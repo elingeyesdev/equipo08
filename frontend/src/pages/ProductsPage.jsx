@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { PackageSearch, Plus, X, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -9,6 +10,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [formData, setFormData] = useState({ name: '', sku: '', proveedor_id: '' });
   const toast = useToast();
 
@@ -37,14 +39,20 @@ export default function ProductsPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Seguro que deseas eliminar este producto permanentemente?')) return;
+  const handleDelete = (id) => {
+    setConfirmDelete(id);
+  };
+
+  const proceedDelete = async () => {
+    if (!confirmDelete) return;
     try {
-      await api.delete(`/productos/${id}`);
+      await api.delete(`/productos/${confirmDelete}`);
       toast.success('Producto eliminado del catálogo');
       fetchData();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -101,11 +109,11 @@ export default function ProductsPage() {
             <div className="form-grid">
               <div className="form-group">
                 <label>Nombre del Producto *</label>
-                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required placeholder="Ej. Zapatillas Nike" />
+                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required pattern="^[A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s]*[A-Za-záéíóúÁÉÍÓÚñÑ][A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s]*$" title="Debe contener al menos una letra y no puede usar símbolos especiales." placeholder="Ej. Zapatillas Nike" />
               </div>
               <div className="form-group">
                 <label>SKU (Código Interno) *</label>
-                <input type="text" value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value.toUpperCase()})} required placeholder="ZAP-NK-01" />
+                <input type="text" value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value.toUpperCase()})} required pattern="^[A-Za-z0-9\-]{3,}$" title="Mínimo 3 caracteres. Solo se permiten letras, números y el distintivo guion (-)" placeholder="ZAP-NK-01" />
               </div>
               <div className="form-group">
                 <label>Proveedor Recomendado *</label>

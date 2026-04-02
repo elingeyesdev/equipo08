@@ -7,7 +7,7 @@ import ProductsPage from './pages/ProductsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import { ToastProvider } from './components/ToastContext';
-import { Settings, Users, Package, ShoppingCart, LogOut, Tag } from 'lucide-react';
+import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive } from 'lucide-react';
 import './index.css';
 
 function Sidebar({ setTenantId }) {
@@ -23,11 +23,11 @@ function Sidebar({ setTenantId }) {
   return (
     <div className="sidebar" style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem' }}>
-        <div style={{ backgroundColor: 'var(--primary-color)', padding: '0.5rem', borderRadius: '8px', display: 'flex' }}>
-          <Package size={24} color="white" />
+        <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', border: '1px solid var(--border-color)' }}>
+          <img src="/logo.png" alt="BolClick Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--primary-color)' }}>OmniMall</h2>
+          <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--primary-color)' }}>BolClick</h2>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>{tenantName}</span>
         </div>
       </div>
@@ -43,7 +43,7 @@ function Sidebar({ setTenantId }) {
           <ShoppingCart size={18} /> Lotes (Sourcing)
         </Link>
         <Link to="/stock" className={`nav-link ${location.pathname === '/stock' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Settings size={18} /> Inventario
+          <Archive size={18} /> Inventario
         </Link>
       </div>
 

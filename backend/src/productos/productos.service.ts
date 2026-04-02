@@ -13,6 +13,11 @@ export class ProductosService {
 
   private async validateProducto(tenant_id: string, dto: Partial<CreateProductoDto>, excludeId?: string) {
     if (dto.name) {
+      // Must contain at least one letter, and no special symbols
+      if (!/^[A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s]*[A-Za-záéíóúÁÉÍÓÚñÑ][A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s]*$/.test(dto.name)) {
+        throw new BadRequestException('El nombre del artículo no puede contener símbolos y debe tener al menos una letra (no puede ser solo números).');
+      }
+
       const existingName = await this.prodRep.findOne({
         where: { 
           tenant_id, 
@@ -25,8 +30,12 @@ export class ProductosService {
       }
     }
     
-    // Si necesitas validar SKU también lo podemos hacer
     if (dto.sku) {
+      // Minimum 3 characters, alphanumeric + hyphen
+      if (!/^[A-Za-z0-9\-]{3,}$/.test(dto.sku)) {
+        throw new BadRequestException('El código SKU debe tener un mínimo de 3 caracteres y solo permite letras, números y guiones (-).');
+      }
+
       const existingSku = await this.prodRep.findOne({
         where: { 
           tenant_id, 

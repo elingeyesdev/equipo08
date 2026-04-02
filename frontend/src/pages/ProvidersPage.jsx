@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { Plus, X, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function ProvidersPage() {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [formData, setFormData] = useState({ name: '', taxId: '', contactEmail: '' });
   const toast = useToast();
 
@@ -32,14 +34,20 @@ export default function ProvidersPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este proveedor?')) return;
+  const handleDelete = (id) => {
+    setConfirmDelete(id);
+  };
+
+  const proceedDelete = async () => {
+    if (!confirmDelete) return;
     try {
-      await api.delete(`/proveedores/${id}`);
+      await api.delete(`/proveedores/${confirmDelete}`);
       toast.success('Proveedor eliminado correctamente');
       fetchProviders();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -97,15 +105,15 @@ export default function ProvidersPage() {
             <div className="form-grid">
               <div className="form-group">
                 <label>Razón Social / Nombre *</label>
-                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required pattern="^[^0-9]+$" title="El nombre del proveedor no debe contener números" placeholder="Ej. Comercializadora ABC" />
+                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required pattern="^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$" title="El nombre del proveedor no debe incluir números ni símbolos" placeholder="Ej. Comercializadora ABC" />
               </div>
               <div className="form-group">
                 <label>NIT / RUT Fiscal</label>
-                <input type="text" value={formData.taxId} onChange={e => setFormData({...formData, taxId: e.target.value})} placeholder="Opcional" />
+                <input type="text" value={formData.taxId} onChange={e => setFormData({...formData, taxId: e.target.value})} pattern="^\d{8,12}$" title="Debe contener entre 8 y 12 números sin espacios ni símbolos" placeholder="Obligatorio 8-12 dígitos numéricos" />
               </div>
               <div className="form-group">
                 <label>Email de Contacto</label>
-                <input type="email" value={formData.contactEmail} onChange={e => setFormData({...formData, contactEmail: e.target.value})} placeholder="contacto@abc.com" />
+                <input type="email" value={formData.contactEmail} onChange={e => setFormData({...formData, contactEmail: e.target.value})} pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" title="Debe ser un correo válido" placeholder="contacto@abc.com" />
               </div>
             </div>
             <div className="form-actions">
@@ -152,6 +160,13 @@ export default function ProvidersPage() {
         )}
       </div>
 
+      <ConfirmModal 
+        isOpen={!!confirmDelete}
+        title="Eliminar Proveedor"
+        message="¿Estás seguro de que deseas eliminar este proveedor? Sus datos fiscales y de contacto se perderán."
+        onConfirm={proceedDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

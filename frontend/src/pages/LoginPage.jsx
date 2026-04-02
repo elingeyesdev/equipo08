@@ -38,8 +38,6 @@ export default function LoginPage({ setTenantId }) {
         <h2 className="auth-title">Iniciar Sesión</h2>
         <p className="auth-subtitle">Accede al panel de control de tu tienda</p>
         
-        {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', fontSize: '0.9rem', textAlign: 'center' }}>{error}</div>}
-        
         <form onSubmit={handleLogin}>
           <label>Correo Electrónico</label>
           <input 

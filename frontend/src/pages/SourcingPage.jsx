@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { ShoppingCart, Plus, X, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function SourcingPage() {
   const [providers, setProviders] = useState([]);
@@ -10,6 +11,7 @@ export default function SourcingPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [loteForm, setLoteForm] = useState({ producto_id: '', proveedor_id: '', cantidad: 1, precioUnitario: '' });
   const toast = useToast();
 
@@ -52,14 +54,20 @@ export default function SourcingPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Seguro que deseas eliminar este ingreso? Esta acción descontará la cantidad del inventario de forma permanente.')) return;
+  const handleDelete = (id) => {
+    setConfirmDelete(id);
+  };
+
+  const proceedDelete = async () => {
+    if (!confirmDelete) return;
     try {
-      await api.delete(`/sourcing/${id}`);
+      await api.delete(`/sourcing/${confirmDelete}`);
       toast.success('Ingreso anulado y stock descontado');
       loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -112,7 +120,7 @@ export default function SourcingPage() {
           onClick={showForm ? resetForm : () => setShowForm(true)} 
           style={{ 
             display: 'flex', alignItems: 'center', gap: '0.5rem', 
-            backgroundColor: showForm ? 'var(--text-secondary)' : '#16a34a' 
+            backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
           }}
         >
           {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Registrar Nuevo Ingreso</>}
@@ -148,7 +156,7 @@ export default function SourcingPage() {
               </div>
 
               <div className="form-group">
-                <label>Volumen (Uds) *</label>
+                <label>Unidades *</label>
                 <input type="number" min="1" required value={loteForm.cantidad} onChange={e => setLoteForm({...loteForm, cantidad: e.target.value})} />
               </div>
 
@@ -177,7 +185,7 @@ export default function SourcingPage() {
             </div>
 
             <div className="form-actions">
-              <button type="submit" style={{ backgroundColor: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button type="submit" style={{ backgroundColor: 'var(--accent-blue)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <ShoppingCart size={18} /> {editingId ? 'Guardar Cambios' : 'Confirmar Ingreso'}
               </button>
             </div>
@@ -195,7 +203,7 @@ export default function SourcingPage() {
                 <th>Fecha Ingreso</th>
                 <th>Producto (SKU)</th>
                 <th>Proveedor Origen</th>
-                <th style={{ textAlign: 'center' }}>Volumen</th>
+                <th style={{ textAlign: 'center' }}>Unidades</th>
                 <th style={{ textAlign: 'center' }}>Precio U.</th>
                 <th style={{ textAlign: 'right' }}>Inversión Total</th>
                 <th style={{ textAlign: 'right', width: '80px' }}>Acciones</th>
@@ -220,7 +228,7 @@ export default function SourcingPage() {
                    </td>
                    <td>{h.proveedor?.name || '---'}</td>
                    <td style={{ textAlign: 'center' }}>
-                     <span className="badge success">+{h.cantidad} uds</span>
+                     <span className="badge success" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>{h.cantidad} U</span>
                    </td>
                    <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                      Bs {precioU.toFixed(2)}
@@ -244,6 +252,13 @@ export default function SourcingPage() {
         )}
       </div>
 
+      <ConfirmModal 
+        isOpen={!!confirmDelete}
+        title="Anular Ingreso de Mercancía"
+        message="¿Seguro que deseas anular este recibo de ingreso? Esta acción descontará irremediablemente las cantidades añadidas de tu inventario físico operativo."
+        onConfirm={proceedDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

@@ -12,11 +12,15 @@ export class ProveedoresService {
   ) {}
 
   private async validateProveedor(tenant_id: string, dto: Partial<CreateProveedorDto>, excludeId?: string) {
-    if (dto.name && /\d/.test(dto.name)) {
-      throw new BadRequestException('El nombre del proveedor no debe incluir números.');
+    if (dto.name && !/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(dto.name)) {
+      throw new BadRequestException('El nombre del proveedor no debe incluir números ni símbolos.');
     }
 
     if (dto.taxId) {
+      if (!/^\d{8,12}$/.test(dto.taxId)) {
+        throw new BadRequestException('El NIT o RUT debe contener únicamente entre 8 y 12 números, sin letras ni símbolos.');
+      }
+      
       const existingTax = await this.proveRep.findOne({
         where: { tenant_id, taxId: dto.taxId, ...(excludeId ? { id: Not(excludeId) } : {}) }
       });
@@ -24,6 +28,10 @@ export class ProveedoresService {
     }
 
     if (dto.contactEmail) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dto.contactEmail)) {
+        throw new BadRequestException('El formato del correo electrónico u omite un símbolo @ o un dominio válido.');
+      }
+
       const existingEmail = await this.proveRep.findOne({
         where: { tenant_id, contactEmail: dto.contactEmail, ...(excludeId ? { id: Not(excludeId) } : {}) }
       });

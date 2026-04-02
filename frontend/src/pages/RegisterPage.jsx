@@ -38,9 +38,7 @@ export default function RegisterPage({ setTenantId }) {
     <div className="auth-container">
       <div className="auth-card" style={{ maxWidth: '500px' }}>
         <h2 className="auth-title">Registra tu Tienda</h2>
-        <p className="auth-subtitle">Crea tu espacio de trabajo aislado centralizado</p>
-        
-        {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', fontSize: '0.9rem', textAlign: 'center' }}>{error}</div>}
+        <p className="auth-subtitle">Crea un espacio de trabajo para tu tienda</p>
         
         <form onSubmit={handleRegister}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -86,7 +84,7 @@ export default function RegisterPage({ setTenantId }) {
           />
           
           <button type="submit" disabled={loading} style={{ width: '100%', marginTop: '1.5rem', backgroundColor: 'var(--accent-blue)' }}>
-            {loading ? 'Creando tienda...' : 'Comenzar a usar OmniMall'}
+            {loading ? 'Creando tienda...' : 'Comenzar a usar BolClick'}
           </button>
         </form>
 
