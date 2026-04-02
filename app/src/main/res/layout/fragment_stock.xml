@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#f8f9fc"
+    android:padding="16dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp">
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Inventario Transversal Unificado"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#2b3b55" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Este inventario se sincroniza dinámicamente cada vez que registras decesos o ingresos en sourcing, operando bajo tenencia aislada."
+                android:textColor="#5a6a85" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- TABLE AREA -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:background="#f1f5f9">
+                    <TextView android:layout_width="150dp" android:layout_height="wrap_content" android:text="SKU" android:textStyle="bold" android:textColor="#5a6a85"/>
+                    <TextView android:layout_width="200dp" android:layout_height="wrap_content" android:text="NOMBRE DEL PRODUCTO" android:textStyle="bold" android:textColor="#5a6a85"/>
+                    <TextView android:layout_width="150dp" android:layout_height="wrap_content" android:text="STOCK ACTUAL" android:textStyle="bold" android:textColor="#5a6a85"/>
+                    <TextView android:layout_width="200dp" android:layout_height="wrap_content" android:text="ÚLTIMA ACTUALIZACIÓN" android:textStyle="bold" android:textColor="#5a6a85"/>
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#e2e8f0"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </HorizontalScrollView>
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>
