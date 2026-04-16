@@ -8,9 +8,11 @@ import { ProveedoresModule } from './proveedores/proveedores.module';
 import { SourcingModule } from './sourcing/sourcing.module';
 import { StockModule } from './stock/stock.module';
 import { ProductosModule } from './productos/productos.module';
+import { SucursalesModule } from './sucursales/sucursales.module';
 import { Tenant } from './tenant/tenant.entity';
 import { Proveedor } from './proveedores/proveedor.entity';
 import { Producto } from './productos/producto.entity';
+import { Sucursal } from './sucursales/sucursal.entity';
 import { LoteIngreso } from './sourcing/lote-ingreso.entity';
 import { Stock } from './stock/stock.entity';
 
@@ -23,7 +25,7 @@ import { Stock } from './stock/stock.entity';
       username: 'postgres',
       password: '1234',
       database: 'mall_db',
-      entities: [Tenant, Proveedor, Producto, LoteIngreso, Stock],
+      entities: [Tenant, Proveedor, Producto, LoteIngreso, Stock, Sucursal],
       synchronize: true,
     }),
     AuthModule,
@@ -32,6 +34,7 @@ import { Stock } from './stock/stock.entity';
     SourcingModule,
     StockModule,
     ProductosModule,
+    SucursalesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

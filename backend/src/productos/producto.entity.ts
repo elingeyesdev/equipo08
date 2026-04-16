@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Proveedor } from '../proveedores/proveedor.entity';
+import { Stock } from '../stock/stock.entity';
 
 @Entity('productos')
 @Index(['tenant_id', 'id'])
@@ -20,7 +21,16 @@ export class Producto {
   @Column({ nullable: true })
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
+  category: string;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  precioCosto: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  precioVenta: number;
+
+  @Column({ nullable: true })
   proveedor_id: string;
 
   @ManyToOne(() => Proveedor)
@@ -32,4 +42,7 @@ export class Producto {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Stock, stock => stock.producto)
+  stocks: Stock[];
 }

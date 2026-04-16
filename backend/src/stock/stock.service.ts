@@ -10,10 +10,10 @@ export class StockService {
     private readonly stockRep: Repository<Stock>,
   ) {}
 
-  async sumStock(tenant_id: string, producto_id: string, cantidad: number): Promise<Stock> {
-    let stock = await this.stockRep.findOne({ where: { tenant_id, producto_id } });
+  async sumStock(tenant_id: string, sucursal_id: string, producto_id: string, cantidad: number): Promise<Stock> {
+    let stock = await this.stockRep.findOne({ where: { tenant_id, sucursal_id, producto_id } });
     if (!stock) {
-      stock = this.stockRep.create({ tenant_id, producto_id, cantidadTotal: cantidad });
+      stock = this.stockRep.create({ tenant_id, sucursal_id, producto_id, cantidadTotal: cantidad });
     } else {
       stock.cantidadTotal += Number(cantidad);
     }
@@ -23,7 +23,10 @@ export class StockService {
   async getStockByTenant(tenant_id: string): Promise<Stock[]> {
     return this.stockRep.find({ 
       where: { tenant_id },
-      relations: ['producto']
+      relations: ['producto', 'sucursal'],
+      order: {
+         sucursal_id: 'ASC'
+      }
     });
   }
 }

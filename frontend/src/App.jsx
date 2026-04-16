@@ -4,10 +4,11 @@ import ProvidersPage from './pages/ProvidersPage';
 import SourcingPage from './pages/SourcingPage';
 import StockPage from './pages/StockPage';
 import ProductsPage from './pages/ProductsPage';
+import SucursalesPage from './pages/SucursalesPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import { ToastProvider } from './components/ToastContext';
-import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive } from 'lucide-react';
+import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive, Store } from 'lucide-react';
 import './index.css';
 
 function Sidebar({ setTenantId }) {
@@ -35,6 +36,9 @@ function Sidebar({ setTenantId }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
         <Link to="/providers" className={`nav-link ${location.pathname === '/providers' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Users size={18} /> Proveedores
+        </Link>
+        <Link to="/sucursales" className={`nav-link ${location.pathname === '/sucursales' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Store size={18} /> Sucursales
         </Link>
         <Link to="/products" className={`nav-link ${location.pathname === '/products' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Tag size={18} /> Catálogo
@@ -106,6 +110,7 @@ function App() {
                   </div>
                 } />
                 <Route path="/providers" element={<ProvidersPage key={tenantId} />} />
+                <Route path="/sucursales" element={<SucursalesPage key={tenantId} />} />
                 <Route path="/products" element={<ProductsPage key={tenantId} />} />
                 <Route path="/sourcing" element={<SourcingPage key={tenantId} />} />
                 <Route path="/stock" element={<StockPage key={tenantId} />} />

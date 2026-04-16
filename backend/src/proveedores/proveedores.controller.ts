@@ -18,6 +18,11 @@ export class ProveedoresController {
     return this.proveedoresService.create(tenantId, createProveedorDto);
   }
 
+  @Get('global/:nit')
+  findByGlobalNit(@Param('nit') nit: string) {
+    return this.proveedoresService.findByGlobalNit(nit);
+  }
+
   @Get()
   findAll(@TenantId() tenantId: string) {
     return this.proveedoresService.findAll(tenantId);

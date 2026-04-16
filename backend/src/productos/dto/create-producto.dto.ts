@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductoDto {
@@ -15,7 +15,23 @@ export class CreateProductoDto {
   @IsOptional()
   description?: string;
 
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  category?: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  precioCosto: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  precioVenta: number;
+
   @ApiProperty()
   @IsString()
-  proveedor_id: string;
+  @IsOptional() // In case it's orphan initially
+  proveedor_id?: string;
 }

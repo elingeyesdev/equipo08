@@ -1,15 +1,38 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not } from 'typeorm';
 import { Proveedor } from './proveedor.entity';
 import { CreateProveedorDto } from './dto/create-proveedor.dto';
 
 @Injectable()
-export class ProveedoresService {
+export class ProveedoresService implements OnModuleInit {
   constructor(
     @InjectRepository(Proveedor)
     private readonly proveRep: Repository<Proveedor>,
   ) {}
+
+  async onModuleInit() {
+    const globals = [
+      { name: 'Coca Cola Oficial', taxId: '10002000', contactEmail: 'ventas@cocacola.com' },
+      { name: 'Nestlé Master', taxId: '20003000', contactEmail: 'distribucion@nestle.com' },
+      { name: 'Nike Corp', taxId: '30004000', contactEmail: 'wholesale@nike.com' },
+      { name: 'Samsung Electronics', taxId: '40005000', contactEmail: 'b2b@samsung.com' },
+      { name: 'Apple Inc.', taxId: '50006000', contactEmail: 'reseller@apple.com' },
+      { name: 'PIL Andina S.A.', taxId: '60007000', contactEmail: 'ventas@pil.com.bo' },
+      { name: 'Sony Corporation', taxId: '70008000', contactEmail: 'playstation@sony.com' },
+      { name: 'Kimberly-Clark', taxId: '80009000', contactEmail: 'ventas@kimberly.com' },
+      { name: 'Unilever Latam', taxId: '90001000', contactEmail: 'proveedores@unilever.com' },
+      { name: 'Adidas AG', taxId: '10001000', contactEmail: 'distributor@adidas.com' }
+    ];
+
+    for (const g of globals) {
+      const exists = await this.proveRep.findOne({ where: { tenant_id: 'GLOBAL', taxId: g.taxId } });
+      if (!exists) {
+        const prov = this.proveRep.create({ ...g, tenant_id: 'GLOBAL' });
+        await this.proveRep.save(prov);
+      }
+    }
+  }
 
   private async validateProveedor(tenant_id: string, dto: Partial<CreateProveedorDto>, excludeId?: string) {
     if (dto.name && !/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(dto.name)) {
@@ -40,9 +63,25 @@ export class ProveedoresService {
   }
 
   async create(tenant_id: string, dto: CreateProveedorDto): Promise<Proveedor> {
+    if (!dto.taxId) throw new BadRequestException('NIT es obligatorio para anexar un proveedor global.');
+    
+    const globalProv = await this.findByGlobalNit(dto.taxId);
+    if (!globalProv) {
+      throw new BadRequestException('El NIT proporcionado no está registrado en el Directorio Mundial. Imposible crear.');
+    }
+    
+    dto.name = globalProv.name;
+    dto.contactEmail = globalProv.contactEmail;
+
     await this.validateProveedor(tenant_id, dto);
     const proveedor = this.proveRep.create({ ...dto, tenant_id });
     return this.proveRep.save(proveedor);
+  }
+
+  async findByGlobalNit(nit: string): Promise<Proveedor | null> {
+    const prov = await this.proveRep.findOne({ where: { tenant_id: 'GLOBAL', taxId: nit } });
+    if (!prov) throw new NotFoundException(`El NIT ${nit} no se encuentra en el Registro Maestro Global.`);
+    return prov;
   }
 
   async findAll(tenant_id: string): Promise<Proveedor[]> {

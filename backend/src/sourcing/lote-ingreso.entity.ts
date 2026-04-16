@@ -11,6 +11,9 @@ export class LoteIngreso {
   @Column()
   tenant_id: string;
 
+  @Column({ nullable: true })
+  sucursal_id: string;
+
   @Column()
   producto_id: string;
 
@@ -19,9 +22,6 @@ export class LoteIngreso {
 
   @Column('int')
   cantidad: number;
-
-  @Column('decimal', { precision: 10, scale: 2 })
-  costoAdquisicion: number;
 
   @CreateDateColumn()
   fechaIngreso: Date;

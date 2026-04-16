@@ -4,7 +4,7 @@ const api = axios.create({
   baseURL: 'http://localhost:3000/api',
 });
 
-// Interceptor para inyectar automáticamente x-tenant-id
+
 api.interceptors.request.use((config) => {
   const tenantId = localStorage.getItem('tenant_id');
   if (tenantId) {
