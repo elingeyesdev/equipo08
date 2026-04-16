@@ -15,28 +15,25 @@ public interface ApiService {
     @POST("auth/register")
     Call<AuthResponse> register(@Body RegisterRequest request);
 
-    // Proveedores
     @retrofit2.http.GET("proveedores")
     Call<java.util.List<com.example.template.network.models.Proveedor>> getProveedores();
 
     @POST("proveedores")
     Call<com.example.template.network.models.Proveedor> createProveedor(@Body com.example.template.network.models.Proveedor proveedor);
 
-    // Productos
     @retrofit2.http.GET("productos")
     Call<java.util.List<com.example.template.network.models.Producto>> getProductos();
 
     @POST("productos")
     Call<com.example.template.network.models.Producto> createProducto(@Body com.example.template.network.models.Producto producto);
 
-    // Sourcing
     @retrofit2.http.GET("sourcing/lotes")
     Call<java.util.List<com.example.template.network.models.LoteIngreso>> getLotes();
 
     @POST("sourcing/lotes")
     Call<com.example.template.network.models.LoteIngreso> createLote(@Body com.example.template.network.models.LoteIngreso lotePeticion);
 
-    // Stock
+
     @retrofit2.http.GET("stock")
     Call<java.util.List<com.example.template.network.models.Stock>> getStock();
 }
