@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="Resumen" />
+    <item
+        android:id="@+id/nav_providers"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Proveedores" />
+    <item
+        android:id="@+id/nav_products"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Catálogo" />
+    <item
+        android:id="@+id/nav_sourcing"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="Lotes" />
+    <item
+        android:id="@+id/nav_stock"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Inventario" />
+</menu>
