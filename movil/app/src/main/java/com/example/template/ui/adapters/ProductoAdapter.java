@@ -3,6 +3,7 @@ package com.example.template.ui.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,9 +15,15 @@ import java.util.List;
 public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHolder> {
 
     private List<Producto> list;
+    private OnDeleteClickListener deleteListener;
 
-    public ProductoAdapter(List<Producto> list) {
+    public interface OnDeleteClickListener {
+        void onDeleteClick(Producto producto);
+    }
+
+    public ProductoAdapter(List<Producto> list, OnDeleteClickListener listener) {
         this.list = list;
+        this.deleteListener = listener;
     }
 
     public void updateData(List<Producto> newList) {
@@ -34,15 +41,21 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Producto p = list.get(position);
-        holder.tvSku.setText(p.getSku());
+        holder.tvSku.setText("SKU: " + p.getSku());
         holder.tvNombre.setText(p.getName());
         
         // El backend devuelve a veces el objeto Proveedor anidado
         if (p.getProveedor() != null) {
-            holder.tvProveedor.setText(p.getProveedor().getName());
+            holder.tvProveedor.setText("Proveedor: " + p.getProveedor().getName());
         } else {
-            holder.tvProveedor.setText("N/A");
+            holder.tvProveedor.setText("Proveedor: N/A");
         }
+
+        holder.btnDelete.setOnClickListener(v -> {
+            if (deleteListener != null) {
+                deleteListener.onDeleteClick(p);
+            }
+        });
     }
 
     @Override
@@ -52,11 +65,13 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvSku, tvNombre, tvProveedor;
+        ImageButton btnDelete;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvSku = itemView.findViewById(R.id.tvSku);
             tvNombre = itemView.findViewById(R.id.tvNombre);
             tvProveedor = itemView.findViewById(R.id.tvProveedor);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
 }

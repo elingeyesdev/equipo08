@@ -3,6 +3,7 @@ package com.example.template.ui.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,9 +16,15 @@ import java.util.Locale;
 public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
 
     private List<LoteIngreso> list;
+    private OnDeleteClickListener deleteListener;
 
-    public LoteAdapter(List<LoteIngreso> list) {
+    public interface OnDeleteClickListener {
+        void onDeleteClick(LoteIngreso lote);
+    }
+
+    public LoteAdapter(List<LoteIngreso> list, OnDeleteClickListener listener) {
         this.list = list;
+        this.deleteListener = listener;
     }
 
     public void updateData(List<LoteIngreso> newList) {
@@ -36,15 +43,19 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         LoteIngreso l = list.get(position);
         
-        holder.tvTrx.setText(l.getId() != null ? "#" + l.getId().substring(0, 8) : "#nuevo");
+        holder.tvTrx.setText(l.getId() != null ? "TRX: #" + l.getId().substring(0, 8) : "TRX: #nuevo");
         holder.tvFecha.setText(l.getFechaIngreso() != null ? l.getFechaIngreso().substring(0, 10) : "");
         
         if (l.getProducto() != null) {
-            holder.tvProducto.setText(l.getProducto().getName() + "\n" + l.getProducto().getSku());
+            holder.tvProducto.setText(l.getProducto().getName() + " (" + l.getProducto().getSku() + ")");
+        } else {
+            holder.tvProducto.setText("Producto Desconocido");
         }
         
         if (l.getProveedor() != null) {
-            holder.tvProveedor.setText(l.getProveedor().getName());
+            holder.tvProveedor.setText("Proveedor: " + l.getProveedor().getName());
+        } else {
+            holder.tvProveedor.setText("Proveedor: N/A");
         }
 
         holder.tvVolumen.setText("+" + l.getCantidad() + " uds");
@@ -52,6 +63,12 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
         
         double inversion = l.getCantidad() * l.getCostoAdquisicion();
         holder.tvInversion.setText(String.format(Locale.US, "Bs %.2f", inversion));
+
+        holder.btnDelete.setOnClickListener(v -> {
+            if (deleteListener != null) {
+                deleteListener.onDeleteClick(l);
+            }
+        });
     }
 
     @Override
@@ -61,6 +78,7 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTrx, tvFecha, tvProducto, tvProveedor, tvVolumen, tvPrecioU, tvInversion;
+        ImageButton btnDelete;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTrx = itemView.findViewById(R.id.tvTrx);
@@ -70,6 +88,7 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
             tvVolumen = itemView.findViewById(R.id.tvVolumen);
             tvPrecioU = itemView.findViewById(R.id.tvPrecioU);
             tvInversion = itemView.findViewById(R.id.tvInversion);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
 }

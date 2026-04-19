@@ -59,7 +59,7 @@ public class ProductsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new ProductoAdapter(new ArrayList<>());
+        adapter = new ProductoAdapter(new ArrayList<>(), this::confirmDelete);
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
@@ -148,6 +148,34 @@ public class ProductsFragment extends Fragment {
             @Override
             public void onFailure(Call<Producto> call, Throwable t) {
                 Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void confirmDelete(Producto producto) {
+        if (getContext() == null) return;
+        new androidx.appcompat.app.AlertDialog.Builder(getContext())
+            .setTitle("Eliminar Producto")
+            .setMessage("¿Estás seguro de que quieres eliminar " + producto.getName() + "?")
+            .setPositiveButton("Eliminar", (dialog, which) -> deleteProducto(producto))
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    private void deleteProducto(Producto producto) {
+        apiService.deleteProducto(producto.getId()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Producto eliminado", Toast.LENGTH_SHORT).show();
+                    loadProductos();
+                } else {
+                    Toast.makeText(getContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
     }

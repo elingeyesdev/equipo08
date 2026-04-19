@@ -1,39 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="16dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    android:backgroundTint="@android:color/white">
 
-    <TextView
-        android:id="@+id/tvSku"
-        android:layout_width="150dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#2b3b55"
-        android:textStyle="bold"
-        android:text="SKU" />
+        android:padding="16dp"
+        android:background="?android:attr/selectableItemBackground">
 
-    <TextView
-        android:id="@+id/tvNombre"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:textColor="#5a6a85"
-        android:text="Nombre del Producto" />
+        <TextView
+            android:id="@+id/tvNombre"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Producto"
+            android:textColor="#2b3b55"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/tvStock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginEnd="8dp"/>
 
-    <TextView
-        android:id="@+id/tvStock"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:textColor="#10b981"
-        android:textStyle="bold"
-        android:text="Stock" />
+        <TextView
+            android:id="@+id/tvSku"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="SKU"
+            android:textColor="#5a6a85"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toStartOf="@+id/tvStock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvNombre"
+            android:layout_marginEnd="8dp"/>
 
-    <TextView
-        android:id="@+id/tvFecha"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:textColor="#2b3b55"
-        android:text="Fecha" />
+        <TextView
+            android:id="@+id/tvFecha"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Fecha"
+            android:textColor="#5a6a85"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toStartOf="@+id/tvStock"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvSku"
+            android:layout_marginEnd="8dp"/>
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/tvStock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="#10b981"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

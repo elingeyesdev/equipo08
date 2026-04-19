@@ -73,7 +73,7 @@ public class SourcingFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new LoteAdapter(new ArrayList<>());
+        adapter = new LoteAdapter(new ArrayList<>(), this::confirmDelete);
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
@@ -239,6 +239,35 @@ public class SourcingFragment extends Fragment {
             }
             @Override
             public void onFailure(Call<LoteIngreso> call, Throwable t) {}
+        });
+    }
+
+    private void confirmDelete(LoteIngreso lote) {
+        if (getContext() == null) return;
+        new androidx.appcompat.app.AlertDialog.Builder(getContext())
+            .setTitle("Eliminar Ingreso")
+            .setMessage("¿Estás seguro de que quieres eliminar este lote de ingreso?")
+            .setPositiveButton("Eliminar", (dialog, which) -> deleteLote(lote))
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    private void deleteLote(LoteIngreso lote) {
+        apiService.deleteLote(lote.getId()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Lote eliminado", Toast.LENGTH_SHORT).show();
+                    loadLotes();
+                } else {
+                    Toast.makeText(getContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }

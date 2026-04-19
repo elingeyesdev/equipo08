@@ -33,7 +33,7 @@ public class ProvidersFragment extends Fragment {
 
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
-    private EditText etName, etNit, etEmail;
+    private EditText etRazonSocial, etNit, etEmail;
     private RecyclerView recyclerView;
     private ProveedorAdapter adapter;
     private ApiService apiService;
@@ -47,13 +47,13 @@ public class ProvidersFragment extends Fragment {
         btnToggleForm = view.findViewById(R.id.btnToggleForm);
         btnGuardar = view.findViewById(R.id.btnGuardar);
         cardForm = view.findViewById(R.id.cardForm);
-        etName = view.findViewById(R.id.etName);
+        etRazonSocial = view.findViewById(R.id.etRazonSocial);
         etNit = view.findViewById(R.id.etNit);
         etEmail = view.findViewById(R.id.etEmail);
         recyclerView = view.findViewById(R.id.recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new ProveedorAdapter(new ArrayList<>());
+        adapter = new ProveedorAdapter(new ArrayList<>(), this::confirmDelete);
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
@@ -95,12 +95,12 @@ public class ProvidersFragment extends Fragment {
     }
 
     private void saveProveedor() {
-        String name = etName.getText().toString().trim();
+        String name = etRazonSocial.getText().toString().trim();
         String nit = etNit.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
 
         if (name.isEmpty()) {
-            etName.setError("Requerido");
+            etRazonSocial.setError("Requerido");
             return;
         }
 
@@ -110,7 +110,7 @@ public class ProvidersFragment extends Fragment {
             public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Proveedor guardado", Toast.LENGTH_SHORT).show();
-                    etName.setText(""); etNit.setText(""); etEmail.setText("");
+                    etRazonSocial.setText(""); etNit.setText(""); etEmail.setText("");
                     toggleForm();
                     loadProveedores(); // refresh
                 } else {
@@ -121,6 +121,35 @@ public class ProvidersFragment extends Fragment {
             @Override
             public void onFailure(Call<Proveedor> call, Throwable t) {
                 Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void confirmDelete(Proveedor proveedor) {
+        if (getContext() == null) return;
+        new androidx.appcompat.app.AlertDialog.Builder(getContext())
+            .setTitle("Eliminar Proveedor")
+            .setMessage("¿Estás seguro de que quieres eliminar a " + proveedor.getName() + "?")
+            .setPositiveButton("Eliminar", (dialog, which) -> deleteProveedor(proveedor))
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    private void deleteProveedor(Proveedor proveedor) {
+        apiService.deleteProveedor(proveedor.getId()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Proveedor eliminado", Toast.LENGTH_SHORT).show();
+                    loadProveedores();
+                } else {
+                    Toast.makeText(getContext(), "Error al eliminar", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
     }

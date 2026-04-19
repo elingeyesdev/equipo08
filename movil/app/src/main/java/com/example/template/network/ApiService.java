@@ -21,17 +21,26 @@ public interface ApiService {
     @POST("proveedores")
     Call<com.example.template.network.models.Proveedor> createProveedor(@Body com.example.template.network.models.Proveedor proveedor);
 
+    @retrofit2.http.DELETE("proveedores/{id}")
+    Call<Void> deleteProveedor(@retrofit2.http.Path("id") String id);
+
     @retrofit2.http.GET("productos")
     Call<java.util.List<com.example.template.network.models.Producto>> getProductos();
 
     @POST("productos")
     Call<com.example.template.network.models.Producto> createProducto(@Body com.example.template.network.models.Producto producto);
 
+    @retrofit2.http.DELETE("productos/{id}")
+    Call<Void> deleteProducto(@retrofit2.http.Path("id") String id);
+
     @retrofit2.http.GET("sourcing/lotes")
     Call<java.util.List<com.example.template.network.models.LoteIngreso>> getLotes();
 
     @POST("sourcing/lotes")
     Call<com.example.template.network.models.LoteIngreso> createLote(@Body com.example.template.network.models.LoteIngreso lotePeticion);
+
+    @retrofit2.http.DELETE("sourcing/lotes/{id}")
+    Call<Void> deleteLote(@retrofit2.http.Path("id") String id);
 
 
     @retrofit2.http.GET("stock")
