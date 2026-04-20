@@ -72,6 +72,19 @@
             <TextView 
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content" 
+                android:text="Sucursal / Almacén de Destino *" 
+                android:textColor="#5a6a85"
+                android:layout_marginBottom="4dp"/>
+            <Spinner
+                android:id="@+id/spinnerSucursal"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/edit_text_bg"
+                android:layout_marginBottom="12dp"/>
+
+            <TextView 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
                 android:text="Producto Entrante *" 
                 android:textColor="#5a6a85"
                 android:layout_marginBottom="4dp"/>
@@ -112,53 +125,14 @@
                     android:textColor="#2b3b55" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:boxBackgroundColor="#f1f5f9"
-                app:boxCornerRadiusTopStart="8dp"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxStrokeWidth="0dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPrecio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Precio Unitario (Bs) *"
-                    android:inputType="numberDecimal"
-                    android:textColor="#2b3b55" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp"
-                android:gravity="center_vertical">
-                <TextView 
-                    android:layout_width="wrap_content" 
-                    android:layout_height="wrap_content" 
-                    android:text="Inversión Estimada:" 
-                    android:textColor="#5a6a85"/>
-                <TextView
-                    android:id="@+id/tvInversionTotal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:text="Bs 0.00"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#10b981"/>
-            </LinearLayout>
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGuardar"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 app:cornerRadius="8dp"
-                android:backgroundTint="#16a34a"
+                android:backgroundTint="#2563eb"
                 android:textColor="#ffffff"
-                android:text="Confirmar Ingreso" />
+                android:text="Confirmar Ingreso en Inventario" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

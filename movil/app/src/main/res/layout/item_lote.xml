@@ -88,22 +88,6 @@
                 android:textColor="#10b981"
                 android:textStyle="bold"
                 android:layout_marginEnd="16dp"/>
-
-            <TextView
-                android:id="@+id/tvPrecioU"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Precio U."
-                android:textColor="#5a6a85"
-                android:layout_marginEnd="16dp"/>
-
-            <TextView
-                android:id="@+id/tvInversion"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Inversion"
-                android:textColor="#2b3b55"
-                android:textStyle="bold"/>
         </LinearLayout>
 
         <ImageButton

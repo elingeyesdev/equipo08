@@ -31,7 +31,7 @@ import retrofit2.Response;
 
 public class ProvidersFragment extends Fragment {
 
-    private Button btnToggleForm, btnGuardar;
+    private Button btnToggleForm, btnGuardar, btnBuscarNit;
     private CardView cardForm;
     private EditText etRazonSocial, etNit, etEmail;
     private RecyclerView recyclerView;
@@ -52,6 +52,8 @@ public class ProvidersFragment extends Fragment {
         etEmail = view.findViewById(R.id.etEmail);
         recyclerView = view.findViewById(R.id.recyclerView);
 
+        btnBuscarNit = view.findViewById(R.id.btnBuscarNit);
+        
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ProveedorAdapter(new ArrayList<>(), this::confirmDelete);
         recyclerView.setAdapter(adapter);
@@ -60,6 +62,32 @@ public class ProvidersFragment extends Fragment {
 
         btnToggleForm.setOnClickListener(v -> toggleForm());
         btnGuardar.setOnClickListener(v -> saveProveedor());
+        
+        btnBuscarNit.setOnClickListener(v -> {
+            String nit = etNit.getText().toString().trim();
+            if (nit.isEmpty()) {
+                etNit.setError("Ingrese un NIT");
+                return;
+            }
+            apiService.getGlobalProveedor(nit).enqueue(new Callback<Proveedor>() {
+                @Override
+                public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        etRazonSocial.setText(response.body().getName());
+                        etEmail.setText(response.body().getContactEmail() != null ? response.body().getContactEmail() : "Sin email");
+                        Toast.makeText(getContext(), "Proveedor encontrado", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "NIT no encontrado en la BD global", Toast.LENGTH_SHORT).show();
+                        etRazonSocial.setText("");
+                        etEmail.setText("");
+                    }
+                }
+                @Override
+                public void onFailure(Call<Proveedor> call, Throwable t) {
+                    Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
 
         loadProveedores();
         return view;
@@ -99,12 +127,17 @@ public class ProvidersFragment extends Fragment {
         String nit = etNit.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
 
-        if (name.isEmpty()) {
-            etRazonSocial.setError("Requerido");
+        if (nit.isEmpty()) {
+            etNit.setError("Primero busque el NIT");
             return;
         }
 
-        Proveedor request = new Proveedor(name, email.isEmpty() ? null : email, nit.isEmpty() ? null : nit);
+        if (name.isEmpty()) {
+            Toast.makeText(getContext(), "Asegúrese de buscar un proveedor válido", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Proveedor request = new Proveedor(name, email.equals("Sin email") || email.isEmpty() ? null : email, nit);
         apiService.createProveedor(request).enqueue(new Callback<Proveedor>() {
             @Override
             public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {
@@ -114,7 +147,7 @@ public class ProvidersFragment extends Fragment {
                     toggleForm();
                     loadProveedores(); // refresh
                 } else {
-                    Toast.makeText(getContext(), "Error al guardar", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error al guardar (Verifique NIT)", Toast.LENGTH_SHORT).show();
                 }
             }
 

@@ -5,12 +5,17 @@ public class Producto {
     private String name;
     private String sku;
     private String proveedor_id;
+    private String category;
     private double precioCosto;
+    private double precioVenta;
     private Proveedor proveedor; 
 
-    public Producto(String name, String sku, String proveedor_id) {
+    public Producto(String name, String sku, String category, double precioCosto, double precioVenta, String proveedor_id) {
         this.name = name;
         this.sku = sku;
+        this.category = category;
+        this.precioCosto = precioCosto;
+        this.precioVenta = precioVenta;
         this.proveedor_id = proveedor_id;
     }
 
@@ -18,7 +23,9 @@ public class Producto {
     public String getName() { return name; }
     public String getSku() { return sku; }
     public String getProveedorId() { return proveedor_id; }
+    public String getCategory() { return category; }
     public double getPrecioCosto() { return precioCosto; }
+    public double getPrecioVenta() { return precioVenta; }
     public Proveedor getProveedor() { return proveedor; }
 
     @Override

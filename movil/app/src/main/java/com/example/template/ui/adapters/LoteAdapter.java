@@ -59,10 +59,6 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
         }
 
         holder.tvVolumen.setText("+" + l.getCantidad() + " uds");
-        holder.tvPrecioU.setText(String.format(Locale.US, "Bs %.2f", l.getCostoAdquisicion()));
-        
-        double inversion = l.getCantidad() * l.getCostoAdquisicion();
-        holder.tvInversion.setText(String.format(Locale.US, "Bs %.2f", inversion));
 
         holder.btnDelete.setOnClickListener(v -> {
             if (deleteListener != null) {
@@ -77,7 +73,7 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTrx, tvFecha, tvProducto, tvProveedor, tvVolumen, tvPrecioU, tvInversion;
+        TextView tvTrx, tvFecha, tvProducto, tvProveedor, tvVolumen;
         ImageButton btnDelete;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,8 +82,6 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
             tvProducto = itemView.findViewById(R.id.tvProducto);
             tvProveedor = itemView.findViewById(R.id.tvProveedor);
             tvVolumen = itemView.findViewById(R.id.tvVolumen);
-            tvPrecioU = itemView.findViewById(R.id.tvPrecioU);
-            tvInversion = itemView.findViewById(R.id.tvInversion);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }

@@ -42,14 +42,17 @@ public interface ApiService {
     @retrofit2.http.DELETE("productos/{id}")
     Call<Void> deleteProducto(@retrofit2.http.Path("id") String id);
 
-    @retrofit2.http.GET("sourcing/lotes")
+    @retrofit2.http.GET("sourcing")
     Call<java.util.List<com.example.template.network.models.LoteIngreso>> getLotes();
 
-    @POST("sourcing/lotes")
+    @POST("sourcing")
     Call<com.example.template.network.models.LoteIngreso> createLote(@Body com.example.template.network.models.LoteIngreso lotePeticion);
 
-    @retrofit2.http.DELETE("sourcing/lotes/{id}")
+    @retrofit2.http.DELETE("sourcing/{id}")
     Call<Void> deleteLote(@retrofit2.http.Path("id") String id);
+
+    @retrofit2.http.GET("proveedores/global/{nit}")
+    Call<com.example.template.network.models.Proveedor> getGlobalProveedor(@retrofit2.http.Path("nit") String nit);
 
 
     @retrofit2.http.GET("stock")

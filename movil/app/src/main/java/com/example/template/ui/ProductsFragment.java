@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,8 +37,9 @@ public class ProductsFragment extends Fragment {
 
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
-    private EditText etName, etSku;
-    private Spinner spinnerProveedor;
+    private EditText etName, etSku, etPrecioCoste, etPrecioVenta;
+    private TextView tvMargen;
+    private Spinner spinnerProveedor, spinnerCategoria;
     private RecyclerView recyclerView;
     private ProductoAdapter adapter;
     private ApiService apiService;
@@ -55,8 +57,27 @@ public class ProductsFragment extends Fragment {
         cardForm = view.findViewById(R.id.cardForm);
         etName = view.findViewById(R.id.etName);
         etSku = view.findViewById(R.id.etSku);
+        etPrecioCoste = view.findViewById(R.id.etPrecioCoste);
+        etPrecioVenta = view.findViewById(R.id.etPrecioVenta);
+        tvMargen = view.findViewById(R.id.tvMargen);
         spinnerProveedor = view.findViewById(R.id.spinnerProveedor);
+        spinnerCategoria = view.findViewById(R.id.spinnerCategoria);
         recyclerView = view.findViewById(R.id.recyclerView);
+
+        // Setup Categories
+        String[] categorias = {"Otros", "Electrónica", "Ropa", "Alimentos", "Hogar"};
+        ArrayAdapter<String> catAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, categorias);
+        catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategoria.setAdapter(catAdapter);
+
+        // Setup Margen Calculation
+        android.text.TextWatcher textWatcher = new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { calculateMargin(); }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        };
+        etPrecioCoste.addTextChangedListener(textWatcher);
+        etPrecioVenta.addTextChangedListener(textWatcher);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ProductoAdapter(new ArrayList<>(), this::confirmDelete);
@@ -71,6 +92,27 @@ public class ProductsFragment extends Fragment {
         loadProveedoresToSpinner();
         
         return view;
+    }
+
+    private void calculateMargin() {
+        try {
+            String costeStr = etPrecioCoste.getText().toString();
+            String ventaStr = etPrecioVenta.getText().toString();
+            if (!costeStr.isEmpty() && !ventaStr.isEmpty()) {
+                double coste = Double.parseDouble(costeStr);
+                double venta = Double.parseDouble(ventaStr);
+                if (coste > 0) {
+                    double margin = ((venta - coste) / coste) * 100;
+                    tvMargen.setText(String.format(java.util.Locale.US, "%.0f%%", margin));
+                } else {
+                    tvMargen.setText("0%");
+                }
+            } else {
+                tvMargen.setText("0%");
+            }
+        } catch (Exception e) {
+            tvMargen.setText("0%");
+        }
     }
 
     private void toggleForm() {
@@ -123,21 +165,27 @@ public class ProductsFragment extends Fragment {
     private void saveProducto() {
         String name = etName.getText().toString().trim();
         String sku = etSku.getText().toString().trim();
+        String cat = spinnerCategoria.getSelectedItem() != null ? spinnerCategoria.getSelectedItem().toString() : "Otros";
+        String costeStr = etPrecioCoste.getText().toString().trim();
+        String ventaStr = etPrecioVenta.getText().toString().trim();
         
         Proveedor selectedProv = (Proveedor) spinnerProveedor.getSelectedItem();
 
-        if (name.isEmpty() || sku.isEmpty() || selectedProv == null) {
+        if (name.isEmpty() || sku.isEmpty() || costeStr.isEmpty() || ventaStr.isEmpty() || selectedProv == null) {
             Toast.makeText(getContext(), "Por favor, completa todos los campos requeridos", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Producto request = new Producto(name, sku, selectedProv.getId());
+        double coste = Double.parseDouble(costeStr);
+        double venta = Double.parseDouble(ventaStr);
+
+        Producto request = new Producto(name, sku, cat, coste, venta, selectedProv.getId());
         apiService.createProducto(request).enqueue(new Callback<Producto>() {
             @Override
             public void onResponse(Call<Producto> call, Response<Producto> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Producto guardado", Toast.LENGTH_SHORT).show();
-                    etName.setText(""); etSku.setText("");
+                    etName.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText("");
                     toggleForm();
                     loadProductos(); 
                 } else {
