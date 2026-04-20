@@ -5,6 +5,7 @@ public class Producto {
     private String name;
     private String sku;
     private String proveedor_id;
+    private double precioCosto;
     private Proveedor proveedor; 
 
     public Producto(String name, String sku, String proveedor_id) {
@@ -17,6 +18,7 @@ public class Producto {
     public String getName() { return name; }
     public String getSku() { return sku; }
     public String getProveedorId() { return proveedor_id; }
+    public double getPrecioCosto() { return precioCosto; }
     public Proveedor getProveedor() { return proveedor; }
 
     @Override

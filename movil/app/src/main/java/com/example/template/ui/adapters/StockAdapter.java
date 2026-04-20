@@ -43,8 +43,19 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
             holder.tvNombre.setText("N/A");
         }
         
-        holder.tvStock.setText(s.getCantidadTotal() + " uds");
-        holder.tvFecha.setText(s.getUltimaActualizacion() != null ? s.getUltimaActualizacion().replace("T", " ").substring(0, 19) : "");
+        holder.tvStock.setText(s.getCantidadTotal() + " U");
+        
+        if (s.getSucursal() != null) {
+            holder.tvSucursal.setText(s.getSucursal().getName());
+        } else {
+            holder.tvSucursal.setText("Huérfana");
+        }
+
+        double costoFijo = s.getProducto() != null ? s.getProducto().getPrecioCosto() : 0.0;
+        double valuacion = s.getCantidadTotal() * costoFijo;
+
+        holder.tvCostoFijo.setText(String.format("Bs %.2f", costoFijo));
+        holder.tvValuacion.setText(String.format("Bs %.2f", valuacion));
     }
 
     @Override
@@ -53,13 +64,15 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvSku, tvNombre, tvStock, tvFecha;
+        TextView tvSku, tvNombre, tvStock, tvSucursal, tvCostoFijo, tvValuacion;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvSku = itemView.findViewById(R.id.tvSku);
             tvNombre = itemView.findViewById(R.id.tvNombre);
             tvStock = itemView.findViewById(R.id.tvStock);
-            tvFecha = itemView.findViewById(R.id.tvFecha);
+            tvSucursal = itemView.findViewById(R.id.tvSucursal);
+            tvCostoFijo = itemView.findViewById(R.id.tvCostoFijo);
+            tvValuacion = itemView.findViewById(R.id.tvValuacion);
         }
     }
 }
