@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useToast } from '../components/ToastContext';
 
-export default function RegisterPage({ setTenantId }) {
+export default function RegisterPage() {
   const [name, setName] = useState('');
   const [domain, setDomain] = useState('');
   const [email, setEmail] = useState('');
@@ -17,18 +17,12 @@ export default function RegisterPage({ setTenantId }) {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/register', { name, domain, email, password });
-      const { tenant_id } = response.data;
+      await api.post('/auth/register', { name, domain, email, password });
       
-      // Auto-login after register
-      localStorage.setItem('tenant_id', tenant_id);
-      localStorage.setItem('tenant_name', name);
-      setTenantId(tenant_id);
-      
-      toast.success('Cuenta comercial creada con éxito');
-      navigate('/');
+      toast.success('Cuenta comercial creada con éxito. Ya puedes iniciar sesión.');
+      navigate('/login');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al registrar la tienda. Verifica que el dominio o correo no existan ya.');
+      toast.error(err.response?.data?.message || 'Error al registrar la tienda.');
     } finally {
       setLoading(false);
     }
@@ -50,6 +44,8 @@ export default function RegisterPage({ setTenantId }) {
                 onChange={e => setName(e.target.value)} 
                 required 
                 placeholder="Ej. Tienda Alpha"
+                pattern="^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$"
+                title="El nombre no puede contener números ni símbolos"
               />
             </div>
             <div>

@@ -2,15 +2,16 @@ import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common'
 import { ProductosService } from './productos.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { TenantId } from '../tenant/tenant-id.decorator';
-import { ApiTags, ApiHeader } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 
 @ApiTags('Productos')
-@ApiHeader({ name: 'x-tenant-id', required: true })
 @Controller('productos')
 export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
 
   @Post()
+  @RequirePermission('catalogo.gestionar')
   create(
     @TenantId() tenantId: string,
     @Body() dto: CreateProductoDto,
@@ -19,11 +20,13 @@ export class ProductosController {
   }
 
   @Get()
+  @RequirePermission('catalogo.ver')
   findAll(@TenantId() tenantId: string) {
     return this.productosService.findAll(tenantId);
   }
 
   @Put(':id')
+  @RequirePermission('catalogo.gestionar')
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -33,6 +36,7 @@ export class ProductosController {
   }
 
   @Delete(':id')
+  @RequirePermission('catalogo.gestionar')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.productosService.remove(tenantId, id);
   }

@@ -2,15 +2,16 @@ import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common'
 import { SourcingService } from './sourcing.service';
 import { CreateLoteIngresoDto } from './dto/create-lote.dto';
 import { TenantId } from '../tenant/tenant-id.decorator';
-import { ApiTags, ApiHeader } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 
 @ApiTags('Sourcing')
-@ApiHeader({ name: 'x-tenant-id', required: true })
 @Controller('sourcing')
 export class SourcingController {
   constructor(private readonly sourcingService: SourcingService) {}
 
   @Post()
+  @RequirePermission('sourcing.gestionar')
   registrarIngreso(
     @TenantId() tenantId: string,
     @Body() dto: CreateLoteIngresoDto,
@@ -19,11 +20,13 @@ export class SourcingController {
   }
 
   @Get()
+  @RequirePermission('sourcing.ver')
   getHistorial(@TenantId() tenantId: string) {
     return this.sourcingService.getHistorial(tenantId);
   }
 
   @Put(':id')
+  @RequirePermission('sourcing.gestionar')
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -33,6 +36,7 @@ export class SourcingController {
   }
 
   @Delete(':id')
+  @RequirePermission('sourcing.gestionar')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.sourcingService.remove(tenantId, id);
   }

@@ -21,7 +21,7 @@ export default function StockPage() {
     ? stock 
     : stock.filter(s => s.sucursal_id === selectedBranch);
 
-  const totalValuation = filteredStock.reduce((acc, curr) => acc + (Number(curr.cantidadTotal) * Number(curr.producto?.precioCosto || 0)), 0);
+  const totalValuation = filteredStock.reduce((acc, curr) => acc + Number(curr.valorAdquisicion || 0), 0);
 
   return (
     <div className="glass-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -61,14 +61,15 @@ export default function StockPage() {
             <th>Nombre del Producto</th>
             <th>Ubicación Física</th>
             <th style={{ textAlign: 'center' }}>Stock Total</th>
-            <th style={{ textAlign: 'center' }}>Costo Fijo (U.)</th>
-            <th style={{ textAlign: 'right' }}>Valuación Parcial</th>
+            <th style={{ textAlign: 'center' }}>Costo Prom. (U.)</th>
+            <th style={{ textAlign: 'right' }}>Valuación Histórica</th>
           </tr>
         </thead>
         <tbody>
           {filteredStock.length === 0 ? <tr><td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Sin inventario físico en esta selección.</td></tr> : 
            filteredStock.map(s => {
-             const valuation = Number(s.cantidadTotal) * Number(s.producto?.precioCosto || 0);
+             const valuation = Number(s.valorAdquisicion || 0);
+             const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
              return (
                <tr key={s.id}>
                  <td style={{ fontWeight: '500' }}><span style={{ backgroundColor: '#e2e8f0', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.8rem' }}>{s.producto?.sku}</span></td>
@@ -79,7 +80,7 @@ export default function StockPage() {
                     </div>
                  </td>
                  <td style={{ textAlign: 'center' }}><strong style={{ color: '#16a34a' }}>{s.cantidadTotal} U</strong></td>
-                 <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Bs {Number(s.producto?.precioCosto || 0).toFixed(2)}</td>
+                 <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Bs {costoPromedio.toFixed(2)}</td>
                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: 'var(--primary-color)' }}>Bs {valuation.toFixed(2)}</td>
                </tr>
              );

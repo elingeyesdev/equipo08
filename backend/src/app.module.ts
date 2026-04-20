@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TenantModule } from './tenant/tenant.module';
@@ -9,12 +10,20 @@ import { SourcingModule } from './sourcing/sourcing.module';
 import { StockModule } from './stock/stock.module';
 import { ProductosModule } from './productos/productos.module';
 import { SucursalesModule } from './sucursales/sucursales.module';
+import { UsersModule } from './users/users.module';
+
 import { Tenant } from './tenant/tenant.entity';
 import { Proveedor } from './proveedores/proveedor.entity';
 import { Producto } from './productos/producto.entity';
 import { Sucursal } from './sucursales/sucursal.entity';
 import { LoteIngreso } from './sourcing/lote-ingreso.entity';
 import { Stock } from './stock/stock.entity';
+import { User } from './users/user.entity';
+import { RolePermissions } from './users/role-permissions.entity';
+
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
+import { PermissionsGuard } from './auth/guards/permissions.guard';
 
 @Module({
   imports: [
@@ -25,7 +34,7 @@ import { Stock } from './stock/stock.entity';
       username: 'postgres',
       password: '1234',
       database: 'mall_db',
-      entities: [Tenant, Proveedor, Producto, LoteIngreso, Stock, Sucursal],
+      entities: [Tenant, Proveedor, Producto, LoteIngreso, Stock, Sucursal, User, RolePermissions],
       synchronize: true,
     }),
     AuthModule,
@@ -35,8 +44,23 @@ import { Stock } from './stock/stock.entity';
     StockModule,
     ProductosModule,
     SucursalesModule,
+    UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
+    },
+  ],
 })
 export class AppModule {}
