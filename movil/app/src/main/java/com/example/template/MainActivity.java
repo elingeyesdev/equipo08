@@ -2,8 +2,12 @@ package com.example.template;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -13,14 +17,16 @@ import com.example.template.ui.ProductsFragment;
 import com.example.template.ui.ProvidersFragment;
 import com.example.template.ui.SourcingFragment;
 import com.example.template.ui.StockFragment;
+import com.example.template.ui.SucursalesFragment;
 import com.example.template.utils.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private SessionManager sessionManager;
     private MaterialToolbar toolbar;
-    private BottomNavigationView bottomNavigationView;
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle("OmniMall - " + sessionManager.getTenantName());
         toolbar.inflateMenu(R.menu.toolbar_menu);
         toolbar.setOnMenuItemClickListener(item -> {
-            if(item.getItemId() == R.id.action_logout) {
+            if (item.getItemId() == R.id.action_logout) {
                 sessionManager.logout();
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();
@@ -47,34 +53,61 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            Fragment selectedFragment = null;
-            int itemId = item.getItemId();
-            if (itemId == R.id.nav_home) {
-                selectedFragment = new HomeFragment();
-            } else if (itemId == R.id.nav_providers) {
-                selectedFragment = new ProvidersFragment();
-            } else if (itemId == R.id.nav_products) {
-                selectedFragment = new ProductsFragment();
-            } else if (itemId == R.id.nav_sourcing) {
-                selectedFragment = new SourcingFragment();
-            } else if (itemId == R.id.nav_stock) {
-                selectedFragment = new StockFragment();
-            }
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
 
-            if (selectedFragment != null) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, selectedFragment)
-                        .commit();
-                return true;
-            }
-            return false;
-        });
+        setSupportActionBar(toolbar);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
 
         // initial load
         if (savedInstanceState == null) {
-            bottomNavigationView.setSelectedItemId(R.id.nav_home);
+            navigationView.setCheckedItem(R.id.nav_home);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new HomeFragment())
+                    .commit();
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Fragment selectedFragment = null;
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.nav_home) {
+            selectedFragment = new HomeFragment();
+        } else if (itemId == R.id.nav_providers) {
+            selectedFragment = new ProvidersFragment();
+        } else if (itemId == R.id.nav_products) {
+            selectedFragment = new ProductsFragment();
+        } else if (itemId == R.id.nav_sourcing) {
+            selectedFragment = new SourcingFragment();
+        } else if (itemId == R.id.nav_stock) {
+            selectedFragment = new StockFragment();
+        } else if (itemId == R.id.nav_sucursales) {
+            selectedFragment = new SucursalesFragment();
+        }
+
+        if (selectedFragment != null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, selectedFragment)
+                    .commit();
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 }

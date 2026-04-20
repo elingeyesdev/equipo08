@@ -15,6 +15,15 @@ public interface ApiService {
     @POST("auth/register")
     Call<AuthResponse> register(@Body RegisterRequest request);
 
+    @retrofit2.http.GET("sucursales")
+    Call<java.util.List<com.example.template.network.models.Sucursal>> getSucursales();
+
+    @POST("sucursales")
+    Call<com.example.template.network.models.Sucursal> createSucursal(@Body com.example.template.network.models.Sucursal sucursal);
+
+    @retrofit2.http.DELETE("sucursales/{id}")
+    Call<Void> deleteSucursal(@retrofit2.http.Path("id") String id);
+
     @retrofit2.http.GET("proveedores")
     Call<java.util.List<com.example.template.network.models.Proveedor>> getProveedores();
 
