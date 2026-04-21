@@ -11,6 +11,7 @@ import { StockModule } from './stock/stock.module';
 import { ProductosModule } from './productos/productos.module';
 import { SucursalesModule } from './sucursales/sucursales.module';
 import { UsersModule } from './users/users.module';
+import { AjustesModule } from './ajustes/ajustes.module';
 
 import { Tenant } from './tenant/tenant.entity';
 import { Proveedor } from './proveedores/proveedor.entity';
@@ -20,6 +21,7 @@ import { LoteIngreso } from './sourcing/lote-ingreso.entity';
 import { Stock } from './stock/stock.entity';
 import { User } from './users/user.entity';
 import { RolePermissions } from './users/role-permissions.entity';
+import { AjusteInventario } from './ajustes/ajuste.entity';
 
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
@@ -34,7 +36,7 @@ import { PermissionsGuard } from './auth/guards/permissions.guard';
       username: 'postgres',
       password: '1234',
       database: 'mall_db',
-      entities: [Tenant, Proveedor, Producto, LoteIngreso, Stock, Sucursal, User, RolePermissions],
+      entities: [Tenant, Proveedor, Producto, LoteIngreso, Stock, Sucursal, User, RolePermissions, AjusteInventario],
       synchronize: true,
     }),
     AuthModule,
@@ -45,6 +47,7 @@ import { PermissionsGuard } from './auth/guards/permissions.guard';
     ProductosModule,
     SucursalesModule,
     UsersModule,
+    AjustesModule,
   ],
   controllers: [AppController],
   providers: [
