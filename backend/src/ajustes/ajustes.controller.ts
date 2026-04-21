@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Req } from '@nestjs/common';
 import { AjustesService } from './ajustes.service';
 import { TenantId } from '../tenant/tenant-id.decorator';
 import { RequirePermission } from '../auth/decorators/permissions.decorator';
+import { CreateAjusteDto } from './dto/create-ajuste.dto';
 
 @Controller('ajustes')
 export class AjustesController {
@@ -11,5 +12,12 @@ export class AjustesController {
   @RequirePermission('inventario.ver')
   findAll(@TenantId() tenant_id: string) {
     return this.ajustesService.findAll(tenant_id);
+  }
+
+  @Post()
+  @RequirePermission('sourcing.gestionar')
+  create(@TenantId() tenant_id: string, @Req() req: any, @Body() dto: CreateAjusteDto) {
+    const usuario_id = req.user.sub;
+    return this.ajustesService.create(tenant_id, usuario_id, dto);
   }
 }
