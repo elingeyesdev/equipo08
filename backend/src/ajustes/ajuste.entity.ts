@@ -4,6 +4,13 @@ import { Sucursal } from '../sucursales/sucursal.entity';
 import { Producto } from '../productos/producto.entity';
 import { User } from '../users/user.entity';
 
+export enum MotivoAjuste {
+  ROBO_O_PERDIDA = 'ROBO_O_PERDIDA',
+  DANO_MERMA = 'DANO_MERMA',
+  ERROR_REGISTRO = 'ERROR_REGISTRO',
+  CADUCIDAD = 'CADUCIDAD',
+}
+
 @Entity('ajustes_inventario')
 export class AjusteInventario {
   @PrimaryGeneratedColumn('uuid')
@@ -26,6 +33,13 @@ export class AjusteInventario {
 
   @Column('int')
   cantidad_fisica: number;
+
+  @Column({
+    type: 'enum',
+    enum: MotivoAjuste,
+    nullable: false,
+  })
+  motivo: MotivoAjuste;
 
   @Column('text', { nullable: true })
   observaciones: string;
