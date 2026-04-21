@@ -14,20 +14,35 @@ export class AjustesService {
   ) {}
 
   async create(tenant_id: string, usuario_id: string, dto: CreateAjusteDto): Promise<AjusteInventario> {
+    if (dto.cantidad_fisica > dto.cantidad_sistema) {
+      throw new BadRequestException(
+        'Auditoría Rechazada: No puede registrar más stock del existente (Detección de excedente anómalo). Para ingresar stock nuevo legitímo sin registrar, debe crearse un nuevo Lote de Sourcing.'
+      );
+    }
+
+    const stockActual = await this.stockService.getStockRow(tenant_id, dto.sucursal_id, dto.producto_id);
+    let avgCost = 0;
+    if (stockActual && stockActual.cantidadTotal > 0) {
+       avgCost = Number(stockActual.valorAdquisicion) / stockActual.cantidadTotal;
+    }
+
+    const unitsLost = dto.cantidad_sistema - dto.cantidad_fisica;
+    const valor_perdido = (unitsLost > 0) ? (unitsLost * avgCost) : 0;
+
     // 1. Guardar el Acta de Ajuste (Auditoría Lineal)
     const nuevoAjuste = this.ajusteRep.create({
       tenant_id,
       usuario_id,
       ...dto,
+      valor_perdido
     });
     const guardado = await this.ajusteRep.save(nuevoAjuste);
 
     // 2. Sincronizador Transversal: Forzar la actualización del Stock Físico a la cantidad reportada.
-    // Usamos el StockService para hacer un delta: cantidad fisica - cantidad sistema = ajuste necesario para sumar/restar.
     const diferencia = dto.cantidad_fisica - dto.cantidad_sistema;
     
-    // El método sumStock del StockService acepta valores negativos, sumando/restando hasta cuadrar con la `cantidad_fisica`.
-    await this.stockService.sumStock(tenant_id, dto.sucursal_id, dto.producto_id, diferencia);
+    // El método sumStock del StockService acepta valores negativos
+    await this.stockService.sumStock(tenant_id, dto.sucursal_id, dto.producto_id, diferencia, -valor_perdido);
 
     return guardado;
   }

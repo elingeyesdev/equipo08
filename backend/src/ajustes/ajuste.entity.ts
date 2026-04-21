@@ -44,6 +44,9 @@ export class AjusteInventario {
   @Column('text', { nullable: true })
   observaciones: string;
 
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  valor_perdido: number;
+
   @CreateDateColumn()
   fecha: Date;
 

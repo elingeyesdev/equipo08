@@ -6,6 +6,7 @@ import { CreateLoteIngresoDto } from './dto/create-lote.dto';
 import { Stock } from '../stock/stock.entity';
 import { Producto } from '../productos/producto.entity';
 import { Sucursal } from '../sucursales/sucursal.entity';
+import { AjusteInventario } from '../ajustes/ajuste.entity';
 
 @Injectable()
 export class SourcingService {
@@ -113,14 +114,26 @@ export class SourcingService {
   private async recalculateStock(queryRunner: any, tenant_id: string, sucursal_id: string, producto_id: string) {
     const stockRep = queryRunner.manager.getRepository(Stock);
     const loteRep = queryRunner.manager.getRepository(LoteIngreso);
+    const ajusteRep = queryRunner.manager.getRepository(AjusteInventario);
 
     const lotes = await loteRep.find({ where: { tenant_id, sucursal_id, producto_id } });
+    const ajustes = await ajusteRep.find({ where: { tenant_id, sucursal_id, producto_id } });
+
     let totalUnidades = 0;
     let totalValorAdquisicion = 0;
 
     for (const lote of lotes) {
       totalUnidades += Number(lote.cantidad);
       totalValorAdquisicion += Number(lote.cantidad) * Number(lote.costoUnitarioSnapshot || 0);
+    }
+
+    // Restar todas las mermas o ajustes físicos (Ajustes Anómalos)
+    for (const ajuste of ajustes) {
+       const gap = ajuste.cantidad_sistema - ajuste.cantidad_fisica;
+       if (gap > 0) {
+           totalUnidades -= gap;
+           totalValorAdquisicion -= Number(ajuste.valor_perdido || 0);
+       }
     }
 
     let stock = await stockRep.findOne({ where: { tenant_id, sucursal_id, producto_id } });

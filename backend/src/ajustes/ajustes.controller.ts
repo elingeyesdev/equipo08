@@ -17,7 +17,7 @@ export class AjustesController {
   @Post()
   @RequirePermission('sourcing.gestionar')
   create(@TenantId() tenant_id: string, @Req() req: any, @Body() dto: CreateAjusteDto) {
-    const usuario_id = req.user.sub;
+    const usuario_id = req.user.userId;
     return this.ajustesService.create(tenant_id, usuario_id, dto);
   }
 }
