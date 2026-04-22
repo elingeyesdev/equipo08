@@ -4,6 +4,7 @@ import api from './api';
 import ProvidersPage from './pages/ProvidersPage';
 import SourcingPage from './pages/SourcingPage';
 import StockPage from './pages/StockPage';
+import AuditReportsPage from './pages/AuditReportsPage';
 import ProductsPage from './pages/ProductsPage';
 import SucursalesPage from './pages/SucursalesPage';
 import UsersPage from './pages/UsersPage';
@@ -11,7 +12,7 @@ import PermissionsPage from './pages/PermissionsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import { ToastProvider } from './components/ToastContext';
-import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive, Store, ShieldCheck, UserPlus } from 'lucide-react';
+import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive, Store, ShieldCheck, UserPlus, BarChart } from 'lucide-react';
 import './index.css';
 
 function Sidebar({ setAuthToken, permissions }) {
@@ -76,9 +77,14 @@ function Sidebar({ setAuthToken, permissions }) {
         )}
 
         {hasPerm('inventario.ver') && (
-          <Link to="/stock" className={`nav-link ${location.pathname === '/stock' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Archive size={18} /> Inventario
-          </Link>
+          <>
+            <Link to="/stock" className={`nav-link ${location.pathname === '/stock' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Archive size={18} /> Inventario Físico
+            </Link>
+            <Link to="/audit-reports" className={`nav-link ${location.pathname === '/audit-reports' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <BarChart size={18} /> Reportes de Auditoría
+            </Link>
+          </>
         )}
 
         {userRole === 'OWNER' && (
@@ -169,6 +175,7 @@ function App() {
                 <Route path="/products" element={<ProductsPage key={authToken} />} />
                 <Route path="/sourcing" element={<SourcingPage key={authToken} />} />
                 <Route path="/stock" element={<StockPage key={authToken} />} />
+                <Route path="/audit-reports" element={<AuditReportsPage key={authToken} />} />
                 
                 {/* Admin Routes */}
                 <Route path="/users" element={<UsersPage key={authToken} />} />
