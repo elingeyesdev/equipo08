@@ -82,7 +82,23 @@ export default function StockPage() {
     ? stock 
     : stock.filter(s => s.sucursal_id === selectedBranch);
 
+  const filteredAjustes = selectedBranch === 'ALL'
+    ? ajustes
+    : ajustes.filter(a => a.sucursal_id === selectedBranch);
+
   const totalValuation = filteredStock.reduce((acc, curr) => acc + Number(curr.valorAdquisicion || 0), 0);
+
+  const historicalLossValue = filteredAjustes.reduce((acc, a) => {
+    let exactLoss = Number(a.valor_perdido || 0);
+    // Backwards Compatibility: Si el registro es antiguo y no se congeló el valor_perdido en BD, estimarlo dinámicamente.
+    if (exactLoss === 0 && a.cantidad_fisica < a.cantidad_sistema) {
+        const unitsLost = a.cantidad_sistema - a.cantidad_fisica;
+        const refStock = stock.find(s => s.producto_id === a.producto_id);
+        const avgCost = refStock && refStock.cantidadTotal > 0 ? (Number(refStock.valorAdquisicion) / refStock.cantidadTotal) : 0;
+        exactLoss = unitsLost * avgCost;
+    }
+    return acc + exactLoss;
+  }, 0);
 
   const formatMotivo = (motivo) => {
     switch(motivo) {
@@ -233,17 +249,22 @@ export default function StockPage() {
             </div>
           </div>
 
-          {/* Enlace al Dashboard de Análisis */}
-          <div style={{ backgroundColor: '#fff', padding: '1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-color)' }}>
+          {/* Tarjeta de Fugas/Déficit Acumulado */}
+          <div style={{ backgroundColor: '#fef2f2', padding: '1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #fecaca' }}>
             <div>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: '500', display: 'block', marginBottom: '0.25rem' }}>Análisis de Déficit y Ajustes:</span>
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Consulta el impacto financiero detallado de las auditorías.</span>
+              <span style={{ color: '#991b1b', fontWeight: '500', display: 'block', marginBottom: '0.25rem' }}>Valuación de Déficit Acumulado:</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingDown size={20} color="#b91c1c" />
+                <span style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#b91c1c' }}>
+                  Bs. {historicalLossValue.toFixed(2)}
+                </span>
+              </div>
             </div>
             <a 
               href="/audit-reports"
-              style={{ backgroundColor: '#f8fafc', color: 'var(--text-primary)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', fontSize: '0.85rem', textDecoration: 'none', borderRadius: '6px' }}
+              style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', fontSize: '0.85rem', textDecoration: 'none', borderRadius: '6px' }}
             >
-              <ClipboardList size={16} /> Abrir Reportes
+              <ClipboardList size={16} /> Ver Reportes
             </a>
           </div>
         </div>
@@ -290,7 +311,7 @@ export default function StockPage() {
                          style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}
                          title="Auditar Inventario / Ingresar Conteo Físico"
                       >
-                        <ClipboardList size={14} /> Físico
+                        <ClipboardList size={14} /> Registrar Incidencia
                       </button>
                    </td>
                  </tr>

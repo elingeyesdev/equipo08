@@ -73,6 +73,8 @@ export default function AuditReportsPage() {
 
   const totalFilteredLoss = filteredAjustes.reduce((acc, a) => acc + Number(a.valor_perdido || 0), 0);
 
+  const [showFilters, setShowFilters] = useState(false);
+
   return (
     <div className="glass-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.3s ease' }}>
       {/* Header */}
@@ -83,6 +85,9 @@ export default function AuditReportsPage() {
           </h3>
           <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Dashboard unificado para el análisis histórico y seguimiento del déficit de inventario.</p>
         </div>
+        <button onClick={() => setShowFilters(!showFilters)} style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px' }}>
+          <Filter size={18} /> {showFilters ? 'Ocultar Filtros Avanzados' : 'Filtrar Reporte'}
+        </button>
       </div>
 
       {/* KPI Section */}
@@ -109,42 +114,44 @@ export default function AuditReportsPage() {
       </div>
 
       {/* Advanced Filters */}
-      <div style={{ padding: '1rem', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' }}>
-         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Filter size={18} color="var(--text-secondary)" />
-            <strong style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Filtros:</strong>
-         </div>
-         
-         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Desde:</label>
-            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ padding: '0.3rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
-         </div>
+      {showFilters && (
+        <div style={{ padding: '1rem', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem', animation: 'fadeIn 0.2s ease' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Filter size={18} color="var(--text-secondary)" />
+              <strong style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Filtros:</strong>
+           </div>
+           
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Desde:</label>
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ padding: '0.3rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+           </div>
 
-         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Hasta:</label>
-            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ padding: '0.3rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
-         </div>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Hasta:</label>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ padding: '0.3rem', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+           </div>
 
-         <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
-            <option value="ALL">Cualquier Operador</option>
-            {usuarios.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-         </select>
+           <select value={selectedUser} onChange={e => setSelectedUser(e.target.value)} style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+              <option value="ALL">Cualquier Operador</option>
+              {usuarios.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+           </select>
 
-         <select value={selectedMotivo} onChange={e => setSelectedMotivo(e.target.value)} style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
-            <option value="ALL">Cualquier Categoría</option>
-            <option value="ERROR_REGISTRO">Error de Registro</option>
-            <option value="DANO_MERMA">Artículo Dañado / Extraviado</option>
-            <option value="ROBO_O_PERDIDA">Robo / No Habido</option>
-            <option value="CADUCIDAD">Vencido</option>
-         </select>
+           <select value={selectedMotivo} onChange={e => setSelectedMotivo(e.target.value)} style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+              <option value="ALL">Cualquier Categoría</option>
+              <option value="ERROR_REGISTRO">Error de Registro</option>
+              <option value="DANO_MERMA">Artículo Dañado / Extraviado</option>
+              <option value="ROBO_O_PERDIDA">Robo / No Habido</option>
+              <option value="CADUCIDAD">Vencido</option>
+           </select>
 
-         <button 
-           onClick={() => { setStartDate(''); setEndDate(''); setSelectedUser('ALL'); setSelectedMotivo('ALL'); }}
-           style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: 'transparent', border: '1px solid #cbd5e1', color: 'var(--text-secondary)' }}
-         >
-            Limpiar
-         </button>
-      </div>
+           <button 
+             onClick={() => { setStartDate(''); setEndDate(''); setSelectedUser('ALL'); setSelectedMotivo('ALL'); }}
+             style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: 'transparent', border: '1px solid #cbd5e1', color: 'var(--text-secondary)' }}
+           >
+              Limpiar
+           </button>
+        </div>
+      )}
 
       {/* Main Report Table */}
       <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: '#fff' }}>
