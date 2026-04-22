@@ -17,7 +17,6 @@ export default function StockPage() {
     observaciones: ''
   });
   const [saving, setSaving] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
 
   const toast = useToast();
 
@@ -83,25 +82,7 @@ export default function StockPage() {
     ? stock 
     : stock.filter(s => s.sucursal_id === selectedBranch);
 
-  const filteredAjustes = selectedBranch === 'ALL'
-    ? ajustes
-    : ajustes.filter(a => a.sucursal_id === selectedBranch);
-
   const totalValuation = filteredStock.reduce((acc, curr) => acc + Number(curr.valorAdquisicion || 0), 0);
-
-  const historicalLossValue = filteredAjustes.reduce((acc, a) => {
-    let exactLoss = Number(a.valor_perdido || 0);
-    
-    // Backwards Compatibility: Si el registro es antiguo y no se congeló el valor_perdido en BD, estimarlo dinámicamente.
-    if (exactLoss === 0 && a.cantidad_fisica < a.cantidad_sistema) {
-        const unitsLost = a.cantidad_sistema - a.cantidad_fisica;
-        const refStock = stock.find(s => s.producto_id === a.producto_id);
-        const avgCost = refStock && refStock.cantidadTotal > 0 ? (Number(refStock.valorAdquisicion) / refStock.cantidadTotal) : 0;
-        exactLoss = unitsLost * avgCost;
-    }
-    
-    return acc + exactLoss;
-  }, 0);
 
   const formatMotivo = (motivo) => {
     switch(motivo) {
@@ -252,73 +233,24 @@ export default function StockPage() {
             </div>
           </div>
 
-          {/* Tarjeta de Fugas/Mermas */}
-          <div style={{ backgroundColor: '#fef2f2', padding: '1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #fecaca' }}>
+          {/* Enlace al Dashboard de Análisis */}
+          <div style={{ backgroundColor: '#fff', padding: '1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-color)' }}>
             <div>
-              <span style={{ color: '#991b1b', fontWeight: '500', display: 'block', marginBottom: '0.25rem' }}>Valuación de Déficit (Pérdidas de Inventario):</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <TrendingDown size={20} color="#b91c1c" />
-                <span style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#b91c1c' }}>
-                  Bs. {historicalLossValue.toFixed(2)}
-                </span>
-              </div>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: '500', display: 'block', marginBottom: '0.25rem' }}>Análisis de Déficit y Ajustes:</span>
+              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Consulta el impacto financiero detallado de las auditorías.</span>
             </div>
-            <button 
-              onClick={() => setShowHistory(!showHistory)}
-              style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+            <a 
+              href="/audit-reports"
+              style={{ backgroundColor: '#f8fafc', color: 'var(--text-primary)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', fontSize: '0.85rem', textDecoration: 'none', borderRadius: '6px' }}
             >
-              <History size={16} /> {showHistory ? 'Ocultar Historial' : 'Ver Historial'}
-            </button>
+              <ClipboardList size={16} /> Abrir Reportes
+            </a>
           </div>
         </div>
       )}
 
-      {/* History Sub-Table */}
-      {!auditItem && showHistory && (
-        <div style={{ animation: 'fadeIn 0.3s ease', backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', overflowX: 'auto', marginBottom: '1.5rem' }}>
-           <h4 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#b91c1c' }}>
-              <ClipboardList size={18} /> Registro Analítico de Ajustes de Inventario
-           </h4>
-           <table style={{ margin: 0, fontSize: '0.9rem' }}>
-             <thead>
-               <tr>
-                 <th>Fecha y Hora</th>
-                 <th>Producto Afectado</th>
-                 <th>Sucursal</th>
-                 <th>Registró</th>
-                 <th style={{ textAlign: 'center' }}>Gap</th>
-                 <th>Motivo Judicial</th>
-               </tr>
-             </thead>
-             <tbody>
-               {filteredAjustes.length === 0 ? (
-                 <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>No existen incidencias ni recuentos físicos perjudiciales en el historial. Mantenimiento excelente.</td></tr>
-               ) : (
-                 filteredAjustes.slice(0).reverse().map(a => {
-                    const deltaVal = a.cantidad_fisica - a.cantidad_sistema;
-                    return (
-                      <tr key={a.id}>
-                        <td style={{ color: 'var(--text-secondary)' }}>{new Date(a.fecha).toLocaleString()}</td>
-                        <td style={{ fontWeight: '500' }}>{a.producto?.name || 'SKU ' + a.producto_id}</td>
-                        <td style={{ color: 'var(--text-secondary)' }}><MapPin size={12}/> {a.sucursal?.name}</td>
-                        <td>{a.usuario?.name || 'Operador'}</td>
-                        <td style={{ textAlign: 'center' }}>
-                           <span style={{ padding: '0.2rem 0.5rem', borderRadius: '4px', backgroundColor: deltaVal < 0 ? '#fee2e2' : '#dcfce3', color: deltaVal < 0 ? '#991b1b' : '#166534', fontWeight: 'bold' }}>
-                              {deltaVal === 0 ? 'Sin Cambios' : (deltaVal > 0 ? `+${deltaVal}` : deltaVal)} U
-                           </span>
-                        </td>
-                        <td><span style={{ fontSize: '0.8rem', backgroundColor: '#f1f5f9', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>{formatMotivo(a.motivo)}</span></td>
-                      </tr>
-                    );
-                 })
-               )}
-             </tbody>
-           </table>
-        </div>
-      )}
-
       {/* Main Stock Table */}
-      <div className="glass-container" style={{ padding: '0', overflow: 'x-auto', display: (auditItem || showHistory) ? 'none' : 'block' }}>
+      <div className="glass-container" style={{ padding: '0', overflow: 'x-auto', display: auditItem ? 'none' : 'block' }}>
         <table style={{ margin: 0 }}>
           <thead>
             <tr>
