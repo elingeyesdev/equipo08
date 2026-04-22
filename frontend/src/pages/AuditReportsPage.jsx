@@ -71,6 +71,8 @@ export default function AuditReportsPage() {
     return validDate && validUser && validMotivo;
   });
 
+  const totalFilteredLoss = filteredAjustes.reduce((acc, a) => acc + Number(a.valor_perdido || 0), 0);
+
   return (
     <div className="glass-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.3s ease' }}>
       {/* Header */}
@@ -83,9 +85,27 @@ export default function AuditReportsPage() {
         </div>
       </div>
 
-      {/* KPI Section Placeholder */}
-      <div style={{ padding: '1.5rem', backgroundColor: '#f1f5f9', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-        [Estructura KPIs / Resumen de Reporte en construcción]
+      {/* KPI Section */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+         <div style={{ backgroundColor: '#fef2f2', padding: '1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #fecaca' }}>
+            <div>
+              <span style={{ color: '#991b1b', fontWeight: '500', display: 'block', marginBottom: '0.25rem' }}>Valuación de Déficit (En Base a Filtros):</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#b91c1c' }}>
+                  Bs. {totalFilteredLoss.toFixed(2)}
+                </span>
+              </div>
+            </div>
+         </div>
+
+         <div style={{ backgroundColor: '#f1f5f9', padding: '1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #cbd5e1' }}>
+            <div>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: '500', display: 'block', marginBottom: '0.25rem' }}>Incidencias Detectadas:</span>
+              <span style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>
+                {filteredAjustes.length} Registros
+              </span>
+            </div>
+         </div>
       </div>
 
       {/* Advanced Filters */}
