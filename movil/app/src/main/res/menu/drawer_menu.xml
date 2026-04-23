@@ -24,4 +24,22 @@
         android:id="@+id/nav_stock"
         android:icon="@android:drawable/ic_menu_sort_by_size"
         android:title="Inventario" />
+        
+    <item android:title="Administración">
+        <menu>
+            <item
+                android:id="@+id/nav_empleados"
+                android:icon="@android:drawable/ic_menu_myplaces"
+                android:title="Empleados" />
+            <item
+                android:id="@+id/nav_permisos"
+                android:icon="@android:drawable/ic_menu_manage"
+                android:title="Permisos" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/nav_logout"
+        android:icon="@android:drawable/ic_lock_power_off"
+        android:title="Cerrar Sesión" />
 </menu>

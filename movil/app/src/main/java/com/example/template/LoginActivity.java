@@ -31,6 +31,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         
         sessionManager = new SessionManager(this);
+        
+        // Limpiar la sesión de prueba anterior automáticamente
+        if ("dev-tenant-123".equals(sessionManager.getTenantId())) {
+            sessionManager.logout();
+        }
+        
         if (sessionManager.isLoggedIn()) {
             goToMain();
         }
@@ -71,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponse auth = response.body();
-                    sessionManager.createSession(auth.getTenant_id(), auth.getName());
+                    sessionManager.createSession(auth.getTenant_id(), auth.getName(), email);
                     Toast.makeText(LoginActivity.this, "Bienvenido a " + auth.getName(), Toast.LENGTH_SHORT).show();
                     goToMain();
                 } else {

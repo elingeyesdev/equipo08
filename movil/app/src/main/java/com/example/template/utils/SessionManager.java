@@ -7,6 +7,7 @@ public class SessionManager {
     private static final String PREF_NAME = "OmniMallSession";
     private static final String KEY_TENANT_ID = "tenant_id";
     private static final String KEY_TENANT_NAME = "tenant_name";
+    private static final String KEY_EMAIL = "email";
 
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
@@ -16,9 +17,10 @@ public class SessionManager {
         editor = prefs.edit();
     }
 
-    public void createSession(String tenantId, String tenantName) {
+    public void createSession(String tenantId, String tenantName, String email) {
         editor.putString(KEY_TENANT_ID, tenantId);
         editor.putString(KEY_TENANT_NAME, tenantName);
+        editor.putString(KEY_EMAIL, email);
         editor.apply();
     }
 
@@ -28,6 +30,10 @@ public class SessionManager {
 
     public String getTenantName() {
         return prefs.getString(KEY_TENANT_NAME, "Mi Tienda");
+    }
+
+    public String getEmail() {
+        return prefs.getString(KEY_EMAIL, "admin@mitienda.com");
     }
 
     public void logout() {

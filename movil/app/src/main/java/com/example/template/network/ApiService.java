@@ -57,4 +57,24 @@ public interface ApiService {
 
     @retrofit2.http.GET("stock")
     Call<java.util.List<com.example.template.network.models.Stock>> getStock();
+
+    // EMPLEADOS
+    @retrofit2.http.GET("empleados")
+    Call<java.util.List<com.example.template.network.models.Empleado>> getEmpleados();
+
+    @POST("empleados")
+    Call<com.example.template.network.models.Empleado> createEmpleado(@Body com.example.template.network.models.Empleado empleado);
+
+    @retrofit2.http.PUT("empleados/{id}")
+    Call<com.example.template.network.models.Empleado> updateEmpleado(@retrofit2.http.Path("id") String id, @Body com.example.template.network.models.Empleado empleado);
+
+    @retrofit2.http.DELETE("empleados/{id}")
+    Call<Void> deleteEmpleado(@retrofit2.http.Path("id") String id);
+
+    // PERMISOS
+    @retrofit2.http.GET("permisos")
+    Call<java.util.List<com.example.template.network.models.PermisosRoles>> getPermisos();
+
+    @retrofit2.http.PUT("permisos/{rol}")
+    Call<com.example.template.network.models.PermisosRoles> updatePermisos(@retrofit2.http.Path("rol") String rol, @Body com.example.template.network.models.PermisosRoles permisos);
 }

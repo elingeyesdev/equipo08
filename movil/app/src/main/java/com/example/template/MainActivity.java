@@ -18,6 +18,8 @@ import com.example.template.ui.ProvidersFragment;
 import com.example.template.ui.SourcingFragment;
 import com.example.template.ui.StockFragment;
 import com.example.template.ui.SucursalesFragment;
+import com.example.template.ui.EmpleadosFragment;
+import com.example.template.ui.PermisosFragment;
 import com.example.template.utils.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
@@ -35,7 +37,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         sessionManager = new SessionManager(this);
         // Bypass login and use dummy session as requested
         if (!sessionManager.isLoggedIn()) {
-            sessionManager.createSession("dev-tenant-123", "Tienda de Desarrollo");
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
         }
 
         setContentView(R.layout.activity_main);
@@ -90,6 +94,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new StockFragment();
         } else if (itemId == R.id.nav_sucursales) {
             selectedFragment = new SucursalesFragment();
+        } else if (itemId == R.id.nav_empleados) {
+            selectedFragment = new EmpleadosFragment();
+        } else if (itemId == R.id.nav_permisos) {
+            selectedFragment = new PermisosFragment();
+        } else if (itemId == R.id.nav_logout) {
+            sessionManager.logout();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return true;
         }
 
         if (selectedFragment != null) {

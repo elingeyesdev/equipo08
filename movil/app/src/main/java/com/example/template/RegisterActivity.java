@@ -69,7 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponse auth = response.body();
                     // Auto login
-                    sessionManager.createSession(auth.getTenant_id(), name);
+                    sessionManager.createSession(auth.getTenant_id(), name, email);
                     Toast.makeText(RegisterActivity.this, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show();
                     
                     Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
