@@ -117,5 +117,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvLabelValuacion" />
 
+        <Button
+            android:id="@+id/btnIncidencia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#fef3c7"
+            android:textColor="#b45309"
+            android:text="Registrar Incidencia"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@+id/tvValuacion"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

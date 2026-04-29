@@ -14,9 +14,15 @@ import java.util.List;
 public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> {
 
     private List<Stock> list;
+    private OnIncidenciaClickListener listener;
 
-    public StockAdapter(List<Stock> list) {
+    public interface OnIncidenciaClickListener {
+        void onIncidenciaClick(Stock stock);
+    }
+
+    public StockAdapter(List<Stock> list, OnIncidenciaClickListener listener) {
         this.list = list;
+        this.listener = listener;
     }
 
     public void updateData(List<Stock> newList) {
@@ -56,6 +62,12 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
 
         holder.tvCostoFijo.setText(String.format("Bs %.2f", costoFijo));
         holder.tvValuacion.setText(String.format("Bs %.2f", valuacion));
+
+        holder.btnIncidencia.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onIncidenciaClick(s);
+            }
+        });
     }
 
     @Override
@@ -65,6 +77,8 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvSku, tvNombre, tvStock, tvSucursal, tvCostoFijo, tvValuacion;
+        android.widget.Button btnIncidencia;
+        
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvSku = itemView.findViewById(R.id.tvSku);
@@ -73,6 +87,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
             tvSucursal = itemView.findViewById(R.id.tvSucursal);
             tvCostoFijo = itemView.findViewById(R.id.tvCostoFijo);
             tvValuacion = itemView.findViewById(R.id.tvValuacion);
+            btnIncidencia = itemView.findViewById(R.id.btnIncidencia);
         }
     }
 }
