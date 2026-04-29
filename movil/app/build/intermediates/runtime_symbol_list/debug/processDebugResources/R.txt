@@ -3388,6 +3388,7 @@ int id mtrl_picker_text_input_range_start 0x7f08013f
 int id mtrl_picker_title_text 0x7f080140
 int id mtrl_view_tag_bottom_padding 0x7f080141
 int id multiply 0x7f080142
+int id nav_audit_reports 0x7f080243
 int id nav_empleados 0x7f080233
 int id nav_home 0x7f080143
 int id nav_logout 0x7f08022c
@@ -3584,6 +3585,8 @@ int id transition_transform 0x7f0801fc
 int id triangle 0x7f0801fd
 int id tvAuditInfo 0x7f080241
 int id tvCostoFijo 0x7f0801fe
+int id tvDate 0x7f080244
+int id tvDelta 0x7f080245
 int id tvDireccion 0x7f0801ff
 int id tvEmail 0x7f080200
 int id tvEstado 0x7f080201
@@ -3591,9 +3594,13 @@ int id tvFecha 0x7f080202
 int id tvLabelCosto 0x7f080203
 int id tvLabelValuacion 0x7f080204
 int id tvLogin 0x7f080205
+int id tvLoss 0x7f080246
 int id tvMargen 0x7f080206
+int id tvMotivo 0x7f080247
 int id tvNit 0x7f080207
 int id tvNombre 0x7f080208
+int id tvOperador 0x7f080248
+int id tvProductName 0x7f080249
 int id tvProducto 0x7f080209
 int id tvProveedor 0x7f08020a
 int id tvRazonSocial 0x7f08020b
@@ -3603,6 +3610,8 @@ int id tvSku 0x7f08020d
 int id tvStock 0x7f08020e
 int id tvSucursal 0x7f08020f
 int id tvTelefono 0x7f080210
+int id tvTotalIncidents 0x7f08024a
+int id tvTotalLoss 0x7f08024b
 int id tvTotalValuation 0x7f080211
 int id tvTrx 0x7f080212
 int id tvValuacion 0x7f080213
@@ -3765,6 +3774,7 @@ int layout design_navigation_menu_item 0x7f0b002c
 int layout design_text_input_end_icon 0x7f0b002d
 int layout design_text_input_start_icon 0x7f0b002e
 int layout dialog_incidencia 0x7f0b007a
+int layout fragment_audit_reports 0x7f0b007b
 int layout fragment_empleados 0x7f0b0077
 int layout fragment_home 0x7f0b002f
 int layout fragment_permisos 0x7f0b0078
@@ -3773,6 +3783,7 @@ int layout fragment_providers 0x7f0b0031
 int layout fragment_sourcing 0x7f0b0032
 int layout fragment_stock 0x7f0b0033
 int layout fragment_sucursales 0x7f0b0034
+int layout item_audit 0x7f0b007c
 int layout item_empleado 0x7f0b0079
 int layout item_lote 0x7f0b0035
 int layout item_producto 0x7f0b0036

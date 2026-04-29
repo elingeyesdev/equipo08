@@ -52,6 +52,7 @@ int id llDetalles 0x0
 int id llSupervisorPermisos 0x0
 int id llVendedorPermisos 0x0
 int id llWarningBox 0x0
+int id nav_audit_reports 0x0
 int id nav_empleados 0x0
 int id nav_home 0x0
 int id nav_logout 0x0
@@ -75,6 +76,8 @@ int id spinnerSucursal 0x0
 int id toolbar 0x0
 int id tvAuditInfo 0x0
 int id tvCostoFijo 0x0
+int id tvDate 0x0
+int id tvDelta 0x0
 int id tvDireccion 0x0
 int id tvEmail 0x0
 int id tvEstado 0x0
@@ -82,9 +85,13 @@ int id tvFecha 0x0
 int id tvLabelCosto 0x0
 int id tvLabelValuacion 0x0
 int id tvLogin 0x0
+int id tvLoss 0x0
 int id tvMargen 0x0
+int id tvMotivo 0x0
 int id tvNit 0x0
 int id tvNombre 0x0
+int id tvOperador 0x0
+int id tvProductName 0x0
 int id tvProducto 0x0
 int id tvProveedor 0x0
 int id tvRazonSocial 0x0
@@ -94,6 +101,8 @@ int id tvSku 0x0
 int id tvStock 0x0
 int id tvSucursal 0x0
 int id tvTelefono 0x0
+int id tvTotalIncidents 0x0
+int id tvTotalLoss 0x0
 int id tvTotalValuation 0x0
 int id tvTrx 0x0
 int id tvValuacion 0x0
@@ -103,6 +112,7 @@ int layout activity_login 0x0
 int layout activity_main 0x0
 int layout activity_register 0x0
 int layout dialog_incidencia 0x0
+int layout fragment_audit_reports 0x0
 int layout fragment_empleados 0x0
 int layout fragment_home 0x0
 int layout fragment_permisos 0x0
@@ -111,6 +121,7 @@ int layout fragment_providers 0x0
 int layout fragment_sourcing 0x0
 int layout fragment_stock 0x0
 int layout fragment_sucursales 0x0
+int layout item_audit 0x0
 int layout item_empleado 0x0
 int layout item_lote 0x0
 int layout item_producto 0x0

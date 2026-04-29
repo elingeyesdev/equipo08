@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#f8f9fc"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registro Analítico de Auditorías"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#2b3b55" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dashboard de histórico de ajustes."
+            android:textColor="#5a6a85" />
+    </LinearLayout>
+
+    <!-- KPI 1 -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        android:backgroundTint="#fef2f2">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Valuación de Déficit Total:"
+                android:textColor="#991b1b"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:id="@+id/tvTotalLoss"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bs. 0.00"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#b91c1c"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- KPI 2 -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        android:backgroundTint="#f1f5f9">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Incidencias Detectadas:"
+                android:textColor="#5a6a85"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"/>
+            <TextView
+                android:id="@+id/tvTotalIncidents"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 Registros"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#2b3b55"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- LIST AREA -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp" />
+
+</LinearLayout>

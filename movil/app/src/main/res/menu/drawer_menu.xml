@@ -24,6 +24,10 @@
         android:id="@+id/nav_stock"
         android:icon="@android:drawable/ic_menu_sort_by_size"
         android:title="Inventario" />
+    <item
+        android:id="@+id/nav_audit_reports"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="Reportes de Auditoría" />
         
     <item android:title="Administración">
         <menu>

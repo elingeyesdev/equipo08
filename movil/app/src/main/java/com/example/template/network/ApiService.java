@@ -67,6 +67,9 @@ public interface ApiService {
     @POST("ajustes")
     Call<Void> createAjuste(@Body com.example.template.network.models.AjusteRequest request);
 
+    @retrofit2.http.GET("ajustes")
+    Call<java.util.List<com.example.template.network.models.Ajuste>> getAjustes();
+
     // EMPLEADOS (Users)
     @retrofit2.http.GET("users")
     Call<java.util.List<com.example.template.network.models.Empleado>> getEmpleados();

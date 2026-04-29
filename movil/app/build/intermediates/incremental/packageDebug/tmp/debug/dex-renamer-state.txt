@@ -1,4 +1,4 @@
-#Wed Apr 29 18:09:03 BOT 2026
+#Wed Apr 29 18:23:27 BOT 2026
 base.0=C\:\\Users\\Said\\OneDrive - Universidad Privada del Valle\\Desktop\\equipo08\\movil\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\Said\\OneDrive - Universidad Privada del Valle\\Desktop\\equipo08\\movil\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.2=C\:\\Users\\Said\\OneDrive - Universidad Privada del Valle\\Desktop\\equipo08\\movil\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
