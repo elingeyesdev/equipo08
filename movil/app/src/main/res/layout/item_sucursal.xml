@@ -23,7 +23,7 @@
             android:textColor="#2b3b55"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/btnDelete"
+            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginEnd="8dp"/>
@@ -36,7 +36,7 @@
             android:textColor="#5a6a85"
             android:textSize="14sp"
             android:layout_marginTop="4dp"
-            app:layout_constraintEnd_toStartOf="@+id/btnDelete"
+            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvNombre"
             android:layout_marginEnd="8dp"/>
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toStartOf="@+id/btnDelete"
+            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvDireccion"
             android:layout_marginEnd="8dp">
@@ -70,6 +70,18 @@
                 android:textStyle="bold"
                 android:textSize="14sp" />
         </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnEdit"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_edit"
+            android:tint="#1d4ed8"
+            android:contentDescription="Edit"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnDelete"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/btnDelete"

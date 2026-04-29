@@ -67,13 +67,9 @@ public class RegisterActivity extends AppCompatActivity {
                 btnRegister.setText("Comenzar a usar OmniMall");
 
                 if (response.isSuccessful() && response.body() != null) {
-                    AuthResponse auth = response.body();
-                    // Auto login
-                    sessionManager.createSession(auth.getTenant_id(), name, email);
-                    Toast.makeText(RegisterActivity.this, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Cuenta creada exitosamente. Inicia sesión.", Toast.LENGTH_LONG).show();
                     
-                    Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                    // Clear whole stack
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();

@@ -21,6 +21,9 @@ public interface ApiService {
     @POST("sucursales")
     Call<com.example.template.network.models.Sucursal> createSucursal(@Body com.example.template.network.models.Sucursal sucursal);
 
+    @retrofit2.http.PUT("sucursales/{id}")
+    Call<com.example.template.network.models.Sucursal> updateSucursal(@retrofit2.http.Path("id") String id, @Body com.example.template.network.models.Sucursal sucursal);
+
     @retrofit2.http.DELETE("sucursales/{id}")
     Call<Void> deleteSucursal(@retrofit2.http.Path("id") String id);
 
@@ -38,6 +41,9 @@ public interface ApiService {
 
     @POST("productos")
     Call<com.example.template.network.models.Producto> createProducto(@Body com.example.template.network.models.Producto producto);
+
+    @retrofit2.http.PUT("productos/{id}")
+    Call<com.example.template.network.models.Producto> updateProducto(@retrofit2.http.Path("id") String id, @Body com.example.template.network.models.Producto producto);
 
     @retrofit2.http.DELETE("productos/{id}")
     Call<Void> deleteProducto(@retrofit2.http.Path("id") String id);
@@ -58,23 +64,23 @@ public interface ApiService {
     @retrofit2.http.GET("stock")
     Call<java.util.List<com.example.template.network.models.Stock>> getStock();
 
-    // EMPLEADOS
-    @retrofit2.http.GET("empleados")
+    // EMPLEADOS (Users)
+    @retrofit2.http.GET("users")
     Call<java.util.List<com.example.template.network.models.Empleado>> getEmpleados();
 
-    @POST("empleados")
+    @POST("users")
     Call<com.example.template.network.models.Empleado> createEmpleado(@Body com.example.template.network.models.Empleado empleado);
 
-    @retrofit2.http.PUT("empleados/{id}")
+    @retrofit2.http.PUT("users/{id}")
     Call<com.example.template.network.models.Empleado> updateEmpleado(@retrofit2.http.Path("id") String id, @Body com.example.template.network.models.Empleado empleado);
 
-    @retrofit2.http.DELETE("empleados/{id}")
+    @retrofit2.http.DELETE("users/{id}")
     Call<Void> deleteEmpleado(@retrofit2.http.Path("id") String id);
 
     // PERMISOS
-    @retrofit2.http.GET("permisos")
+    @retrofit2.http.GET("users/permissions")
     Call<java.util.List<com.example.template.network.models.PermisosRoles>> getPermisos();
 
-    @retrofit2.http.PUT("permisos/{rol}")
-    Call<com.example.template.network.models.PermisosRoles> updatePermisos(@retrofit2.http.Path("rol") String rol, @Body com.example.template.network.models.PermisosRoles permisos);
+    @retrofit2.http.PUT("users/permissions")
+    Call<com.example.template.network.models.PermisosRoles> updatePermisos(@Body com.example.template.network.models.PermisosRoles permisos);
 }

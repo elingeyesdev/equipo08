@@ -143,7 +143,11 @@ public class SourcingFragment extends Fragment {
             public void onResponse(Call<List<Sucursal>> call, Response<List<Sucursal>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     sucursalesList.clear();
-                    sucursalesList.addAll(response.body());
+                    for (Sucursal s : response.body()) {
+                        if (s.isActive()) {
+                            sucursalesList.add(s);
+                        }
+                    }
                     if (getContext() != null) {
                         ArrayAdapter<Sucursal> sucAdapter = new ArrayAdapter<>(
                             getContext(), android.R.layout.simple_spinner_item, sucursalesList

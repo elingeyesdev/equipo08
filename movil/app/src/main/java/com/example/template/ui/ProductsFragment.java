@@ -44,6 +44,7 @@ public class ProductsFragment extends Fragment {
     private ProductoAdapter adapter;
     private ApiService apiService;
     private boolean isFormVisible = false;
+    private Producto editingProducto = null;
 
     private List<Proveedor> proveedoresList = new ArrayList<>();
 
@@ -80,14 +81,29 @@ public class ProductsFragment extends Fragment {
         etPrecioVenta.addTextChangedListener(textWatcher);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new ProductoAdapter(new ArrayList<>(), this::confirmDelete);
+        adapter = new ProductoAdapter(new ArrayList<>(), new ProductoAdapter.OnActionClickListener() {
+            @Override
+            public void onDeleteClick(Producto producto) {
+                confirmDelete(producto);
+            }
+
+            @Override
+            public void onEditClick(Producto producto) {
+                editProducto(producto);
+            }
+        });
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
-        btnToggleForm.setOnClickListener(v -> toggleForm());
+        btnToggleForm.setOnClickListener(v -> toggleForm(false));
         btnGuardar.setOnClickListener(v -> saveProducto());
 
+        // Default hide
+        btnToggleForm.setVisibility(View.GONE);
+        adapter.setCanManage(false);
+
+        loadPermissions();
         loadProductos();
         loadProveedoresToSpinner();
         
@@ -115,8 +131,14 @@ public class ProductsFragment extends Fragment {
         }
     }
 
-    private void toggleForm() {
-        isFormVisible = !isFormVisible;
+    private void toggleForm(boolean fromEdit) {
+        if (!fromEdit) {
+            editingProducto = null;
+            etName.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText("");
+            btnGuardar.setText("Nuevo Artículo");
+        }
+        
+        isFormVisible = !isFormVisible || fromEdit;
         if (isFormVisible) {
             cardForm.setVisibility(View.VISIBLE);
             btnToggleForm.setText("X Cancelar");
@@ -126,6 +148,67 @@ public class ProductsFragment extends Fragment {
             btnToggleForm.setText("Nuevo Artículo");
             btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
         }
+    }
+
+    private void editProducto(Producto producto) {
+        editingProducto = producto;
+        etName.setText(producto.getName());
+        etSku.setText(producto.getSku());
+        etPrecioCoste.setText(String.valueOf(producto.getPrecioCosto()));
+        etPrecioVenta.setText(String.valueOf(producto.getPrecioVenta()));
+        btnGuardar.setText("Actualizar Artículo");
+        
+        // Categoria
+        if (producto.getCategory() != null) {
+            ArrayAdapter<String> catAdapter = (ArrayAdapter<String>) spinnerCategoria.getAdapter();
+            for (int i = 0; i < catAdapter.getCount(); i++) {
+                if (catAdapter.getItem(i).equalsIgnoreCase(producto.getCategory())) {
+                    spinnerCategoria.setSelection(i);
+                    break;
+                }
+            }
+        }
+        
+        // Proveedor
+        if (producto.getProveedorId() != null) {
+            for (int i = 0; i < proveedoresList.size(); i++) {
+                if (proveedoresList.get(i).getId().equals(producto.getProveedorId())) {
+                    spinnerProveedor.setSelection(i);
+                    break;
+                }
+            }
+        }
+        
+        if (!isFormVisible) {
+            toggleForm(true);
+        }
+    }
+
+    private void loadPermissions() {
+        String role = new com.example.template.utils.SessionManager(getContext()).getRole();
+        if ("OWNER".equalsIgnoreCase(role)) {
+            adapter.setCanManage(true);
+            btnToggleForm.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        apiService.getPermisos().enqueue(new Callback<List<com.example.template.network.models.PermisosRoles>>() {
+            @Override
+            public void onResponse(Call<List<com.example.template.network.models.PermisosRoles>> call, Response<List<com.example.template.network.models.PermisosRoles>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    for (com.example.template.network.models.PermisosRoles pr : response.body()) {
+                        if (pr.getRole().equalsIgnoreCase(role)) {
+                            boolean canManage = pr.isCatalogoGestionar();
+                            btnToggleForm.setVisibility(canManage ? View.VISIBLE : View.GONE);
+                            adapter.setCanManage(canManage);
+                            break;
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<List<com.example.template.network.models.PermisosRoles>> call, Throwable t) { }
+        });
     }
 
     private void loadProductos() {
@@ -180,24 +263,43 @@ public class ProductsFragment extends Fragment {
         double venta = Double.parseDouble(ventaStr);
 
         Producto request = new Producto(name, sku, cat, coste, venta, selectedProv.getId());
-        apiService.createProducto(request).enqueue(new Callback<Producto>() {
-            @Override
-            public void onResponse(Call<Producto> call, Response<Producto> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Producto guardado", Toast.LENGTH_SHORT).show();
-                    etName.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText("");
-                    toggleForm();
-                    loadProductos(); 
-                } else {
-                    Toast.makeText(getContext(), "Error al guardar", Toast.LENGTH_SHORT).show();
+        
+        if (editingProducto != null) {
+            apiService.updateProducto(editingProducto.getId(), request).enqueue(new Callback<Producto>() {
+                @Override
+                public void onResponse(Call<Producto> call, Response<Producto> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Producto actualizado", Toast.LENGTH_SHORT).show();
+                        editingProducto = null;
+                        toggleForm(false);
+                        loadProductos(); 
+                    } else {
+                        Toast.makeText(getContext(), "Error al actualizar", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-
-            @Override
-            public void onFailure(Call<Producto> call, Throwable t) {
-                Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<Producto> call, Throwable t) {
+                    Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            apiService.createProducto(request).enqueue(new Callback<Producto>() {
+                @Override
+                public void onResponse(Call<Producto> call, Response<Producto> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Producto guardado", Toast.LENGTH_SHORT).show();
+                        toggleForm(false);
+                        loadProductos(); 
+                    } else {
+                        Toast.makeText(getContext(), "Error al guardar", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                @Override
+                public void onFailure(Call<Producto> call, Throwable t) {
+                    Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
     private void confirmDelete(Producto producto) {
         if (getContext() == null) return;

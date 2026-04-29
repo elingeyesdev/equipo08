@@ -129,6 +129,16 @@ public class PermisosFragment extends Fragment {
         }
     }
 
+    private void setSwitchSafe(Map<String, Switch> map, String key, boolean value) {
+        Switch sw = map.get(key);
+        if (sw != null) sw.setChecked(value);
+    }
+    
+    private boolean getSwitchSafe(Map<String, Switch> map, String key) {
+        Switch sw = map.get(key);
+        return sw != null && sw.isChecked();
+    }
+
     private void loadPermisos() {
         apiService.getPermisos().enqueue(new Callback<List<PermisosRoles>>() {
             @Override
@@ -136,19 +146,26 @@ public class PermisosFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     for (PermisosRoles pr : response.body()) {
                         Map<String, Switch> targetSwitches = null;
-                        if ("SUPERVISOR".equalsIgnoreCase(pr.getRol())) {
+                        if ("SUPERVISOR".equalsIgnoreCase(pr.getRole())) {
                             targetSwitches = supervisorSwitches;
-                        } else if ("VENDEDOR".equalsIgnoreCase(pr.getRol())) {
+                        } else if ("VENDEDOR".equalsIgnoreCase(pr.getRole())) {
                             targetSwitches = vendedorSwitches;
                         }
 
-                        if (targetSwitches != null && pr.getPermisos() != null) {
-                            for (Map.Entry<String, Boolean> entry : pr.getPermisos().entrySet()) {
-                                Switch sw = targetSwitches.get(entry.getKey());
-                                if (sw != null) {
-                                    sw.setChecked(entry.getValue());
-                                }
-                            }
+                        if (targetSwitches != null) {
+                            setSwitchSafe(targetSwitches, "Consultar Directorio Geográfico", pr.isSucursalesVer());
+                            setSwitchSafe(targetSwitches, "Control de Alta, Edición y Cierre", pr.isSucursalesGestionar());
+                            
+                            setSwitchSafe(targetSwitches, "Visualización Global de Productos", pr.isCatalogoVer());
+                            setSwitchSafe(targetSwitches, "Creación y Alteración de Precios", pr.isCatalogoGestionar());
+                            
+                            setSwitchSafe(targetSwitches, "Inspeccionar Historial de Accesos", pr.isSourcingVer());
+                            setSwitchSafe(targetSwitches, "Registrar Nuevos Lotes y Costos", pr.isSourcingGestionar());
+                            
+                            setSwitchSafe(targetSwitches, "Visualización de Cantidades por Sucursal", pr.isInventarioVer());
+                            
+                            setSwitchSafe(targetSwitches, "Consultar Organigrama Interno", pr.isUsuariosVer());
+                            setSwitchSafe(targetSwitches, "Contratar y Desvincular Personal", pr.isUsuariosGestionar());
                         }
                     }
                 }
@@ -164,13 +181,24 @@ public class PermisosFragment extends Fragment {
     }
 
     private void savePermisos(String rol, Map<String, Switch> switchesMap) {
-        Map<String, Boolean> permisos = new HashMap<>();
-        for (Map.Entry<String, Switch> entry : switchesMap.entrySet()) {
-            permisos.put(entry.getKey(), entry.getValue().isChecked());
-        }
+        PermisosRoles req = new PermisosRoles();
+        req.setRole(rol);
+        
+        req.setSucursalesVer(getSwitchSafe(switchesMap, "Consultar Directorio Geográfico"));
+        req.setSucursalesGestionar(getSwitchSafe(switchesMap, "Control de Alta, Edición y Cierre"));
+        
+        req.setCatalogoVer(getSwitchSafe(switchesMap, "Visualización Global de Productos"));
+        req.setCatalogoGestionar(getSwitchSafe(switchesMap, "Creación y Alteración de Precios"));
+        
+        req.setSourcingVer(getSwitchSafe(switchesMap, "Inspeccionar Historial de Accesos"));
+        req.setSourcingGestionar(getSwitchSafe(switchesMap, "Registrar Nuevos Lotes y Costos"));
+        
+        req.setInventarioVer(getSwitchSafe(switchesMap, "Visualización de Cantidades por Sucursal"));
+        
+        req.setUsuariosVer(getSwitchSafe(switchesMap, "Consultar Organigrama Interno"));
+        req.setUsuariosGestionar(getSwitchSafe(switchesMap, "Contratar y Desvincular Personal"));
 
-        PermisosRoles req = new PermisosRoles(rol, permisos);
-        apiService.updatePermisos(rol, req).enqueue(new Callback<PermisosRoles>() {
+        apiService.updatePermisos(req).enqueue(new Callback<PermisosRoles>() {
             @Override
             public void onResponse(Call<PermisosRoles> call, Response<PermisosRoles> response) {
                 if (response.isSuccessful()) {

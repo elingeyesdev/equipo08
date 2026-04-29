@@ -5,6 +5,7 @@ public class Sucursal {
     private String name;
     private String address;
     private String phone;
+    @com.google.gson.annotations.SerializedName("isActive")
     private boolean isActive;
 
     public Sucursal(String name, String address, String phone, boolean isActive) {

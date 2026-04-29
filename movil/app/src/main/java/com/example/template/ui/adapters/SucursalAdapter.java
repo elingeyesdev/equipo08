@@ -16,15 +16,22 @@ import java.util.List;
 public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHolder> {
 
     private List<Sucursal> list;
-    private OnDeleteClickListener deleteListener;
+    private OnActionClickListener actionListener;
+    private boolean canManage = true;
 
-    public interface OnDeleteClickListener {
+    public interface OnActionClickListener {
         void onDeleteClick(Sucursal sucursal);
+        void onEditClick(Sucursal sucursal);
     }
 
-    public SucursalAdapter(List<Sucursal> list, OnDeleteClickListener listener) {
+    public SucursalAdapter(List<Sucursal> list, OnActionClickListener listener) {
         this.list = list;
-        this.deleteListener = listener;
+        this.actionListener = listener;
+    }
+
+    public void setCanManage(boolean canManage) {
+        this.canManage = canManage;
+        notifyDataSetChanged();
     }
 
     public void updateData(List<Sucursal> newList) {
@@ -54,9 +61,23 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
             holder.tvEstado.setTextColor(Color.parseColor("#ef4444")); // Red
         }
 
+        if (canManage) {
+            holder.btnEdit.setVisibility(View.VISIBLE);
+            holder.btnDelete.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnEdit.setVisibility(View.GONE);
+            holder.btnDelete.setVisibility(View.GONE);
+        }
+
         holder.btnDelete.setOnClickListener(v -> {
-            if (deleteListener != null) {
-                deleteListener.onDeleteClick(s);
+            if (actionListener != null) {
+                actionListener.onDeleteClick(s);
+            }
+        });
+        
+        holder.btnEdit.setOnClickListener(v -> {
+            if (actionListener != null) {
+                actionListener.onEditClick(s);
             }
         });
     }
@@ -68,7 +89,7 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvNombre, tvDireccion, tvTelefono, tvEstado;
-        ImageButton btnDelete;
+        ImageButton btnDelete, btnEdit;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvNombre = itemView.findViewById(R.id.tvNombre);
@@ -76,6 +97,7 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
             tvTelefono = itemView.findViewById(R.id.tvTelefono);
             tvEstado = itemView.findViewById(R.id.tvEstado);
             btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnEdit = itemView.findViewById(R.id.btnEdit);
         }
     }
 }

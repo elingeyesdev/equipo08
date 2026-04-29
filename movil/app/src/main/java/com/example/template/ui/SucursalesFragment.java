@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -35,12 +36,14 @@ public class SucursalesFragment extends Fragment {
 
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
-    private EditText etName, etAddress, etPhone;
+    private EditText etName, etAddress;
+    private AutoCompleteTextView etPhone;
     private Spinner spinnerStatus;
     private RecyclerView recyclerView;
     private SucursalAdapter adapter;
     private ApiService apiService;
     private boolean isFormVisible = false;
+    private Sucursal editingSucursal = null;
 
     @Nullable
     @Override
@@ -67,20 +70,69 @@ public class SucursalesFragment extends Fragment {
         }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new SucursalAdapter(new ArrayList<>(), this::confirmDelete);
+        adapter = new SucursalAdapter(new ArrayList<>(), new SucursalAdapter.OnActionClickListener() {
+            @Override
+            public void onDeleteClick(Sucursal sucursal) {
+                confirmDelete(sucursal);
+            }
+
+            @Override
+            public void onEditClick(Sucursal sucursal) {
+                editSucursal(sucursal);
+            }
+        });
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
-        btnToggleForm.setOnClickListener(v -> toggleForm());
+        btnToggleForm.setOnClickListener(v -> toggleForm(false));
         btnGuardar.setOnClickListener(v -> saveSucursal());
 
+        // Default hide
+        btnToggleForm.setVisibility(View.GONE);
+        adapter.setCanManage(false);
+
+        loadPermissions();
         loadSucursales();
         return view;
     }
 
-    private void toggleForm() {
-        isFormVisible = !isFormVisible;
+    private void loadPermissions() {
+        String role = new com.example.template.utils.SessionManager(getContext()).getRole();
+        if ("OWNER".equalsIgnoreCase(role)) {
+            adapter.setCanManage(true);
+            btnToggleForm.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        apiService.getPermisos().enqueue(new Callback<List<com.example.template.network.models.PermisosRoles>>() {
+            @Override
+            public void onResponse(Call<List<com.example.template.network.models.PermisosRoles>> call, Response<List<com.example.template.network.models.PermisosRoles>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    for (com.example.template.network.models.PermisosRoles pr : response.body()) {
+                        if (pr.getRole().equalsIgnoreCase(role)) {
+                            boolean canManage = pr.isSucursalesGestionar();
+                            btnToggleForm.setVisibility(canManage ? View.VISIBLE : View.GONE);
+                            adapter.setCanManage(canManage);
+                            break;
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<List<com.example.template.network.models.PermisosRoles>> call, Throwable t) { }
+        });
+    }
+
+    private void toggleForm(boolean fromEdit) {
+        if (!fromEdit) {
+            editingSucursal = null;
+            etName.setText(""); etAddress.setText(""); etPhone.setText("");
+            spinnerStatus.setSelection(0);
+            btnGuardar.setText("Crear Sucursal Físicamente");
+        }
+        
+        isFormVisible = !isFormVisible || fromEdit;
         if (isFormVisible) {
             cardForm.setVisibility(View.VISIBLE);
             btnToggleForm.setText("X Cancelar");
@@ -92,12 +144,38 @@ public class SucursalesFragment extends Fragment {
         }
     }
 
+    private void editSucursal(Sucursal sucursal) {
+        editingSucursal = sucursal;
+        etName.setText(sucursal.getName());
+        etAddress.setText(sucursal.getAddress() != null ? sucursal.getAddress() : "");
+        etPhone.setText(sucursal.getPhone() != null ? sucursal.getPhone() : "");
+        spinnerStatus.setSelection(sucursal.isActive() ? 0 : 1);
+        btnGuardar.setText("Actualizar Sucursal");
+        
+        if (!isFormVisible) {
+            toggleForm(true);
+        }
+    }
+
     private void loadSucursales() {
         apiService.getSucursales().enqueue(new Callback<List<Sucursal>>() {
             @Override
             public void onResponse(Call<List<Sucursal>> call, Response<List<Sucursal>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    adapter.updateData(response.body());
+                    List<Sucursal> list = response.body();
+                    adapter.updateData(list);
+                    
+                    // Setup AutoComplete for phones
+                    List<String> phones = new ArrayList<>();
+                    for (Sucursal s : list) {
+                        if (s.getPhone() != null && !s.getPhone().isEmpty() && !phones.contains(s.getPhone())) {
+                            phones.add(s.getPhone());
+                        }
+                    }
+                    if (getContext() != null) {
+                        ArrayAdapter<String> phoneAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, phones);
+                        etPhone.setAdapter(phoneAdapter);
+                    }
                 }
             }
 
@@ -119,6 +197,11 @@ public class SucursalesFragment extends Fragment {
             return;
         }
 
+        if (!phone.isEmpty() && !phone.matches("^[0-9]{8}$")) {
+            etPhone.setError("El teléfono debe tener exactamente 8 dígitos");
+            return;
+        }
+
         Sucursal request = new Sucursal(
                 name,
                 address.isEmpty() ? null : address,
@@ -126,25 +209,41 @@ public class SucursalesFragment extends Fragment {
                 isActive
         );
 
-        apiService.createSucursal(request).enqueue(new Callback<Sucursal>() {
-            @Override
-            public void onResponse(Call<Sucursal> call, Response<Sucursal> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Sucursal creada", Toast.LENGTH_SHORT).show();
-                    etName.setText(""); etAddress.setText(""); etPhone.setText("");
-                    spinnerStatus.setSelection(0);
-                    toggleForm();
-                    loadSucursales(); // refresh
-                } else {
-                    Toast.makeText(getContext(), "Error al crear", Toast.LENGTH_SHORT).show();
+        if (editingSucursal != null) {
+            apiService.updateSucursal(editingSucursal.getId(), request).enqueue(new Callback<Sucursal>() {
+                @Override
+                public void onResponse(Call<Sucursal> call, Response<Sucursal> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Sucursal actualizada", Toast.LENGTH_SHORT).show();
+                        toggleForm(false);
+                        loadSucursales(); 
+                    } else {
+                        Toast.makeText(getContext(), "Error al actualizar", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-
-            @Override
-            public void onFailure(Call<Sucursal> call, Throwable t) {
-                Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<Sucursal> call, Throwable t) {
+                    Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            apiService.createSucursal(request).enqueue(new Callback<Sucursal>() {
+                @Override
+                public void onResponse(Call<Sucursal> call, Response<Sucursal> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Sucursal creada", Toast.LENGTH_SHORT).show();
+                        toggleForm(false);
+                        loadSucursales(); // refresh
+                    } else {
+                        Toast.makeText(getContext(), "Error al crear", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                @Override
+                public void onFailure(Call<Sucursal> call, Throwable t) {
+                    Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void confirmDelete(Sucursal sucursal) {

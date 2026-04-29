@@ -109,12 +109,18 @@
                 app:boxCornerRadiusTopStart="8dp"
                 app:boxCornerRadiusTopEnd="8dp"
                 app:boxStrokeWidth="0dp">
-                <com.google.android.material.textfield.TextInputEditText
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
                     android:id="@+id/etPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="56dp"
+                    android:paddingTop="22dp"
+                    android:paddingBottom="14dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
                     android:hint="Teléfono / Contacto"
                     android:inputType="phone"
+                    android:completionThreshold="1"
                     android:textColor="#2b3b55" />
             </com.google.android.material.textfield.TextInputLayout>
 

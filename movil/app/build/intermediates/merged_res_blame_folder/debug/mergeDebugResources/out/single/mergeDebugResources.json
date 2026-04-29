@@ -20,12 +20,12 @@
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\menu\\toolbar_menu.xml"
     },
     {
-        "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\mipmap-anydpi-v26\\ic_launcher.xml"
-    },
-    {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\layout_item_sucursal.xml.flat",
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\layout\\item_sucursal.xml"
+    },
+    {
+        "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\mipmap-anydpi-v26\\ic_launcher.xml"
     },
     {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\layout_item_proveedor.xml.flat",
@@ -34,6 +34,10 @@
     {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\layout_item_lote.xml.flat",
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\layout\\item_lote.xml"
+    },
+    {
+        "merged": "com.example.template.app-debug-30:/layout_fragment_sucursales.xml.flat",
+        "source": "com.example.template.app-main-32:/layout/fragment_sucursales.xml"
     },
     {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\drawable_ic_launcher_foreground.xml.flat",
@@ -56,8 +60,16 @@
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\layout\\item_stock.xml"
     },
     {
+        "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\layout_item_empleado.xml.flat",
+        "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\layout\\item_empleado.xml"
+    },
+    {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\menu_drawer_menu.xml.flat",
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\menu\\drawer_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\layout_fragment_permisos.xml.flat",
+        "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\layout\\fragment_permisos.xml"
     },
     {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\layout_fragment_products.xml.flat",
@@ -72,8 +84,8 @@
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\layout\\item_producto.xml"
     },
     {
-        "merged": "com.example.template.app-debug-30:/layout_fragment_permisos.xml.flat",
-        "source": "com.example.template.app-main-32:/layout/fragment_permisos.xml"
+        "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\layout_fragment_empleados.xml.flat",
+        "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\layout\\fragment_empleados.xml"
     },
     {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\layout_activity_login.xml.flat",
@@ -100,16 +112,8 @@
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\xml\\data_extraction_rules.xml"
     },
     {
-        "merged": "com.example.template.app-debug-30:/layout_fragment_empleados.xml.flat",
-        "source": "com.example.template.app-main-32:/layout/fragment_empleados.xml"
-    },
-    {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\xml_backup_rules.xml.flat",
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\xml\\backup_rules.xml"
-    },
-    {
-        "merged": "com.example.template.app-debug-30:/menu_drawer_menu.xml.flat",
-        "source": "com.example.template.app-main-32:/menu/drawer_menu.xml"
     },
     {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
@@ -130,10 +134,6 @@
     {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\drawable_edit_text_bg.xml.flat",
         "source": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-main-32:\\drawable\\edit_text_bg.xml"
-    },
-    {
-        "merged": "com.example.template.app-debug-30:/layout_item_empleado.xml.flat",
-        "source": "com.example.template.app-main-32:/layout/item_empleado.xml"
     },
     {
         "merged": "C:\\Users\\Said\\.gradle\\daemon\\9.3.1\\com.example.template.app-debug-30:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",

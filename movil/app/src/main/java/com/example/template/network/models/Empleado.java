@@ -5,26 +5,26 @@ import com.google.gson.annotations.SerializedName;
 public class Empleado {
     private String id;
     
-    @SerializedName("nombreCompleto")
+    @SerializedName("name")
     private String nombreCompleto;
     
-    @SerializedName("correo")
+    @SerializedName("email")
     private String correo;
     
     @SerializedName("password")
     private String password;
     
-    @SerializedName("rol")
+    @SerializedName("role")
     private String rol;
     
-    @SerializedName("sucursalId")
+    @SerializedName("sucursal_id")
     private String sucursalId;
     
-    @SerializedName("sucursalNombre")
-    private String sucursalNombre;
+    @SerializedName("sucursal")
+    private Sucursal nestedSucursal;
     
-    @SerializedName("estado")
-    private String estado;
+    @SerializedName("isActive")
+    private boolean isActive;
 
     public Empleado() {}
 
@@ -34,7 +34,7 @@ public class Empleado {
         this.password = password;
         this.rol = rol;
         this.sucursalId = sucursalId;
-        this.estado = "Activo";
+        this.isActive = true;
     }
 
     public String getId() { return id; }
@@ -55,9 +55,18 @@ public class Empleado {
     public String getSucursalId() { return sucursalId; }
     public void setSucursalId(String sucursalId) { this.sucursalId = sucursalId; }
     
-    public String getSucursalNombre() { return sucursalNombre; }
-    public void setSucursalNombre(String sucursalNombre) { this.sucursalNombre = sucursalNombre; }
+    public String getSucursalNombre() { 
+        return nestedSucursal != null ? nestedSucursal.getName() : null; 
+    }
+    public void setSucursalNombre(String sucursalNombre) { 
+        if (this.nestedSucursal == null) {
+            this.nestedSucursal = new Sucursal(sucursalNombre, null, null, true);
+        }
+    }
     
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public String getEstado() { return isActive ? "Activo" : "Inactivo"; }
+    public void setEstado(String estado) { this.isActive = "Activo".equalsIgnoreCase(estado); }
+    
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
 }

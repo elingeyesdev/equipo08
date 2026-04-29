@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponse auth = response.body();
-                    sessionManager.createSession(auth.getTenant_id(), auth.getName(), email);
+                    sessionManager.createSession(auth.getTenant_id(), auth.getName(), email, auth.getAccessToken(), auth.getRole());
                     Toast.makeText(LoginActivity.this, "Bienvenido a " + auth.getName(), Toast.LENGTH_SHORT).show();
                     goToMain();
                 } else {

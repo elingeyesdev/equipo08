@@ -165,7 +165,12 @@ public class EmpleadosFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Sucursal>> call, Response<List<Sucursal>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    sucursalesList = response.body();
+                    sucursalesList = new ArrayList<>();
+                    for (Sucursal s : response.body()) {
+                        if (s.isActive()) {
+                            sucursalesList.add(s);
+                        }
+                    }
                     
                     List<String> sucNames = new ArrayList<>();
                     List<String> filterSucNames = new ArrayList<>();
@@ -252,8 +257,8 @@ public class EmpleadosFragment extends Fragment {
         String rol = spinnerRol.getSelectedItem() != null ? spinnerRol.getSelectedItem().toString() : "VENDEDOR";
         
         int sucIndex = spinnerSucursal.getSelectedItemPosition();
-        String sucursalId = "";
-        String sucursalNombre = "";
+        String sucursalId = null;
+        String sucursalNombre = null;
         if (sucIndex >= 0 && sucIndex < sucursalesList.size()) {
             sucursalId = sucursalesList.get(sucIndex).getId();
             sucursalNombre = sucursalesList.get(sucIndex).getName();
@@ -263,8 +268,11 @@ public class EmpleadosFragment extends Fragment {
         if (email.isEmpty()) { etEmail.setError("Requerido"); return; }
         if (editingEmpleado == null && password.isEmpty()) { etPassword.setError("Requerido"); return; }
 
+        if (password.isEmpty()) {
+            password = null;
+        }
+
         Empleado request = new Empleado(nombre, email, password, rol, sucursalId);
-        request.setSucursalNombre(sucursalNombre);
         
         if (editingEmpleado != null) {
             request.setId(editingEmpleado.getId());

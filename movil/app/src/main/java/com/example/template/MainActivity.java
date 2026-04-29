@@ -24,6 +24,16 @@ import com.example.template.utils.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
 
+import android.view.Menu;
+import android.util.Log;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import com.example.template.network.ApiClient;
+import com.example.template.network.ApiService;
+import com.example.template.network.models.PermisosRoles;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private SessionManager sessionManager;
     private MaterialToolbar toolbar;
@@ -75,6 +85,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .replace(R.id.fragment_container, new HomeFragment())
                     .commit();
         }
+
+        applyPermissions();
+    }
+
+    private void applyPermissions() {
+        String role = sessionManager.getRole();
+        Menu menu = navigationView.getMenu();
+
+        if ("OWNER".equalsIgnoreCase(role)) {
+            // Owner sees everything, nothing to hide
+            return;
+        }
+
+        // Default hide administration stuff for non-owners
+        menu.findItem(R.id.nav_permisos).setVisible(false);
+
+        ApiClient.getClient(this).create(ApiService.class).getPermisos().enqueue(new Callback<List<PermisosRoles>>() {
+            @Override
+            public void onResponse(Call<List<PermisosRoles>> call, Response<List<PermisosRoles>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    for (PermisosRoles pr : response.body()) {
+                        if (pr.getRole().equalsIgnoreCase(role)) {
+                            menu.findItem(R.id.nav_providers).setVisible(pr.isCatalogoVer());
+                            menu.findItem(R.id.nav_products).setVisible(pr.isCatalogoVer());
+                            menu.findItem(R.id.nav_sucursales).setVisible(pr.isSucursalesVer());
+                            menu.findItem(R.id.nav_sourcing).setVisible(pr.isSourcingVer());
+                            menu.findItem(R.id.nav_stock).setVisible(pr.isInventarioVer());
+                            menu.findItem(R.id.nav_empleados).setVisible(pr.isUsuariosVer());
+                            break;
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<List<PermisosRoles>> call, Throwable t) {
+                Log.e("MainActivity", "Error fetching permissions");
+            }
+        });
     }
 
     @Override

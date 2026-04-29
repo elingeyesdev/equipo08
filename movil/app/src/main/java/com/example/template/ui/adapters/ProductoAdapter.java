@@ -15,15 +15,22 @@ import java.util.List;
 public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHolder> {
 
     private List<Producto> list;
-    private OnDeleteClickListener deleteListener;
+    private OnActionClickListener actionListener;
+    private boolean canManage = true;
 
-    public interface OnDeleteClickListener {
+    public interface OnActionClickListener {
         void onDeleteClick(Producto producto);
+        void onEditClick(Producto producto);
     }
 
-    public ProductoAdapter(List<Producto> list, OnDeleteClickListener listener) {
+    public ProductoAdapter(List<Producto> list, OnActionClickListener listener) {
         this.list = list;
-        this.deleteListener = listener;
+        this.actionListener = listener;
+    }
+
+    public void setCanManage(boolean canManage) {
+        this.canManage = canManage;
+        notifyDataSetChanged();
     }
 
     public void updateData(List<Producto> newList) {
@@ -51,9 +58,23 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHo
             holder.tvProveedor.setText("Proveedor: N/A");
         }
 
+        if (canManage) {
+            holder.btnEdit.setVisibility(View.VISIBLE);
+            holder.btnDelete.setVisibility(View.VISIBLE);
+        } else {
+            holder.btnEdit.setVisibility(View.GONE);
+            holder.btnDelete.setVisibility(View.GONE);
+        }
+
         holder.btnDelete.setOnClickListener(v -> {
-            if (deleteListener != null) {
-                deleteListener.onDeleteClick(p);
+            if (actionListener != null) {
+                actionListener.onDeleteClick(p);
+            }
+        });
+        
+        holder.btnEdit.setOnClickListener(v -> {
+            if (actionListener != null) {
+                actionListener.onEditClick(p);
             }
         });
     }
@@ -65,13 +86,14 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvSku, tvNombre, tvProveedor;
-        ImageButton btnDelete;
+        ImageButton btnDelete, btnEdit;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvSku = itemView.findViewById(R.id.tvSku);
             tvNombre = itemView.findViewById(R.id.tvNombre);
             tvProveedor = itemView.findViewById(R.id.tvProveedor);
             btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnEdit = itemView.findViewById(R.id.btnEdit);
         }
     }
 }
