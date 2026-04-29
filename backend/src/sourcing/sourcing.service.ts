@@ -5,6 +5,8 @@ import { LoteIngreso } from './lote-ingreso.entity';
 import { CreateLoteIngresoDto } from './dto/create-lote.dto';
 import { Stock } from '../stock/stock.entity';
 import { Producto } from '../productos/producto.entity';
+import { Sucursal } from '../sucursales/sucursal.entity';
+import { AjusteInventario } from '../ajustes/ajuste.entity';
 
 @Injectable()
 export class SourcingService {
@@ -24,12 +26,21 @@ export class SourcingService {
      
       const producto = await queryRunner.manager.findOne(Producto, { where: { id: dto.producto_id, tenant_id } });
       if (!producto) throw new NotFoundException('Producto no encontrado');
+
+      const sucursal = await queryRunner.manager.findOne(Sucursal, { where: { id: dto.sucursal_id, tenant_id } });
+      if (!sucursal) throw new NotFoundException('Sucursal no encontrada');
+      if (!sucursal.isActive) throw new BadRequestException(`La sucursal "${sucursal.name}" está inactiva o clausurada. No se pueden registrar ingresos en ella.`);
+
       if (producto.proveedor_id !== dto.proveedor_id) {
          throw new BadRequestException('No puedes ingresar un lote con un proveedor distinto al oficial del producto. Por favor actualiza el proveedor en el Catálogo si es necesario.');
       }
 
    
-      const lote = queryRunner.manager.create(LoteIngreso, { ...dto, tenant_id });
+      const lote = queryRunner.manager.create(LoteIngreso, { 
+        ...dto, 
+        tenant_id,
+        costoUnitarioSnapshot: producto.precioCosto 
+      });
       const loteGuardado = await queryRunner.manager.save(lote);
 
       await this.recalculateStock(queryRunner, tenant_id, dto.sucursal_id, dto.producto_id);
@@ -103,12 +114,26 @@ export class SourcingService {
   private async recalculateStock(queryRunner: any, tenant_id: string, sucursal_id: string, producto_id: string) {
     const stockRep = queryRunner.manager.getRepository(Stock);
     const loteRep = queryRunner.manager.getRepository(LoteIngreso);
+    const ajusteRep = queryRunner.manager.getRepository(AjusteInventario);
 
     const lotes = await loteRep.find({ where: { tenant_id, sucursal_id, producto_id } });
+    const ajustes = await ajusteRep.find({ where: { tenant_id, sucursal_id, producto_id } });
+
     let totalUnidades = 0;
+    let totalValorAdquisicion = 0;
 
     for (const lote of lotes) {
       totalUnidades += Number(lote.cantidad);
+      totalValorAdquisicion += Number(lote.cantidad) * Number(lote.costoUnitarioSnapshot || 0);
+    }
+
+    // Restar todas las mermas o ajustes físicos (Ajustes Anómalos)
+    for (const ajuste of ajustes) {
+       const gap = ajuste.cantidad_sistema - ajuste.cantidad_fisica;
+       if (gap > 0) {
+           totalUnidades -= gap;
+           totalValorAdquisicion -= Number(ajuste.valor_perdido || 0);
+       }
     }
 
     let stock = await stockRep.findOne({ where: { tenant_id, sucursal_id, producto_id } });
@@ -117,7 +142,7 @@ export class SourcingService {
     }
     
     stock.cantidadTotal = totalUnidades;
-    // CPP properties have been intentionally deprecated as pricing migrated directly to Producto Schema
+    stock.valorAdquisicion = totalValorAdquisicion;
     await stockRep.save(stock);
   }
 }

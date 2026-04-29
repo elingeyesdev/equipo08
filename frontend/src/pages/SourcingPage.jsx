@@ -13,6 +13,8 @@ export default function SourcingPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [filterProducto, setFilterProducto] = useState('ALL');
+  const [filterSucursal, setFilterSucursal] = useState('ALL');
   const [loteForm, setLoteForm] = useState({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1 });
   const toast = useToast();
 
@@ -134,7 +136,7 @@ export default function SourcingPage() {
                 <label>Sucursal / Almacén de Destino *</label>
                 <select required value={loteForm.sucursal_id} onChange={e => setLoteForm({...loteForm, sucursal_id: e.target.value})} disabled={editingId ? true : false}>
                   <option value="">Seleccione sucursal...</option>
-                  {sucursales.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  {sucursales.filter(s => s.isActive).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
 
@@ -173,6 +175,24 @@ export default function SourcingPage() {
         </div>
       )}
 
+      {/* Filter Bar */}
+      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '200px' }}>
+          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Filtrar Producto:</label>
+          <select value={filterProducto} onChange={e => setFilterProducto(e.target.value)} style={{ flex: 1, padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)' }}>
+            <option value="ALL">Todos los productos</option>
+            {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
+          </select>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: '200px' }}>
+          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Filtrar Sucursal:</label>
+          <select value={filterSucursal} onChange={e => setFilterSucursal(e.target.value)} style={{ flex: 1, padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)' }}>
+            <option value="ALL">Todas las sucursales</option>
+            {sucursales.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+        </div>
+      </div>
+
       {/* Table Section */}
       <div className="glass-container" style={{ padding: '0', overflow: 'hidden' }}>
         {loading ? <div style={{ padding: '3rem', textAlign: 'center' }}><Loader2 className="animate-spin" size={32} color="var(--accent-blue)" style={{ margin: '0 auto' }} /></div> : (
@@ -183,18 +203,30 @@ export default function SourcingPage() {
                 <th>Fecha Ingreso</th>
                 <th>Producto (SKU)</th>
                 <th>Proveedor Origen</th>
-                <th style={{ textAlign: 'center' }}>Unidades Ingresadas</th>
+                <th style={{ textAlign: 'center' }}>Unidades</th>
+                <th style={{ textAlign: 'center' }}>Costo U. (Capturado)</th>
+                <th style={{ textAlign: 'right' }}>Inversión Total</th>
                 <th style={{ textAlign: 'right', width: '80px' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {historial.length === 0 ? (
+              {(() => {
+                const filtered = historial.filter(h => {
+                  if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
+                  if (filterSucursal !== 'ALL' && h.sucursal_id !== filterSucursal) return false;
+                  return true;
+                });
+                if (filtered.length === 0) return (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                     Aún no hay entradas físicas registradas.
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                     No hay entradas que coincidan con los filtros seleccionados.
                   </td>
                 </tr>
-              ) : historial.map(h => (
+                );
+                return filtered.map(h => {
+                 const costoSnap = Number(h.costoUnitarioSnapshot || 0);
+                 const inversionTotal = costoSnap * h.cantidad;
+                 return (
                  <tr key={h.id}>
                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>#{h.id.split('-')[0]}</td>
                    <td>{new Date(h.fechaIngreso).toLocaleDateString()} {new Date(h.fechaIngreso).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
@@ -204,8 +236,10 @@ export default function SourcingPage() {
                    </td>
                    <td>{h.proveedor?.name || '---'}</td>
                    <td style={{ textAlign: 'center' }}>
-                     <span className="badge success" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>+ {h.cantidad} Unidades</span>
+                     <span className="badge success" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>+ {h.cantidad} U</span>
                    </td>
+                   <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Bs {costoSnap.toFixed(2)}</td>
+                   <td style={{ textAlign: 'right', fontWeight: '600', color: 'var(--primary-color)' }}>Bs {inversionTotal.toFixed(2)}</td>
                    <td style={{ textAlign: 'right' }}>
                     <button onClick={() => handleEdit(h)} style={{ padding: '0.25rem', background: 'none', color: 'var(--accent-blue)' }} title="Editar">
                       <Edit2 size={16} />
@@ -215,7 +249,9 @@ export default function SourcingPage() {
                     </button>
                   </td>
                  </tr>
-              ))}
+                 );
+              });
+              })()}
             </tbody>
           </table>
         )}

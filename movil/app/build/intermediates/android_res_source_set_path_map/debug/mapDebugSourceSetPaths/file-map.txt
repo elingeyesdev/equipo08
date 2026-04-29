@@ -1,0 +1,7 @@
+com.example.template.app-pngs-0 C:\Users\Said\OneDrive - Universidad Privada del Valle\Desktop\equipo08\movil\app\build\generated\res\pngs\debug
+com.example.template.app-updated_navigation_xml-1 C:\Users\Said\OneDrive - Universidad Privada del Valle\Desktop\equipo08\movil\app\build\generated\updated_navigation_xml\debug
+com.example.template.app-packageDebugResources-2 C:\Users\Said\OneDrive - Universidad Privada del Valle\Desktop\equipo08\movil\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.template.app-packageDebugResources-3 C:\Users\Said\OneDrive - Universidad Privada del Valle\Desktop\equipo08\movil\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.template.app-debug-4 C:\Users\Said\OneDrive - Universidad Privada del Valle\Desktop\equipo08\movil\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.example.template.app-debug-5 C:\Users\Said\OneDrive - Universidad Privada del Valle\Desktop\equipo08\movil\app\src\debug\res
+com.example.template.app-main-6 C:\Users\Said\OneDrive - Universidad Privada del Valle\Desktop\equipo08\movil\app\src\main\res

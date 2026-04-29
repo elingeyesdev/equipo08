@@ -20,6 +20,8 @@ export class Stock {
   @Column('int', { default: 0 })
   cantidadTotal: number;
 
+  @Column('decimal', { precision: 12, scale: 2, default: 0 })
+  valorAdquisicion: number;
 
   @UpdateDateColumn()
   ultimaActualizacion: Date;

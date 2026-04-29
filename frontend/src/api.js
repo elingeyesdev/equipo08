@@ -4,13 +4,25 @@ const api = axios.create({
   baseURL: 'http://localhost:3000/api',
 });
 
-
+// Interceptor para inyectar el Token
 api.interceptors.request.use((config) => {
-  const tenantId = localStorage.getItem('tenant_id');
-  if (tenantId) {
-    config.headers['x-tenant-id'] = tenantId;
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
   }
   return config;
 }, (error) => Promise.reject(error));
+
+// Interceptor para manejar errores globales (ej: token expirado)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && !error.config.url.includes('/auth/')) {
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

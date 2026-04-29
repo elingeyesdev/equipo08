@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="Resumen" />
+    <item
+        android:id="@+id/nav_providers"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Proveedores" />
+    <item
+        android:id="@+id/nav_sucursales"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Sucursales" />
+    <item
+        android:id="@+id/nav_products"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Catálogo" />
+    <item
+        android:id="@+id/nav_sourcing"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="Lotes (Sourcing)" />
+    <item
+        android:id="@+id/nav_stock"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Inventario" />
+        
+    <item android:title="Administración">
+        <menu>
+            <item
+                android:id="@+id/nav_empleados"
+                android:icon="@android:drawable/ic_menu_myplaces"
+                android:title="Empleados" />
+            <item
+                android:id="@+id/nav_permisos"
+                android:icon="@android:drawable/ic_menu_manage"
+                android:title="Permisos" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/nav_logout"
+        android:icon="@android:drawable/ic_lock_power_off"
+        android:title="Cerrar Sesión" />
+</menu>

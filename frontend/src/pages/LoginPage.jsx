@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useToast } from '../components/ToastContext';
 
-export default function LoginPage({ setTenantId }) {
+export default function LoginPage({ setAuthToken }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,14 +16,19 @@ export default function LoginPage({ setTenantId }) {
 
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { tenant_id, name } = response.data;
+      const { access_token, user } = response.data;
       
-      // Save in localStorage and state
-      localStorage.setItem('tenant_id', tenant_id);
-      localStorage.setItem('tenant_name', name);
-      setTenantId(tenant_id);
+      // Guardar todo en localStorage
+      localStorage.setItem('access_token', access_token);
+      localStorage.setItem('user_id', user.id);
+      localStorage.setItem('user_name', user.name);
+      localStorage.setItem('user_role', user.role);
+      localStorage.setItem('tenant_id', user.tenant_id);
+      localStorage.setItem('tenant_name', user.tenant_name);
       
-      toast.success(`Bienvenido a ${name}`);
+      setAuthToken(access_token);
+      
+      toast.success(`Bienvenido, ${user.name} (${user.tenant_name})`);
       navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Error al iniciar sesión');

@@ -1,15 +1,14 @@
-import { createParamDecorator, ExecutionContext, BadRequestException } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
 export const TenantId = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
-    const tenantId = request.headers['x-tenant-id'];
+    const user = request.user;
     
-    // Si no es el endpoint /api/docs y no tiene el header
-    if (!tenantId) {
-      throw new BadRequestException('Falta el header x-tenant-id en la petición HTTP.');
+    if (!user || !user.tenantId) {
+      throw new UnauthorizedException('No se pudo identificar el Tenant. Asegúrate de estar autenticado.');
     }
     
-    return tenantId;
+    return user.tenantId;
   },
 );

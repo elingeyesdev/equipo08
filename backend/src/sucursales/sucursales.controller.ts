@@ -2,15 +2,16 @@ import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common'
 import { SucursalesService } from './sucursales.service';
 import { CreateSucursalDto } from './dto/create-sucursal.dto';
 import { TenantId } from '../tenant/tenant-id.decorator';
-import { ApiTags, ApiHeader } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
+import { RequirePermission } from '../auth/decorators/permissions.decorator';
 
 @ApiTags('Sucursales')
-@ApiHeader({ name: 'x-tenant-id', required: true, description: 'ID del tenant' })
 @Controller('sucursales')
 export class SucursalesController {
   constructor(private readonly sucursalesService: SucursalesService) {}
 
   @Post()
+  @RequirePermission('sucursales.gestionar')
   create(
     @TenantId() tenantId: string,
     @Body() createSucursalDto: CreateSucursalDto,
@@ -19,11 +20,13 @@ export class SucursalesController {
   }
 
   @Get()
+  @RequirePermission('sucursales.ver')
   findAll(@TenantId() tenantId: string) {
     return this.sucursalesService.findAll(tenantId);
   }
 
   @Put(':id')
+  @RequirePermission('sucursales.gestionar')
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -33,6 +36,7 @@ export class SucursalesController {
   }
 
   @Delete(':id')
+  @RequirePermission('sucursales.gestionar')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.sucursalesService.remove(tenantId, id);
   }
