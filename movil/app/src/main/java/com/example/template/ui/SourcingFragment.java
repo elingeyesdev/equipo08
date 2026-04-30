@@ -22,6 +22,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.textfield.TextInputLayout;
 
 import com.example.template.R;
 import com.example.template.network.ApiClient;
@@ -45,7 +46,8 @@ public class SourcingFragment extends Fragment {
 
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
-    private EditText etVolumen;
+    private EditText etVolumen, etFechaVencimiento;
+    private TextInputLayout tilFechaVencimiento;
     private Spinner spinnerSucursal, spinnerProducto, spinnerProveedor;
     private RecyclerView recyclerView;
     
@@ -72,6 +74,10 @@ public class SourcingFragment extends Fragment {
         spinnerProducto = view.findViewById(R.id.spinnerProducto);
         spinnerProveedor = view.findViewById(R.id.spinnerProveedor);
         recyclerView = view.findViewById(R.id.recyclerView);
+        etFechaVencimiento = view.findViewById(R.id.etFechaVencimiento);
+        tilFechaVencimiento = view.findViewById(R.id.tilFechaVencimiento);
+
+        etFechaVencimiento.setOnClickListener(v -> showDatePicker());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new LoteAdapter(new ArrayList<>(), this::confirmDelete);
@@ -100,7 +106,26 @@ public class SourcingFragment extends Fragment {
             cardForm.setVisibility(View.GONE);
             btnToggleForm.setText("Nuevo Ingreso");
             btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
+            etVolumen.setText("");
+            etFechaVencimiento.setText("");
         }
+    }
+
+    private void showDatePicker() {
+        if (getContext() == null) return;
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int year = calendar.get(java.util.Calendar.YEAR);
+        int month = calendar.get(java.util.Calendar.MONTH);
+        int day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
+
+        android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(
+                getContext(),
+                (view, year1, month1, dayOfMonth) -> {
+                    String selectedDate = String.format(Locale.US, "%04d-%02d-%02d", year1, month1 + 1, dayOfMonth);
+                    etFechaVencimiento.setText(selectedDate);
+                },
+                year, month, day);
+        datePickerDialog.show();
     }
 
     private void setupSpinnerLink() {
@@ -116,6 +141,14 @@ public class SourcingFragment extends Fragment {
                             break;
                         }
                     }
+                }
+                
+                String cat = prod.getCategory();
+                if (cat != null && (cat.equals("Abarrotes y Alimentos") || cat.equals("Bebidas"))) {
+                    tilFechaVencimiento.setVisibility(View.VISIBLE);
+                } else {
+                    tilFechaVencimiento.setVisibility(View.GONE);
+                    etFechaVencimiento.setText("");
                 }
             }
             @Override
@@ -204,6 +237,9 @@ public class SourcingFragment extends Fragment {
 
     private void saveLote() {
         String volStr = etVolumen.getText().toString().trim();
+        String fechaVencimiento = etFechaVencimiento.getText().toString().trim();
+        if (fechaVencimiento.isEmpty()) fechaVencimiento = null;
+
         Sucursal selectedSucursal = (Sucursal) spinnerSucursal.getSelectedItem();
         Producto selectedProd = (Producto) spinnerProducto.getSelectedItem();
         Proveedor selectedProv = (Proveedor) spinnerProveedor.getSelectedItem();
@@ -215,7 +251,7 @@ public class SourcingFragment extends Fragment {
 
         int vol = Integer.parseInt(volStr);
 
-        LoteIngreso request = new LoteIngreso(selectedSucursal.getId(), selectedProd.getId(), selectedProv.getId(), vol);
+        LoteIngreso request = new LoteIngreso(selectedSucursal.getId(), selectedProd.getId(), selectedProv.getId(), vol, fechaVencimiento);
         
         apiService.createLote(request).enqueue(new Callback<LoteIngreso>() {
             @Override

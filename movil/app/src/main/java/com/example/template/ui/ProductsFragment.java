@@ -66,7 +66,12 @@ public class ProductsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
 
         // Setup Categories
-        String[] categorias = {"Otros", "Electrónica", "Ropa", "Alimentos", "Hogar"};
+        String[] categorias = {
+            "Abarrotes y Alimentos", "Bebidas", "Ropa y Moda", "Zapatos y Calzado",
+            "Belleza y Cuidado Personal", "Joyería y Relojes", "Juguetes y Niños",
+            "Hogar y Decoración", "Electrónica y Tecnología", "Ferretería y Construcción",
+            "Deportes y Aire Libre", "Entretenimiento y Ocio", "Otros"
+        };
         ArrayAdapter<String> catAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, categorias);
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategoria.setAdapter(catAdapter);

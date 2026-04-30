@@ -41,13 +41,37 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister = findViewById(R.id.btnRegister);
         tvLogin = findViewById(R.id.tvLogin);
 
+        etName.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (etName.hasFocus()) {
+                    String slug = s.toString().toLowerCase()
+                            .trim()
+                            .replaceAll("[\\s_]+", "-")
+                            .replaceAll("[^a-z0-9-]", "")
+                            .replaceAll("-+", "-");
+                    etDomain.setText(slug);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
         btnRegister.setOnClickListener(v -> handleRegister());
         tvLogin.setOnClickListener(v -> finish());
     }
 
     private void handleRegister() {
         String name = etName.getText().toString().trim();
-        String domain = etDomain.getText().toString().trim().toLowerCase().replaceAll("[^a-z0-9]", "");
+        String domain = etDomain.getText().toString().trim().toLowerCase()
+                .replaceAll("[\\s_]+", "-")
+                .replaceAll("[^a-z0-9-]", "")
+                .replaceAll("-+", "-")
+                .replaceAll("^-+|-+$", "");
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
