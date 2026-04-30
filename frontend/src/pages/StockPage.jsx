@@ -20,6 +20,14 @@ export default function StockPage() {
 
   const toast = useToast();
 
+  const userRole = localStorage.getItem('user_role');
+  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+
+  const hasPermission = (key) => {
+    if (userRole === 'OWNER') return true;
+    return !!userPermissions[key];
+  };
+
   useEffect(() => {
     fetchStock();
   }, []);
@@ -205,10 +213,15 @@ export default function StockPage() {
                   <strong>⚠️ Impacto Financiero Directo:</strong> La diferencia de {Math.abs(delta)} unidades resultará en una pérdida de valuación estimada de <strong>Bs. {getLostValue().toFixed(2)}</strong> para esta sucursal.
                 </div>
               )}
-              {delta !== null && delta > 0 && (
+              {delta !== null && delta > 0 && userRole !== 'OWNER' && (
                 <div style={{ gridColumn: '1 / -1', padding: '1rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', border: '1px solid #fca5a5' }}>
                   <strong>❌ Excedente Anómalo Detectado:</strong> No puedes declarar una cantidad física ({auditForm.cantidad_fisica}) mayor a la registrada en sistema ({auditItem.cantidadTotal}).<br/>
                   Si ingresó mercancía nueva que no está en el sistema, debes hacerlo formalmente mediante el módulo de <a href="/sourcing" style={{color: '#7f1d1d', fontWeight: 'bold'}}>Lotes / Sourcing</a>.
+                </div>
+              )}
+              {delta !== null && delta > 0 && userRole === 'OWNER' && (
+                <div style={{ gridColumn: '1 / -1', padding: '1rem', backgroundColor: '#fef3c7', color: '#92400e', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                  <strong>⚠️ Excepción de Dueño:</strong> Estás reportando un excedente anómalo (mercancía física mayor al sistema). Esta acción está restringida para empleados, pero habilitada para tu nivel.
                 </div>
               )}
 
@@ -228,7 +241,7 @@ export default function StockPage() {
               <button type="button" onClick={handleCloseAudit} style={{ backgroundColor: 'transparent', color: '#b45309', border: '1px solid #fde68a' }}>
                  Cancelar Vuelo
               </button>
-              <button type="submit" disabled={saving || auditForm.cantidad_fisica === '' || delta > 0} style={{ backgroundColor: delta > 0 ? '#d1d5db' : '#d97706', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button type="submit" disabled={saving || auditForm.cantidad_fisica === '' || (delta > 0 && userRole !== 'OWNER')} style={{ backgroundColor: (delta > 0 && userRole !== 'OWNER') ? '#d1d5db' : '#d97706', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Save size={18} /> Procesar Acta y Ajustar (Síncrono)
               </button>
             </div>
@@ -306,13 +319,15 @@ export default function StockPage() {
                    <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Bs {costoPromedio.toFixed(2)}</td>
                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: 'var(--primary-color)' }}>Bs {valuation.toFixed(2)}</td>
                    <td style={{ textAlign: 'center' }}>
-                      <button 
-                         onClick={() => handleOpenAudit(s)}
-                         style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}
-                         title="Auditar Inventario / Ingresar Conteo Físico"
-                      >
-                        <ClipboardList size={14} /> Registrar Incidencia
-                      </button>
+                      {hasPermission('inventario_crear') && (
+                        <button 
+                           onClick={() => handleOpenAudit(s)}
+                           style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}
+                           title="Auditar Inventario / Ingresar Conteo Físico"
+                        >
+                          <ClipboardList size={14} /> Registrar Incidencia
+                        </button>
+                      )}
                    </td>
                  </tr>
                );

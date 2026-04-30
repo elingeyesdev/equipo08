@@ -14,6 +14,14 @@ export default function ProvidersPage() {
   const [isFound, setIsFound] = useState(false);
   const toast = useToast();
 
+  const userRole = localStorage.getItem('user_role');
+  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+
+  const hasPermission = (key) => {
+    if (userRole === 'OWNER') return true;
+    return !!userPermissions[key];
+  };
+
   useEffect(() => {
     fetchProviders();
   }, []);
@@ -108,15 +116,17 @@ export default function ProvidersPage() {
             Añade proveedores de manera local sincronizándolos mediante NIT.
           </p>
         </div>
-        <button 
-          onClick={showForm ? resetForm : () => setShowForm(true)} 
-          style={{ 
-            display: 'flex', alignItems: 'center', gap: '0.5rem', 
-            backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
-          }}
-        >
-          {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Nuevo Proveedor</>}
-        </button>
+        {hasPermission('proveedores_crear') && (
+          <button 
+            onClick={showForm ? resetForm : () => setShowForm(true)} 
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '0.5rem', 
+              backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
+            }}
+          >
+            {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Nuevo Proveedor</>}
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -209,9 +219,11 @@ export default function ProvidersPage() {
                   <td style={{ color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{p.taxId || '-'}</td>
                   <td>{p.contactEmail || '-'}</td>
                   <td style={{ textAlign: 'right' }}>
-                    <button onClick={() => handleDelete(p.id)} style={{ padding: '0.25rem', background: 'none', color: 'var(--danger-color)' }} title="Eliminar">
-                      <Trash2 size={16} />
-                    </button>
+                    {hasPermission('proveedores_eliminar') && (
+                      <button onClick={() => handleDelete(p.id)} style={{ padding: '0.25rem', background: 'none', color: 'var(--danger-color)' }} title="Eliminar">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

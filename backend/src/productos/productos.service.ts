@@ -93,7 +93,7 @@ export class ProductosService {
       await this.prodRep.remove(prod);
     } catch (e) {
       if (e.code === '23503') {
-        throw new NotFoundException('No se puede eliminar el producto porque tiene stock o historial de ingresos asociado.');
+        throw new BadRequestException('No se puede eliminar el producto porque tiene stock o historial de ingresos asociado. Esto corrompería la integridad contable.');
       }
       throw e;
     }

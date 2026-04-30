@@ -13,8 +13,8 @@ export class AjustesService {
     private readonly stockService: StockService,
   ) {}
 
-  async create(tenant_id: string, usuario_id: string, dto: CreateAjusteDto): Promise<AjusteInventario> {
-    if (dto.cantidad_fisica > dto.cantidad_sistema) {
+  async create(tenant_id: string, usuario_id: string, userRole: string, dto: CreateAjusteDto): Promise<AjusteInventario> {
+    if (dto.cantidad_fisica > dto.cantidad_sistema && userRole !== 'OWNER') {
       throw new BadRequestException(
         'Auditoría Rechazada: No puede registrar más stock del existente (Detección de excedente anómalo). Para ingresar stock nuevo legitímo sin registrar, debe crearse un nuevo Lote de Sourcing.'
       );

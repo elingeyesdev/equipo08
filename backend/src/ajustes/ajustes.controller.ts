@@ -15,9 +15,10 @@ export class AjustesController {
   }
 
   @Post()
-  @RequirePermission('sourcing.gestionar')
+  @RequirePermission('inventario.crear')
   create(@TenantId() tenant_id: string, @Req() req: any, @Body() dto: CreateAjusteDto) {
     const usuario_id = req.user.userId;
-    return this.ajustesService.create(tenant_id, usuario_id, dto);
+    const userRole = req.user.role;
+    return this.ajustesService.create(tenant_id, usuario_id, userRole, dto);
   }
 }

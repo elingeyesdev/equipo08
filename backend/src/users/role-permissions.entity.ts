@@ -15,30 +15,57 @@ export class RolePermissions {
 
   @Column({ default: true })
   sucursales_ver: boolean;
-
   @Column({ default: false })
-  sucursales_gestionar: boolean;
+  sucursales_crear: boolean;
+  @Column({ default: false })
+  sucursales_editar: boolean;
+  @Column({ default: false })
+  sucursales_eliminar: boolean;
 
   @Column({ default: true })
   catalogo_ver: boolean;
-
   @Column({ default: false })
-  catalogo_gestionar: boolean;
+  catalogo_crear: boolean;
+  @Column({ default: false })
+  catalogo_editar: boolean;
+  @Column({ default: false })
+  catalogo_eliminar: boolean;
+
+  @Column({ default: true })
+  proveedores_ver: boolean;
+  @Column({ default: false })
+  proveedores_crear: boolean;
+  @Column({ default: false })
+  proveedores_editar: boolean;
+  @Column({ default: false })
+  proveedores_eliminar: boolean;
 
   @Column({ default: true })
   sourcing_ver: boolean;
-
   @Column({ default: false })
-  sourcing_gestionar: boolean;
+  sourcing_crear: boolean;
+  @Column({ default: false })
+  sourcing_editar: boolean;
+  @Column({ default: false })
+  sourcing_eliminar: boolean;
 
   @Column({ default: true })
   inventario_ver: boolean;
+  @Column({ default: false })
+  inventario_crear: boolean;
+  @Column({ default: false })
+  inventario_editar: boolean;
+  @Column({ default: false })
+  inventario_eliminar: boolean;
 
   @Column({ default: true })
   usuarios_ver: boolean;
-
   @Column({ default: false })
-  usuarios_gestionar: boolean;
+  usuarios_crear: boolean;
+  @Column({ default: false })
+  usuarios_editar: boolean;
+  @Column({ default: false })
+  usuarios_eliminar: boolean;
 
   @ManyToOne(() => Tenant)
   @JoinColumn({ name: 'tenant_id' })
