@@ -53,22 +53,49 @@
         android:layout_marginBottom="16dp"
         android:gravity="center_vertical">
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Inversión Física Total (A Costo):"
-            android:textColor="#5a6a85"
-            android:textStyle="bold" />
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Inversión Física Total (A Costo):"
+                android:textColor="#5a6a85"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Valuación de Déficit Acumulado:"
+                android:textColor="#991b1b"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvTotalValuation"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bs. 0.00"
-            android:textColor="#2b3b55"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:gravity="end">
+            <TextView
+                android:id="@+id/tvTotalValuation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bs. 0.00"
+                android:textColor="#2b3b55"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tvTotalDeficit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bs. 0.00"
+                android:textColor="#b91c1c"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- LIST AREA -->

@@ -3155,7 +3155,10 @@ int id btnAplicarSupervisor 0x7f08022d
 int id btnAplicarVendedor 0x7f08022e
 int id btnBuscarNit 0x7f080063
 int id btnCancelar 0x7f08023d
+int id btnClearFilters 0x7f08024c
 int id btnClose 0x7f08023e
+int id btnDateFrom 0x7f08024d
+int id btnDateTo 0x7f08024e
 int id btnDelete 0x7f080064
 int id btnEdit 0x7f08022f
 int id btnGuardar 0x7f080065
@@ -3163,11 +3166,13 @@ int id btnIncidencia 0x7f080239
 int id btnLogin 0x7f080066
 int id btnProcesar 0x7f08023f
 int id btnRegister 0x7f080067
+int id btnToggleFilter 0x7f08024f
 int id btnToggleForm 0x7f080068
 int id buttonPanel 0x7f080069
 int id cache_measures 0x7f08006a
 int id callMeasure 0x7f08006b
 int id cancel_button 0x7f08006c
+int id cardFilters 0x7f080250
 int id cardForm 0x7f08006d
 int id carryVelocity 0x7f08006e
 int id center 0x7f08006f
@@ -3507,9 +3512,11 @@ int id south 0x7f0801b2
 int id spacer 0x7f0801b3
 int id special_effects_controller_view_tag 0x7f0801b4
 int id spinnerCategoria 0x7f0801b5
+int id spinnerCategory 0x7f080251
 int id spinnerFilterRol 0x7f080235
 int id spinnerFilterSucursal 0x7f080236
 int id spinnerMotivo 0x7f08023c
+int id spinnerOperator 0x7f080252
 int id spinnerProducto 0x7f0801b6
 int id spinnerProveedor 0x7f0801b7
 int id spinnerRol 0x7f080237
@@ -3610,6 +3617,7 @@ int id tvSku 0x7f08020d
 int id tvStock 0x7f08020e
 int id tvSucursal 0x7f08020f
 int id tvTelefono 0x7f080210
+int id tvTotalDeficit 0x7f080253
 int id tvTotalIncidents 0x7f08024a
 int id tvTotalLoss 0x7f08024b
 int id tvTotalValuation 0x7f080211

@@ -18,6 +18,16 @@ import com.example.template.network.ApiService;
 import com.example.template.network.models.Ajuste;
 import com.example.template.ui.adapters.AuditAdapter;
 
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.app.DatePickerDialog;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +42,15 @@ public class AuditReportsFragment extends Fragment {
     private AuditAdapter adapter;
     private ApiService apiService;
     private TextView tvTotalLoss, tvTotalIncidents;
+    
+    private List<Ajuste> allAjustes = new ArrayList<>();
+    private Button btnToggleFilter, btnDateFrom, btnDateTo, btnClearFilters;
+    private androidx.cardview.widget.CardView cardFilters;
+    private Spinner spinnerOperator, spinnerCategory;
+    private boolean isFilterVisible = false;
+    private Calendar calFrom = null;
+    private Calendar calTo = null;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
 
     @Nullable
     @Override
@@ -48,6 +67,49 @@ public class AuditReportsFragment extends Fragment {
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
+        btnToggleFilter = view.findViewById(R.id.btnToggleFilter);
+        cardFilters = view.findViewById(R.id.cardFilters);
+        btnDateFrom = view.findViewById(R.id.btnDateFrom);
+        btnDateTo = view.findViewById(R.id.btnDateTo);
+        btnClearFilters = view.findViewById(R.id.btnClearFilters);
+        spinnerOperator = view.findViewById(R.id.spinnerOperator);
+        spinnerCategory = view.findViewById(R.id.spinnerCategory);
+
+        btnToggleFilter.setOnClickListener(v -> {
+            isFilterVisible = !isFilterVisible;
+            if (isFilterVisible) {
+                cardFilters.setVisibility(View.VISIBLE);
+                btnToggleFilter.setText("Ocultar Filtros");
+            } else {
+                cardFilters.setVisibility(View.GONE);
+                btnToggleFilter.setText("Filtrar Reporte");
+            }
+        });
+
+        btnDateFrom.setOnClickListener(v -> showDatePicker(true));
+        btnDateTo.setOnClickListener(v -> showDatePicker(false));
+
+        btnClearFilters.setOnClickListener(v -> {
+            calFrom = null;
+            calTo = null;
+            btnDateFrom.setText("dd/mm/yyyy");
+            btnDateTo.setText("dd/mm/yyyy");
+            spinnerOperator.setSelection(0);
+            spinnerCategory.setSelection(0);
+            applyFilters();
+        });
+
+        AdapterView.OnItemSelectedListener filterListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                applyFilters();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        };
+        spinnerOperator.setOnItemSelectedListener(filterListener);
+        spinnerCategory.setOnItemSelectedListener(filterListener);
+
         loadAudits();
 
         return view;
@@ -63,8 +125,10 @@ public class AuditReportsFragment extends Fragment {
                     // reverse to show newest first
                     Collections.reverse(list);
                     
-                    adapter.updateData(list);
+                    allAjustes = new ArrayList<>(list);
+                    populateSpinners();
                     
+                    adapter.updateData(list);
                     calculateKPIs(list);
                 }
             }
@@ -88,5 +152,101 @@ public class AuditReportsFragment extends Fragment {
         
         tvTotalLoss.setText(String.format("Bs. %.2f", totalLoss));
         tvTotalIncidents.setText(list.size() + " Registros");
+    }
+
+    private void showDatePicker(boolean isFrom) {
+        Calendar c = Calendar.getInstance();
+        if (isFrom && calFrom != null) c = calFrom;
+        else if (!isFrom && calTo != null) c = calTo;
+        
+        DatePickerDialog dpd = new DatePickerDialog(getContext(), (view, year, month, dayOfMonth) -> {
+            Calendar selected = Calendar.getInstance();
+            selected.set(year, month, dayOfMonth, 0, 0, 0);
+            if (isFrom) {
+                calFrom = selected;
+                btnDateFrom.setText(dateFormat.format(calFrom.getTime()));
+            } else {
+                calTo = selected;
+                calTo.set(Calendar.HOUR_OF_DAY, 23);
+                calTo.set(Calendar.MINUTE, 59);
+                calTo.set(Calendar.SECOND, 59);
+                btnDateTo.setText(dateFormat.format(calTo.getTime()));
+            }
+            applyFilters();
+        }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+        dpd.show();
+    }
+
+    private void populateSpinners() {
+        if (getContext() == null) return;
+        List<String> operators = new ArrayList<>();
+        operators.add("Cualquier Operador");
+        List<String> motives = new ArrayList<>();
+        motives.add("Cualquier Motivo");
+        motives.add("Error de Registro");
+        motives.add("Artículo Dañado / Extraviado");
+        motives.add("Robo / No Habido");
+        motives.add("Vencido");
+
+        for (Ajuste a : allAjustes) {
+            String op = a.getUsuario() != null ? a.getUsuario().getNombreCompleto() : "Operador";
+            if (!operators.contains(op)) operators.add(op);
+        }
+
+        ArrayAdapter<String> opAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, operators);
+        opAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerOperator.setAdapter(opAdapter);
+
+        ArrayAdapter<String> catAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, motives);
+        catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(catAdapter);
+    }
+
+    private void applyFilters() {
+        if (allAjustes == null || allAjustes.isEmpty()) return;
+        
+        List<Ajuste> filtered = new ArrayList<>();
+        String selOp = spinnerOperator.getSelectedItem() != null ? spinnerOperator.getSelectedItem().toString() : "Cualquier Operador";
+        String selMot = spinnerCategory.getSelectedItem() != null ? spinnerCategory.getSelectedItem().toString() : "Cualquier Motivo";
+
+        SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+        utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        for (Ajuste a : allAjustes) {
+            boolean matches = true;
+
+            if (calFrom != null || calTo != null) {
+                if (a.getFecha() != null) {
+                    try {
+                        Date d = utcFormat.parse(a.getFecha());
+                        if (calFrom != null && d.before(calFrom.getTime())) matches = false;
+                        if (calTo != null && d.after(calTo.getTime())) matches = false;
+                    } catch (Exception e) {}
+                }
+            }
+
+            if (!"Cualquier Operador".equals(selOp)) {
+                String op = a.getUsuario() != null ? a.getUsuario().getNombreCompleto() : "Operador";
+                if (!selOp.equals(op)) matches = false;
+            }
+
+            if (!"Cualquier Motivo".equals(selMot)) {
+                String m = a.getMotivo();
+                String desc = m != null ? m : "";
+                if ("ERROR_REGISTRO".equals(m)) desc = "Error de Registro";
+                else if ("DANO_MERMA".equals(m)) desc = "Artículo Dañado / Extraviado";
+                else if ("ROBO_O_PERDIDA".equals(m)) desc = "Robo / No Habido";
+                else if ("CADUCIDAD".equals(m)) desc = "Vencido";
+                
+                if (!selMot.equals(desc)) matches = false;
+            }
+
+            if (matches) {
+                filtered.add(a);
+            }
+        }
+        
+        adapter.updateData(filtered);
+        calculateKPIs(filtered);
     }
 }

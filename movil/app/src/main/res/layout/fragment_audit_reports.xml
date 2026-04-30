@@ -8,24 +8,41 @@
     android:padding="16dp">
 
     <!-- Header -->
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_marginBottom="16dp">
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Registro Analítico de Auditorías"
-            android:textSize="20sp"
-            android:textStyle="bold"
+            android:orientation="vertical"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/btnToggleFilter"
+            android:layout_marginEnd="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Registro Analítico de Auditorías"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#2b3b55" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dashboard de histórico de ajustes."
+                android:textColor="#5a6a85" />
+        </LinearLayout>
+        <Button
+            android:id="@+id/btnToggleFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="Filtrar Reporte"
+            android:textSize="12sp"
+            android:backgroundTint="#ffffff"
             android:textColor="#2b3b55" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dashboard de histórico de ajustes."
-            android:textColor="#5a6a85" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <!-- KPI 1 -->
     <androidx.cardview.widget.CardView
@@ -85,6 +102,123 @@
                 android:text="0 Registros"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                android:textColor="#2b3b55"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Filter Section -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardFilters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#ffffff">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Filtros: "
+                    android:textColor="#2b3b55"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Desde:"
+                    android:textColor="#5a6a85"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"/>
+                <Button
+                    android:id="@+id/btnDateFrom"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="40dp"
+                    android:text="dd/mm/yyyy"
+                    android:textSize="12sp"
+                    android:backgroundTint="#f8f9fc"
+                    android:textColor="#2b3b55" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hasta:"
+                    android:textColor="#5a6a85"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="4dp"/>
+                <Button
+                    android:id="@+id/btnDateTo"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="40dp"
+                    android:text="dd/mm/yyyy"
+                    android:textSize="12sp"
+                    android:backgroundTint="#f8f9fc"
+                    android:textColor="#2b3b55" />
+            </LinearLayout>
+            
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/edit_text_bg">
+                <Spinner
+                    android:id="@+id/spinnerOperator"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/arrow_down_float"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="12dp"
+                    app:tint="#5a6a85" />
+            </RelativeLayout>
+                
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/edit_text_bg">
+                <Spinner
+                    android:id="@+id/spinnerCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@android:drawable/arrow_down_float"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="12dp"
+                    app:tint="#5a6a85" />
+            </RelativeLayout>
+                
+            <Button
+                android:id="@+id/btnClearFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:text="Limpiar"
+                android:textSize="12sp"
+                android:backgroundTint="#f8f9fc"
                 android:textColor="#2b3b55"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>

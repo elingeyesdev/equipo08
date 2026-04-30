@@ -21,7 +21,10 @@ id btnAplicarSupervisor
 id btnAplicarVendedor
 id btnBuscarNit
 id btnCancelar
+id btnClearFilters
 id btnClose
+id btnDateFrom
+id btnDateTo
 id btnDelete
 id btnEdit
 id btnGuardar
@@ -29,7 +32,9 @@ id btnIncidencia
 id btnLogin
 id btnProcesar
 id btnRegister
+id btnToggleFilter
 id btnToggleForm
+id cardFilters
 id cardForm
 id divider
 id drawer_layout
@@ -67,9 +72,11 @@ id nav_sucursales
 id nav_view
 id recyclerView
 id spinnerCategoria
+id spinnerCategory
 id spinnerFilterRol
 id spinnerFilterSucursal
 id spinnerMotivo
+id spinnerOperator
 id spinnerProducto
 id spinnerProveedor
 id spinnerRol
@@ -103,6 +110,7 @@ id tvSku
 id tvStock
 id tvSucursal
 id tvTelefono
+id tvTotalDeficit
 id tvTotalIncidents
 id tvTotalLoss
 id tvTotalValuation

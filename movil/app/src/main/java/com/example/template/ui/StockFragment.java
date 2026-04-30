@@ -46,9 +46,10 @@ public class StockFragment extends Fragment {
     private StockAdapter adapter;
     private ApiService apiService;
     private Spinner spinnerSucursal;
-    private TextView tvTotalValuation;
+    private TextView tvTotalValuation, tvTotalDeficit;
 
     private List<Stock> allStockList = new ArrayList<>();
+    private List<com.example.template.network.models.Ajuste> allAjustesList = new ArrayList<>();
     private List<Sucursal> sucursalesList = new ArrayList<>();
 
     @Nullable
@@ -59,6 +60,7 @@ public class StockFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         spinnerSucursal = view.findViewById(R.id.spinnerSucursal);
         tvTotalValuation = view.findViewById(R.id.tvTotalValuation);
+        tvTotalDeficit = view.findViewById(R.id.tvTotalDeficit);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new StockAdapter(new ArrayList<>(), new StockAdapter.OnIncidenciaClickListener() {
@@ -135,13 +137,25 @@ public class StockFragment extends Fragment {
                 if(getContext() != null) Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+        
+        apiService.getAjustes().enqueue(new Callback<List<com.example.template.network.models.Ajuste>>() {
+            @Override
+            public void onResponse(Call<List<com.example.template.network.models.Ajuste>> call, Response<List<com.example.template.network.models.Ajuste>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    allAjustesList = response.body();
+                    filterStock();
+                }
+            }
+            @Override
+            public void onFailure(Call<List<com.example.template.network.models.Ajuste>> call, Throwable t) {}
+        });
     }
 
     private void filterStock() {
         if (spinnerSucursal.getSelectedItemPosition() <= 0) {
             // "ALL" selected
             adapter.updateData(allStockList);
-            calculateTotal(allStockList);
+            calculateTotal(allStockList, allAjustesList);
             return;
         }
 
@@ -155,17 +169,36 @@ public class StockFragment extends Fragment {
             }
         }
         
+        List<com.example.template.network.models.Ajuste> filteredAjustes = new ArrayList<>();
+        for (com.example.template.network.models.Ajuste a : allAjustesList) {
+            if (a.getSucursal() != null && selectedBranch.getId().equals(a.getSucursal().getId())) {
+                filteredAjustes.add(a);
+            }
+        }
+        
         adapter.updateData(filteredList);
-        calculateTotal(filteredList);
+        calculateTotal(filteredList, filteredAjustes);
     }
 
-    private void calculateTotal(List<Stock> list) {
+    private void calculateTotal(List<Stock> list, List<com.example.template.network.models.Ajuste> ajustes) {
         double total = 0;
         for (Stock s : list) {
             double costoFijo = s.getProducto() != null ? s.getProducto().getPrecioCosto() : 0.0;
             total += s.getCantidadTotal() * costoFijo;
         }
         tvTotalValuation.setText(String.format("Bs. %.2f", total));
+        
+        double deficit = 0;
+        if (ajustes != null) {
+            for (com.example.template.network.models.Ajuste a : ajustes) {
+                if (a.getValorPerdido() != null && !a.getValorPerdido().isEmpty()) {
+                    try {
+                        deficit += Double.parseDouble(a.getValorPerdido());
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+        tvTotalDeficit.setText(String.format("Bs. %.2f", deficit));
     }
 
     private void showIncidenciaDialog(Stock stock) {

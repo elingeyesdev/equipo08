@@ -36,7 +36,21 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Ajuste a = list.get(position);
 
-        holder.tvDate.setText(a.getFecha() != null ? a.getFecha().replace("T", " ").substring(0, 16) : "N/A");
+        String formattedDate = "N/A";
+        if (a.getFecha() != null) {
+            try {
+                java.text.SimpleDateFormat utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
+                utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                java.util.Date date = utcFormat.parse(a.getFecha());
+                
+                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.US);
+                localFormat.setTimeZone(java.util.TimeZone.getDefault());
+                formattedDate = localFormat.format(date);
+            } catch (Exception e) {
+                formattedDate = a.getFecha().replace("T", " ").substring(0, 16);
+            }
+        }
+        holder.tvDate.setText(formattedDate);
         holder.tvProductName.setText(a.getProducto() != null ? a.getProducto().getName() : "SKU D/C");
         holder.tvSucursal.setText(a.getSucursal() != null ? a.getSucursal().getName() : "Desconocida");
         holder.tvOperador.setText(a.getUsuario() != null ? a.getUsuario().getNombreCompleto() : "Operador");

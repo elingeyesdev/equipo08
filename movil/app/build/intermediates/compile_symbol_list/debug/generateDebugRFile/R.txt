@@ -19,7 +19,10 @@ int id btnAplicarSupervisor 0x0
 int id btnAplicarVendedor 0x0
 int id btnBuscarNit 0x0
 int id btnCancelar 0x0
+int id btnClearFilters 0x0
 int id btnClose 0x0
+int id btnDateFrom 0x0
+int id btnDateTo 0x0
 int id btnDelete 0x0
 int id btnEdit 0x0
 int id btnGuardar 0x0
@@ -27,7 +30,9 @@ int id btnIncidencia 0x0
 int id btnLogin 0x0
 int id btnProcesar 0x0
 int id btnRegister 0x0
+int id btnToggleFilter 0x0
 int id btnToggleForm 0x0
+int id cardFilters 0x0
 int id cardForm 0x0
 int id divider 0x0
 int id drawer_layout 0x0
@@ -65,9 +70,11 @@ int id nav_sucursales 0x0
 int id nav_view 0x0
 int id recyclerView 0x0
 int id spinnerCategoria 0x0
+int id spinnerCategory 0x0
 int id spinnerFilterRol 0x0
 int id spinnerFilterSucursal 0x0
 int id spinnerMotivo 0x0
+int id spinnerOperator 0x0
 int id spinnerProducto 0x0
 int id spinnerProveedor 0x0
 int id spinnerRol 0x0
@@ -101,6 +108,7 @@ int id tvSku 0x0
 int id tvStock 0x0
 int id tvSucursal 0x0
 int id tvTelefono 0x0
+int id tvTotalDeficit 0x0
 int id tvTotalIncidents 0x0
 int id tvTotalLoss 0x0
 int id tvTotalValuation 0x0
