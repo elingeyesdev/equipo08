@@ -57,7 +57,7 @@ export class AuthService {
       await queryRunner.manager.save(user);
 
       // 3. Seed Default Permissions
-      await this.usersService.seedDefaultPermissions(savedTenant.id);
+      await this.usersService.seedDefaultPermissions(savedTenant.id, queryRunner.manager);
 
       await queryRunner.commitTransaction();
 
@@ -127,6 +127,12 @@ export class AuthService {
       tenantName: user.tenant.name 
     };
 
+    let userPermissions = null;
+    if (user.role !== UserRole.OWNER) {
+      const allPermissions = await this.usersService.getPermissions(user.tenant_id);
+      userPermissions = allPermissions.find(p => p.role === user.role) || {};
+    }
+
     return {
       access_token: this.jwtService.sign(payload),
       user: {
@@ -135,7 +141,8 @@ export class AuthService {
         email: user.email,
         role: user.role,
         tenant_id: user.tenant_id,
-        tenant_name: user.tenant.name
+        tenant_name: user.tenant.name,
+        permissions: userPermissions
       }
     };
   }

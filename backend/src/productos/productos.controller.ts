@@ -11,7 +11,7 @@ export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
 
   @Post()
-  @RequirePermission('catalogo.gestionar')
+  @RequirePermission('catalogo.crear')
   create(
     @TenantId() tenantId: string,
     @Body() dto: CreateProductoDto,
@@ -26,7 +26,7 @@ export class ProductosController {
   }
 
   @Put(':id')
-  @RequirePermission('catalogo.gestionar')
+  @RequirePermission('catalogo.editar')
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -36,7 +36,7 @@ export class ProductosController {
   }
 
   @Delete(':id')
-  @RequirePermission('catalogo.gestionar')
+  @RequirePermission('catalogo.eliminar')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.productosService.remove(tenantId, id);
   }

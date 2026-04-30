@@ -11,6 +11,7 @@ import UsersPage from './pages/UsersPage';
 import PermissionsPage from './pages/PermissionsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import LandingPage from './pages/LandingPage';
 import { ToastProvider } from './components/ToastContext';
 import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive, Store, ShieldCheck, UserPlus, BarChart } from 'lucide-react';
 import './index.css';
@@ -150,9 +151,10 @@ function App() {
       <Router>
         {!authToken ? (
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage setAuthToken={setAuthToken} />} />
             <Route path="/register" element={<RegisterPage setAuthToken={setAuthToken} />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         ) : (
           <div className="app-layout">

@@ -12,7 +12,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @RequirePermission('usuarios.gestionar')
+  @RequirePermission('usuarios.crear')
   create(@TenantId() tenant_id: string, @Body() dto: CreateUserDto) {
     return this.usersService.create(tenant_id, dto);
   }
@@ -41,13 +41,13 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @RequirePermission('usuarios.gestionar')
+  @RequirePermission('usuarios.eliminar')
   remove(@TenantId() tenant_id: string, @Param('id') id: string) {
     return this.usersService.remove(tenant_id, id);
   }
 
   @Put(':id')
-  @RequirePermission('usuarios.gestionar')
+  @RequirePermission('usuarios.editar')
   update(
     @TenantId() tenant_id: string, 
     @Param('id') id: string, 

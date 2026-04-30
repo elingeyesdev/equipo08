@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from './user.entity';
 import { RolePermissions } from './role-permissions.entity';
@@ -90,35 +90,69 @@ export class UsersService {
     return this.permissionsRep.save(perm);
   }
 
-  async seedDefaultPermissions(tenant_id: string): Promise<void> {
+  async seedDefaultPermissions(tenant_id: string, manager?: EntityManager): Promise<void> {
     const supervisor = this.permissionsRep.create({
       tenant_id,
       role: UserRole.SUPERVISOR,
       sucursales_ver: true,
-      sucursales_gestionar: false,
+      sucursales_crear: false,
+      sucursales_editar: false,
+      sucursales_eliminar: false,
       catalogo_ver: true,
-      catalogo_gestionar: true,
+      catalogo_crear: true,
+      catalogo_editar: true,
+      catalogo_eliminar: false,
+      proveedores_ver: true,
+      proveedores_crear: true,
+      proveedores_editar: true,
+      proveedores_eliminar: false,
       sourcing_ver: true,
-      sourcing_gestionar: true,
+      sourcing_crear: true,
+      sourcing_editar: true,
+      sourcing_eliminar: false,
       inventario_ver: true,
+      inventario_crear: true,
+      inventario_editar: true,
+      inventario_eliminar: false,
       usuarios_ver: true,
-      usuarios_gestionar: false,
+      usuarios_crear: false,
+      usuarios_editar: false,
+      usuarios_eliminar: false,
     });
 
     const vendedor = this.permissionsRep.create({
       tenant_id,
       role: UserRole.VENDEDOR,
       sucursales_ver: true,
-      sucursales_gestionar: false,
+      sucursales_crear: false,
+      sucursales_editar: false,
+      sucursales_eliminar: false,
       catalogo_ver: true,
-      catalogo_gestionar: false,
+      catalogo_crear: false,
+      catalogo_editar: false,
+      catalogo_eliminar: false,
+      proveedores_ver: true,
+      proveedores_crear: false,
+      proveedores_editar: false,
+      proveedores_eliminar: false,
       sourcing_ver: true,
-      sourcing_gestionar: false,
+      sourcing_crear: false,
+      sourcing_editar: false,
+      sourcing_eliminar: false,
       inventario_ver: true,
+      inventario_crear: false,
+      inventario_editar: false,
+      inventario_eliminar: false,
       usuarios_ver: false,
-      usuarios_gestionar: false,
+      usuarios_crear: false,
+      usuarios_editar: false,
+      usuarios_eliminar: false,
     });
 
-    await this.permissionsRep.save([supervisor, vendedor]);
+    if (manager) {
+      await manager.save([supervisor, vendedor]);
+    } else {
+      await this.permissionsRep.save([supervisor, vendedor]);
+    }
   }
 }

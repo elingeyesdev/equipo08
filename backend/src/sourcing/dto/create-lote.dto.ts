@@ -1,4 +1,4 @@
-import { IsString, IsNumber, Min } from 'class-validator';
+import { IsString, IsNumber, Min, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLoteIngresoDto {
@@ -19,4 +19,8 @@ export class CreateLoteIngresoDto {
   @Min(1)
   cantidad: number;
 
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  fechaVencimiento?: string;
 }

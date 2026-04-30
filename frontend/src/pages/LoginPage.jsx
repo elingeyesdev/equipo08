@@ -25,6 +25,7 @@ export default function LoginPage({ setAuthToken }) {
       localStorage.setItem('user_role', user.role);
       localStorage.setItem('tenant_id', user.tenant_id);
       localStorage.setItem('tenant_name', user.tenant_name);
+      localStorage.setItem('permissions', JSON.stringify(user.permissions || {}));
       
       setAuthToken(access_token);
       

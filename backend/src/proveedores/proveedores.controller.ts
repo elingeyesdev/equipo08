@@ -11,7 +11,7 @@ export class ProveedoresController {
   constructor(private readonly proveedoresService: ProveedoresService) {}
 
   @Post()
-  @RequirePermission('catalogo.gestionar')
+  @RequirePermission('proveedores.crear')
   create(
     @TenantId() tenantId: string,
     @Body() createProveedorDto: CreateProveedorDto,
@@ -20,19 +20,19 @@ export class ProveedoresController {
   }
 
   @Get('global/:nit')
-  @RequirePermission('catalogo.ver')
+  @RequirePermission('proveedores.ver')
   findByGlobalNit(@Param('nit') nit: string) {
     return this.proveedoresService.findByGlobalNit(nit);
   }
 
   @Get()
-  @RequirePermission('catalogo.ver')
+  @RequirePermission('proveedores.ver')
   findAll(@TenantId() tenantId: string) {
     return this.proveedoresService.findAll(tenantId);
   }
 
   @Put(':id')
-  @RequirePermission('catalogo.gestionar')
+  @RequirePermission('proveedores.editar')
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -42,7 +42,7 @@ export class ProveedoresController {
   }
 
   @Delete(':id')
-  @RequirePermission('catalogo.gestionar')
+  @RequirePermission('proveedores.eliminar')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.proveedoresService.remove(tenantId, id);
   }

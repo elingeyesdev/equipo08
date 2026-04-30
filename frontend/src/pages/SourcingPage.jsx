@@ -15,8 +15,16 @@ export default function SourcingPage() {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [filterProducto, setFilterProducto] = useState('ALL');
   const [filterSucursal, setFilterSucursal] = useState('ALL');
-  const [loteForm, setLoteForm] = useState({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1 });
+  const [loteForm, setLoteForm] = useState({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1, fechaVencimiento: '' });
   const toast = useToast();
+
+  const userRole = localStorage.getItem('user_role');
+  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+
+  const hasPermission = (key) => {
+    if (userRole === 'OWNER') return true;
+    return !!userPermissions[key];
+  };
 
   useEffect(() => {
     loadData();
@@ -42,7 +50,7 @@ export default function SourcingPage() {
   };
 
   const resetForm = () => {
-    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1 });
+    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1, fechaVencimiento: '' });
     setEditingId(null);
     setShowForm(false);
   };
@@ -53,7 +61,8 @@ export default function SourcingPage() {
       producto_id: h.producto_id,
       proveedor_id: h.proveedor_id,
       sucursal_id: h.sucursal_id,
-      cantidad: h.cantidad
+      cantidad: h.cantidad,
+      fechaVencimiento: h.fechaVencimiento || ''
     });
     setShowForm(true);
   };
@@ -87,6 +96,7 @@ export default function SourcingPage() {
     try {
       const payload = {
         ...loteForm,
+        fechaVencimiento: loteForm.fechaVencimiento || null,
         cantidad: parseInt(loteForm.cantidad)
       };
 
@@ -105,6 +115,9 @@ export default function SourcingPage() {
   };
 
   const isProviderLocked = !!loteForm.producto_id;
+  
+  const selectedProductObj = products.find(p => p.id === loteForm.producto_id);
+  const showExpirationDate = selectedProductObj && ['Abarrotes y Alimentos', 'Bebidas'].includes(selectedProductObj.category);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -114,15 +127,17 @@ export default function SourcingPage() {
           <h2 style={{ margin: 0 }}>Entradas Operativas (Sourcing Físico)</h2>
           <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Registra las entradas físicas de cajas o unidades al inventario principal.</p>
         </div>
-        <button 
-          onClick={showForm ? resetForm : () => setShowForm(true)} 
-          style={{ 
-            display: 'flex', alignItems: 'center', gap: '0.5rem', 
-            backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
-          }}
-        >
-          {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Registrar Nueva Entrada</>}
-        </button>
+        {hasPermission('sourcing_crear') && (
+          <button 
+            onClick={showForm ? resetForm : () => setShowForm(true)} 
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '0.5rem', 
+              backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
+            }}
+          >
+            {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Registrar Nueva Entrada</>}
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -164,6 +179,13 @@ export default function SourcingPage() {
                 <label>Unidades Físicas (Cajas/Pzas) *</label>
                 <input type="number" min="1" required value={loteForm.cantidad} onChange={e => setLoteForm({...loteForm, cantidad: e.target.value})} />
               </div>
+
+              {showExpirationDate && (
+                <div className="form-group">
+                  <label>Fecha de Vencimiento (Opcional)</label>
+                  <input type="date" value={loteForm.fechaVencimiento || ''} onChange={e => setLoteForm({...loteForm, fechaVencimiento: e.target.value})} />
+                </div>
+              )}
             </div>
 
             <div className="form-actions" style={{ marginTop: '1.5rem' }}>
@@ -228,7 +250,14 @@ export default function SourcingPage() {
                  const inversionTotal = costoSnap * h.cantidad;
                  return (
                  <tr key={h.id}>
-                   <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>#{h.id.split('-')[0]}</td>
+                   <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
+                      #{h.id.split('-')[0]}
+                      {h.fechaVencimiento && (
+                        <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px', fontWeight: 'bold' }}>
+                           Vence: {h.fechaVencimiento}
+                        </div>
+                      )}
+                   </td>
                    <td>{new Date(h.fechaIngreso).toLocaleDateString()} {new Date(h.fechaIngreso).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
                    <td style={{ fontWeight: '500' }}>
                      {h.producto?.name || '---'} 
@@ -241,12 +270,16 @@ export default function SourcingPage() {
                    <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Bs {costoSnap.toFixed(2)}</td>
                    <td style={{ textAlign: 'right', fontWeight: '600', color: 'var(--primary-color)' }}>Bs {inversionTotal.toFixed(2)}</td>
                    <td style={{ textAlign: 'right' }}>
-                    <button onClick={() => handleEdit(h)} style={{ padding: '0.25rem', background: 'none', color: 'var(--accent-blue)' }} title="Editar">
-                      <Edit2 size={16} />
-                    </button>
-                    <button onClick={() => handleDelete(h.id)} style={{ padding: '0.25rem', background: 'none', color: 'var(--danger-color)', marginLeft: '0.5rem' }} title="Eliminar">
-                      <Trash2 size={16} />
-                    </button>
+                    {hasPermission('sourcing_editar') && (
+                      <button onClick={() => handleEdit(h)} style={{ padding: '0.25rem', background: 'none', color: 'var(--accent-blue)' }} title="Editar">
+                        <Edit2 size={16} />
+                      </button>
+                    )}
+                    {hasPermission('sourcing_eliminar') && (
+                      <button onClick={() => handleDelete(h.id)} style={{ padding: '0.25rem', background: 'none', color: 'var(--danger-color)', marginLeft: '0.5rem' }} title="Eliminar">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </td>
                  </tr>
                  );

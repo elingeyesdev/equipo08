@@ -11,7 +11,7 @@ export class SourcingController {
   constructor(private readonly sourcingService: SourcingService) {}
 
   @Post()
-  @RequirePermission('sourcing.gestionar')
+  @RequirePermission('sourcing.crear')
   registrarIngreso(
     @TenantId() tenantId: string,
     @Body() dto: CreateLoteIngresoDto,
@@ -26,7 +26,7 @@ export class SourcingController {
   }
 
   @Put(':id')
-  @RequirePermission('sourcing.gestionar')
+  @RequirePermission('sourcing.editar')
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -36,7 +36,7 @@ export class SourcingController {
   }
 
   @Delete(':id')
-  @RequirePermission('sourcing.gestionar')
+  @RequirePermission('sourcing.eliminar')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.sourcingService.remove(tenantId, id);
   }

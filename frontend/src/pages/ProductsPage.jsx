@@ -16,6 +16,14 @@ export default function ProductsPage() {
   });
   const toast = useToast();
 
+  const userRole = localStorage.getItem('user_role');
+  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+
+  const hasPermission = (key) => {
+    if (userRole === 'OWNER') return true;
+    return !!userPermissions[key];
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -56,7 +64,7 @@ export default function ProductsPage() {
     if (!confirmDelete) return;
     try {
       await api.delete(`/productos/${confirmDelete}`);
-      toast.success('Producto eliminado del catálogo');
+      toast.success('Producto eliminado del sistema');
       fetchData();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
@@ -64,6 +72,8 @@ export default function ProductsPage() {
       setConfirmDelete(null);
     }
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,15 +123,17 @@ export default function ProductsPage() {
           <h2 style={{ margin: 0 }}>Catálogo de Artículos</h2>
           <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Administra tu lista de productos e inventario disponible.</p>
         </div>
-        <button 
-          onClick={showForm ? resetForm : () => setShowForm(true)} 
-          style={{ 
-            display: 'flex', alignItems: 'center', gap: '0.5rem', 
-            backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
-          }}
-        >
-          {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Añadir al Catálogo</>}
-        </button>
+        {hasPermission('catalogo_crear') && (
+          <button 
+            onClick={showForm ? resetForm : () => setShowForm(true)} 
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '0.5rem', 
+              backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
+            }}
+          >
+            {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Añadir al Catálogo</>}
+          </button>
+        )}
       </div>
 
       {/* Expandable Form Section */}
@@ -148,10 +160,16 @@ export default function ProductsPage() {
                 <select required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                   <option value="Abarrotes y Alimentos">Abarrotes y Alimentos</option>
                   <option value="Bebidas">Bebidas</option>
-                  <option value="Cuidado del Hogar">Cuidado del Hogar</option>
+                  <option value="Ropa y Moda">Ropa y Moda</option>
+                  <option value="Zapatos y Calzado">Zapatos y Calzado</option>
+                  <option value="Belleza y Cuidado Personal">Belleza y Cuidado Personal</option>
+                  <option value="Joyería y Relojes">Joyería y Relojes</option>
+                  <option value="Juguetes y Niños">Juguetes y Niños</option>
+                  <option value="Hogar y Decoración">Hogar y Decoración</option>
                   <option value="Electrónica y Tecnología">Electrónica y Tecnología</option>
                   <option value="Ferretería y Construcción">Ferretería y Construcción</option>
-                  <option value="Textil y Ropa">Textil y Ropa</option>
+                  <option value="Deportes y Aire Libre">Deportes y Aire Libre</option>
+                  <option value="Entretenimiento y Ocio">Entretenimiento y Ocio</option>
                   <option value="Otros">Otros</option>
                 </select>
               </div>
@@ -229,7 +247,9 @@ export default function ProductsPage() {
                         <span style={{ color: 'var(--accent-blue)', fontWeight: 'bold' }}>• {p.proveedor?.name || 'Prov. Indefinido'}</span>
                       </div>
                     </td>
-                    <td style={{ color: '#64748b' }}>{p.category || 'Otros'}</td>
+                    <td style={{ color: '#64748b' }}>
+                      <div>{p.category || 'Otros'}</div>
+                    </td>
                     <td style={{ fontWeight: '500' }}>Bs.{Number(p.precioVenta).toFixed(2)}</td>
                     <td style={{ color: '#64748b' }}>Bs.{Number(p.precioCosto).toFixed(2)}</td>
                     <td><span style={{ color: margin < 0 ? '#dc2626' : 'inherit' }}>{margin}%</span></td>
@@ -237,9 +257,16 @@ export default function ProductsPage() {
                       {totalStock === 0 ? <span style={{ color: '#94a3b8' }}>—</span> : <strong>{totalStock}</strong>}
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <button onClick={() => handleEdit(p)} style={{ padding: '0.25rem', background: 'none', color: '#64748b' }} title="Editar">
-                        <Edit2 size={16} />
-                      </button>
+                      {hasPermission('catalogo_editar') && (
+                        <button onClick={() => handleEdit(p)} style={{ padding: '0.25rem', background: 'none', color: '#64748b' }} title="Editar">
+                          <Edit2 size={16} />
+                        </button>
+                      )}
+                      {hasPermission('catalogo_eliminar') && (
+                        <button onClick={() => handleDelete(p.id)} style={{ padding: '0.25rem', background: 'none', color: 'var(--danger-color)', marginLeft: '0.5rem' }} title="Dar de baja">
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -249,6 +276,13 @@ export default function ProductsPage() {
         )}
       </div>
 
+      <ConfirmModal 
+        isOpen={!!confirmDelete}
+        title="Dar de Baja Artículo"
+        message="¿Estás seguro que deseas eliminar permanentemente este producto del catálogo? Esta acción no puede deshacerse."
+        onConfirm={proceedDelete}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

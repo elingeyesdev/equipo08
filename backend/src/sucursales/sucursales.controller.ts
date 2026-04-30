@@ -11,7 +11,7 @@ export class SucursalesController {
   constructor(private readonly sucursalesService: SucursalesService) {}
 
   @Post()
-  @RequirePermission('sucursales.gestionar')
+  @RequirePermission('sucursales.crear')
   create(
     @TenantId() tenantId: string,
     @Body() createSucursalDto: CreateSucursalDto,
@@ -26,7 +26,7 @@ export class SucursalesController {
   }
 
   @Put(':id')
-  @RequirePermission('sucursales.gestionar')
+  @RequirePermission('sucursales.editar')
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -36,7 +36,7 @@ export class SucursalesController {
   }
 
   @Delete(':id')
-  @RequirePermission('sucursales.gestionar')
+  @RequirePermission('sucursales.eliminar')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.sucursalesService.remove(tenantId, id);
   }

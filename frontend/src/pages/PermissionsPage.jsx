@@ -54,30 +54,49 @@ export default function PermissionsPage() {
       icon: Store,
       fields: [
         { key: 'sucursales_ver', label: 'Consultar Directorio Geográfico' },
-        { key: 'sucursales_gestionar', label: 'Control de Alta, Edición y Cierre' }
+        { key: 'sucursales_crear', label: 'Registrar Nuevas Sucursales' },
+        { key: 'sucursales_editar', label: 'Editar Datos de Sucursales' },
+        { key: 'sucursales_eliminar', label: 'Dar de Baja Sucursales' }
       ] 
     },
     { 
-      title: 'Catálogo Central', 
+      title: 'Catálogo Central (Productos)', 
       icon: Tags,
       fields: [
         { key: 'catalogo_ver', label: 'Visualización Global de Productos' },
-        { key: 'catalogo_gestionar', label: 'Creación y Alteración de Precios' }
+        { key: 'catalogo_crear', label: 'Añadir Nuevos Productos' },
+        { key: 'catalogo_editar', label: 'Modificar Precios y Artículos' },
+        { key: 'catalogo_eliminar', label: 'Eliminar Artículos del Catálogo' }
       ] 
     },
     { 
-      title: 'Auditoría Sourcing', 
+      title: 'Gestión de Proveedores', 
+      icon: Tags,
+      fields: [
+        { key: 'proveedores_ver', label: 'Consultar Directorio de Proveedores' },
+        { key: 'proveedores_crear', label: 'Registrar Nuevos Proveedores' },
+        { key: 'proveedores_editar', label: 'Editar Datos de Proveedores' },
+        { key: 'proveedores_eliminar', label: 'Dar de Baja Proveedores' }
+      ] 
+    },
+    { 
+      title: 'Auditoría Sourcing (Lotes)', 
       icon: Inbox,
       fields: [
         { key: 'sourcing_ver', label: 'Inspeccionar Historial de Accesos' },
-        { key: 'sourcing_gestionar', label: 'Registrar Nuevos Lotes y Costos' }
+        { key: 'sourcing_crear', label: 'Registrar Nuevos Lotes' },
+        { key: 'sourcing_editar', label: 'Editar Lotes Existentes' },
+        { key: 'sourcing_eliminar', label: 'Anular Lotes Ingresados' }
       ] 
     },
     { 
-      title: 'Niveles de Inventario', 
+      title: 'Niveles de Inventario y Ajustes', 
       icon: Box,
       fields: [
-        { key: 'inventario_ver', label: 'Visualización de Cantidades por Sucursal' }
+        { key: 'inventario_ver', label: 'Visualización de Cantidades' },
+        { key: 'inventario_crear', label: 'Registrar Incidencias / Ajustes' },
+        { key: 'inventario_editar', label: 'Modificar Incidencias' },
+        { key: 'inventario_eliminar', label: 'Eliminar Incidencias' }
       ] 
     },
     { 
@@ -85,7 +104,9 @@ export default function PermissionsPage() {
       icon: Users,
       fields: [
         { key: 'usuarios_ver', label: 'Consultar Organigrama Interno' },
-        { key: 'usuarios_gestionar', label: 'Contratar y Desvincular Personal' }
+        { key: 'usuarios_crear', label: 'Contratar Personal' },
+        { key: 'usuarios_editar', label: 'Editar Datos de Personal' },
+        { key: 'usuarios_eliminar', label: 'Desvincular Personal' }
       ] 
     },
   ];

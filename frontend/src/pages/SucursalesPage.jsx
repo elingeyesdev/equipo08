@@ -13,6 +13,14 @@ export default function SucursalesPage() {
   const [formData, setFormData] = useState({ name: '', address: '', phone: '', isActive: true });
   const toast = useToast();
 
+  const userRole = localStorage.getItem('user_role');
+  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+
+  const hasPermission = (key) => {
+    if (userRole === 'OWNER') return true;
+    return !!userPermissions[key];
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -84,15 +92,17 @@ export default function SucursalesPage() {
           </h2>
           <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Administra los puntos de venta y almacenes físicos de tu Pyme.</p>
         </div>
-        <button 
-          onClick={showForm ? resetForm : () => setShowForm(true)} 
-          style={{ 
-            display: 'flex', alignItems: 'center', gap: '0.5rem', 
-            backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
-          }}
-        >
-          {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Aperturar Sucursal</>}
-        </button>
+        {hasPermission('sucursales_crear') && (
+          <button 
+            onClick={showForm ? resetForm : () => setShowForm(true)} 
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '0.5rem', 
+              backgroundColor: showForm ? 'var(--text-secondary)' : 'var(--accent-blue)' 
+            }}
+          >
+            {showForm ? <><X size={18} /> Cancelar</> : <><Plus size={18} /> Aperturar Sucursal</>}
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -163,12 +173,16 @@ export default function SucursalesPage() {
                     </span>
                   </td>
                   <td style={{ textAlign: 'right' }}>
-                    <button onClick={() => handleEdit(s)} style={{ padding: '0.25rem', background: 'none', color: 'var(--accent-blue)' }} title="Editar">
-                      <Edit2 size={16} />
-                    </button>
-                    <button onClick={() => handleDelete(s.id)} style={{ padding: '0.25rem', background: 'none', color: 'var(--danger-color)', marginLeft: '0.5rem' }} title="Cerrar / Eliminar">
-                      <Trash2 size={16} />
-                    </button>
+                    {hasPermission('sucursales_editar') && (
+                      <button onClick={() => handleEdit(s)} style={{ padding: '0.25rem', background: 'none', color: 'var(--accent-blue)' }} title="Editar">
+                        <Edit2 size={16} />
+                      </button>
+                    )}
+                    {hasPermission('sucursales_eliminar') && (
+                      <button onClick={() => handleDelete(s.id)} style={{ padding: '0.25rem', background: 'none', color: 'var(--danger-color)', marginLeft: '0.5rem' }} title="Cerrar / Eliminar">
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
