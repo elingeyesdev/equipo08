@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
@@ -45,7 +46,8 @@ import retrofit2.Response;
 public class SourcingFragment extends Fragment {
 
     private Button btnToggleForm, btnGuardar;
-    private CardView cardForm;
+    private CardView cardForm, cardFilter;
+    private ScrollView scrollForm;
     private EditText etVolumen, etFechaVencimiento, etFechaProduccion, etSearch, etFilterDateFrom, etFilterDateTo;
     private TextInputLayout tilFechaVencimiento, tilFechaProduccion;
     private Spinner spinnerSucursal, spinnerProducto, spinnerProveedor, spinnerFilterSucursal;
@@ -70,6 +72,8 @@ public class SourcingFragment extends Fragment {
         btnToggleForm = view.findViewById(R.id.btnToggleForm);
         btnGuardar = view.findViewById(R.id.btnGuardar);
         cardForm = view.findViewById(R.id.cardForm);
+        cardFilter = view.findViewById(R.id.cardFilter);
+        scrollForm = view.findViewById(R.id.scrollForm);
         etVolumen = view.findViewById(R.id.etVolumen);
         spinnerSucursal = view.findViewById(R.id.spinnerSucursal);
         spinnerProducto = view.findViewById(R.id.spinnerProducto);
@@ -115,11 +119,13 @@ public class SourcingFragment extends Fragment {
     private void toggleForm() {
         isFormVisible = !isFormVisible;
         if (isFormVisible) {
-            cardForm.setVisibility(View.VISIBLE);
+            scrollForm.setVisibility(View.VISIBLE);
+            cardFilter.setVisibility(View.GONE);
             btnToggleForm.setText("X Cancelar");
             btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#64748b")));
         } else {
-            cardForm.setVisibility(View.GONE);
+            scrollForm.setVisibility(View.GONE);
+            cardFilter.setVisibility(View.VISIBLE);
             btnToggleForm.setText("Nuevo Ingreso");
             btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
             etVolumen.setText("");

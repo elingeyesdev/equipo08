@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.template.R;
 import com.example.template.network.models.Sucursal;
+import com.example.template.utils.SessionManager;
 import java.util.List;
 
 public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHolder> {
@@ -49,6 +50,10 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Sucursal s = list.get(position);
+        
+        SessionManager sessionManager = new SessionManager(holder.itemView.getContext());
+        holder.tvTienda.setText(sessionManager.getTenantName() + " -");
+
         holder.tvNombre.setText(s.getName());
         holder.tvDireccion.setText(s.getAddress() != null && !s.getAddress().isEmpty() ? s.getAddress() : "Sin Dirección");
         holder.tvTelefono.setText("Teléfono: " + (s.getPhone() != null && !s.getPhone().isEmpty() ? s.getPhone() : "N/A"));
@@ -88,10 +93,11 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNombre, tvDireccion, tvTelefono, tvEstado;
+        TextView tvTienda, tvNombre, tvDireccion, tvTelefono, tvEstado;
         ImageButton btnDelete, btnEdit;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            tvTienda = itemView.findViewById(R.id.tvTienda);
             tvNombre = itemView.findViewById(R.id.tvNombre);
             tvDireccion = itemView.findViewById(R.id.tvDireccion);
             tvTelefono = itemView.findViewById(R.id.tvTelefono);

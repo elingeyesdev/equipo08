@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -37,7 +38,8 @@ public class ProductsFragment extends Fragment {
 
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
-    private EditText etName, etSku, etPrecioCoste, etPrecioVenta, etDescription;
+    private AutoCompleteTextView etName;
+    private EditText etSku, etPrecioCoste, etPrecioVenta, etDescription;
     private TextView tvMargen;
     private Spinner spinnerProveedor, spinnerCategoria;
     private RecyclerView recyclerView;
@@ -140,7 +142,7 @@ public class ProductsFragment extends Fragment {
     private void toggleForm(boolean fromEdit) {
         if (!fromEdit) {
             editingProducto = null;
-            etName.setText(""); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText("");
+            etName.setText("", false); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText("");
             btnGuardar.setText("Nuevo Artículo");
         }
         
@@ -158,7 +160,7 @@ public class ProductsFragment extends Fragment {
 
     private void editProducto(Producto producto) {
         editingProducto = producto;
-        etName.setText(producto.getName());
+        etName.setText(producto.getName(), false);
         etDescription.setText(producto.getDescription() != null ? producto.getDescription() : "");
         etSku.setText(producto.getSku());
         etPrecioCoste.setText(String.valueOf(producto.getPrecioCosto()));
@@ -223,7 +225,21 @@ public class ProductsFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Producto>> call, Response<List<Producto>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    adapter.updateData(response.body());
+                    List<Producto> list = response.body();
+                    adapter.updateData(list);
+
+                    // Setup AutoComplete for product names
+                    List<String> productNames = new ArrayList<>();
+                    for (Producto p : list) {
+                        if (p.getName() != null && !p.getName().isEmpty() && !productNames.contains(p.getName())) {
+                            productNames.add(p.getName());
+                        }
+                    }
+                    if (getContext() != null) {
+                        ArrayAdapter<String> nameAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, productNames);
+                        etName.setThreshold(1);
+                        etName.setAdapter(nameAdapter);
+                    }
                 }
             }
             @Override
@@ -270,20 +286,8 @@ public class ProductsFragment extends Fragment {
         double coste = Double.parseDouble(costeStr);
         double venta = Double.parseDouble(ventaStr);
 
-        // HACK TEMPORAL: Para evitar el error de nombres y sku duplicados en el backend,
-        // le adjuntamos la variante (descripción) al nombre y sku del producto, solo si no la tiene ya.
         String nameToSend = name;
         String skuToSend = sku;
-        if (!desc.isEmpty()) {
-            String safeDescName = desc.replaceAll("[^\\\\p{L}\\\\p{N}\\\\s]", "").trim();
-            if (!safeDescName.isEmpty() && !name.endsWith(safeDescName)) {
-                nameToSend = name + " " + safeDescName;
-            }
-            String safeDescSku = desc.replaceAll("[^a-zA-Z0-9]", "");
-            if (!safeDescSku.isEmpty() && !sku.endsWith(safeDescSku)) {
-                skuToSend = sku + "-" + safeDescSku;
-            }
-        }
 
         Producto request = new Producto(nameToSend, skuToSend, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
         
