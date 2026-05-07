@@ -36,11 +36,12 @@ public class PermisosFragment extends Fragment {
     private Map<String, Switch> vendedorSwitches = new HashMap<>();
 
     private String[] categorias = {
-            "SUCURSALES FÍSICAS",
-            "CATÁLOGO CENTRAL",
-            "AUDITORÍA SOURCING",
-            "NIVELES DE INVENTARIO",
-            "RECURSOS HUMANOS"
+            "Sucursales Físicas",
+            "Catálogo Central (Productos)",
+            "Gestión de Proveedores",
+            "Auditoría Sourcing (Lotes)",
+            "Niveles de Inventario y Ajustes",
+            "Recursos Humanos"
     };
 
     private Map<String, String[]> permisosPorCategoria = new HashMap<>();
@@ -57,25 +58,42 @@ public class PermisosFragment extends Fragment {
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
-        // Inicializar datos
-        permisosPorCategoria.put("SUCURSALES FÍSICAS", new String[]{
+        // Inicializar datos EXACTAMENTE como en el frontend
+        permisosPorCategoria.put("Sucursales Físicas", new String[]{
                 "Consultar Directorio Geográfico",
-                "Control de Alta, Edición y Cierre"
+                "Registrar Nuevas Sucursales",
+                "Editar Datos de Sucursales",
+                "Dar de Baja Sucursales"
         });
-        permisosPorCategoria.put("CATÁLOGO CENTRAL", new String[]{
+        permisosPorCategoria.put("Catálogo Central (Productos)", new String[]{
                 "Visualización Global de Productos",
-                "Creación y Alteración de Precios"
+                "Añadir Nuevos Productos",
+                "Modificar Precios y Artículos",
+                "Eliminar Artículos del Catálogo"
         });
-        permisosPorCategoria.put("AUDITORÍA SOURCING", new String[]{
+        permisosPorCategoria.put("Gestión de Proveedores", new String[]{
+                "Consultar Directorio de Proveedores",
+                "Registrar Nuevos Proveedores",
+                "Editar Datos de Proveedores",
+                "Dar de Baja Proveedores"
+        });
+        permisosPorCategoria.put("Auditoría Sourcing (Lotes)", new String[]{
                 "Inspeccionar Historial de Accesos",
-                "Registrar Nuevos Lotes y Costos"
+                "Registrar Nuevos Lotes",
+                "Editar Lotes Existentes",
+                "Anular Lotes Ingresados"
         });
-        permisosPorCategoria.put("NIVELES DE INVENTARIO", new String[]{
-                "Visualización de Cantidades por Sucursal"
+        permisosPorCategoria.put("Niveles de Inventario y Ajustes", new String[]{
+                "Visualización de Cantidades",
+                "Registrar Incidencias / Ajustes",
+                "Modificar Incidencias",
+                "Eliminar Incidencias"
         });
-        permisosPorCategoria.put("RECURSOS HUMANOS", new String[]{
+        permisosPorCategoria.put("Recursos Humanos", new String[]{
                 "Consultar Organigrama Interno",
-                "Contratar y Desvincular Personal"
+                "Contratar Personal",
+                "Editar Datos de Personal",
+                "Desvincular Personal"
         });
 
         buildUI(llSupervisorPermisos, supervisorSwitches);
@@ -154,18 +172,34 @@ public class PermisosFragment extends Fragment {
 
                         if (targetSwitches != null) {
                             setSwitchSafe(targetSwitches, "Consultar Directorio Geográfico", pr.isSucursalesVer());
-                            setSwitchSafe(targetSwitches, "Control de Alta, Edición y Cierre", pr.isSucursalesGestionar());
+                            setSwitchSafe(targetSwitches, "Registrar Nuevas Sucursales", pr.isSucursalesCrear());
+                            setSwitchSafe(targetSwitches, "Editar Datos de Sucursales", pr.isSucursalesEditar());
+                            setSwitchSafe(targetSwitches, "Dar de Baja Sucursales", pr.isSucursalesEliminar());
                             
                             setSwitchSafe(targetSwitches, "Visualización Global de Productos", pr.isCatalogoVer());
-                            setSwitchSafe(targetSwitches, "Creación y Alteración de Precios", pr.isCatalogoGestionar());
+                            setSwitchSafe(targetSwitches, "Añadir Nuevos Productos", pr.isCatalogoCrear());
+                            setSwitchSafe(targetSwitches, "Modificar Precios y Artículos", pr.isCatalogoEditar());
+                            setSwitchSafe(targetSwitches, "Eliminar Artículos del Catálogo", pr.isCatalogoEliminar());
+                            
+                            setSwitchSafe(targetSwitches, "Consultar Directorio de Proveedores", pr.isProveedoresVer());
+                            setSwitchSafe(targetSwitches, "Registrar Nuevos Proveedores", pr.isProveedoresCrear());
+                            setSwitchSafe(targetSwitches, "Editar Datos de Proveedores", pr.isProveedoresEditar());
+                            setSwitchSafe(targetSwitches, "Dar de Baja Proveedores", pr.isProveedoresEliminar());
                             
                             setSwitchSafe(targetSwitches, "Inspeccionar Historial de Accesos", pr.isSourcingVer());
-                            setSwitchSafe(targetSwitches, "Registrar Nuevos Lotes y Costos", pr.isSourcingGestionar());
+                            setSwitchSafe(targetSwitches, "Registrar Nuevos Lotes", pr.isSourcingCrear());
+                            setSwitchSafe(targetSwitches, "Editar Lotes Existentes", pr.isSourcingEditar());
+                            setSwitchSafe(targetSwitches, "Anular Lotes Ingresados", pr.isSourcingEliminar());
                             
-                            setSwitchSafe(targetSwitches, "Visualización de Cantidades por Sucursal", pr.isInventarioVer());
+                            setSwitchSafe(targetSwitches, "Visualización de Cantidades", pr.isInventarioVer());
+                            setSwitchSafe(targetSwitches, "Registrar Incidencias / Ajustes", pr.isInventarioCrear());
+                            setSwitchSafe(targetSwitches, "Modificar Incidencias", pr.isInventarioEditar());
+                            setSwitchSafe(targetSwitches, "Eliminar Incidencias", pr.isInventarioEliminar());
                             
                             setSwitchSafe(targetSwitches, "Consultar Organigrama Interno", pr.isUsuariosVer());
-                            setSwitchSafe(targetSwitches, "Contratar y Desvincular Personal", pr.isUsuariosGestionar());
+                            setSwitchSafe(targetSwitches, "Contratar Personal", pr.isUsuariosCrear());
+                            setSwitchSafe(targetSwitches, "Editar Datos de Personal", pr.isUsuariosEditar());
+                            setSwitchSafe(targetSwitches, "Desvincular Personal", pr.isUsuariosEliminar());
                         }
                     }
                 }
@@ -185,18 +219,34 @@ public class PermisosFragment extends Fragment {
         req.setRole(rol);
         
         req.setSucursalesVer(getSwitchSafe(switchesMap, "Consultar Directorio Geográfico"));
-        req.setSucursalesGestionar(getSwitchSafe(switchesMap, "Control de Alta, Edición y Cierre"));
+        req.setSucursalesCrear(getSwitchSafe(switchesMap, "Registrar Nuevas Sucursales"));
+        req.setSucursalesEditar(getSwitchSafe(switchesMap, "Editar Datos de Sucursales"));
+        req.setSucursalesEliminar(getSwitchSafe(switchesMap, "Dar de Baja Sucursales"));
         
         req.setCatalogoVer(getSwitchSafe(switchesMap, "Visualización Global de Productos"));
-        req.setCatalogoGestionar(getSwitchSafe(switchesMap, "Creación y Alteración de Precios"));
+        req.setCatalogoCrear(getSwitchSafe(switchesMap, "Añadir Nuevos Productos"));
+        req.setCatalogoEditar(getSwitchSafe(switchesMap, "Modificar Precios y Artículos"));
+        req.setCatalogoEliminar(getSwitchSafe(switchesMap, "Eliminar Artículos del Catálogo"));
+        
+        req.setProveedoresVer(getSwitchSafe(switchesMap, "Consultar Directorio de Proveedores"));
+        req.setProveedoresCrear(getSwitchSafe(switchesMap, "Registrar Nuevos Proveedores"));
+        req.setProveedoresEditar(getSwitchSafe(switchesMap, "Editar Datos de Proveedores"));
+        req.setProveedoresEliminar(getSwitchSafe(switchesMap, "Dar de Baja Proveedores"));
         
         req.setSourcingVer(getSwitchSafe(switchesMap, "Inspeccionar Historial de Accesos"));
-        req.setSourcingGestionar(getSwitchSafe(switchesMap, "Registrar Nuevos Lotes y Costos"));
+        req.setSourcingCrear(getSwitchSafe(switchesMap, "Registrar Nuevos Lotes"));
+        req.setSourcingEditar(getSwitchSafe(switchesMap, "Editar Lotes Existentes"));
+        req.setSourcingEliminar(getSwitchSafe(switchesMap, "Anular Lotes Ingresados"));
         
-        req.setInventarioVer(getSwitchSafe(switchesMap, "Visualización de Cantidades por Sucursal"));
+        req.setInventarioVer(getSwitchSafe(switchesMap, "Visualización de Cantidades"));
+        req.setInventarioCrear(getSwitchSafe(switchesMap, "Registrar Incidencias / Ajustes"));
+        req.setInventarioEditar(getSwitchSafe(switchesMap, "Modificar Incidencias"));
+        req.setInventarioEliminar(getSwitchSafe(switchesMap, "Eliminar Incidencias"));
         
         req.setUsuariosVer(getSwitchSafe(switchesMap, "Consultar Organigrama Interno"));
-        req.setUsuariosGestionar(getSwitchSafe(switchesMap, "Contratar y Desvincular Personal"));
+        req.setUsuariosCrear(getSwitchSafe(switchesMap, "Contratar Personal"));
+        req.setUsuariosEditar(getSwitchSafe(switchesMap, "Editar Datos de Personal"));
+        req.setUsuariosEliminar(getSwitchSafe(switchesMap, "Desvincular Personal"));
 
         apiService.updatePermisos(req).enqueue(new Callback<PermisosRoles>() {
             @Override

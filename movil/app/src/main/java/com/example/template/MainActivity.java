@@ -12,7 +12,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.example.template.ui.HomeFragment;
+
 import com.example.template.ui.ProductsFragment;
 import com.example.template.ui.ProvidersFragment;
 import com.example.template.ui.SourcingFragment;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         sessionManager = new SessionManager(this);
         // Bypass login and use dummy session as requested
         if (!sessionManager.isLoggedIn()) {
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, LandingActivity.class));
             finish();
             return;
         }
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_logout) {
                 sessionManager.logout();
-                startActivity(new Intent(this, LoginActivity.class));
+                startActivity(new Intent(this, LandingActivity.class));
                 finish();
                 return true;
             }
@@ -79,11 +79,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.setNavigationItemSelectedListener(this);
 
+        // Update nav header
+        android.view.View headerView = navigationView.getHeaderView(0);
+        if (headerView == null) {
+            headerView = navigationView.inflateHeaderView(R.layout.nav_header);
+        }
+        android.widget.TextView navUsername = headerView.findViewById(R.id.nav_header_name);
+        android.widget.TextView navRole = headerView.findViewById(R.id.nav_header_role);
+        if (navUsername != null) navUsername.setText(sessionManager.getUserName());
+        if (navRole != null) navRole.setText(sessionManager.getRole());
+
         // initial load
         if (savedInstanceState == null) {
-            navigationView.setCheckedItem(R.id.nav_home);
+            navigationView.setCheckedItem(R.id.nav_products);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new HomeFragment())
+                    .replace(R.id.fragment_container, new ProductsFragment())
                     .commit();
         }
 
@@ -132,9 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Fragment selectedFragment = null;
         int itemId = item.getItemId();
 
-        if (itemId == R.id.nav_home) {
-            selectedFragment = new HomeFragment();
-        } else if (itemId == R.id.nav_providers) {
+        if (itemId == R.id.nav_providers) {
             selectedFragment = new ProvidersFragment();
         } else if (itemId == R.id.nav_products) {
             selectedFragment = new ProductsFragment();
@@ -152,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new PermisosFragment();
         } else if (itemId == R.id.nav_logout) {
             sessionManager.logout();
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, LandingActivity.class));
             finish();
             return true;
         }

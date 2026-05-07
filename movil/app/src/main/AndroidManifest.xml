@@ -18,7 +18,8 @@
             android:exported="false">
         </activity>
 
-        <activity android:name=".LoginActivity" android:exported="true">
+        <activity android:name=".LoginActivity" android:exported="false" />
+        <activity android:name=".LandingActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

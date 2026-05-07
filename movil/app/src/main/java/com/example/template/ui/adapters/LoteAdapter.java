@@ -47,7 +47,11 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
         holder.tvFecha.setText(l.getFechaIngreso() != null ? l.getFechaIngreso().substring(0, 10) : "");
         
         if (l.getProducto() != null) {
-            holder.tvProducto.setText(l.getProducto().getName() + " (" + l.getProducto().getSku() + ")");
+            String prodText = l.getProducto().getName() + " (" + l.getProducto().getSku() + ")";
+            if (l.getProducto().getDescription() != null && !l.getProducto().getDescription().isEmpty()) {
+                prodText += "\nVariante: " + l.getProducto().getDescription();
+            }
+            holder.tvProducto.setText(prodText);
         } else {
             holder.tvProducto.setText("Producto Desconocido");
         }

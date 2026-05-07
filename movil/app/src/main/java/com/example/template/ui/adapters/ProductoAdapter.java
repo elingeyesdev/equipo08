@@ -51,6 +51,13 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHo
         holder.tvSku.setText("SKU: " + p.getSku());
         holder.tvNombre.setText(p.getName());
         
+        if (p.getDescription() != null && !p.getDescription().isEmpty()) {
+            holder.tvVariant.setVisibility(View.VISIBLE);
+            holder.tvVariant.setText("Variante: " + p.getDescription());
+        } else {
+            holder.tvVariant.setVisibility(View.GONE);
+        }
+        
         // El backend devuelve a veces el objeto Proveedor anidado
         if (p.getProveedor() != null) {
             holder.tvProveedor.setText("Proveedor: " + p.getProveedor().getName());
@@ -85,12 +92,13 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvSku, tvNombre, tvProveedor;
+        TextView tvSku, tvNombre, tvProveedor, tvVariant;
         ImageButton btnDelete, btnEdit;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvSku = itemView.findViewById(R.id.tvSku);
             tvNombre = itemView.findViewById(R.id.tvNombre);
+            tvVariant = itemView.findViewById(R.id.tvVariant);
             tvProveedor = itemView.findViewById(R.id.tvProveedor);
             btnDelete = itemView.findViewById(R.id.btnDelete);
             btnEdit = itemView.findViewById(R.id.btnEdit);

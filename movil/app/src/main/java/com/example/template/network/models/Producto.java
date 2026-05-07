@@ -9,14 +9,16 @@ public class Producto {
     private double precioCosto;
     private double precioVenta;
     private Proveedor proveedor; 
+    private String description;
 
-    public Producto(String name, String sku, String category, double precioCosto, double precioVenta, String proveedor_id) {
+    public Producto(String name, String sku, String category, double precioCosto, double precioVenta, String proveedor_id, String description) {
         this.name = name;
         this.sku = sku;
         this.category = category;
         this.precioCosto = precioCosto;
         this.precioVenta = precioVenta;
         this.proveedor_id = proveedor_id;
+        this.description = description;
     }
 
     public String getId() { return id; }
@@ -27,9 +29,13 @@ public class Producto {
     public double getPrecioCosto() { return precioCosto; }
     public double getPrecioVenta() { return precioVenta; }
     public Proveedor getProveedor() { return proveedor; }
+    public String getDescription() { return description; }
 
     @Override
     public String toString() {
+        if (description != null && !description.isEmpty()) {
+            return name + " (" + description + ")";
+        }
         return name; 
     }
 }

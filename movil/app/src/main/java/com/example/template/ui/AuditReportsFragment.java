@@ -46,7 +46,7 @@ public class AuditReportsFragment extends Fragment {
     private List<Ajuste> allAjustes = new ArrayList<>();
     private Button btnToggleFilter, btnDateFrom, btnDateTo, btnClearFilters;
     private androidx.cardview.widget.CardView cardFilters;
-    private Spinner spinnerOperator, spinnerCategory;
+    private Spinner spinnerOperator, spinnerCategory, spinnerRole;
     private boolean isFilterVisible = false;
     private Calendar calFrom = null;
     private Calendar calTo = null;
@@ -73,6 +73,7 @@ public class AuditReportsFragment extends Fragment {
         btnDateTo = view.findViewById(R.id.btnDateTo);
         btnClearFilters = view.findViewById(R.id.btnClearFilters);
         spinnerOperator = view.findViewById(R.id.spinnerOperator);
+        spinnerRole = view.findViewById(R.id.spinnerRole);
         spinnerCategory = view.findViewById(R.id.spinnerCategory);
 
         btnToggleFilter.setOnClickListener(v -> {
@@ -95,6 +96,7 @@ public class AuditReportsFragment extends Fragment {
             btnDateFrom.setText("dd/mm/yyyy");
             btnDateTo.setText("dd/mm/yyyy");
             spinnerOperator.setSelection(0);
+            spinnerRole.setSelection(0);
             spinnerCategory.setSelection(0);
             applyFilters();
         });
@@ -108,6 +110,7 @@ public class AuditReportsFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {}
         };
         spinnerOperator.setOnItemSelectedListener(filterListener);
+        spinnerRole.setOnItemSelectedListener(filterListener);
         spinnerCategory.setOnItemSelectedListener(filterListener);
 
         loadAudits();
@@ -181,6 +184,8 @@ public class AuditReportsFragment extends Fragment {
         if (getContext() == null) return;
         List<String> operators = new ArrayList<>();
         operators.add("Cualquier Operador");
+        List<String> roles = new ArrayList<>();
+        roles.add("Cualquier Rol");
         List<String> motives = new ArrayList<>();
         motives.add("Cualquier Motivo");
         motives.add("Error de Registro");
@@ -191,11 +196,18 @@ public class AuditReportsFragment extends Fragment {
         for (Ajuste a : allAjustes) {
             String op = a.getUsuario() != null ? a.getUsuario().getNombreCompleto() : "Operador";
             if (!operators.contains(op)) operators.add(op);
+            
+            String rol = a.getUsuario() != null ? a.getUsuario().getRol() : null;
+            if (rol != null && !roles.contains(rol)) roles.add(rol);
         }
 
         ArrayAdapter<String> opAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, operators);
         opAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOperator.setAdapter(opAdapter);
+
+        ArrayAdapter<String> roleAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, roles);
+        roleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerRole.setAdapter(roleAdapter);
 
         ArrayAdapter<String> catAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, motives);
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -228,6 +240,12 @@ public class AuditReportsFragment extends Fragment {
             if (!"Cualquier Operador".equals(selOp)) {
                 String op = a.getUsuario() != null ? a.getUsuario().getNombreCompleto() : "Operador";
                 if (!selOp.equals(op)) matches = false;
+            }
+            
+            String selRol = spinnerRole.getSelectedItem() != null ? spinnerRole.getSelectedItem().toString() : "Cualquier Rol";
+            if (!"Cualquier Rol".equals(selRol)) {
+                String rol = a.getUsuario() != null ? a.getUsuario().getRol() : null;
+                if (rol == null || !selRol.equals(rol)) matches = false;
             }
 
             if (!"Cualquier Motivo".equals(selMot)) {

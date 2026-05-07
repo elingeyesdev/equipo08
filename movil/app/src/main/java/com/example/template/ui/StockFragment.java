@@ -46,6 +46,7 @@ public class StockFragment extends Fragment {
     private StockAdapter adapter;
     private ApiService apiService;
     private Spinner spinnerSucursal;
+    private EditText etSearch;
     private TextView tvTotalValuation, tvTotalDeficit;
 
     private List<Stock> allStockList = new ArrayList<>();
@@ -59,8 +60,18 @@ public class StockFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerView);
         spinnerSucursal = view.findViewById(R.id.spinnerSucursal);
+        etSearch = view.findViewById(R.id.etSearch);
         tvTotalValuation = view.findViewById(R.id.tvTotalValuation);
         tvTotalDeficit = view.findViewById(R.id.tvTotalDeficit);
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { filterStock(); }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new StockAdapter(new ArrayList<>(), new StockAdapter.OnIncidenciaClickListener() {
@@ -152,30 +163,59 @@ public class StockFragment extends Fragment {
     }
 
     private void filterStock() {
-        if (spinnerSucursal.getSelectedItemPosition() <= 0) {
-            // "ALL" selected
-            adapter.updateData(allStockList);
-            calculateTotal(allStockList, allAjustesList);
-            return;
+        String query = "";
+        if (etSearch != null && etSearch.getText() != null) {
+            query = etSearch.getText().toString().toLowerCase();
         }
 
-        // -1 because the first option is "ALL"
-        Sucursal selectedBranch = sucursalesList.get(spinnerSucursal.getSelectedItemPosition() - 1);
+        List<Stock> baseList;
+        Sucursal selectedBranch = null;
+
+        if (spinnerSucursal.getSelectedItemPosition() > 0) {
+            selectedBranch = sucursalesList.get(spinnerSucursal.getSelectedItemPosition() - 1);
+            baseList = new ArrayList<>();
+            for (Stock s : allStockList) {
+                if (s.getSucursalId() != null && s.getSucursalId().equals(selectedBranch.getId())) {
+                    baseList.add(s);
+                }
+            }
+        } else {
+            baseList = allStockList;
+        }
+
         List<Stock> filteredList = new ArrayList<>();
-        
-        for (Stock s : allStockList) {
-            if (s.getSucursalId() != null && s.getSucursalId().equals(selectedBranch.getId())) {
+        for (Stock s : baseList) {
+            boolean matches = true;
+            if (!query.isEmpty() && s.getProducto() != null) {
+                String name = s.getProducto().getName() != null ? s.getProducto().getName().toLowerCase() : "";
+                String sku = s.getProducto().getSku() != null ? s.getProducto().getSku().toLowerCase() : "";
+                if (!name.contains(query) && !sku.contains(query)) {
+                    matches = false;
+                }
+            }
+            if (matches) {
                 filteredList.add(s);
             }
         }
-        
+
         List<com.example.template.network.models.Ajuste> filteredAjustes = new ArrayList<>();
         for (com.example.template.network.models.Ajuste a : allAjustesList) {
-            if (a.getSucursal() != null && selectedBranch.getId().equals(a.getSucursal().getId())) {
+            boolean sucursalMatch = selectedBranch == null || (a.getSucursal() != null && selectedBranch.getId().equals(a.getSucursal().getId()));
+            
+            boolean queryMatch = true;
+            if (!query.isEmpty() && a.getProducto() != null) {
+                String name = a.getProducto().getName() != null ? a.getProducto().getName().toLowerCase() : "";
+                String sku = a.getProducto().getSku() != null ? a.getProducto().getSku().toLowerCase() : "";
+                if (!name.contains(query) && !sku.contains(query)) {
+                    queryMatch = false;
+                }
+            }
+
+            if (sucursalMatch && queryMatch) {
                 filteredAjustes.add(a);
             }
         }
-        
+
         adapter.updateData(filteredList);
         calculateTotal(filteredList, filteredAjustes);
     }

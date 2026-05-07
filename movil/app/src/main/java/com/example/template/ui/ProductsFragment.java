@@ -37,7 +37,7 @@ public class ProductsFragment extends Fragment {
 
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
-    private EditText etName, etSku, etPrecioCoste, etPrecioVenta;
+    private EditText etName, etSku, etPrecioCoste, etPrecioVenta, etDescription;
     private TextView tvMargen;
     private Spinner spinnerProveedor, spinnerCategoria;
     private RecyclerView recyclerView;
@@ -57,6 +57,7 @@ public class ProductsFragment extends Fragment {
         btnGuardar = view.findViewById(R.id.btnGuardar);
         cardForm = view.findViewById(R.id.cardForm);
         etName = view.findViewById(R.id.etName);
+        etDescription = view.findViewById(R.id.etDescription);
         etSku = view.findViewById(R.id.etSku);
         etPrecioCoste = view.findViewById(R.id.etPrecioCoste);
         etPrecioVenta = view.findViewById(R.id.etPrecioVenta);
@@ -139,7 +140,7 @@ public class ProductsFragment extends Fragment {
     private void toggleForm(boolean fromEdit) {
         if (!fromEdit) {
             editingProducto = null;
-            etName.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText("");
+            etName.setText(""); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText("");
             btnGuardar.setText("Nuevo Artículo");
         }
         
@@ -158,6 +159,7 @@ public class ProductsFragment extends Fragment {
     private void editProducto(Producto producto) {
         editingProducto = producto;
         etName.setText(producto.getName());
+        etDescription.setText(producto.getDescription() != null ? producto.getDescription() : "");
         etSku.setText(producto.getSku());
         etPrecioCoste.setText(String.valueOf(producto.getPrecioCosto()));
         etPrecioVenta.setText(String.valueOf(producto.getPrecioVenta()));
@@ -252,6 +254,7 @@ public class ProductsFragment extends Fragment {
 
     private void saveProducto() {
         String name = etName.getText().toString().trim();
+        String desc = etDescription.getText().toString().trim();
         String sku = etSku.getText().toString().trim();
         String cat = spinnerCategoria.getSelectedItem() != null ? spinnerCategoria.getSelectedItem().toString() : "Otros";
         String costeStr = etPrecioCoste.getText().toString().trim();
@@ -267,7 +270,14 @@ public class ProductsFragment extends Fragment {
         double coste = Double.parseDouble(costeStr);
         double venta = Double.parseDouble(ventaStr);
 
-        Producto request = new Producto(name, sku, cat, coste, venta, selectedProv.getId());
+        // HACK TEMPORAL: Para evitar el error de nombres duplicados en el backend,
+        // le adjuntamos la variante (descripción) al nombre del producto, solo si no la tiene ya.
+        String nameToSend = name;
+        if (!desc.isEmpty() && !name.endsWith(desc)) {
+            nameToSend = name + " - " + desc;
+        }
+
+        Producto request = new Producto(nameToSend, sku, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
         
         if (editingProducto != null) {
             apiService.updateProducto(editingProducto.getId(), request).enqueue(new Callback<Producto>() {

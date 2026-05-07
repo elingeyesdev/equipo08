@@ -25,6 +25,10 @@ public class AuthResponse {
         return user != null ? user.tenant_name : null; 
     }
 
+    public String getUserName() {
+        return user != null ? user.name : null;
+    }
+
     public String getRole() {
         return user != null ? user.role : null;
     }
