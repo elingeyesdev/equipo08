@@ -153,7 +153,11 @@ public class AuditReportsFragment extends Fragment {
             }
         }
         
-        tvTotalLoss.setText(String.format("Bs. %.2f", totalLoss));
+        if (totalLoss > 0) {
+            tvTotalLoss.setText(String.format("- Bs. %.2f", totalLoss));
+        } else {
+            tvTotalLoss.setText(String.format("Bs. %.2f", totalLoss));
+        }
         tvTotalIncidents.setText(list.size() + " Registros");
     }
 

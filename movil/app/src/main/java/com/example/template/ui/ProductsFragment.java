@@ -270,14 +270,22 @@ public class ProductsFragment extends Fragment {
         double coste = Double.parseDouble(costeStr);
         double venta = Double.parseDouble(ventaStr);
 
-        // HACK TEMPORAL: Para evitar el error de nombres duplicados en el backend,
-        // le adjuntamos la variante (descripción) al nombre del producto, solo si no la tiene ya.
+        // HACK TEMPORAL: Para evitar el error de nombres y sku duplicados en el backend,
+        // le adjuntamos la variante (descripción) al nombre y sku del producto, solo si no la tiene ya.
         String nameToSend = name;
-        if (!desc.isEmpty() && !name.endsWith(desc)) {
-            nameToSend = name + " - " + desc;
+        String skuToSend = sku;
+        if (!desc.isEmpty()) {
+            String safeDescName = desc.replaceAll("[^\\\\p{L}\\\\p{N}\\\\s]", "").trim();
+            if (!safeDescName.isEmpty() && !name.endsWith(safeDescName)) {
+                nameToSend = name + " " + safeDescName;
+            }
+            String safeDescSku = desc.replaceAll("[^a-zA-Z0-9]", "");
+            if (!safeDescSku.isEmpty() && !sku.endsWith(safeDescSku)) {
+                skuToSend = sku + "-" + safeDescSku;
+            }
         }
 
-        Producto request = new Producto(nameToSend, sku, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
+        Producto request = new Producto(nameToSend, skuToSend, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
         
         if (editingProducto != null) {
             apiService.updateProducto(editingProducto.getId(), request).enqueue(new Callback<Producto>() {

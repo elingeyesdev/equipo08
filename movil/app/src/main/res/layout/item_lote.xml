@@ -70,14 +70,28 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tvFechasExtra"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="#5a6a85"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@+id/btnDelete"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llDetails"
+            android:layout_marginEnd="8dp"/>
+
         <LinearLayout
+            android:id="@+id/llVolumen"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toStartOf="@+id/btnDelete"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/llDetails"
+            app:layout_constraintTop_toBottomOf="@+id/tvFechasExtra"
             android:layout_marginEnd="8dp">
 
             <TextView

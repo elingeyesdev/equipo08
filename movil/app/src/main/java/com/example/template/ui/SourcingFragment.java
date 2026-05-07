@@ -46,15 +46,16 @@ public class SourcingFragment extends Fragment {
 
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
-    private EditText etVolumen, etFechaVencimiento;
-    private TextInputLayout tilFechaVencimiento;
-    private Spinner spinnerSucursal, spinnerProducto, spinnerProveedor;
+    private EditText etVolumen, etFechaVencimiento, etFechaProduccion, etSearch, etFilterDateFrom, etFilterDateTo;
+    private TextInputLayout tilFechaVencimiento, tilFechaProduccion;
+    private Spinner spinnerSucursal, spinnerProducto, spinnerProveedor, spinnerFilterSucursal;
     private RecyclerView recyclerView;
     
     private LoteAdapter adapter;
     private ApiService apiService;
     private boolean isFormVisible = false;
 
+    private List<LoteIngreso> allLotesList = new ArrayList<>();
     private List<Producto> productosList = new ArrayList<>();
     private List<Proveedor> proveedoresList = new ArrayList<>();
     private List<Sucursal> sucursalesList = new ArrayList<>();
@@ -76,8 +77,23 @@ public class SourcingFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         etFechaVencimiento = view.findViewById(R.id.etFechaVencimiento);
         tilFechaVencimiento = view.findViewById(R.id.tilFechaVencimiento);
+        etFechaProduccion = view.findViewById(R.id.etFechaProduccion);
+        tilFechaProduccion = view.findViewById(R.id.tilFechaProduccion);
+        etSearch = view.findViewById(R.id.etSearch);
+        etFilterDateFrom = view.findViewById(R.id.etFilterDateFrom);
+        etFilterDateTo = view.findViewById(R.id.etFilterDateTo);
+        spinnerFilterSucursal = view.findViewById(R.id.spinnerFilterSucursal);
 
-        etFechaVencimiento.setOnClickListener(v -> showDatePicker());
+        etFechaVencimiento.setOnClickListener(v -> showDatePicker(etFechaVencimiento));
+        etFechaProduccion.setOnClickListener(v -> showDatePicker(etFechaProduccion));
+        etFilterDateFrom.setOnClickListener(v -> showFilterDatePicker(etFilterDateFrom));
+        etFilterDateTo.setOnClickListener(v -> showFilterDatePicker(etFilterDateTo));
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { filterLotes(); }
+            @Override public void afterTextChanged(Editable s) {}
+        });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new LoteAdapter(new ArrayList<>(), this::confirmDelete);
@@ -108,10 +124,11 @@ public class SourcingFragment extends Fragment {
             btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
             etVolumen.setText("");
             etFechaVencimiento.setText("");
+            etFechaProduccion.setText("");
         }
     }
 
-    private void showDatePicker() {
+    private void showDatePicker(EditText targetEditText) {
         if (getContext() == null) return;
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         int year = calendar.get(java.util.Calendar.YEAR);
@@ -122,9 +139,31 @@ public class SourcingFragment extends Fragment {
                 getContext(),
                 (view, year1, month1, dayOfMonth) -> {
                     String selectedDate = String.format(Locale.US, "%04d-%02d-%02d", year1, month1 + 1, dayOfMonth);
-                    etFechaVencimiento.setText(selectedDate);
+                    targetEditText.setText(selectedDate);
                 },
                 year, month, day);
+        datePickerDialog.show();
+    }
+
+    private void showFilterDatePicker(EditText targetEditText) {
+        if (getContext() == null) return;
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        int year = calendar.get(java.util.Calendar.YEAR);
+        int month = calendar.get(java.util.Calendar.MONTH);
+        int day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
+
+        android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(
+                getContext(),
+                (view, year1, month1, dayOfMonth) -> {
+                    String selectedDate = String.format(Locale.US, "%04d-%02d-%02d", year1, month1 + 1, dayOfMonth);
+                    targetEditText.setText(selectedDate);
+                    filterLotes();
+                },
+                year, month, day);
+        datePickerDialog.setButton(android.content.DialogInterface.BUTTON_NEUTRAL, "Limpiar", (dialog, which) -> {
+            targetEditText.setText("");
+            filterLotes();
+        });
         datePickerDialog.show();
     }
 
@@ -145,8 +184,11 @@ public class SourcingFragment extends Fragment {
                 
                 String cat = prod.getCategory();
                 if (cat != null && (cat.equals("Abarrotes y Alimentos") || cat.equals("Bebidas"))) {
+                    tilFechaProduccion.setVisibility(View.VISIBLE);
                     tilFechaVencimiento.setVisibility(View.VISIBLE);
                 } else {
+                    tilFechaProduccion.setVisibility(View.GONE);
+                    etFechaProduccion.setText("");
                     tilFechaVencimiento.setVisibility(View.GONE);
                     etFechaVencimiento.setText("");
                 }
@@ -161,7 +203,8 @@ public class SourcingFragment extends Fragment {
             @Override
             public void onResponse(Call<List<LoteIngreso>> call, Response<List<LoteIngreso>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    adapter.updateData(response.body());
+                    allLotesList = response.body();
+                    filterLotes();
                 }
             }
             @Override
@@ -187,6 +230,20 @@ public class SourcingFragment extends Fragment {
                         );
                         sucAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinnerSucursal.setAdapter(sucAdapter);
+
+                        List<String> filterOptions = new ArrayList<>();
+                        filterOptions.add("Todas las Sucursales");
+                        for (Sucursal s : sucursalesList) {
+                            filterOptions.add(s.getName());
+                        }
+                        ArrayAdapter<String> filterSucAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, filterOptions);
+                        filterSucAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinnerFilterSucursal.setAdapter(filterSucAdapter);
+                        
+                        spinnerFilterSucursal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { filterLotes(); }
+                            @Override public void onNothingSelected(AdapterView<?> parent) {}
+                        });
                     }
                 }
             }
@@ -235,10 +292,68 @@ public class SourcingFragment extends Fragment {
         });
     }
 
+    private void filterLotes() {
+        if (allLotesList == null) return;
+        
+        String query = etSearch != null && etSearch.getText() != null ? etSearch.getText().toString().toLowerCase() : "";
+        String dateFrom = etFilterDateFrom != null ? etFilterDateFrom.getText().toString() : "";
+        String dateTo = etFilterDateTo != null ? etFilterDateTo.getText().toString() : "";
+        int sucIndex = spinnerFilterSucursal != null ? spinnerFilterSucursal.getSelectedItemPosition() : 0;
+        
+        Sucursal selectedBranch = null;
+        if (sucIndex > 0 && sucursalesList != null && sucIndex - 1 < sucursalesList.size()) {
+            selectedBranch = sucursalesList.get(sucIndex - 1);
+        }
+
+        List<LoteIngreso> filteredList = new ArrayList<>();
+        for (LoteIngreso lote : allLotesList) {
+            boolean match = true;
+            
+            // Text search
+            if (!query.isEmpty() && lote.getProducto() != null) {
+                String name = lote.getProducto().getName() != null ? lote.getProducto().getName().toLowerCase() : "";
+                String sku = lote.getProducto().getSku() != null ? lote.getProducto().getSku().toLowerCase() : "";
+                if (!name.contains(query) && !sku.contains(query)) {
+                    match = false;
+                }
+            }
+            
+            // Sucursal filter
+            if (match && selectedBranch != null) {
+                if (lote.getSucursalId() == null || !lote.getSucursalId().equals(selectedBranch.getId())) {
+                    match = false;
+                }
+            }
+            
+            // Date filter (Vencimiento)
+            if (match && (!dateFrom.isEmpty() || !dateTo.isEmpty())) {
+                String venc = lote.getFechaVencimiento();
+                if (venc == null || venc.isEmpty()) {
+                    match = false;
+                } else {
+                    venc = venc.substring(0, Math.min(venc.length(), 10)); // just date part
+                    if (!dateFrom.isEmpty() && venc.compareTo(dateFrom) < 0) {
+                        match = false;
+                    }
+                    if (!dateTo.isEmpty() && venc.compareTo(dateTo) > 0) {
+                        match = false;
+                    }
+                }
+            }
+            
+            if (match) {
+                filteredList.add(lote);
+            }
+        }
+        adapter.updateData(filteredList);
+    }
+
     private void saveLote() {
         String volStr = etVolumen.getText().toString().trim();
         String fechaVencimiento = etFechaVencimiento.getText().toString().trim();
         if (fechaVencimiento.isEmpty()) fechaVencimiento = null;
+        String fechaProduccion = etFechaProduccion.getText().toString().trim();
+        if (fechaProduccion.isEmpty()) fechaProduccion = null;
 
         Sucursal selectedSucursal = (Sucursal) spinnerSucursal.getSelectedItem();
         Producto selectedProd = (Producto) spinnerProducto.getSelectedItem();
@@ -249,9 +364,20 @@ public class SourcingFragment extends Fragment {
             return;
         }
 
+        if (tilFechaProduccion.getVisibility() == View.VISIBLE) {
+            if (fechaProduccion == null || fechaVencimiento == null) {
+                Toast.makeText(getContext(), "Las fechas de producción y vencimiento son obligatorias para este producto", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (fechaProduccion.compareTo(fechaVencimiento) >= 0) {
+                Toast.makeText(getContext(), "La fecha de producción debe ser anterior a la de vencimiento", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         int vol = Integer.parseInt(volStr);
 
-        LoteIngreso request = new LoteIngreso(selectedSucursal.getId(), selectedProd.getId(), selectedProv.getId(), vol, fechaVencimiento);
+        LoteIngreso request = new LoteIngreso(selectedSucursal.getId(), selectedProd.getId(), selectedProv.getId(), vol, fechaVencimiento, fechaProduccion);
         
         apiService.createLote(request).enqueue(new Callback<LoteIngreso>() {
             @Override
@@ -259,6 +385,7 @@ public class SourcingFragment extends Fragment {
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Lote de Sourcing Confirmado", Toast.LENGTH_SHORT).show();
                     etVolumen.setText("");
+                    etFechaProduccion.setText("");
                     toggleForm();
                     loadLotes(); 
                 } else {

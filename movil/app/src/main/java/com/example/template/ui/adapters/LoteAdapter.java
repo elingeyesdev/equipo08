@@ -64,6 +64,16 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
 
         holder.tvVolumen.setText("+" + l.getCantidad() + " uds");
 
+        if (l.getFechaProduccion() != null && l.getFechaVencimiento() != null) {
+            holder.tvFechasExtra.setVisibility(View.VISIBLE);
+            holder.tvFechasExtra.setText("Prod: " + l.getFechaProduccion().substring(0, 10) + " | Venc: " + l.getFechaVencimiento().substring(0, 10));
+        } else if (l.getFechaVencimiento() != null) {
+            holder.tvFechasExtra.setVisibility(View.VISIBLE);
+            holder.tvFechasExtra.setText("Venc: " + l.getFechaVencimiento().substring(0, 10));
+        } else {
+            holder.tvFechasExtra.setVisibility(View.GONE);
+        }
+
         holder.btnDelete.setOnClickListener(v -> {
             if (deleteListener != null) {
                 deleteListener.onDeleteClick(l);
@@ -77,7 +87,7 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTrx, tvFecha, tvProducto, tvProveedor, tvVolumen;
+        TextView tvTrx, tvFecha, tvProducto, tvProveedor, tvVolumen, tvFechasExtra;
         ImageButton btnDelete;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -86,6 +96,7 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.ViewHolder> {
             tvProducto = itemView.findViewById(R.id.tvProducto);
             tvProveedor = itemView.findViewById(R.id.tvProveedor);
             tvVolumen = itemView.findViewById(R.id.tvVolumen);
+            tvFechasExtra = itemView.findViewById(R.id.tvFechasExtra);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }

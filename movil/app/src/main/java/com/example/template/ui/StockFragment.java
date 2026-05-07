@@ -238,7 +238,11 @@ public class StockFragment extends Fragment {
                 }
             }
         }
-        tvTotalDeficit.setText(String.format("Bs. %.2f", deficit));
+        if (deficit > 0) {
+            tvTotalDeficit.setText(String.format("- Bs. %.2f", deficit));
+        } else {
+            tvTotalDeficit.setText(String.format("Bs. %.2f", deficit));
+        }
     }
 
     private void showIncidenciaDialog(Stock stock) {

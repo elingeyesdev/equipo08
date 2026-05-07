@@ -84,7 +84,11 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
                 loss = Double.parseDouble(a.getValorPerdido());
             } catch (Exception ignored) {}
         }
-        holder.tvLoss.setText(String.format("Bs. %.2f", loss));
+        if (loss > 0) {
+            holder.tvLoss.setText(String.format("- Bs. %.2f", loss));
+        } else {
+            holder.tvLoss.setText(String.format("Bs. %.2f", loss));
+        }
     }
 
     @Override
