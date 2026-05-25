@@ -139,6 +139,34 @@ export default function StockPage() {
 
   const delta = getAuditDelta();
 
+  const handleSimularBajoStock = async () => {
+    if (filteredStock.length === 0) return toast.error("No hay productos para simular");
+    const numToModify = Math.min(2, filteredStock.length);
+    const shuffled = [...filteredStock].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, numToModify);
+    
+    setSaving(true);
+    try {
+      for (const s of selected) {
+        const payload = {
+          sucursal_id: s.sucursal_id,
+          producto_id: s.producto_id,
+          cantidad_fisica: Math.max(0, (s.producto?.stockMinimo || 10) - 1),
+          motivo: 'DANO_MERMA',
+          observaciones: 'Simulación de inventario bajo (E9)',
+          valor_adquisicion_unitario: s.cantidadTotal > 0 ? (s.valorAdquisicion / s.cantidadTotal) : 0
+        };
+        await api.post('/ajustes', payload);
+      }
+      toast.success(`Escenario simulado en ${numToModify} productos`);
+      fetchStock();
+    } catch (err) {
+      toast.error('Error al simular bajo stock');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="glass-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       
@@ -153,6 +181,16 @@ export default function StockPage() {
 
         {!auditItem && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {hasPermission('inventario_editar') && (
+              <button 
+                onClick={handleSimularBajoStock} 
+                disabled={saving}
+                style={{ backgroundColor: 'var(--danger-color)', color: 'white', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '0.85rem' }}
+                title="Genera un ajuste para colocar 2 productos bajo su umbral mínimo"
+              >
+                <TrendingDown size={16} /> Simular Escenario Crítico
+              </button>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <input 
                 type="text" 
