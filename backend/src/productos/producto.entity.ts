@@ -24,6 +24,9 @@ export class Producto {
   @Column({ nullable: true })
   category: string;
 
+  @Column('int', { default: 10 })
+  stockMinimo: number;
+
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   precioCosto: number;
 

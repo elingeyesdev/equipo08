@@ -12,7 +12,7 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [formData, setFormData] = useState({ 
-    name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '' 
+    name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10 
   });
   const toast = useToast();
 
@@ -52,7 +52,8 @@ export default function ProductsPage() {
       category: p.category || 'Otros',
       precioCosto: p.precioCosto || '',
       precioVenta: p.precioVenta || '',
-      description: p.description || ''
+      description: p.description || '',
+      stockMinimo: p.stockMinimo !== undefined ? p.stockMinimo : 10
     });
     setShowForm(true);
   };
@@ -80,13 +81,10 @@ export default function ProductsPage() {
     e.preventDefault();
     try {
       const payload = {
-        name: formData.name,
-        sku: formData.sku,
-        proveedor_id: formData.proveedor_id,
-        category: formData.category,
-        description: formData.description,
-        precioCosto: parseFloat(formData.precioCosto),
-        precioVenta: parseFloat(formData.precioVenta)
+        ...formData,
+        precioCosto: Number(formData.precioCosto) || 0,
+        precioVenta: Number(formData.precioVenta) || 0,
+        stockMinimo: Number(formData.stockMinimo) || 0
       };
 
       if (editingId) {
@@ -104,7 +102,7 @@ export default function ProductsPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '' });
+    setFormData({ name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10 });
     setEditingId(null);
     setShowForm(false);
   };
@@ -185,13 +183,16 @@ export default function ProductsPage() {
               </div>
 
               <div className="form-group">
-                <label>Precio Coste (Bs) *</label>
-                <input type="number" step="0.01" min="0" value={formData.precioCosto} onChange={e => setFormData({...formData, precioCosto: e.target.value})} required placeholder="0.00" />
+                <label>Precio Costo (Bs)</label>
+                <input type="number" step="0.1" value={formData.precioCosto} onChange={e => setFormData({...formData, precioCosto: e.target.value})} placeholder="0.00" />
               </div>
-
               <div className="form-group">
-                <label>Precio Venta Pública (Bs) *</label>
-                <input type="number" step="0.01" min="0" value={formData.precioVenta} onChange={e => setFormData({...formData, precioVenta: e.target.value})} required placeholder="0.00" />
+                <label>Precio Venta (Bs)</label>
+                <input type="number" step="0.1" value={formData.precioVenta} onChange={e => setFormData({...formData, precioVenta: e.target.value})} placeholder="0.00" />
+              </div>
+              <div className="form-group">
+                <label>Stock Mínimo (Alerta)</label>
+                <input type="number" min="0" value={formData.stockMinimo} onChange={e => setFormData({...formData, stockMinimo: e.target.value})} required placeholder="Ej. 10" />
               </div>
 
               <div className="form-group">
@@ -228,10 +229,10 @@ export default function ProductsPage() {
               <tr style={{ color: 'var(--text-secondary)' }}>
                 <th>Nombre del artículo</th>
                 <th>Categoría</th>
-                <th>Precio</th>
-                <th>Coste</th>
-                <th>Margen</th>
-                <th style={{ textAlign: 'center' }}>En stock</th>
+                <th>Proveedor</th>
+                <th style={{ textAlign: 'right' }}>Stock Min.</th>
+                <th style={{ textAlign: 'right' }}>Precio Compra</th>
+                <th style={{ textAlign: 'right' }}>Precio Venta</th>
                 <th style={{ textAlign: 'right', width: '80px' }}></th>
               </tr>
             </thead>
@@ -244,10 +245,6 @@ export default function ProductsPage() {
                   </td>
                 </tr>
               ) : products.map(p => {
-                // Sum branches logically (or single total if no branches setup yet)
-                const totalStock = p.stocks?.reduce((acc, curr) => acc + curr.cantidadTotal, 0) || 0;
-                const margin = p.precioVenta > 0 ? (((p.precioVenta - p.precioCosto) / p.precioVenta) * 100).toFixed(0) : 0;
-                
                 return (
                   <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ display: 'flex', flexDirection: 'column' }}>
@@ -259,18 +256,19 @@ export default function ProductsPage() {
                       )}
                       <div style={{ display: 'flex', gap: '0.5rem', fontSize: '0.75rem' }}>
                         <span style={{ color: '#94a3b8' }}>SKU: {p.sku}</span>
-                        <span style={{ color: 'var(--accent-blue)', fontWeight: 'bold' }}>• {p.proveedor?.name || 'Prov. Indefinido'}</span>
                       </div>
                     </td>
                     <td style={{ color: '#64748b' }}>
                       <div>{p.category || 'Otros'}</div>
                     </td>
-                    <td style={{ fontWeight: '500' }}>Bs.{Number(p.precioVenta).toFixed(2)}</td>
-                    <td style={{ color: '#64748b' }}>Bs.{Number(p.precioCosto).toFixed(2)}</td>
-                    <td><span style={{ color: margin < 0 ? '#dc2626' : 'inherit' }}>{margin}%</span></td>
-                    <td style={{ textAlign: 'center' }}>
-                      {totalStock === 0 ? <span style={{ color: '#94a3b8' }}>—</span> : <strong>{totalStock}</strong>}
+                    <td style={{ color: 'var(--text-secondary)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                         {p.proveedor?.name || 'Huérfano'}
+                      </div>
                     </td>
+                    <td style={{ textAlign: 'right', color: 'var(--danger-color)', fontWeight: 'bold' }}>{p.stockMinimo || 0}</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>Bs {Number(p.precioCosto).toFixed(2)}</td>
+                    <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>Bs {Number(p.precioVenta).toFixed(2)}</td>
                     <td style={{ textAlign: 'right' }}>
                       {hasPermission('catalogo_editar') && (
                         <button onClick={() => handleEdit(p)} style={{ padding: '0.25rem', background: 'none', color: '#64748b' }} title="Editar">

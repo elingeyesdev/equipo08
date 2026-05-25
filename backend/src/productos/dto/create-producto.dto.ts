@@ -20,6 +20,12 @@ export class CreateProductoDto {
   @IsOptional()
   category?: string;
 
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  stockMinimo?: number;
+
   @ApiProperty()
   @IsNumber()
   @Min(0)
