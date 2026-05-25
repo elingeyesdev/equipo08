@@ -123,7 +123,6 @@ export default function StockPage() {
       default: return motivo;
     }
   };
-
   const getAuditDelta = () => {
     if (!auditItem || auditForm.cantidad_fisica === '') return null;
     return Number(auditForm.cantidad_fisica) - auditItem.cantidadTotal;
@@ -138,6 +137,8 @@ export default function StockPage() {
   };
 
   const delta = getAuditDelta();
+
+  const alertasStock = filteredStock.filter(s => s.cantidadTotal < (s.producto?.stockMinimo || 10));
 
   const handleSimularBajoStock = async () => {
     if (filteredStock.length === 0) return toast.error("No hay productos para simular");
@@ -214,6 +215,19 @@ export default function StockPage() {
           </div>
         )}
       </div>
+
+      {/* Alertas Automáticas Banner */}
+      {!auditItem && alertasStock.length > 0 && (
+        <div style={{ padding: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', animation: 'fadeIn 0.3s ease', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+          <div style={{ backgroundColor: '#fee2e2', padding: '0.5rem', borderRadius: '50%' }}>
+             <AlertTriangle size={24} color="#dc2626" />
+          </div>
+          <div style={{ flex: 1 }}>
+             <h4 style={{ margin: '0 0 0.25rem 0', color: '#991b1b' }}>Alertas de Inventario Bajo ({alertasStock.length})</h4>
+             <p style={{ margin: 0, color: '#b91c1c', fontSize: '0.9rem' }}>Hay productos que se encuentran por debajo de su stock mínimo de seguridad. Toma acción para evitar quiebres de stock.</p>
+          </div>
+        </div>
+      )}
 
       {/* Audit Inline Form */}
       {auditItem && (
@@ -355,11 +369,17 @@ export default function StockPage() {
           <tbody>
             {filteredStock.length === 0 ? <tr><td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Sin inventario físico en esta selección.</td></tr> : 
              filteredStock.map(s => {
+               const isAlerta = s.cantidadTotal < (s.producto?.stockMinimo || 10);
                const valuation = Number(s.valorAdquisicion || 0);
                const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
                return (
-                 <tr key={s.id}>
-                   <td style={{ fontWeight: '500' }}><span style={{ backgroundColor: '#e2e8f0', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{s.producto?.sku}</span></td>
+                 <tr key={s.id} style={{ backgroundColor: isAlerta ? '#fef2f2' : 'transparent' }}>
+                   <td style={{ fontWeight: '500' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                       {isAlerta && <AlertTriangle size={14} color="#dc2626" title="Stock por debajo del mínimo" />}
+                       <span style={{ backgroundColor: '#e2e8f0', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{s.producto?.sku}</span>
+                     </div>
+                   </td>
                    <td>{s.producto?.name}</td>
                    <td style={{ color: 'var(--text-secondary)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
@@ -368,9 +388,8 @@ export default function StockPage() {
                       </div>
                    </td>
                    <td style={{ textAlign: 'center' }}>
-                     <strong style={{ color: s.cantidadTotal <= 0 ? 'var(--danger-color)' : '#16a34a' }}>
-                        {s.cantidadTotal} U
-                     </strong>
+                      <strong style={{ fontSize: '1.1rem', color: isAlerta ? '#dc2626' : 'inherit' }}>{s.cantidadTotal}</strong>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Mín: {s.producto?.stockMinimo || 10}</div>
                    </td>
                    <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Bs {costoPromedio.toFixed(2)}</td>
                    <td style={{ textAlign: 'right', fontWeight: 'bold', color: 'var(--primary-color)' }}>Bs {valuation.toFixed(2)}</td>
