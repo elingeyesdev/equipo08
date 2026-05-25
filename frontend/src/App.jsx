@@ -4,6 +4,7 @@ import api from './api';
 import ProvidersPage from './pages/ProvidersPage';
 import SourcingPage from './pages/SourcingPage';
 import StockPage from './pages/StockPage';
+import SalesPage from './pages/SalesPage';
 import AuditReportsPage from './pages/AuditReportsPage';
 import ProductsPage from './pages/ProductsPage';
 import SucursalesPage from './pages/SucursalesPage';
@@ -13,7 +14,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import LandingPage from './pages/LandingPage';
 import { ToastProvider } from './components/ToastContext';
-import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive, Store, ShieldCheck, UserPlus, BarChart } from 'lucide-react';
+import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive, Store, ShieldCheck, UserPlus, BarChart, Receipt } from 'lucide-react';
 import './index.css';
 
 function Sidebar({ setAuthToken, permissions }) {
@@ -42,14 +43,14 @@ function Sidebar({ setAuthToken, permissions }) {
           <img src="/logo.png" alt="BolClick Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--primary-color)' }}>BolClick</h2>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>{tenantName}</span>
+          <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#ffffff' }}>BolClick</h2>
+          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', fontWeight: '600', textTransform: 'uppercase' }}>{tenantName}</span>
         </div>
       </div>
 
-      <div style={{ padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid var(--border-color)' }}>
-        <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{userName}</div>
-        <div style={{ fontSize: '0.7rem', color: 'var(--primary-color)', fontWeight: 'bold', textTransform: 'uppercase' }}>{userRole}</div>
+      <div style={{ padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(255,255,255,0.2)' }}>
+        <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'white' }}>{userName}</div>
+        <div style={{ fontSize: '0.7rem', color: '#93c5fd', fontWeight: 'bold', textTransform: 'uppercase' }}>{userRole}</div>
       </div>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
@@ -77,6 +78,10 @@ function Sidebar({ setAuthToken, permissions }) {
           </Link>
         )}
 
+        <Link to="/sales" className={`nav-link ${location.pathname === '/sales' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Receipt size={18} /> Facturación y Ventas
+        </Link>
+
         {hasPerm('inventario.ver') && (
           <>
             <Link to="/stock" className={`nav-link ${location.pathname === '/stock' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -90,8 +95,8 @@ function Sidebar({ setAuthToken, permissions }) {
 
         {userRole === 'OWNER' && (
           <>
-            <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '1rem 0' }} />
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', padding: '0 0.75rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>ADMINISTRACIÓN</span>
+            <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.2)', margin: '1rem 0' }} />
+            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', padding: '0 0.75rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>ADMINISTRACIÓN</span>
             
             <Link to="/users" className={`nav-link ${location.pathname === '/users' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <UserPlus size={18} /> Empleados
@@ -104,21 +109,23 @@ function Sidebar({ setAuthToken, permissions }) {
         )}
       </div>
 
-      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: 'auto' }}>
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '1rem', marginTop: 'auto' }}>
         <button 
           onClick={handleLogout}
           style={{ 
             backgroundColor: 'transparent', 
-            color: 'var(--danger-color)', 
+            color: 'rgba(255,255,255,0.8)', 
             width: '100%', 
             display: 'flex', 
             alignItems: 'center', 
             gap: '0.75rem',
             padding: '0.75rem 1rem',
-            textAlign: 'left'
+            textAlign: 'left',
+            borderRadius: '6px',
+            transition: 'all 0.2s ease'
           }}
-          onMouseOver={e => e.currentTarget.style.backgroundColor = '#fee2e2'}
-          onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          onMouseOver={e => { e.currentTarget.style.backgroundColor = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
+          onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
         >
           <LogOut size={18} /> Cerrar Sesión
         </button>
@@ -176,6 +183,7 @@ function App() {
                 <Route path="/sucursales" element={<SucursalesPage key={authToken} />} />
                 <Route path="/products" element={<ProductsPage key={authToken} />} />
                 <Route path="/sourcing" element={<SourcingPage key={authToken} />} />
+                <Route path="/sales" element={<SalesPage key={authToken} />} />
                 <Route path="/stock" element={<StockPage key={authToken} />} />
                 <Route path="/audit-reports" element={<AuditReportsPage key={authToken} />} />
                 
