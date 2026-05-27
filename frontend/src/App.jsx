@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import api from './api';
 import ProvidersPage from './pages/ProvidersPage';
 import SourcingPage from './pages/SourcingPage';
 import StockPage from './pages/StockPage';
+import SalesPage from './pages/SalesPage';
 import AuditReportsPage from './pages/AuditReportsPage';
 import ProductsPage from './pages/ProductsPage';
 import SucursalesPage from './pages/SucursalesPage';
@@ -12,22 +14,55 @@ import PermissionsPage from './pages/PermissionsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import LandingPage from './pages/LandingPage';
+import AdminConsolePage from './pages/AdminConsolePage';
+import SettingsPage from './pages/SettingsPage';
 import { ToastProvider } from './components/ToastContext';
-import { Settings, Users, Package, ShoppingCart, LogOut, Tag, Archive, Store, ShieldCheck, UserPlus, BarChart } from 'lucide-react';
+import {
+  Users, Package, ShoppingCart, LogOut, Tag, Archive,
+  Store, ShieldCheck, UserPlus, BarChart2, Receipt, LayoutDashboard,
+  Menu, ChevronLeft, Settings as SettingsIcon, ShieldAlert
+} from 'lucide-react';
 import './index.css';
 
-function Sidebar({ setAuthToken, permissions }) {
+/* ─── PAGE TRANSITION ────────────────────────────────────────────── */
+function PageTransition({ children }) {
   const location = useLocation();
-  const tenantName = localStorage.getItem('tenant_name') || 'Mi Tienda';
-  const userName = localStorage.getItem('user_name') || 'Usuario';
-  const userRole = localStorage.getItem('user_role') || 'VENDEDOR';
+  return (
+    <motion.div
+      key={location.pathname}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className="h-full"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ─── NAV ITEM ─────────────────────────────────────────────────── */
+function NavItem({ to, icon: Icon, label, active, isOpen }) {
+  return (
+    <Link to={to} className={`nav-link ${active ? 'active' : ''} ${!isOpen ? 'justify-center px-0' : ''}`} title={!isOpen ? label : undefined}>
+      <Icon size={22} strokeWidth={2} className="flex-shrink-0" />
+      {isOpen && <span className="font-semibold text-[1.05rem] tracking-tight">{label}</span>}
+    </Link>
+  );
+}
+
+/* ─── SIDEBAR ──────────────────────────────────────────────────── */
+function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
+  const location = useLocation();
+  const tenantName = localStorage.getItem('tenant_name') || 'Mi Empresa';
+  const userName   = localStorage.getItem('user_name')   || 'Usuario';
+  const userRole   = localStorage.getItem('user_role')   || 'VENDEDOR';
 
   const handleLogout = () => {
     localStorage.clear();
     setAuthToken(null);
   };
 
-  // Helper to check if a permission exists in our list
   const hasPerm = (key) => {
     if (userRole === 'OWNER') return true;
     if (!permissions) return false;
@@ -35,104 +70,136 @@ function Sidebar({ setAuthToken, permissions }) {
     return p ? p[key.replace('.', '_')] : false;
   };
 
+  const p = location.pathname;
+
+  const initials = userName
+    .split(' ')
+    .map(w => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
-    <div className="sidebar" style={{ display: 'flex', flexDirection: 'column', padding: '1.5rem', boxSizing: 'border-box' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-        <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'white', border: '1px solid var(--border-color)' }}>
-          <img src="/logo.png" alt="BolClick Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-        </div>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--primary-color)' }}>BolClick</h2>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textTransform: 'uppercase' }}>{tenantName}</span>
-        </div>
-      </div>
-
-      <div style={{ padding: '0.75rem', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid var(--border-color)' }}>
-        <div style={{ fontSize: '0.85rem', fontWeight: 'bold' }}>{userName}</div>
-        <div style={{ fontSize: '0.7rem', color: 'var(--primary-color)', fontWeight: 'bold', textTransform: 'uppercase' }}>{userRole}</div>
-      </div>
+    <div className={`sidebar transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isOpen ? 'w-[280px]' : 'w-[88px] items-center'}`}>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1 }}>
-        {hasPerm('catalogo.ver') && (
-          <Link to="/providers" className={`nav-link ${location.pathname === '/providers' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Users size={18} /> Proveedores
-          </Link>
-        )}
-        
-        {hasPerm('sucursales.ver') && (
-          <Link to="/sucursales" className={`nav-link ${location.pathname === '/sucursales' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Store size={18} /> Sucursales
-          </Link>
-        )}
+      {/* ── Top scroll area ── */}
+      <div className={`flex flex-col gap-6 flex-1 overflow-y-auto w-full ${isOpen ? 'p-5' : 'py-5 px-3'}`}>
 
-        {hasPerm('catalogo.ver') && (
-          <Link to="/products" className={`nav-link ${location.pathname === '/products' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Tag size={18} /> Catálogo
-          </Link>
-        )}
+        {/* Toggle and User Chip Area */}
+        <div className="flex flex-col gap-4">
+          <div className={`flex items-center ${isOpen ? 'justify-end' : 'justify-center'} pt-2`}>
+            <button 
+              onClick={() => setIsOpen(!isOpen)} 
+              className="text-white hover:bg-white/20 p-2 rounded-xl transition-colors flex-shrink-0"
+              title={isOpen ? 'Ocultar menú' : 'Mostrar menú'}
+            >
+              {isOpen ? <ChevronLeft size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
+            </button>
+          </div>
 
-        {hasPerm('sourcing.ver') && (
-          <Link to="/sourcing" className={`nav-link ${location.pathname === '/sourcing' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <ShoppingCart size={18} /> Lotes (Sourcing)
-          </Link>
-        )}
+          {/* User chip */}
+          <div className={`flex items-center gap-3 ${isOpen ? 'px-4 py-3' : 'justify-center py-3 px-0'} rounded-2xl bg-black/10 border border-white/10 backdrop-blur-md shadow-inner`}>
+            <div className="user-avatar text-[13px] bg-gradient-to-br from-white to-sky-50 text-[#184e77] font-black border-none shadow-sm flex-shrink-0">{initials}</div>
+            {isOpen && (
+              <div className="min-w-0 flex-1 animate-fadeIn">
+                <div className="text-[0.95rem] font-extrabold text-white truncate leading-tight">{userName}</div>
+                <div className="text-[0.65rem] font-black text-sky-300 uppercase tracking-widest mt-1">{userRole}</div>
+              </div>
+            )}
+          </div>
+        </div>
+        <nav className={`flex flex-col gap-2 mt-2 w-full ${!isOpen ? 'items-center' : ''}`}>
 
-        {hasPerm('inventario.ver') && (
-          <>
-            <Link to="/stock" className={`nav-link ${location.pathname === '/stock' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <Archive size={18} /> Inventario Físico
-            </Link>
-            <Link to="/audit-reports" className={`nav-link ${location.pathname === '/audit-reports' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <BarChart size={18} /> Reportes de Auditoría
-            </Link>
-          </>
-        )}
+          {hasPerm('catalogo.ver') && (
+            <NavItem to="/providers"   icon={Users}      label="Proveedores"        active={p === '/providers'} isOpen={isOpen} />
+          )}
+          {hasPerm('sucursales.ver') && (
+            <NavItem to="/sucursales"  icon={Store}      label="Sucursales"         active={p === '/sucursales'} isOpen={isOpen} />
+          )}
+          {hasPerm('catalogo.ver') && (
+            <NavItem to="/products"    icon={Tag}        label="Catálogo"           active={p === '/products'} isOpen={isOpen} />
+          )}
+          {hasPerm('sourcing.ver') && (
+            <NavItem to="/sourcing"    icon={ShoppingCart} label="Sourcing"         active={p === '/sourcing'} isOpen={isOpen} />
+          )}
 
-        {userRole === 'OWNER' && (
-          <>
-            <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '1rem 0' }} />
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', padding: '0 0.75rem', marginBottom: '0.5rem', fontWeight: 'bold' }}>ADMINISTRACIÓN</span>
-            
-            <Link to="/users" className={`nav-link ${location.pathname === '/users' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <UserPlus size={18} /> Empleados
-            </Link>
+          <NavItem to="/sales" icon={Receipt} label="Facturación / POS" active={p === '/sales'} isOpen={isOpen} />
 
-            <Link to="/permissions" className={`nav-link ${location.pathname === '/permissions' ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <ShieldCheck size={18} /> Permisos
-            </Link>
-          </>
-        )}
+          {hasPerm('inventario.ver') && (
+            <>
+              <NavItem to="/stock"         icon={Archive}   label="Inventario"          active={p === '/stock'} isOpen={isOpen} />
+              <NavItem to="/audit-reports" icon={BarChart2} label="Auditoría"           active={p === '/audit-reports'} isOpen={isOpen} />
+            </>
+          )}
+
+          {userRole === 'OWNER' && (
+            <>
+              <div className="h-px w-full bg-white/10 my-4" />
+              {isOpen && <span className="text-[0.65rem] font-black uppercase tracking-widest text-sky-300 px-4 mb-2 animate-fadeIn">Administración</span>}
+              <NavItem to="/users"       icon={UserPlus}    label="Empleados"   active={p === '/users'} isOpen={isOpen} />
+              <NavItem to="/permissions" icon={ShieldCheck} label="Permisos"    active={p === '/permissions'} isOpen={isOpen} />
+              <NavItem to="/settings"    icon={SettingsIcon} label="Ajustes"    active={p === '/settings'} isOpen={isOpen} />
+            </>
+          )}
+
+          {userRole === 'SUPER_ADMIN' && (
+            <>
+              <div className="h-px w-full bg-white/10 my-4" />
+              {isOpen && <span className="text-[0.65rem] font-black uppercase tracking-widest text-rose-300 px-4 mb-2 animate-fadeIn">Sistema Global</span>}
+              <NavItem to="/admin-console" icon={ShieldAlert} label="Consola Global" active={p === '/admin-console'} isOpen={isOpen} />
+            </>
+          )}
+        </nav>
       </div>
 
-      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: 'auto' }}>
-        <button 
+      {/* ── Logout ── */}
+      <div className={`p-5 w-full border-t border-white/10 flex justify-center`}>
+        <button
           onClick={handleLogout}
-          style={{ 
-            backgroundColor: 'transparent', 
-            color: 'var(--danger-color)', 
-            width: '100%', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.75rem',
-            padding: '0.75rem 1rem',
-            textAlign: 'left'
-          }}
-          onMouseOver={e => e.currentTarget.style.backgroundColor = '#fee2e2'}
-          onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          className={`flex items-center justify-center gap-3 h-12 rounded-xl text-sky-100 hover:text-white hover:bg-white/10 hover:shadow-md border border-transparent font-bold transition-all duration-200 ${isOpen ? 'w-full px-4' : 'w-12 px-0'}`}
+          title={!isOpen ? 'Cerrar Sesión' : undefined}
         >
-          <LogOut size={18} /> Cerrar Sesión
+          <LogOut size={20} strokeWidth={2.5} />
+          {isOpen && <span className="text-[1rem] tracking-tight">Cerrar Sesión</span>}
         </button>
       </div>
     </div>
   );
 }
 
+/* ─── DASHBOARD HOME ────────────────────────────────────────────── */
+function DashboardHome() {
+  const userName = localStorage.getItem('user_name') || 'Usuario';
+  const userRole = localStorage.getItem('user_role') || 'VENDEDOR';
+
+  return (
+    <div className="max-w-xl mx-auto mt-16">
+      <div className="card text-center p-10">
+        <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto mb-5">
+          <LayoutDashboard size={22} className="text-blue-600" strokeWidth={1.75} />
+        </div>
+        <h1 className="text-xl font-bold text-slate-900 mb-1.5 tracking-tight">Panel de Control</h1>
+        <p className="text-sm text-slate-500 mb-5 leading-relaxed">
+          Bienvenido, <span className="font-semibold text-slate-800">{userName}</span>.<br />
+          Usa la barra lateral para navegar entre los módulos del sistema.
+        </p>
+        <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-100 uppercase tracking-wider">
+          Rol: {userRole}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── APP ROOT ──────────────────────────────────────────────────── */
 function App() {
   const [authToken, setAuthToken] = useState(localStorage.getItem('access_token'));
   const [permissions, setPermissions] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
-    if (authToken && localStorage.getItem('user_role') !== 'OWNER') {
+    const role = localStorage.getItem('user_role');
+    if (authToken && role !== 'OWNER' && role !== 'SUPER_ADMIN') {
       fetchPermissions();
     }
   }, [authToken]);
@@ -142,7 +209,7 @@ function App() {
       const res = await api.get('/users/permissions');
       setPermissions(res.data);
     } catch (err) {
-      console.error("Error fetching permissions", err);
+      console.error('Error fetching permissions', err);
     }
   };
 
@@ -151,41 +218,32 @@ function App() {
       <Router>
         {!authToken ? (
           <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage setAuthToken={setAuthToken} />} />
+            <Route path="/"         element={<LandingPage />} />
+            <Route path="/login"    element={<LoginPage    setAuthToken={setAuthToken} />} />
             <Route path="/register" element={<RegisterPage setAuthToken={setAuthToken} />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*"         element={<Navigate to="/" replace />} />
           </Routes>
         ) : (
           <div className="app-layout">
-            <Sidebar setAuthToken={setAuthToken} permissions={permissions} />
-            <div className="main-content">
-              
-              <Routes>
-                <Route path="/" element={
-                  <div className="glass-container" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-                    <Package size={48} color="var(--accent-blue)" style={{ marginBottom: '1rem' }} />
-                    <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>Resumen de Operaciones</h2>
-                    <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto' }}>
-                      Bienvenido al sistema, {localStorage.getItem('user_name')}. Tienes el rol de {localStorage.getItem('user_role')}.
-                    </p>
-                  </div>
-                } />
-                
-                <Route path="/providers" element={<ProvidersPage key={authToken} />} />
-                <Route path="/sucursales" element={<SucursalesPage key={authToken} />} />
-                <Route path="/products" element={<ProductsPage key={authToken} />} />
-                <Route path="/sourcing" element={<SourcingPage key={authToken} />} />
-                <Route path="/stock" element={<StockPage key={authToken} />} />
-                <Route path="/audit-reports" element={<AuditReportsPage key={authToken} />} />
-                
-                {/* Admin Routes */}
-                <Route path="/users" element={<UsersPage key={authToken} />} />
-                <Route path="/permissions" element={<PermissionsPage key={authToken} />} />
-
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-
+            <Sidebar setAuthToken={setAuthToken} permissions={permissions} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <div className={`main-content transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative`}>
+              <AnimatePresence mode="wait">
+                <Routes location={location} key={location.pathname}>
+                  <Route path="/"              element={<PageTransition><DashboardHome /></PageTransition>} />
+                  <Route path="/providers"     element={<PageTransition><ProvidersPage     key={authToken} /></PageTransition>} />
+                  <Route path="/sucursales"    element={<PageTransition><SucursalesPage    key={authToken} /></PageTransition>} />
+                  <Route path="/products"      element={<PageTransition><ProductsPage      key={authToken} /></PageTransition>} />
+                  <Route path="/sourcing"      element={<PageTransition><SourcingPage      key={authToken} /></PageTransition>} />
+                  <Route path="/sales"         element={<PageTransition><SalesPage         key={authToken} /></PageTransition>} />
+                  <Route path="/stock"         element={<PageTransition><StockPage         key={authToken} /></PageTransition>} />
+                  <Route path="/audit-reports" element={<PageTransition><AuditReportsPage  key={authToken} /></PageTransition>} />
+                  <Route path="/users"         element={<PageTransition><UsersPage         key={authToken} /></PageTransition>} />
+                  <Route path="/permissions"   element={<PageTransition><PermissionsPage   key={authToken} /></PageTransition>} />
+                  <Route path="/settings"      element={<PageTransition><SettingsPage      key={authToken} /></PageTransition>} />
+                  <Route path="/admin-console" element={<PageTransition><AdminConsolePage  key={authToken} /></PageTransition>} />
+                  <Route path="*"              element={<Navigate to="/" replace />} />
+                </Routes>
+              </AnimatePresence>
             </div>
           </div>
         )}

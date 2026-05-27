@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flujos de Usuario - Mall Multi-Tenant</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #38bdf8; /* Sky 400 */
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #fbbf24; /* Amber 400 */
+            margin-top: 50px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 10px;
+            width: 100%;
+            max-width: 800px;
+        }
+        p {
+            color: #94a3b8; /* Slate 400 */
+            margin-bottom: 30px;
+            max-width: 800px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .mermaid-container {
+            background-color: #1e293b; /* Slate 800 */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 1000px;
+            overflow-x: auto;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Flujos Lógicos de Usuario del Sistema</h1>
+    <p>Estos diagramas detallan el paso a paso ("Happy Path") de cómo cada tipo de usuario interactúa con el sistema, respetando las dependencias lógicas del negocio (ej. no hay producto sin proveedor, no hay venta sin stock).</p>
+
+    <!-- FLUJO 1: SUPER ADMIN -->
+    <h2>1. Flujo del Administrador Global (SUPER_ADMIN)</h2>
+    <p>El administrador maestro del mall que controla quién puede operar.</p>
+    <div class="mermaid-container">
+        <div class="mermaid">
+        flowchart TD
+            classDef startNode fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#ffffff;
+            classDef endNode fill:#16a34a,stroke:#15803d,stroke-width:2px,color:#ffffff;
+            classDef errorNode fill:#dc2626,stroke:#b91c1c,stroke-width:2px,color:#ffffff;
+
+            A(["Inicio de Sesión"]):::startNode --> B{"¿Autenticación Exitosa?"}
+            B -- Sí --> C["Ingresa al Panel Global"]
+            B -- No --> D(["Mostrar Error"]):::errorNode
+            C --> E["Revisar Tiendas Pendientes"]
+            E --> F{"¿Aprobar Tienda?"}
+            F -- Sí --> G["Cambiar Estado a APPROVED"]:::endNode
+            F -- No --> H["Rechazar / Suspender"]
+            G --> I(["Tienda habilitada para operar"]):::endNode
+        </div>
+    </div>
+
+    <!-- FLUJO 2: OWNER -->
+    <h2>2. Flujo del Dueño de Tienda (OWNER)</h2>
+    <p>El creador de la tienda. Se encarga de configurar la base, estructurar las sucursales y contratar al personal.</p>
+    <div class="mermaid-container">
+        <div class="mermaid">
+        flowchart TD
+            classDef startNode fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#ffffff;
+            classDef endNode fill:#16a34a,stroke:#15803d,stroke-width:2px,color:#ffffff;
+
+            A(["Registro en Landing Page"]):::startNode --> B["Estado Inicial: PENDING"]
+            B --> C{"¿Super Admin lo aprobó?"}
+            C -- No --> D(["Espera Notificación"])
+            C -- Sí --> E(["Inicio de Sesión"])
+            E --> F["Configurar Ajustes de Negocio (Logo, Color)"]
+            F --> G["Crear Sucursales (Mínimo 1)"]
+            G --> H["Crear Usuarios (Personal)"]
+            H --> I["Asignar Roles y Permisos a Empleados"]
+            I --> J(["La tienda está lista para operar"]):::endNode
+        </div>
+    </div>
+
+    <!-- FLUJO 3: SUPERVISOR -->
+    <h2>3. Flujo del Supervisor / Gerente de Operaciones</h2>
+    <p>Responsable del catálogo, compras a proveedores y abastecimiento de inventario.</p>
+    <div class="mermaid-container">
+        <div class="mermaid">
+        flowchart TD
+            classDef startNode fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#ffffff;
+            classDef endNode fill:#16a34a,stroke:#15803d,stroke-width:2px,color:#ffffff;
+
+            A(["Inicio de Sesión"]):::startNode --> B["Módulo Proveedores"]
+            B --> C["Registrar Nuevo Proveedor"]
+            C --> D["Módulo Catálogo"]
+            D --> E{"¿Tiene Proveedor?"}
+            E -- No --> B
+            E -- Sí --> F["Crear Nuevo Producto (SKU)"]
+            F --> G["Módulo Sourcing / Ingresos"]
+            G --> H["Crear Lote de Ingreso (Compra)"]
+            H --> I["Seleccionar Producto, Sucursal y Cantidad"]
+            I --> J["Confirmar Ingreso"]
+            J --> K(["El Stock se actualiza automáticamente"]):::endNode
+        </div>
+    </div>
+
+    <!-- FLUJO 4: VENDEDOR -->
+    <h2>4. Flujo del Vendedor (POS)</h2>
+    <p>El personal de punto de venta que atiende al cliente final y ejecuta la transacción.</p>
+    <div class="mermaid-container">
+        <div class="mermaid">
+        flowchart TD
+            classDef startNode fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#ffffff;
+            classDef endNode fill:#16a34a,stroke:#15803d,stroke-width:2px,color:#ffffff;
+            classDef errorNode fill:#dc2626,stroke:#b91c1c,stroke-width:2px,color:#ffffff;
+
+            A(["Inicio de Sesión"]):::startNode --> B["Seleccionar su Sucursal de trabajo"]
+            B --> C["Ingresar a Módulo de Ventas (POS)"]
+            C --> D["Buscar Producto en Catálogo / Escanear SKU"]
+            D --> E{"¿Hay Stock en esta Sucursal?"}
+            E -- No --> F(["Sistema bloquea agregar al carrito"]):::errorNode
+            E -- Sí --> G["Agregar Producto al Carrito"]
+            G --> H["Ingresar Datos del Cliente (Opcional)"]
+            H --> I["Cobrar y Emitir Comprobante"]
+            I --> J(["El Stock se reduce automáticamente"]):::endNode
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'dark',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

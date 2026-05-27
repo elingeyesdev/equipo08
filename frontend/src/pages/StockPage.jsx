@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { useToast } from '../components/ToastContext';
-import { Archive, MapPin, ClipboardList, AlertTriangle, Save, X, History, TrendingDown } from 'lucide-react';
+import { Archive, MapPin, ClipboardList, AlertTriangle, Save, X, TrendingDown, Search, Printer } from 'lucide-react';
 
 export default function StockPage() {
   const [stock, setStock] = useState([]);
@@ -9,6 +9,7 @@ export default function StockPage() {
   const [ajustes, setAjustes] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState('ALL');
   const [searchProduct, setSearchProduct] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   
   // Auditing Form State
   const [auditItem, setAuditItem] = useState(null);
@@ -114,16 +115,6 @@ export default function StockPage() {
     return acc + exactLoss;
   }, 0);
 
-  const formatMotivo = (motivo) => {
-    switch(motivo) {
-      case 'ERROR_REGISTRO': return 'Error de Registro';
-      case 'DANO_MERMA': return 'Artículo Dañado / Extraviado';
-      case 'ROBO_O_PERDIDA': return 'Robo / No Habido';
-      case 'CADUCIDAD': return 'Vencido';
-      default: return motivo;
-    }
-  };
-
   const getAuditDelta = () => {
     if (!auditItem || auditForm.cantidad_fisica === '') return null;
     return Number(auditForm.cantidad_fisica) - auditItem.cantidadTotal;
@@ -139,84 +130,160 @@ export default function StockPage() {
 
   const delta = getAuditDelta();
 
-  return (
-    <div className="glass-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+  const alertasStock = filteredStock.filter(s => s.cantidadTotal < (s.producto?.stockMinimo || 10));
+
+  const handleSimularBajoStock = async () => {
+    if (filteredStock.length === 0) return toast.error("No hay productos para simular");
+    const numToModify = Math.min(2, filteredStock.length);
+    const shuffled = [...filteredStock].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, numToModify);
+    
+    setSaving(true);
+    try {
+      for (const s of selected) {
+        const payload = {
+          sucursal_id: s.sucursal_id,
+          producto_id: s.producto_id,
+          cantidad_fisica: Math.max(0, (s.producto?.stockMinimo || 10) - 1),
+          motivo: 'DANO_MERMA',
+          observaciones: 'Simulación de inventario bajo (E9)',
+          valor_adquisicion_unitario: s.cantidadTotal > 0 ? (s.valorAdquisicion / s.cantidadTotal) : 0
+        };
+        await api.post('/ajustes', payload);
+      }
+      toast.success(`Escenario simulado en ${numToModify} productos`);
+      fetchStock();
+    } catch (err) {
+      toast.error('Error al simular bajo stock');
+    } finally {
+      setSaving(false);
+    }
+  };  return (
+    <div className="full-width-container animate-fadein space-y-8">
       
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Header Panel */}
+      <div className="page-header-bar">
         <div>
-          <h3 style={{ marginTop: 0, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Archive size={24} color="var(--primary-color)" /> Inventario y Valuación Física
-          </h3>
-          <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Operando bajo centros de costos segregados físicamente.</p>
+          <h1>Inventario y Valuación Física</h1>
+          <p>Control y valuación de stock por centros de costos segregados físicamente.</p>
         </div>
 
         {!auditItem && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input 
-                type="text" 
-                placeholder="Buscar por Nombre o SKU..." 
-                value={searchProduct} 
-                onChange={(e) => setSearchProduct(e.target.value)} 
-                style={{ minWidth: '200px', backgroundColor: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.5rem' }}
-              />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <MapPin size={18} color="var(--accent-blue)" />
-              <select 
-                value={selectedBranch} 
-                onChange={e => setSelectedBranch(e.target.value)}
-                style={{ minWidth: '200px', backgroundColor: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '6px', padding: '0.5rem' }}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowFilters(!showFilters)} 
+              className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
+                showFilters ? 'bg-indigo-500 text-white shadow-indigo-500/20' : 'bg-white/20 hover:bg-white/30 text-white'
+              }`}
+            >
+              <Search size={18} /> {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
+            </button>
+            <button onClick={() => window.print()} className="py-2 px-4 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shadow-sm bg-white/20 hover:bg-white/30 text-white">
+              <Printer size={16} /> Imprimir
+            </button>
+            {hasPermission('inventario_editar') && (
+              <button 
+                onClick={handleSimularBajoStock} 
+                disabled={saving}
+                className="py-2 px-4 rounded-xl text-xs font-bold bg-rose-500 hover:bg-rose-600 text-white flex items-center gap-2 shadow-sm shadow-rose-500/20 transition-all"
+                title="Genera un ajuste para colocar 2 productos bajo su umbral mínimo"
               >
-                <option value="ALL">Consolidado Total (Todas las Sucursales)</option>
-                {sucursales.map(s => <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>)}
-              </select>
-            </div>
+                Simular Baja
+              </button>
+            )}
           </div>
         )}
       </div>
 
+      {/* Filter Panel */}
+      {showFilters && !auditItem && (
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-end md:items-center gap-4 animate-fadeIn">
+          <div className="flex-1 w-full">
+             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Buscar Producto</label>
+             <div className="relative">
+               <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                 <Search size={16} />
+               </span>
+               <input 
+                 type="text" 
+                 placeholder="Buscar por SKU o nombre de producto..." 
+                 value={searchProduct} 
+                 onChange={(e) => setSearchProduct(e.target.value)} 
+                 className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+               />
+             </div>
+          </div>
+          <div className="flex-1 w-full">
+             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Filtrar por Sucursal</label>
+             <select 
+               value={selectedBranch} 
+               onChange={e => setSelectedBranch(e.target.value)}
+               className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+             >
+               <option value="ALL">-- Todas las Sucursales --</option>
+               {sucursales.map(s => <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>)}
+             </select>
+          </div>
+          <div className="w-full md:w-auto flex justify-end">
+             <button onClick={() => { setSearchProduct(''); setSelectedBranch('ALL'); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider mt-2 md:mt-0 transition-colors">
+               Limpiar Filtros
+             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Alertas Automáticas Banner */}
+      {!auditItem && alertasStock.length > 0 && (
+        <div className="p-4 bg-gradient-to-r from-rose-500 to-rose-600 border border-rose-600 rounded-2xl flex items-start gap-3 shadow-md">
+          <div className="bg-white/20 p-2 rounded-full text-white backdrop-blur-sm">
+             <AlertTriangle size={18} />
+          </div>
+          <div>
+             <h4 className="font-black text-white text-sm m-0">Alertas de Inventario Bajo ({alertasStock.length})</h4>
+             <p className="text-rose-50 text-xs mt-0.5 m-0 font-medium">Hay productos que se encuentran por debajo del stock mínimo configurado. Recomendamos generar reposiciones.</p>
+          </div>
+        </div>
+      )}
+
       {/* Audit Inline Form */}
       {auditItem && (
-        <div style={{ padding: '1.5rem', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', animation: 'fadeIn 0.3s ease' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #fcd34d', paddingBottom: '0.75rem' }}>
-            <h4 style={{ margin: 0, color: '#b45309', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-               <AlertTriangle size={20} /> Acta de Auditoría de Stock (Ajuste Físico)
-            </h4>
-            <button onClick={handleCloseAudit} style={{ background: 'none', color: '#b45309', padding: '0.2rem' }}><X size={18} /></button>
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
+          <div className="flex justify-between items-center pb-4 border-b border-slate-105 mb-4">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 m-0">
+               <span>Registrar Acta de Auditoría (Ajuste Físico)</span>
+            </h3>
+            <button onClick={handleCloseAudit} className="btn-premium-icon btn-premium-icon-danger">
+              <X size={15} />
+            </button>
           </div>
 
-          <div style={{ marginBottom: '1.5rem', color: '#92400e', fontSize: '0.9rem' }}>
-            Estás auditando <strong>{auditItem.producto?.name}</strong> en <strong>{auditItem.sucursal?.name}</strong>.
-            Actualmente el sistema registra <strong style={{ fontSize: '1.1rem' }}>{auditItem.cantidadTotal}</strong> unidades.
+          <div className="text-sm text-slate-600 mb-6 font-medium">
+            Estás auditando el stock de <strong className="text-slate-900 font-bold">{auditItem.producto?.name}</strong> en la sucursal <strong className="text-slate-900 font-bold">{auditItem.sucursal?.name}</strong>.<br/>
+            Unidades registradas actualmente en el sistema: <strong className="text-base font-extrabold text-slate-950">{auditItem.cantidadTotal}</strong>.
           </div>
 
-          <form onSubmit={handleSubmitAudit}>
-            <div className="form-grid">
+          <form onSubmit={handleSubmitAudit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="form-group">
-                <label style={{ color: '#92400e' }}>Conteo Físico Real (Unidades) *</label>
-                <div className="input-with-icon">
-                  <ClipboardList size={18} style={{ color: '#b45309' }} />
-                  <input 
-                    type="number" 
-                    value={auditForm.cantidad_fisica} 
-                    onChange={e => setAuditForm({...auditForm, cantidad_fisica: e.target.value})} 
-                    placeholder="Ej: 9"
-                    required 
-                    min="0"
-                    style={{ borderColor: '#fde68a' }}
-                  />
-                </div>
+                <label className="text-slate-700">Conteo Físico Real (Unidades) *</label>
+                <input 
+                  type="number" 
+                  value={auditForm.cantidad_fisica} 
+                  onChange={e => setAuditForm({...auditForm, cantidad_fisica: e.target.value})} 
+                  placeholder="Cantidad contada físicamente"
+                  required 
+                  min="0"
+                  className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
+                />
               </div>
 
               <div className="form-group">
-                <label style={{ color: '#92400e' }}>Motivo Oficial (Obligatorio) *</label>
+                <label className="text-slate-700">Motivo de Incidencia *</label>
                 <select 
                   value={auditForm.motivo} 
                   onChange={e => setAuditForm({...auditForm, motivo: e.target.value})}
                   required
-                  style={{ borderColor: '#fde68a' }}
+                  className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10 animate-none"
                 >
                   <option value="ERROR_REGISTRO">Error de Registro Numérico</option>
                   <option value="DANO_MERMA">Artículo Dañado / Extraviado</option>
@@ -224,136 +291,155 @@ export default function StockPage() {
                   <option value="CADUCIDAD">Caducidad / Vencimiento</option>
                 </select>
               </div>
-
-              {delta !== null && delta < 0 && (
-                <div style={{ gridColumn: '1 / -1', padding: '1rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', border: '1px solid #fca5a5' }}>
-                  <strong>⚠️ Impacto Financiero Directo:</strong> La diferencia de {Math.abs(delta)} unidades resultará en una pérdida de valuación estimada de <strong>Bs. {getLostValue().toFixed(2)}</strong> para esta sucursal.
-                </div>
-              )}
-              {delta !== null && delta > 0 && userRole !== 'OWNER' && (
-                <div style={{ gridColumn: '1 / -1', padding: '1rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '8px', border: '1px solid #fca5a5' }}>
-                  <strong>❌ Excedente Anómalo Detectado:</strong> No puedes declarar una cantidad física ({auditForm.cantidad_fisica}) mayor a la registrada en sistema ({auditItem.cantidadTotal}).<br/>
-                  Si ingresó mercancía nueva que no está en el sistema, debes hacerlo formalmente mediante el módulo de <a href="/sourcing" style={{color: '#7f1d1d', fontWeight: 'bold'}}>Lotes / Sourcing</a>.
-                </div>
-              )}
-              {delta !== null && delta > 0 && userRole === 'OWNER' && (
-                <div style={{ gridColumn: '1 / -1', padding: '1rem', backgroundColor: '#fef3c7', color: '#92400e', borderRadius: '8px', border: '1px solid #fde68a' }}>
-                  <strong>⚠️ Excepción de Dueño:</strong> Estás reportando un excedente anómalo (mercancía física mayor al sistema). Esta acción está restringida para empleados, pero habilitada para tu nivel.
-                </div>
-              )}
-
-              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label style={{ color: '#92400e' }}>Observaciones Cuantitativas (Opcional)</label>
-                <input 
-                  type="text" 
-                  value={auditForm.observaciones} 
-                  onChange={e => setAuditForm({...auditForm, observaciones: e.target.value})} 
-                  placeholder="Detalles sobre el hallazgo de la diferencia de inventario..."
-                  style={{ borderColor: '#fde68a' }}
-                />
-              </div>
             </div>
 
-            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-              <button type="button" onClick={handleCloseAudit} style={{ backgroundColor: 'transparent', color: '#b45309', border: '1px solid #fde68a' }}>
-                 Cancelar Vuelo
+            {delta !== null && delta < 0 && (
+              <div className="p-4 bg-rose-50/50 border border-rose-100 text-rose-800 rounded-xl text-xs leading-relaxed font-medium">
+                <strong>⚠️ Impacto Financiero Directo:</strong> La pérdida declarada de {Math.abs(delta)} unidades resultará en un ajuste de valuación estimado de <strong className="font-bold">Bs. {getLostValue().toFixed(2)}</strong>.
+              </div>
+            )}
+            
+            {delta !== null && delta > 0 && userRole !== 'OWNER' && (
+              <div className="p-4 bg-rose-50/50 border border-rose-100 text-rose-800 rounded-xl text-xs leading-relaxed font-medium">
+                <strong>❌ Excedente Anómalo:</strong> No tienes permisos para declarar un excedente físico superior al del sistema ({auditItem.cantidadTotal}). Registra este reabastecimiento en la sección de Lotes (Sourcing).
+              </div>
+            )}
+            
+            {delta !== null && delta > 0 && userRole === 'OWNER' && (
+              <div className="p-4 bg-amber-50/50 border border-amber-200 text-amber-800 rounded-xl text-xs leading-relaxed font-medium">
+                <strong>⚠️ Excepción Habilitada:</strong> Declararás un excedente físico mayor al del sistema. Esta acción está restringida para el personal, pero habilitada para tu rol de Owner.
+              </div>
+            )}
+
+            <div className="form-group">
+              <label className="text-slate-755">Observaciones / Detalles</label>
+              <input 
+                type="text" 
+                value={auditForm.observaciones} 
+                onChange={e => setAuditForm({...auditForm, observaciones: e.target.value})} 
+                placeholder="Indica observaciones específicas sobre la discrepancia..."
+                className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4 border-t border-slate-100">
+              <button 
+                type="button" 
+                onClick={handleCloseAudit} 
+                className="btn-premium"
+              >
+                Cancelar
               </button>
-              <button type="submit" disabled={saving || auditForm.cantidad_fisica === '' || (delta > 0 && userRole !== 'OWNER')} style={{ backgroundColor: (delta > 0 && userRole !== 'OWNER') ? '#d1d5db' : '#d97706', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Save size={18} /> Procesar Acta y Ajustar (Síncrono)
+              <button 
+                type="submit" 
+                disabled={saving || auditForm.cantidad_fisica === '' || (delta > 0 && userRole !== 'OWNER')} 
+                className="btn-premium btn-premium-indigo"
+              >
+                Procesar Ajuste de Stock
               </button>
             </div>
           </form>
         </div>
       )}
       
-      {/* Resumen Financiero Top Bar */}
+      {/* Resumen Financiero Dash Cards */}
       {!auditItem && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
-          {/* Tarjeta de Valuación Positiva */}
-          <div style={{ backgroundColor: '#f1f5f9', padding: '1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #cbd5e1' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:-translate-y-1">
             <div>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: '500', display: 'block', marginBottom: '0.25rem' }}>Inversión Física Activa (A Costo Promedio):</span>
-              <span style={{ fontSize: '1.6rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>
+              <span className="text-slate-500 font-semibold uppercase tracking-wider text-[10px] block">Valuación Activa (Costo Promedio)</span>
+              <span className="text-2xl font-black text-slate-900 mt-1 block">
                 Bs. {totalValuation.toFixed(2)}
               </span>
             </div>
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-650">
+              <Archive size={20} />
+            </div>
           </div>
 
-          {/* Tarjeta de Fugas/Déficit Acumulado */}
-          <div style={{ backgroundColor: '#fef2f2', padding: '1.25rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #fecaca' }}>
+          <div className="bg-gradient-to-br from-rose-500 to-rose-600 border border-rose-600 p-6 rounded-2xl shadow-md flex items-center justify-between transition-transform hover:-translate-y-1">
             <div>
-              <span style={{ color: '#991b1b', fontWeight: '500', display: 'block', marginBottom: '0.25rem' }}>Valuación de Déficit Acumulado:</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <TrendingDown size={20} color="#b91c1c" />
-                <span style={{ fontSize: '1.6rem', fontWeight: 'bold', color: '#b91c1c' }}>
-                  Bs. {historicalLossValue.toFixed(2)}
-                </span>
-              </div>
+              <span className="text-rose-100 font-bold uppercase tracking-wider text-[10px] block">Pérdida por Desajuste Acumulado</span>
+              <span className="text-2xl font-black text-white mt-1 block drop-shadow-sm">
+                Bs. {historicalLossValue.toFixed(2)}
+              </span>
             </div>
             <a 
               href="/audit-reports"
-              style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', fontSize: '0.85rem', textDecoration: 'none', borderRadius: '6px' }}
+              className="btn-premium btn-premium-sm border-rose-400 text-rose-700 hover:text-rose-800 hover:border-rose-500 bg-white shadow-sm"
             >
-              <ClipboardList size={16} /> Ver Reportes
+              <span>Ver Auditorías</span>
             </a>
           </div>
         </div>
       )}
 
       {/* Main Stock Table */}
-      <div className="glass-container" style={{ padding: '0', overflow: 'x-auto', display: auditItem ? 'none' : 'block' }}>
-        <table style={{ margin: 0 }}>
-          <thead>
-            <tr>
-              <th>SKU</th>
-              <th>Nombre del Producto</th>
-              <th>Ubicación Física</th>
-              <th style={{ textAlign: 'center' }}>Stock Total</th>
-              <th style={{ textAlign: 'center' }}>Costo Promedio</th>
-              <th style={{ textAlign: 'right' }}>Valuación Activo</th>
-              <th style={{ textAlign: 'center', width: '120px' }}>Operaciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStock.length === 0 ? <tr><td colSpan="7" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Sin inventario físico en esta selección.</td></tr> : 
-             filteredStock.map(s => {
-               const valuation = Number(s.valorAdquisicion || 0);
-               const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
-               return (
-                 <tr key={s.id}>
-                   <td style={{ fontWeight: '500' }}><span style={{ backgroundColor: '#e2e8f0', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>{s.producto?.sku}</span></td>
-                   <td>{s.producto?.name}</td>
-                   <td style={{ color: 'var(--text-secondary)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
-                        <MapPin size={14} /> 
-                        <span>{tenantName} ({s.sucursal?.name})</span>
-                      </div>
-                   </td>
-                   <td style={{ textAlign: 'center' }}>
-                     <strong style={{ color: s.cantidadTotal <= 0 ? 'var(--danger-color)' : '#16a34a' }}>
-                        {s.cantidadTotal} U
-                     </strong>
-                   </td>
-                   <td style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>Bs {costoPromedio.toFixed(2)}</td>
-                   <td style={{ textAlign: 'right', fontWeight: 'bold', color: 'var(--primary-color)' }}>Bs {valuation.toFixed(2)}</td>
-                   <td style={{ textAlign: 'center' }}>
-                      {hasPermission('inventario_crear') && (
-                        <button 
-                           onClick={() => handleOpenAudit(s)}
-                           style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}
-                           title="Auditar Inventario / Ingresar Conteo Físico"
-                        >
-                          <ClipboardList size={14} /> Registrar Incidencia
-                        </button>
-                      )}
-                   </td>
-                 </tr>
-               );
-             })
-            }
-          </tbody>
-        </table>
-      </div>
+      {!auditItem && (
+        <div className="table-premium-wrapper">
+          <div className="overflow-x-auto">
+            <table className="table-premium">
+              <thead>
+                <tr>
+                  <th style={{ width: '15%' }}>SKU</th>
+                  <th style={{ width: '25%' }}>Producto</th>
+                  <th style={{ width: '15%' }}>Ubicación</th>
+                  <th className="text-right" style={{ width: '12%' }}>Stock Físico</th>
+                  <th className="text-right" style={{ width: '15%' }}>Costo Unitario Promedio</th>
+                  <th className="text-right" style={{ width: '10%' }}>Valuación Total</th>
+                  {hasPermission('inventario_crear') && <th className="text-center" style={{ width: '8%' }}>Acciones</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStock.length === 0 ? (
+                  <tr>
+                    <td colSpan={hasPermission('inventario_crear') ? 7 : 6} className="text-center py-12 text-slate-400 font-medium">
+                      No hay productos registrados en el inventario.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredStock.map(s => {
+                    const isAlerta = s.cantidadTotal < (s.producto?.stockMinimo || 10);
+                    const valuation = Number(s.valorAdquisicion || 0);
+                    const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
+                    return (
+                      <tr key={s.id} className={isAlerta ? 'bg-rose-50/10' : ''}>
+                        <td>
+                          <div className="flex items-center gap-2">
+                            {isAlerta && <AlertTriangle size={14} className="text-rose-500" title="Bajo el stock mínimo" />}
+                            <span className="font-mono text-xs font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md uppercase tracking-wider">{s.producto?.sku}</span>
+                          </div>
+                        </td>
+                        <td className="font-bold text-slate-900 text-lg">{s.producto?.name}</td>
+                        <td>
+                           <span className="text-base font-semibold text-slate-700">{s.sucursal?.name}</span>
+                        </td>
+                        <td className="text-right">
+                           <strong className={`text-xl ${isAlerta ? 'text-rose-600 font-black' : 'text-slate-900 font-black'}`}>{s.cantidadTotal}</strong>
+                           <div className="text-sm text-slate-500 font-bold mt-1">Min: {s.producto?.stockMinimo || 10}</div>
+                        </td>
+                        <td className="text-right text-slate-600 text-base font-mono font-bold">Bs {costoPromedio.toFixed(2)}</td>
+                        <td className="text-right font-black text-indigo-700 font-mono text-xl">Bs {valuation.toFixed(2)}</td>
+                        {hasPermission('inventario_crear') && (
+                          <td className="text-center">
+                            <button 
+                               onClick={() => handleOpenAudit(s)}
+                               className="btn-premium btn-premium-sm"
+                            >
+                              <ClipboardList size={13} />
+                              <span>Auditar</span>
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

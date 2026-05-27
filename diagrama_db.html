@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Base de Datos - Mall Multi-Tenant</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #38bdf8; /* Sky 400 */
+            margin-bottom: 10px;
+        }
+        p {
+            color: #94a3b8; /* Slate 400 */
+            margin-bottom: 40px;
+            max-width: 600px;
+            text-align: center;
+        }
+        .mermaid {
+            background-color: #1e293b; /* Slate 800 */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 1200px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Arquitectura de Base de Datos</h1>
+    <p>Diagrama Entidad-Relación Lógico para la plataforma Multi-Tenant. Diseñado para mostrar las relaciones operativas clave sin cruces innecesarios ("anti-fideo").</p>
+
+    <div class="mermaid">
+        erDiagram
+            %% MÓDULO CORE / ESTRUCTURA
+            TENANT {
+                uuid id PK
+                varchar name
+                varchar domain
+                varchar status "PENDING | APPROVED"
+            }
+            
+            SUCURSAL {
+                uuid id PK
+                varchar tenant_id FK
+                varchar name
+                varchar address
+            }
+            
+            USER {
+                uuid id PK
+                varchar tenant_id FK
+                uuid sucursal_id FK
+                varchar name
+                varchar role "OWNER | SUPERVISOR | VENDEDOR"
+            }
+
+            ROLE_PERMISSIONS {
+                uuid id PK
+                varchar tenant_id FK
+                varchar role
+                boolean modulo_ver
+            }
+
+            %% RELACIONES CORE
+            TENANT ||--o{ SUCURSAL : "tiene"
+            TENANT ||--o{ USER : "emplea"
+            TENANT ||--o{ ROLE_PERMISSIONS : "define"
+            SUCURSAL ||--o{ USER : "asigna a"
+
+            %% MÓDULO CATÁLOGO Y SOURCING
+            PROVEEDOR {
+                uuid id PK
+                varchar tenant_id FK
+                varchar name
+                varchar contactEmail
+            }
+
+            PRODUCTO {
+                uuid id PK
+                varchar tenant_id FK
+                uuid proveedor_id FK
+                varchar sku
+                varchar name
+                numeric precioVenta
+            }
+
+            %% RELACIONES CATÁLOGO
+            PROVEEDOR ||--o{ PRODUCTO : "provee"
+
+            %% MÓDULO INVENTARIO Y OPERACIONES
+            STOCK {
+                uuid id PK
+                varchar tenant_id FK
+                uuid producto_id FK
+                uuid sucursal_id FK
+                integer cantidadTotal
+            }
+
+            LOTE_INGRESO {
+                uuid id PK
+                varchar tenant_id FK
+                uuid producto_id FK
+                uuid sucursal_id FK
+                integer cantidad
+            }
+
+            AJUSTE_INVENTARIO {
+                uuid id PK
+                varchar tenant_id FK
+                uuid producto_id FK
+                uuid sucursal_id FK
+                uuid usuario_id FK
+                integer cantidad_sistema
+                integer cantidad_fisica
+            }
+
+            VENTA {
+                uuid id PK
+                varchar tenant_id FK
+                uuid sucursal_id FK
+                varchar clienteNombre
+                numeric total
+            }
+
+            %% RELACIONES OPERACIONALES
+            PRODUCTO ||--o{ STOCK : "tiene en"
+            SUCURSAL ||--o{ STOCK : "almacena"
+            
+            PRODUCTO ||--o{ LOTE_INGRESO : "ingresa"
+            PRODUCTO ||--o{ AJUSTE_INVENTARIO : "se audita"
+            
+            SUCURSAL ||--o{ VENTA : "registra"
+    </div>
+
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'dark',
+            securityLevel: 'loose',
+            er: {
+                diagramPadding: 20,
+                layoutDirection: 'TB',
+                minEntityWidth: 150,
+                minEntityHeight: 75,
+                entityPadding: 15,
+                stroke: 'gray',
+                fill: 'honeydew',
+                fontSize: 14,
+                useMaxWidth: true
+            }
+        });
+    </script>
+</body>
+</html>
