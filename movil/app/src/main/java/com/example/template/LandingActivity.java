@@ -33,5 +33,7 @@ public class LandingActivity extends AppCompatActivity {
         btnRegister.setOnClickListener(v -> {
             startActivity(new Intent(LandingActivity.this, RegisterActivity.class));
         });
+
+        //Hola
     }
 }

@@ -89,4 +89,14 @@ public interface ApiService {
 
     @retrofit2.http.PUT("users/permissions")
     Call<com.example.template.network.models.PermisosRoles> updatePermisos(@Body com.example.template.network.models.PermisosRoles permisos);
+
+    // VENTAS (Sales)
+    @retrofit2.http.GET("ventas")
+    Call<java.util.List<com.example.template.network.models.Venta>> getVentas();
+
+    @POST("ventas")
+    Call<com.example.template.network.models.Venta> createVenta(@Body com.example.template.network.models.VentaRequest request);
+
+    @retrofit2.http.GET("ventas/{id}")
+    Call<com.example.template.network.models.Venta> getVenta(@retrofit2.http.Path("id") String id);
 }
