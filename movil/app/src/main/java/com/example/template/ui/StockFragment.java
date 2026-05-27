@@ -50,6 +50,7 @@ public class StockFragment extends Fragment {
     private TextView tvTotalValuation, tvTotalDeficit;
     private LinearLayout llAlertBanner;
     private TextView tvAlertTitle;
+    private Button btnSimulateAlerts;
 
     private List<Stock> allStockList = new ArrayList<>();
     private List<com.example.template.network.models.Ajuste> allAjustesList = new ArrayList<>();
@@ -67,6 +68,7 @@ public class StockFragment extends Fragment {
         tvTotalDeficit = view.findViewById(R.id.tvTotalDeficit);
         llAlertBanner = view.findViewById(R.id.llAlertBanner);
         tvAlertTitle = view.findViewById(R.id.tvAlertTitle);
+        btnSimulateAlerts = view.findViewById(R.id.btnSimulateAlerts);
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -87,6 +89,10 @@ public class StockFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
+
+        if (btnSimulateAlerts != null) {
+            btnSimulateAlerts.setOnClickListener(v -> handleSimulateLowStock());
+        }
 
         loadSucursales();
         loadStock();
@@ -396,5 +402,87 @@ public class StockFragment extends Fragment {
                 Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void handleSimulateLowStock() {
+        if (allStockList.isEmpty()) {
+            Toast.makeText(getContext(), "No hay productos para simular", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<Stock> candidates = new ArrayList<>();
+        for (Stock s : allStockList) {
+            if (s.getProducto() != null) {
+                candidates.add(s);
+            }
+        }
+
+        if (candidates.isEmpty()) {
+            Toast.makeText(getContext(), "No hay productos válidos para simular", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Shuffle and pick at most 2 items
+        java.util.Collections.shuffle(candidates);
+        int numToModify = Math.min(2, candidates.size());
+        List<Stock> selected = candidates.subList(0, numToModify);
+
+        final int[] completedCount = {0};
+        final boolean[] hasError = {false};
+
+        if (btnSimulateAlerts != null) {
+            btnSimulateAlerts.setEnabled(false);
+            btnSimulateAlerts.setText("Simulando...");
+        }
+
+        for (Stock s : selected) {
+            int minStock = s.getProducto().getStockMinimo();
+            int cantidadFisica = Math.max(0, minStock - 1);
+
+            AjusteRequest request = new AjusteRequest(
+                s.getSucursalId(),
+                s.getProductoId(),
+                s.getCantidadTotal(),
+                cantidadFisica,
+                "DANO_MERMA",
+                "Simulación de inventario bajo (E9)"
+            );
+
+            apiService.createAjuste(request).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    completedCount[0]++;
+                    if (!response.isSuccessful()) {
+                        hasError[0] = true;
+                    }
+                    checkSimulationCompletion(completedCount[0], numToModify, hasError[0]);
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    completedCount[0]++;
+                    hasError[0] = true;
+                    checkSimulationCompletion(completedCount[0], numToModify, hasError[0]);
+                }
+            });
+        }
+    }
+
+    private void checkSimulationCompletion(int completed, int total, boolean hasError) {
+        if (completed == total) {
+            if (btnSimulateAlerts != null) {
+                btnSimulateAlerts.setEnabled(true);
+                btnSimulateAlerts.setText("Simular Escenario de Bajo Stock (E9)");
+            }
+
+            if (getContext() != null) {
+                if (hasError) {
+                    Toast.makeText(getContext(), "Error al simular bajo stock", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Escenario simulado en " + total + " productos", Toast.LENGTH_LONG).show();
+                }
+            }
+            loadStock(); // Reload updated stock list and alerts
+        }
     }
 }

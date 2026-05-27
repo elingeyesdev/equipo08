@@ -99,6 +99,19 @@
         android:drawablePadding="8dp"
         android:textColor="#2b3b55" />
 
+    <Button
+        android:id="@+id/btnSimulateAlerts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Simular Escenario de Bajo Stock"
+        android:backgroundTint="#f43f5e"
+        android:textColor="#ffffff"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
