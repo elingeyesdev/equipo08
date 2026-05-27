@@ -21,6 +21,49 @@
         android:textColor="#5a6a85" 
         android:layout_marginBottom="16dp"/>
 
+    <!-- Alert Banner -->
+    <LinearLayout
+        android:id="@+id/llAlertBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_warning_red"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@android:drawable/ic_dialog_alert"
+            android:layout_marginEnd="12dp"
+            app:tint="#b91c1c" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvAlertTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Alertas de Inventario Bajo (0)"
+                android:textColor="#991b1b"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hay productos que se encuentran por debajo del stock mínimo configurado. Recomendamos generar reposiciones."
+                android:textColor="#b91c1c"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -48,6 +48,8 @@ public class StockFragment extends Fragment {
     private Spinner spinnerSucursal;
     private EditText etSearch;
     private TextView tvTotalValuation, tvTotalDeficit;
+    private LinearLayout llAlertBanner;
+    private TextView tvAlertTitle;
 
     private List<Stock> allStockList = new ArrayList<>();
     private List<com.example.template.network.models.Ajuste> allAjustesList = new ArrayList<>();
@@ -63,6 +65,8 @@ public class StockFragment extends Fragment {
         etSearch = view.findViewById(R.id.etSearch);
         tvTotalValuation = view.findViewById(R.id.tvTotalValuation);
         tvTotalDeficit = view.findViewById(R.id.tvTotalDeficit);
+        llAlertBanner = view.findViewById(R.id.llAlertBanner);
+        tvAlertTitle = view.findViewById(R.id.tvAlertTitle);
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -218,6 +222,24 @@ public class StockFragment extends Fragment {
 
         adapter.updateData(filteredList);
         calculateTotal(filteredList, filteredAjustes);
+
+        // Calculate alerts reactively based on the filtered list
+        int alertCount = 0;
+        for (Stock s : filteredList) {
+            int minStock = s.getProducto() != null ? s.getProducto().getStockMinimo() : 10;
+            if (s.getCantidadTotal() < minStock) {
+                alertCount++;
+            }
+        }
+
+        if (llAlertBanner != null && tvAlertTitle != null) {
+            if (alertCount > 0) {
+                llAlertBanner.setVisibility(View.VISIBLE);
+                tvAlertTitle.setText("Alertas de Inventario Bajo (" + alertCount + ")");
+            } else {
+                llAlertBanner.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void calculateTotal(List<Stock> list, List<com.example.template.network.models.Ajuste> ajustes) {

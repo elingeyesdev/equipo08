@@ -1,10 +1,13 @@
 package com.example.template.ui.adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.template.R;
@@ -63,6 +66,20 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
         holder.tvCostoFijo.setText(String.format("Bs %.2f", costoFijo));
         holder.tvValuacion.setText(String.format("Bs %.2f", valuacion));
 
+        // Low stock alert visual styling
+        int minStock = s.getProducto() != null ? s.getProducto().getStockMinimo() : 10;
+        boolean isAlerta = s.getCantidadTotal() < minStock;
+        
+        holder.tvMinStock.setText("Min: " + minStock);
+        
+        if (isAlerta) {
+            holder.tvStock.setTextColor(Color.parseColor("#dc2626"));
+            holder.cardView.setCardBackgroundColor(Color.parseColor("#FFF5F5"));
+        } else {
+            holder.tvStock.setTextColor(Color.parseColor("#16a34a"));
+            holder.cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
+        }
+
         holder.btnIncidencia.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onIncidenciaClick(s);
@@ -76,8 +93,10 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvSku, tvNombre, tvStock, tvSucursal, tvCostoFijo, tvValuacion;
+        TextView tvSku, tvNombre, tvStock, tvSucursal, tvCostoFijo, tvValuacion, tvMinStock;
         android.widget.Button btnIncidencia;
+        CardView cardView;
+        ConstraintLayout layoutContainer;
         
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -87,7 +106,10 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
             tvSucursal = itemView.findViewById(R.id.tvSucursal);
             tvCostoFijo = itemView.findViewById(R.id.tvCostoFijo);
             tvValuacion = itemView.findViewById(R.id.tvValuacion);
+            tvMinStock = itemView.findViewById(R.id.tvMinStock);
             btnIncidencia = itemView.findViewById(R.id.btnIncidencia);
+            cardView = itemView.findViewById(R.id.cardView);
+            layoutContainer = itemView.findViewById(R.id.layoutContainer);
         }
     }
 }

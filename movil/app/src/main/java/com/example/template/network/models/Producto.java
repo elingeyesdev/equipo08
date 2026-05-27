@@ -10,6 +10,7 @@ public class Producto {
     private double precioVenta;
     private Proveedor proveedor; 
     private String description;
+    private int stockMinimo;
 
     public Producto(String name, String sku, String category, double precioCosto, double precioVenta, String proveedor_id, String description) {
         this.name = name;
@@ -30,6 +31,8 @@ public class Producto {
     public double getPrecioVenta() { return precioVenta; }
     public Proveedor getProveedor() { return proveedor; }
     public String getDescription() { return description; }
+    public int getStockMinimo() { return stockMinimo <= 0 ? 10 : stockMinimo; }
+    public void setStockMinimo(int stockMinimo) { this.stockMinimo = stockMinimo; }
 
     @Override
     public String toString() {
