@@ -39,7 +39,7 @@ public class ProductsFragment extends Fragment {
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
     private AutoCompleteTextView etName;
-    private EditText etSku, etPrecioCoste, etPrecioVenta, etDescription;
+    private EditText etSku, etPrecioCoste, etPrecioVenta, etDescription, etStockMinimo;
     private TextView tvMargen;
     private Spinner spinnerProveedor, spinnerCategoria;
     private RecyclerView recyclerView;
@@ -66,6 +66,7 @@ public class ProductsFragment extends Fragment {
         tvMargen = view.findViewById(R.id.tvMargen);
         spinnerProveedor = view.findViewById(R.id.spinnerProveedor);
         spinnerCategoria = view.findViewById(R.id.spinnerCategoria);
+        etStockMinimo = view.findViewById(R.id.etStockMinimo);
         recyclerView = view.findViewById(R.id.recyclerView);
 
         // Setup Categories
@@ -142,7 +143,7 @@ public class ProductsFragment extends Fragment {
     private void toggleForm(boolean fromEdit) {
         if (!fromEdit) {
             editingProducto = null;
-            etName.setText("", false); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText("");
+            etName.setText("", false); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText(""); etStockMinimo.setText("");
             btnGuardar.setText("Nuevo Artículo");
         }
         
@@ -165,6 +166,7 @@ public class ProductsFragment extends Fragment {
         etSku.setText(producto.getSku());
         etPrecioCoste.setText(String.valueOf(producto.getPrecioCosto()));
         etPrecioVenta.setText(String.valueOf(producto.getPrecioVenta()));
+        etStockMinimo.setText(String.valueOf(producto.getStockMinimo()));
         btnGuardar.setText("Actualizar Artículo");
         
         // Categoria
@@ -286,10 +288,11 @@ public class ProductsFragment extends Fragment {
         double coste = Double.parseDouble(costeStr);
         double venta = Double.parseDouble(ventaStr);
 
-        String nameToSend = name;
-        String skuToSend = sku;
+        String stockMinimoStr = etStockMinimo.getText().toString().trim();
+        int stockMinimo = stockMinimoStr.isEmpty() ? 10 : Integer.parseInt(stockMinimoStr);
 
-        Producto request = new Producto(nameToSend, skuToSend, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
+        Producto request = new Producto(name, sku, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
+        request.setStockMinimo(stockMinimo);
         
         if (editingProducto != null) {
             apiService.updateProducto(editingProducto.getId(), request).enqueue(new Callback<Producto>() {
