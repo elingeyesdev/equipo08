@@ -71,6 +71,9 @@ public class SalesFragment extends Fragment {
     private RecyclerView rvSalesHistory;
     private SalesHistoryAdapter historyAdapter;
 
+    // SwipeRefreshLayouts
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshProducts, swipeRefreshHistory;
+
     // API
     private ApiService apiService;
 
@@ -115,6 +118,14 @@ public class SalesFragment extends Fragment {
 
         // Bind History
         rvSalesHistory = view.findViewById(R.id.rvSalesHistory);
+
+        // Bind SwipeRefreshLayouts
+        swipeRefreshProducts = view.findViewById(R.id.swipeRefreshProducts);
+        swipeRefreshHistory = view.findViewById(R.id.swipeRefreshHistory);
+
+        // Setup SwipeRefreshLayouts
+        swipeRefreshProducts.setOnRefreshListener(() -> loadStock());
+        swipeRefreshHistory.setOnRefreshListener(() -> loadSalesHistory());
 
         setupTabs();
         setupRecyclerViews();
@@ -189,7 +200,7 @@ public class SalesFragment extends Fragment {
 
         // History items: Linear layout
         rvSalesHistory.setLayoutManager(new LinearLayoutManager(getContext()));
-        historyAdapter = new SalesHistoryAdapter(salesHistoryList, venta -> showComprobanteDialog(venta));
+        historyAdapter = new SalesHistoryAdapter(salesHistoryList, sucursalesList, venta -> showComprobanteDialog(venta));
         rvSalesHistory.setAdapter(historyAdapter);
     }
 
@@ -261,6 +272,7 @@ public class SalesFragment extends Fragment {
         apiService.getStock().enqueue(new Callback<List<Stock>>() {
             @Override
             public void onResponse(Call<List<Stock>> call, Response<List<Stock>> response) {
+                if (swipeRefreshProducts != null) swipeRefreshProducts.setRefreshing(false);
                 if (response.isSuccessful() && response.body() != null) {
                     allStockList = response.body();
                     filterCatalog();
@@ -269,6 +281,7 @@ public class SalesFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Stock>> call, Throwable t) {
+                if (swipeRefreshProducts != null) swipeRefreshProducts.setRefreshing(false);
                 if(getContext() != null) Toast.makeText(getContext(), "Error cargando inventario", Toast.LENGTH_SHORT).show();
             }
         });
@@ -278,6 +291,7 @@ public class SalesFragment extends Fragment {
         apiService.getVentas().enqueue(new Callback<List<Venta>>() {
             @Override
             public void onResponse(Call<List<Venta>> call, Response<List<Venta>> response) {
+                if (swipeRefreshHistory != null) swipeRefreshHistory.setRefreshing(false);
                 if (response.isSuccessful() && response.body() != null) {
                     salesHistoryList.clear();
                     salesHistoryList.addAll(response.body());
@@ -287,6 +301,7 @@ public class SalesFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Venta>> call, Throwable t) {
+                if (swipeRefreshHistory != null) swipeRefreshHistory.setRefreshing(false);
                 if(getContext() != null) Toast.makeText(getContext(), "Error al cargar historial", Toast.LENGTH_SHORT).show();
             }
         });
@@ -465,13 +480,49 @@ public class SalesFragment extends Fragment {
         // Fill headers
         tvNro.setText("Comprobante Nro: " + (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "N/A"));
         
-        // Date formatting fallback
+        // Date formatting: Parse UTC to local timezone beautifully (AM/PM format)
+        String formattedDate = "N/A";
         String dateStr = venta.getFecha();
-        if (dateStr != null && dateStr.contains("T")) {
-            dateStr = dateStr.replace("T", " ").substring(0, 19);
+        if (dateStr != null) {
+            try {
+                java.text.SimpleDateFormat utcFormat;
+                if (dateStr.contains(".")) {
+                    utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
+                } else {
+                    utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US);
+                }
+                utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                java.util.Date date = utcFormat.parse(dateStr);
+                
+                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm a", java.util.Locale.US);
+                localFormat.setTimeZone(java.util.TimeZone.getDefault());
+                formattedDate = localFormat.format(date);
+            } catch (Exception e) {
+                if (dateStr.contains("T")) {
+                    formattedDate = dateStr.replace("T", " ");
+                    if (formattedDate.length() > 19) {
+                        formattedDate = formattedDate.substring(0, 19);
+                    }
+                } else {
+                    formattedDate = dateStr;
+                }
+            }
         }
-        tvFecha.setText("Fecha: " + (dateStr != null ? dateStr : "N/A"));
-        tvSuc.setText("Sucursal: " + (venta.getSucursal() != null ? venta.getSucursal().getName() : "Principal"));
+        tvFecha.setText("Fecha: " + formattedDate);
+
+        // Branch name lookup fallback if relation is not populated by POST response
+        String sucursalName = "Principal";
+        if (venta.getSucursal() != null && venta.getSucursal().getName() != null) {
+            sucursalName = venta.getSucursal().getName();
+        } else if (venta.getSucursalId() != null) {
+            for (com.example.template.network.models.Sucursal s : sucursalesList) {
+                if (venta.getSucursalId().equals(s.getId())) {
+                    sucursalName = s.getName();
+                    break;
+                }
+            }
+        }
+        tvSuc.setText("Sucursal: " + sucursalName);
         tvCli.setText("Nombre/Razón Social: " + (venta.getClienteNombre() != null ? venta.getClienteNombre() : "Cliente Casual"));
         tvDoc.setText("NIT/CI: " + (venta.getClienteDocumento() != null ? venta.getClienteDocumento() : "N/A"));
         tvTotal.setText(String.format("Bs %.2f", venta.getTotal()));
@@ -683,14 +734,16 @@ public class SalesFragment extends Fragment {
     // --- RECENT SALES HISTORY RECYCLER ADAPTER ---
     private static class SalesHistoryAdapter extends RecyclerView.Adapter<SalesHistoryAdapter.ViewHolder> {
         private List<Venta> list;
+        private List<com.example.template.network.models.Sucursal> sucursalesList;
         private OnSaleClickListener listener;
 
         public interface OnSaleClickListener {
             void onSaleClick(Venta venta);
         }
 
-        public SalesHistoryAdapter(List<Venta> list, OnSaleClickListener listener) {
+        public SalesHistoryAdapter(List<Venta> list, List<com.example.template.network.models.Sucursal> sucursalesList, OnSaleClickListener listener) {
             this.list = list;
+            this.sucursalesList = sucursalesList;
             this.listener = listener;
         }
 
@@ -707,16 +760,47 @@ public class SalesFragment extends Fragment {
             holder.tvComprobante.setText(v.getNumeroComprobante() != null ? v.getNumeroComprobante() : "N/A");
             
             String label = (v.getClienteNombre() != null ? v.getClienteNombre() : "Cliente Casual");
-            if (v.getSucursal() != null) {
-                label += " (" + v.getSucursal().getName() + ")";
+            String sucursalName = null;
+            if (v.getSucursal() != null && v.getSucursal().getName() != null) {
+                sucursalName = v.getSucursal().getName();
+            } else if (v.getSucursalId() != null && sucursalesList != null) {
+                for (com.example.template.network.models.Sucursal s : sucursalesList) {
+                    if (v.getSucursalId().equals(s.getId())) {
+                        sucursalName = s.getName();
+                        break;
+                    }
+                }
+            }
+            if (sucursalName != null) {
+                label += " (" + sucursalName + ")";
             }
             holder.tvCliente.setText(label);
             
+            String formattedDate = "N/A";
             String dateStr = v.getFecha();
-            if (dateStr != null && dateStr.contains("T")) {
-                dateStr = dateStr.replace("T", " ").substring(0, 16);
+            if (dateStr != null) {
+                try {
+                    java.text.SimpleDateFormat utcFormat;
+                    if (dateStr.contains(".")) {
+                        utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
+                    } else {
+                        utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US);
+                    }
+                    utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                    java.util.Date date = utcFormat.parse(dateStr);
+                    
+                    java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm a", java.util.Locale.US);
+                    localFormat.setTimeZone(java.util.TimeZone.getDefault());
+                    formattedDate = localFormat.format(date);
+                } catch (Exception e) {
+                    if (dateStr.contains("T")) {
+                        formattedDate = dateStr.replace("T", " ").substring(0, 16);
+                    } else {
+                        formattedDate = dateStr;
+                    }
+                }
             }
-            holder.tvFecha.setText(dateStr != null ? dateStr : "N/A");
+            holder.tvFecha.setText(formattedDate);
             
             holder.tvTotal.setText(String.format("Bs %.2f", v.getTotal()));
 

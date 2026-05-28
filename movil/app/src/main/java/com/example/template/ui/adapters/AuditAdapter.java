@@ -89,6 +89,14 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
         } else {
             holder.tvLoss.setText(String.format("Bs. %.2f", loss));
         }
+
+        // Bind observations description dynamically
+        if (a.getObservaciones() != null && !a.getObservaciones().trim().isEmpty()) {
+            holder.tvObservaciones.setText("Obs: " + a.getObservaciones().trim());
+            holder.tvObservaciones.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvObservaciones.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -97,7 +105,7 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDate, tvProductName, tvDelta, tvSucursal, tvOperador, tvMotivo, tvLoss;
+        TextView tvDate, tvProductName, tvDelta, tvSucursal, tvOperador, tvMotivo, tvLoss, tvObservaciones;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvDate = itemView.findViewById(R.id.tvDate);
@@ -107,6 +115,7 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
             tvOperador = itemView.findViewById(R.id.tvOperador);
             tvMotivo = itemView.findViewById(R.id.tvMotivo);
             tvLoss = itemView.findViewById(R.id.tvLoss);
+            tvObservaciones = itemView.findViewById(R.id.tvObservaciones);
         }
     }
 }

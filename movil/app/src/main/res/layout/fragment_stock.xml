@@ -87,17 +87,28 @@
             android:background="@null" />
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/etSearch"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Buscar por producto o SKU..."
-        android:background="@drawable/edit_text_bg"
-        android:padding="12dp"
         android:layout_marginBottom="16dp"
-        android:drawableStart="@android:drawable/ic_menu_search"
-        android:drawablePadding="8dp"
-        android:textColor="#2b3b55" />
+        app:boxBackgroundMode="none"
+        app:hintEnabled="false"
+        app:endIconMode="clear_text"
+        app:endIconTint="#5a6a85">
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Buscar por producto o SKU..."
+            android:background="@drawable/edit_text_bg"
+            android:padding="12dp"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="8dp"
+            android:textColor="#2b3b55"
+            android:inputType="text"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnSimulateAlerts"

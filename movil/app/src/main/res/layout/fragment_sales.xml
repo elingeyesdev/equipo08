@@ -99,27 +99,44 @@
                     android:background="@null" />
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/etSearch"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Buscar producto por nombre o SKU..."
-                android:background="@drawable/edit_text_bg"
-                android:padding="10dp"
                 android:layout_marginBottom="12dp"
-                android:drawableStart="@android:drawable/ic_menu_search"
-                android:drawablePadding="8dp"
-                android:textColor="#2b3b55"
-                android:textSize="14sp" />
+                app:boxBackgroundMode="none"
+                app:hintEnabled="false"
+                app:endIconMode="clear_text"
+                app:endIconTint="#5a6a85">
 
-            <!-- Products Catalog Grid -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvProducts"
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Buscar producto por nombre o SKU..."
+                    android:background="@drawable/edit_text_bg"
+                    android:padding="10dp"
+                    android:drawableStart="@android:drawable/ic_menu_search"
+                    android:drawablePadding="8dp"
+                    android:textColor="#2b3b55"
+                    android:textSize="14sp"
+                    android:inputType="text"
+                    android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Products Catalog Grid with SwipeRefresh -->
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeRefreshProducts"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:clipToPadding="false"
-                android:paddingBottom="12dp" />
+                android:layout_weight="1">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvProducts"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="12dp" />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
             <!-- Bottom Cart Panel -->
             <androidx.cardview.widget.CardView
@@ -129,7 +146,8 @@
                 app:cardCornerRadius="16dp"
                 app:cardElevation="6dp"
                 android:backgroundTint="@android:color/white"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -251,13 +269,19 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <!-- History RecyclerView -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvSalesHistory"
+            <!-- History RecyclerView with SwipeRefresh -->
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeRefreshHistory"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="12dp" />
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSalesHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingBottom="12dp" />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
         </LinearLayout>
 
     </FrameLayout>

@@ -152,10 +152,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Detalles sobre el hallazgo de la diferencia de inventario..."
-            android:padding="16dp"
+            android:padding="12dp"
             android:background="@drawable/edit_text_bg"
             android:backgroundTint="@android:color/white"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:gravity="top|start" />
 
         <!-- Buttons -->
         <LinearLayout
@@ -169,7 +172,7 @@
                 android:id="@+id/btnCancelar"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:text="Cancelar Vuelo"
+                android:text="Cancelar"
                 android:textColor="#b45309"
                 android:backgroundTint="#fffbeb"
                 android:layout_marginEnd="12dp"
