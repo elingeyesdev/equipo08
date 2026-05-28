@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@android:color/white">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="COMPROBANTE DE VENTA"
+        android:textColor="#059669"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Receipt Info -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:id="@+id/tvComprobanteNro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Comprobante Nro: FAC-XXXXXX"
+            android:textColor="#334155"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"/>
+
+        <TextView
+            android:id="@+id/tvComprobanteFecha"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Fecha: 2026-05-27 18:00:00"
+            android:textColor="#475569"
+            android:textSize="12sp"
+            android:layout_marginTop="2dp"/>
+
+        <TextView
+            android:id="@+id/tvComprobanteSucursal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sucursal: Principal"
+            android:textColor="#475569"
+            android:textSize="12sp"
+            android:layout_marginTop="2dp"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#cbd5e1"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Client Info -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Datos del Cliente"
+        android:textColor="#1e293b"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp"/>
+
+    <TextView
+        android:id="@+id/tvComprobanteCliente"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nombre/Razón Social: Cliente Casual"
+        android:textColor="#475569"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/tvComprobanteDocumento"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NIT/CI: N/A"
+        android:textColor="#475569"
+        android:textSize="12sp"
+        android:layout_marginTop="2dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#cbd5e1"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Table Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="6dp">
+        
+        <TextView
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:text="Cant"
+            android:textColor="#1e293b"
+            android:textSize="11sp"
+            android:textStyle="bold"/>
+        
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Detalle"
+            android:textColor="#1e293b"
+            android:textSize="11sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="P. Unit"
+            android:textColor="#1e293b"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:gravity="end"/>
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:text="Subtotal"
+            android:textColor="#1e293b"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:gravity="end"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#e2e8f0"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Dynamic Items List -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_marginBottom="12dp">
+        
+        <LinearLayout
+            android:id="@+id/llComprobanteDetalleContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#cbd5e1"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Total and Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginBottom="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TOTAL: "
+            android:textColor="#1e293b"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tvComprobanteTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bs 0.00"
+            android:textColor="#059669"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="¡Gracias por su compra!"
+        android:textColor="#64748b"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnCerrarComprobante"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Aceptar"
+        android:backgroundTint="#0f172a"
+        android:textColor="#ffffff"
+        android:textStyle="bold" />
+
+</LinearLayout>

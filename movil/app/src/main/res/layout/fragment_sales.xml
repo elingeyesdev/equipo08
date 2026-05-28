@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#f8f9fc"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Punto de Venta (POS)"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#2b3b55" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Facturación directa, búsqueda y comprobantes de venta."
+        android:textColor="#5a6a85"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Segmented Tab Controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#e2e8f0"
+        android:padding="3dp"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/btnTabPOS"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Terminal POS"
+            android:backgroundTint="#2b3b55"
+            android:textColor="#ffffff"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:insetTop="0dp"
+            android:insetBottom="0dp" />
+
+        <Button
+            android:id="@+id/btnTabHistory"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Historial de Ventas"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="#475569"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:elevation="0dp"
+            app:strokeWidth="0dp" />
+    </LinearLayout>
+
+    <!-- CONTENT CONTAINERS -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- TAB 1: TERMINAL POS -->
+        <LinearLayout
+            android:id="@+id/llTabPOS"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <!-- Filter Panel -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/edit_text_bg"
+                android:padding="6dp"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@android:drawable/ic_menu_mylocation"
+                    app:tint="#5a6a85"
+                    android:layout_marginEnd="8dp"/>
+
+                <Spinner
+                    android:id="@+id/spinnerBranch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Buscar producto por nombre o SKU..."
+                android:background="@drawable/edit_text_bg"
+                android:padding="10dp"
+                android:layout_marginBottom="12dp"
+                android:drawableStart="@android:drawable/ic_menu_search"
+                android:drawablePadding="8dp"
+                android:textColor="#2b3b55"
+                android:textSize="14sp" />
+
+            <!-- Products Catalog Grid -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvProducts"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:paddingBottom="12dp" />
+
+            <!-- Bottom Cart Panel -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvCartPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:backgroundTint="@android:color/white"
+                android:layout_marginTop="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Cart Summary (Always visible) -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvCartCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Carrito vacío"
+                            android:textColor="#1e293b"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"/>
+
+                        <TextView
+                            android:id="@+id/tvCartTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Bs 0.00"
+                            android:textColor="#0284c7"
+                            android:textStyle="bold"
+                            android:textSize="18sp"
+                            android:layout_toStartOf="@+id/btnToggleCart"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="12dp"/>
+
+                        <Button
+                            android:id="@+id/btnToggleCart"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:text="Ver Detalles"
+                            android:textSize="10sp"
+                            android:backgroundTint="#f1f5f9"
+                            android:textColor="#475569"
+                            android:layout_alignParentEnd="true"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp" />
+                    </RelativeLayout>
+
+                    <!-- Expandable Cart Details -->
+                    <LinearLayout
+                        android:id="@+id/llCartDetails"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="12dp"
+                        android:visibility="gone">
+
+                        <!-- Client Form -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <EditText
+                                android:id="@+id/etClienteNombre"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1.2"
+                                android:hint="Cliente"
+                                android:textSize="13sp"
+                                android:background="@drawable/edit_text_bg"
+                                android:padding="10dp"
+                                android:layout_marginEnd="6dp"/>
+
+                            <EditText
+                                android:id="@+id/etClienteDoc"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0.8"
+                                android:hint="NIT / CI"
+                                android:textSize="13sp"
+                                android:background="@drawable/edit_text_bg"
+                                android:padding="10dp"/>
+                        </LinearLayout>
+
+                        <!-- Cart Products List -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvCartItems"
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:layout_marginBottom="12dp"
+                            android:background="#f8f9fc"
+                            android:padding="4dp"/>
+
+                        <!-- Checkout Button -->
+                        <Button
+                            android:id="@+id/btnCheckout"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:text="Cobrar y Emitir Comprobante"
+                            android:backgroundTint="#0284c7"
+                            android:textColor="#ffffff"
+                            android:textStyle="bold"
+                            android:textSize="14sp"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+        <!-- TAB 2: HISTORIAL DE COMPROBANTES -->
+        <LinearLayout
+            android:id="@+id/llTabHistory"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- History RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSalesHistory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="12dp" />
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>

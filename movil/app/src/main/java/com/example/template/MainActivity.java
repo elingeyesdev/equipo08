@@ -21,6 +21,7 @@ import com.example.template.ui.AuditReportsFragment;
 import com.example.template.ui.SucursalesFragment;
 import com.example.template.ui.EmpleadosFragment;
 import com.example.template.ui.PermisosFragment;
+import com.example.template.ui.SalesFragment;
 import com.example.template.utils.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
@@ -123,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             menu.findItem(R.id.nav_sucursales).setVisible(pr.isSucursalesVer());
                             menu.findItem(R.id.nav_sourcing).setVisible(pr.isSourcingVer());
                             menu.findItem(R.id.nav_stock).setVisible(pr.isInventarioVer());
+                            menu.findItem(R.id.nav_sales).setVisible(pr.isInventarioVer());
                             menu.findItem(R.id.nav_audit_reports).setVisible(pr.isInventarioVer());
                             menu.findItem(R.id.nav_empleados).setVisible(pr.isUsuariosVer());
                             break;
@@ -150,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new SourcingFragment();
         } else if (itemId == R.id.nav_stock) {
             selectedFragment = new StockFragment();
+        } else if (itemId == R.id.nav_sales) {
+            selectedFragment = new SalesFragment();
         } else if (itemId == R.id.nav_audit_reports) {
             selectedFragment = new AuditReportsFragment();
         } else if (itemId == R.id.nav_sucursales) {
