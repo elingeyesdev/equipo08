@@ -93,6 +93,9 @@ public class RegisterActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(RegisterActivity.this, "Cuenta creada exitosamente. Inicia sesión.", Toast.LENGTH_LONG).show();
                     
+                    // Enviar correo de bienvenida desde la app móvil
+                    com.example.template.utils.GmailSender.sendWelcomeEmail(email, name);
+                    
                     Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
