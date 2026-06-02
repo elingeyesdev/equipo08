@@ -24,6 +24,9 @@ export class Producto {
   @Column({ nullable: true })
   category: string;
 
+  @Column({ nullable: true })
+  imagen_url: string;
+
   @Column('int', { default: 10 })
   stockMinimo: number;
 

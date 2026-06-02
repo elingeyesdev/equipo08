@@ -12,7 +12,7 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [formData, setFormData] = useState({ 
-    name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10 
+    name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '' 
   });
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,7 +56,8 @@ export default function ProductsPage() {
       precioCosto: p.precioCosto || '',
       precioVenta: p.precioVenta || '',
       description: p.description || '',
-      stockMinimo: p.stockMinimo !== undefined ? p.stockMinimo : 10
+      stockMinimo: p.stockMinimo !== undefined ? p.stockMinimo : 10,
+      imagen_url: p.imagen_url || ''
     });
     setShowForm(true);
   };
@@ -103,7 +104,7 @@ export default function ProductsPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10 });
+    setFormData({ name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '' });
     setEditingId(null);
     setShowForm(false);
   };
@@ -217,9 +218,19 @@ export default function ProductsPage() {
                   <option value="Electrónica y Tecnología">Electrónica y Tecnología</option>
                   <option value="Ferretería y Construcción">Ferretería y Construcción</option>
                   <option value="Deportes y Aire Libre">Deportes y Aire Libre</option>
-                  <option value="Entretenimiento y Ocio">Entretenimiento y Ocio</option>
                   <option value="Otros">Otros</option>
                 </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="prod-img">URL de Imagen (Opcional)</label>
+                <input 
+                  id="prod-img"
+                  type="url" 
+                  value={formData.imagen_url} 
+                  onChange={e => setFormData({...formData, imagen_url: e.target.value})} 
+                  placeholder="https://ejemplo.com/imagen.jpg" 
+                />
               </div>
 
               <div className="form-group">
@@ -387,14 +398,23 @@ export default function ProductsPage() {
                   return filtered.map(p => (
                     <tr key={p.id}>
                       <td>
-                        <div className="flex flex-col items-start gap-1">
-                          <span className="font-bold text-slate-900 text-base">{p.name}</span>
-                          {p.description ? (
-                            <span className="text-xs text-slate-500 font-semibold">Var: {p.description}</span>
-                          ) : null}
-                          <span className="font-mono text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md uppercase tracking-wider">
-                            SKU: {p.sku}
-                          </span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                            {p.imagen_url ? (
+                              <img src={p.imagen_url} alt={p.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <PackageSearch size={20} className="text-slate-400" />
+                            )}
+                          </div>
+                          <div className="flex flex-col items-start gap-1">
+                            <span className="font-bold text-slate-900 text-base leading-tight">{p.name}</span>
+                            {p.description ? (
+                              <span className="text-xs text-slate-500 font-semibold truncate max-w-[150px]">Var: {p.description}</span>
+                            ) : null}
+                            <span className="font-mono text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                              SKU: {p.sku}
+                            </span>
+                          </div>
                         </div>
                       </td>
                       <td>

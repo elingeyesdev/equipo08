@@ -21,6 +21,11 @@ export class CreateProductoDto {
   category?: string;
 
   @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  imagen_url?: string;
+
+  @ApiProperty({ required: false })
   @IsNumber()
   @IsOptional()
   @Min(0)

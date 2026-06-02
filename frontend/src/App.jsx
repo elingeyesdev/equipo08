@@ -16,6 +16,7 @@ import RegisterPage from './pages/RegisterPage';
 import LandingPage from './pages/LandingPage';
 import AdminConsolePage from './pages/AdminConsolePage';
 import SettingsPage from './pages/SettingsPage';
+import PublicCatalogPage from './pages/PublicCatalogPage';
 import { ToastProvider } from './components/ToastContext';
 import {
   Users, Package, ShoppingCart, LogOut, Tag, Archive,
@@ -57,6 +58,14 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
   const tenantName = localStorage.getItem('tenant_name') || 'Mi Empresa';
   const userName   = localStorage.getItem('user_name')   || 'Usuario';
   const userRole   = localStorage.getItem('user_role')   || 'VENDEDOR';
+  
+  const [logoUrl, setLogoUrl] = useState(localStorage.getItem('tenant_logo') || '');
+
+  useEffect(() => {
+    const handleUpdate = () => setLogoUrl(localStorage.getItem('tenant_logo') || '');
+    window.addEventListener('tenant_logo_updated', handleUpdate);
+    return () => window.removeEventListener('tenant_logo_updated', handleUpdate);
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -99,7 +108,13 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
 
           {/* User chip */}
           <div className={`flex items-center gap-3 ${isOpen ? 'px-4 py-3' : 'justify-center py-3 px-0'} rounded-2xl bg-black/10 border border-white/10 backdrop-blur-md shadow-inner`}>
-            <div className="user-avatar text-[13px] bg-gradient-to-br from-white to-sky-50 text-[#184e77] font-black border-none shadow-sm flex-shrink-0">{initials}</div>
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-xl object-cover bg-white flex-shrink-0" />
+            ) : (
+              <div className="w-10 h-10 rounded-xl text-[13px] bg-gradient-to-br from-white to-sky-50 text-[#184e77] font-black flex items-center justify-center flex-shrink-0">
+                {initials}
+              </div>
+            )}
             {isOpen && (
               <div className="min-w-0 flex-1 animate-fadeIn">
                 <div className="text-[0.95rem] font-extrabold text-white truncate leading-tight">{userName}</div>
@@ -216,37 +231,45 @@ function App() {
   return (
     <ToastProvider>
       <Router>
-        {!authToken ? (
-          <Routes>
-            <Route path="/"         element={<LandingPage />} />
-            <Route path="/login"    element={<LoginPage    setAuthToken={setAuthToken} />} />
-            <Route path="/register" element={<RegisterPage setAuthToken={setAuthToken} />} />
-            <Route path="*"         element={<Navigate to="/" replace />} />
-          </Routes>
-        ) : (
-          <div className="app-layout">
-            <Sidebar setAuthToken={setAuthToken} permissions={permissions} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-            <div className={`main-content transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative`}>
-              <AnimatePresence mode="wait">
-                <Routes location={location} key={location.pathname}>
-                  <Route path="/"              element={<PageTransition><DashboardHome /></PageTransition>} />
-                  <Route path="/providers"     element={<PageTransition><ProvidersPage     key={authToken} /></PageTransition>} />
-                  <Route path="/sucursales"    element={<PageTransition><SucursalesPage    key={authToken} /></PageTransition>} />
-                  <Route path="/products"      element={<PageTransition><ProductsPage      key={authToken} /></PageTransition>} />
-                  <Route path="/sourcing"      element={<PageTransition><SourcingPage      key={authToken} /></PageTransition>} />
-                  <Route path="/sales"         element={<PageTransition><SalesPage         key={authToken} /></PageTransition>} />
-                  <Route path="/stock"         element={<PageTransition><StockPage         key={authToken} /></PageTransition>} />
-                  <Route path="/audit-reports" element={<PageTransition><AuditReportsPage  key={authToken} /></PageTransition>} />
-                  <Route path="/users"         element={<PageTransition><UsersPage         key={authToken} /></PageTransition>} />
-                  <Route path="/permissions"   element={<PageTransition><PermissionsPage   key={authToken} /></PageTransition>} />
-                  <Route path="/settings"      element={<PageTransition><SettingsPage      key={authToken} /></PageTransition>} />
-                  <Route path="/admin-console" element={<PageTransition><AdminConsolePage  key={authToken} /></PageTransition>} />
-                  <Route path="*"              element={<Navigate to="/" replace />} />
-                </Routes>
-              </AnimatePresence>
-            </div>
-          </div>
-        )}
+        <Routes>
+          {/* Ruta Pública Independiente (Sin Layout ni Autenticación Requerida) */}
+          <Route path="/tienda/:domain" element={<PublicCatalogPage />} />
+          
+          {/* Rutas de la Aplicación */}
+          <Route path="/*" element={
+            !authToken ? (
+              <Routes>
+                <Route path="/"         element={<LandingPage />} />
+                <Route path="/login"    element={<LoginPage    setAuthToken={setAuthToken} />} />
+                <Route path="/register" element={<RegisterPage setAuthToken={setAuthToken} />} />
+                <Route path="*"         element={<Navigate to="/" replace />} />
+              </Routes>
+            ) : (
+              <div className="app-layout">
+                <Sidebar setAuthToken={setAuthToken} permissions={permissions} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+                <div className={`main-content transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative`}>
+                  <AnimatePresence mode="wait">
+                    <Routes location={location} key={location.pathname}>
+                      <Route path="/"              element={<PageTransition><DashboardHome /></PageTransition>} />
+                      <Route path="/providers"     element={<PageTransition><ProvidersPage     key={authToken} /></PageTransition>} />
+                      <Route path="/sucursales"    element={<PageTransition><SucursalesPage    key={authToken} /></PageTransition>} />
+                      <Route path="/products"      element={<PageTransition><ProductsPage      key={authToken} /></PageTransition>} />
+                      <Route path="/sourcing"      element={<PageTransition><SourcingPage      key={authToken} /></PageTransition>} />
+                      <Route path="/sales"         element={<PageTransition><SalesPage         key={authToken} /></PageTransition>} />
+                      <Route path="/stock"         element={<PageTransition><StockPage         key={authToken} /></PageTransition>} />
+                      <Route path="/audit-reports" element={<PageTransition><AuditReportsPage  key={authToken} /></PageTransition>} />
+                      <Route path="/users"         element={<PageTransition><UsersPage         key={authToken} /></PageTransition>} />
+                      <Route path="/permissions"   element={<PageTransition><PermissionsPage   key={authToken} /></PageTransition>} />
+                      <Route path="/settings"      element={<PageTransition><SettingsPage      key={authToken} /></PageTransition>} />
+                      <Route path="/admin-console" element={<PageTransition><AdminConsolePage  key={authToken} /></PageTransition>} />
+                      <Route path="*"              element={<Navigate to="/" replace />} />
+                    </Routes>
+                  </AnimatePresence>
+                </div>
+              </div>
+            )
+          } />
+        </Routes>
       </Router>
     </ToastProvider>
   );
