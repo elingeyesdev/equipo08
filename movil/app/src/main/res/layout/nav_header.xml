@@ -17,13 +17,17 @@
         android:paddingTop="8dp"
         android:text="Nombre de Usuario"
         android:textColor="@color/primary_color"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginStart="56dp" />
 
     <TextView
         android:id="@+id/nav_header_role"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/text_secondary"
-        android:text="Rol del Usuario" />
+        android:textColor="@color/accent_blue"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="Rol del Usuario"
+        android:layout_marginStart="56dp" />
 </LinearLayout>

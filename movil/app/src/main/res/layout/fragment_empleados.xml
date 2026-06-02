@@ -1,48 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#f8f9fc"
-    android:padding="16dp">
+    android:fillViewport="true"
+    android:background="#f8f9fc">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_marginBottom="16dp">
         
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_alignParentStart="true"
-            android:layout_toStartOf="@+id/btnToggleForm"
-            android:layout_marginEnd="8dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gestión de Nómina y Personal"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="#2b3b55" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Administra el organigrama de tu tienda y asigna sucursales."
-                android:textColor="#5a6a85" />
-        </LinearLayout>
+            android:text="Gestión de Nómina y Personal"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#2b3b55" />
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Administra el organigrama de tu tienda y asigna sucursales."
+            android:textColor="#5a6a85"
+            android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnToggleForm"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
             android:backgroundTint="#1d4ed8"
             android:textColor="#ffffff"
             android:text="Registrar Nuevo" />
-    </RelativeLayout>
+    </LinearLayout>
 
     <!-- CARD Form -->
     <androidx.cardview.widget.CardView
@@ -172,17 +170,28 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:background="@drawable/edit_text_bg"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Rol: "
-                android:textColor="#5a6a85" />
+                android:textColor="#5a6a85"
+                android:textSize="14sp" />
             <Spinner
                 android:id="@+id/spinnerFilterRol"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/edit_text_bg" />
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null" />
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/arrow_down_float"
+                app:tint="#5a6a85"
+                android:contentDescription="Dropdown" />
         </LinearLayout>
 
         <View android:layout_width="8dp" android:layout_height="match_parent" />
@@ -192,17 +201,28 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:background="@drawable/edit_text_bg"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sucursal: "
-                android:textColor="#5a6a85" />
+                android:textColor="#5a6a85"
+                android:textSize="14sp" />
             <Spinner
                 android:id="@+id/spinnerFilterSucursal"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:background="@drawable/edit_text_bg" />
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@null" />
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/arrow_down_float"
+                app:tint="#5a6a85"
+                android:contentDescription="Dropdown" />
         </LinearLayout>
 
     </LinearLayout>
@@ -211,8 +231,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:clipToPadding="false"
-        android:paddingBottom="80dp" />
+        android:paddingBottom="80dp"
+        android:nestedScrollingEnabled="false" />
 
-</LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

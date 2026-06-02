@@ -24,6 +24,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.cardview.widget.CardView;
+
 
 import com.example.template.R;
 import com.example.template.network.ApiClient;
@@ -50,7 +52,9 @@ public class StockFragment extends Fragment {
     private TextView tvTotalValuation, tvTotalDeficit;
     private LinearLayout llAlertBanner;
     private TextView tvAlertTitle;
-    private Button btnSimulateAlerts;
+    private Button btnSimulateAlerts, btnToggleFilter;
+    private CardView cardFilter;
+    private boolean isFilterVisible = false;
 
     private List<Stock> allStockList = new ArrayList<>();
     private List<com.example.template.network.models.Ajuste> allAjustesList = new ArrayList<>();
@@ -93,6 +97,21 @@ public class StockFragment extends Fragment {
         if (btnSimulateAlerts != null) {
             btnSimulateAlerts.setOnClickListener(v -> handleSimulateLowStock());
         }
+
+        btnToggleFilter = view.findViewById(R.id.btnToggleFilter);
+        cardFilter = view.findViewById(R.id.cardFilter);
+        btnToggleFilter.setOnClickListener(v -> {
+            isFilterVisible = !isFilterVisible;
+            if (isFilterVisible) {
+                cardFilter.setVisibility(View.VISIBLE);
+                btnToggleFilter.setText("Ocultar Filtros");
+                btnToggleFilter.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#64748b")));
+            } else {
+                cardFilter.setVisibility(View.GONE);
+                btnToggleFilter.setText("Filtrar");
+                btnToggleFilter.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#2563eb")));
+            }
+        });
 
         loadSucursales();
         loadStock();
@@ -483,6 +502,14 @@ public class StockFragment extends Fragment {
                 }
             }
             loadStock(); // Reload updated stock list and alerts
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() != null) {
+            getActivity().getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }
     }
 }

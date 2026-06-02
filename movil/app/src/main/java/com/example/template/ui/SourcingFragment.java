@@ -45,7 +45,7 @@ import retrofit2.Response;
 
 public class SourcingFragment extends Fragment {
 
-    private Button btnToggleForm, btnGuardar;
+    private Button btnToggleForm, btnGuardar, btnToggleFilters;
     private CardView cardForm, cardFilter;
     private ScrollView scrollForm;
     private EditText etVolumen, etFechaVencimiento, etFechaProduccion, etSearch, etFilterDateFrom, etFilterDateTo;
@@ -56,6 +56,7 @@ public class SourcingFragment extends Fragment {
     private LoteAdapter adapter;
     private ApiService apiService;
     private boolean isFormVisible = false;
+    private boolean isFiltersVisible = false;
 
     private List<LoteIngreso> allLotesList = new ArrayList<>();
     private List<Producto> productosList = new ArrayList<>();
@@ -108,6 +109,20 @@ public class SourcingFragment extends Fragment {
         btnToggleForm.setOnClickListener(v -> toggleForm());
         btnGuardar.setOnClickListener(v -> saveLote());
 
+        btnToggleFilters = view.findViewById(R.id.btnToggleFilters);
+        btnToggleFilters.setOnClickListener(v -> {
+            isFiltersVisible = !isFiltersVisible;
+            if (isFiltersVisible) {
+                cardFilter.setVisibility(View.VISIBLE);
+                btnToggleFilters.setText("Ocultar Filtros");
+                btnToggleFilters.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#64748b")));
+            } else {
+                cardFilter.setVisibility(View.GONE);
+                btnToggleFilters.setText("Filtros");
+                btnToggleFilters.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2563eb")));
+            }
+        });
+
         setupSpinnerLink();
 
         loadLotes();
@@ -121,11 +136,13 @@ public class SourcingFragment extends Fragment {
         if (isFormVisible) {
             scrollForm.setVisibility(View.VISIBLE);
             cardFilter.setVisibility(View.GONE);
+            btnToggleFilters.setVisibility(View.GONE);
             btnToggleForm.setText("X Cancelar");
             btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#64748b")));
         } else {
             scrollForm.setVisibility(View.GONE);
-            cardFilter.setVisibility(View.VISIBLE);
+            cardFilter.setVisibility(isFiltersVisible ? View.VISIBLE : View.GONE);
+            btnToggleFilters.setVisibility(View.VISIBLE);
             btnToggleForm.setText("Nuevo Ingreso");
             btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
             etVolumen.setText("");
@@ -430,5 +447,13 @@ public class SourcingFragment extends Fragment {
                 Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() != null) {
+            getActivity().getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
     }
 }

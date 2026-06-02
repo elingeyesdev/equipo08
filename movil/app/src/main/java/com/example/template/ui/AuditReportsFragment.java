@@ -271,4 +271,12 @@ public class AuditReportsFragment extends Fragment {
         adapter.updateData(filtered);
         calculateKPIs(filtered);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() != null) {
+            getActivity().getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
+    }
 }

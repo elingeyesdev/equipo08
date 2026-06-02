@@ -92,9 +92,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // initial load
         if (savedInstanceState == null) {
-            navigationView.setCheckedItem(R.id.nav_products);
+            navigationView.setCheckedItem(R.id.nav_providers);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new ProductsFragment())
+                    .replace(R.id.fragment_container, new ProvidersFragment())
                     .commit();
         }
 
