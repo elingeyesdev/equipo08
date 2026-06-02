@@ -14,8 +14,8 @@ export default function ProvidersPage() {
   const [isFound, setIsFound] = useState(false);
   const toast = useToast();
 
-  const userRole = localStorage.getItem('user_role');
-  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+  const userRole = sessionStorage.getItem('user_role');
+  const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
 
   const hasPermission = (key) => {
     if (userRole === 'OWNER') return true;
@@ -45,18 +45,17 @@ export default function ProvidersPage() {
     setSearchingNit(true);
     try {
       const { data } = await api.get(`/proveedores/global/${formData.taxId}`);
-      // Auto-fill and lock
+      // Auto-fill
       setFormData({
         ...formData,
         name: data.name,
-        contactEmail: data.contactEmail,
+        contactEmail: data.contactEmail || '',
       });
       setIsFound(true);
       toast.success('Proveedor Maestro encontrado y autocompletado.');
     } catch (err) {
       setIsFound(false);
-      setFormData({ ...formData, name: '', contactEmail: '' });
-      toast.error(err.response?.data?.message || 'Proveedor no encontrado. Contacta al administrador.');
+      toast.info('NIT no registrado globalmente. Puedes ingresar los datos manualmente para registrarlo.');
     } finally {
       setSearchingNit(false);
     }
@@ -82,11 +81,10 @@ export default function ProvidersPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!isFound) {
-        toast.error('Debes buscar un NIT válido y registrado primero.');
+      if (!formData.taxId || !formData.name) {
+        toast.error('NIT y Razón Social son requeridos.');
         return;
       }
-      if (!formData.name) return;
       
       await api.post('/proveedores', formData);
       toast.success('Proveedor anexado a tu directorio');
@@ -179,10 +177,9 @@ export default function ProvidersPage() {
                   id="prov-name"
                   type="text" 
                   value={formData.name} 
+                  onChange={e => setFormData({...formData, name: e.target.value})}
                   required 
-                  readOnly 
-                  placeholder="Esperando NIT válido..." 
-                  className="bg-slate-50 cursor-not-allowed text-slate-500 border-slate-200"
+                  placeholder="Escribe la razón social..." 
                 />
               </div>
 
@@ -192,9 +189,8 @@ export default function ProvidersPage() {
                   id="prov-email"
                   type="email" 
                   value={formData.contactEmail} 
-                  readOnly 
-                  placeholder="Se autocompleta desde el NIT" 
-                  className="bg-slate-50 cursor-not-allowed text-slate-500 border-slate-200"
+                  onChange={e => setFormData({...formData, contactEmail: e.target.value})}
+                  placeholder="correo@proveedor.com" 
                 />
               </div>
 
@@ -210,7 +206,6 @@ export default function ProvidersPage() {
               </button>
               <button 
                 type="submit" 
-                disabled={!isFound} 
                 className="btn-premium btn-premium-indigo"
               >
                 Anexar Proveedor a la Tienda

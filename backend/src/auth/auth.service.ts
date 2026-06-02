@@ -82,7 +82,7 @@ export class AuthService {
     // 1. Intentar buscar en la nueva tabla de usuarios
     let user = await this.dataSource.getRepository(User).findOne({ 
       where: { email: dto.email },
-      relations: ['tenant']
+      relations: ['tenant', 'sucursal']
     });
 
     if (!user) {
@@ -145,7 +145,8 @@ export class AuthService {
       sub: user.id, 
       tenantId: user.tenant_id, 
       role: user.role,
-      tenantName: user.tenant?.name || 'Administración Global'
+      tenantName: user.tenant?.name || 'Administración Global',
+      sucursal_id: user.sucursal_id
     };
 
     let userPermissions = null;
@@ -164,6 +165,8 @@ export class AuthService {
         tenant_id: user.tenant_id,
         tenant_name: user.tenant?.name || 'Administración Global',
         tenant_logoUrl: user.tenant?.logoUrl || null,
+        sucursal_id: user.sucursal_id || null,
+        sucursal_name: user.sucursal?.name || null,
         permissions: userPermissions
       }
     };

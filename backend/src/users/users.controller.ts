@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePermissionsDto } from './dto/update-permissions.dto';
@@ -21,6 +21,19 @@ export class UsersController {
   @RequirePermission('usuarios.ver')
   findAll(@TenantId() tenant_id: string) {
     return this.usersService.findAll(tenant_id);
+  }
+
+  @Get('me')
+  async getMe(@TenantId() tenant_id: string, @Req() req: any) {
+    const user = await this.usersService.findOne(tenant_id, req.user.userId);
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      sucursal_id: user.sucursal_id,
+      sucursal_name: user.sucursal?.name || null
+    };
   }
 
   @Get('permissions')

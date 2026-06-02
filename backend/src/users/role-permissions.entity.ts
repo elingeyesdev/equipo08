@@ -67,6 +67,15 @@ export class RolePermissions {
   @Column({ default: false })
   usuarios_eliminar: boolean;
 
+  @Column({ default: true })
+  ventas_ver: boolean;
+  @Column({ default: true })
+  ventas_crear: boolean;
+  @Column({ default: false })
+  ventas_editar: boolean;
+  @Column({ default: false })
+  ventas_eliminar: boolean;
+
   @ManyToOne(() => Tenant)
   @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;

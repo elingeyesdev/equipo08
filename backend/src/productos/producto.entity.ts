@@ -21,6 +21,9 @@ export class Producto {
   @Column({ nullable: true })
   description: string;
 
+  @Column({ type: 'jsonb', nullable: true })
+  attributes: Record<string, any>;
+
   @Column({ nullable: true })
   category: string;
 

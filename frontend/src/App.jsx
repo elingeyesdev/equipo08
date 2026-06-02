@@ -21,7 +21,7 @@ import { ToastProvider } from './components/ToastContext';
 import {
   Users, Package, ShoppingCart, LogOut, Tag, Archive,
   Store, ShieldCheck, UserPlus, BarChart2, Receipt, LayoutDashboard,
-  Menu, ChevronLeft, Settings as SettingsIcon, ShieldAlert
+  Menu, ChevronLeft, Settings as SettingsIcon, ShieldAlert, Sun, Moon
 } from 'lucide-react';
 import './index.css';
 
@@ -55,20 +55,31 @@ function NavItem({ to, icon: Icon, label, active, isOpen }) {
 /* ─── SIDEBAR ──────────────────────────────────────────────────── */
 function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
   const location = useLocation();
-  const tenantName = localStorage.getItem('tenant_name') || 'Mi Empresa';
-  const userName   = localStorage.getItem('user_name')   || 'Usuario';
-  const userRole   = localStorage.getItem('user_role')   || 'VENDEDOR';
+  const tenantName = sessionStorage.getItem('tenant_name') || 'Mi Empresa';
+  const userName   = sessionStorage.getItem('user_name')   || 'Usuario';
+  const userRole   = sessionStorage.getItem('user_role')   || 'VENDEDOR';
   
-  const [logoUrl, setLogoUrl] = useState(localStorage.getItem('tenant_logo') || '');
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  
+  const [logoUrl, setLogoUrl] = useState(sessionStorage.getItem('tenant_logo') || '');
 
   useEffect(() => {
-    const handleUpdate = () => setLogoUrl(localStorage.getItem('tenant_logo') || '');
+    const handleUpdate = () => setLogoUrl(sessionStorage.getItem('tenant_logo') || '');
     window.addEventListener('tenant_logo_updated', handleUpdate);
     return () => window.removeEventListener('tenant_logo_updated', handleUpdate);
   }, []);
 
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear();
     setAuthToken(null);
   };
 
@@ -96,10 +107,19 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
 
         {/* Toggle and User Chip Area */}
         <div className="flex flex-col gap-4">
-          <div className={`flex items-center ${isOpen ? 'justify-end' : 'justify-center'} pt-2`}>
+          <div className={`flex items-center ${isOpen ? 'justify-between' : 'justify-center'} pt-2`}>
+            {isOpen && (
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="bg-transparent text-slate-400 hover:text-white hover:bg-white/10 p-2 rounded-xl transition-colors flex-shrink-0"
+                title={theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
+              >
+                {theme === 'dark' ? <Sun size={20} strokeWidth={2} /> : <Moon size={20} strokeWidth={2} />}
+              </button>
+            )}
             <button 
               onClick={() => setIsOpen(!isOpen)} 
-              className="text-white hover:bg-white/20 p-2 rounded-xl transition-colors flex-shrink-0"
+              className="bg-transparent text-white hover:bg-white/20 p-2 rounded-xl transition-colors flex-shrink-0"
               title={isOpen ? 'Ocultar menú' : 'Mostrar menú'}
             >
               {isOpen ? <ChevronLeft size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
@@ -111,14 +131,14 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
             {logoUrl ? (
               <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-xl object-cover bg-white flex-shrink-0" />
             ) : (
-              <div className="w-10 h-10 rounded-xl text-[13px] bg-gradient-to-br from-white to-sky-50 text-[#184e77] font-black flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl text-[13px] bg-slate-100 text-slate-900 font-black flex items-center justify-center flex-shrink-0">
                 {initials}
               </div>
             )}
             {isOpen && (
               <div className="min-w-0 flex-1 animate-fadeIn">
                 <div className="text-[0.95rem] font-extrabold text-white truncate leading-tight">{userName}</div>
-                <div className="text-[0.65rem] font-black text-sky-300 uppercase tracking-widest mt-1">{userRole}</div>
+                <div className="text-[0.65rem] font-black text-slate-400 uppercase tracking-widest mt-1">{userRole}</div>
               </div>
             )}
           </div>
@@ -138,7 +158,9 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
             <NavItem to="/sourcing"    icon={ShoppingCart} label="Sourcing"         active={p === '/sourcing'} isOpen={isOpen} />
           )}
 
-          <NavItem to="/sales" icon={Receipt} label="Facturación / POS" active={p === '/sales'} isOpen={isOpen} />
+          {hasPerm('ventas.ver') && (
+            <NavItem to="/sales" icon={Receipt} label="Facturación / POS" active={p === '/sales'} isOpen={isOpen} />
+          )}
 
           {hasPerm('inventario.ver') && (
             <>
@@ -150,7 +172,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
           {userRole === 'OWNER' && (
             <>
               <div className="h-px w-full bg-white/10 my-4" />
-              {isOpen && <span className="text-[0.65rem] font-black uppercase tracking-widest text-sky-300 px-4 mb-2 animate-fadeIn">Administración</span>}
+              {isOpen && <span className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400 px-4 mb-2 animate-fadeIn">Administración</span>}
               <NavItem to="/users"       icon={UserPlus}    label="Empleados"   active={p === '/users'} isOpen={isOpen} />
               <NavItem to="/permissions" icon={ShieldCheck} label="Permisos"    active={p === '/permissions'} isOpen={isOpen} />
               <NavItem to="/settings"    icon={SettingsIcon} label="Ajustes"    active={p === '/settings'} isOpen={isOpen} />
@@ -160,7 +182,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
           {userRole === 'SUPER_ADMIN' && (
             <>
               <div className="h-px w-full bg-white/10 my-4" />
-              {isOpen && <span className="text-[0.65rem] font-black uppercase tracking-widest text-rose-300 px-4 mb-2 animate-fadeIn">Sistema Global</span>}
+              {isOpen && <span className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400 px-4 mb-2 animate-fadeIn">Sistema Global</span>}
               <NavItem to="/admin-console" icon={ShieldAlert} label="Consola Global" active={p === '/admin-console'} isOpen={isOpen} />
             </>
           )}
@@ -171,7 +193,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
       <div className={`p-5 w-full border-t border-white/10 flex justify-center`}>
         <button
           onClick={handleLogout}
-          className={`flex items-center justify-center gap-3 h-12 rounded-xl text-sky-100 hover:text-white hover:bg-white/10 hover:shadow-md border border-transparent font-bold transition-all duration-200 ${isOpen ? 'w-full px-4' : 'w-12 px-0'}`}
+          className={`bg-transparent flex items-center justify-center gap-3 h-12 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 hover:shadow-md border border-transparent font-bold transition-all duration-200 ${isOpen ? 'w-full px-4' : 'w-12 px-0'}`}
           title={!isOpen ? 'Cerrar Sesión' : undefined}
         >
           <LogOut size={20} strokeWidth={2.5} />
@@ -184,8 +206,8 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
 
 /* ─── DASHBOARD HOME ────────────────────────────────────────────── */
 function DashboardHome() {
-  const userName = localStorage.getItem('user_name') || 'Usuario';
-  const userRole = localStorage.getItem('user_role') || 'VENDEDOR';
+  const userName = sessionStorage.getItem('user_name') || 'Usuario';
+  const userRole = sessionStorage.getItem('user_role') || 'VENDEDOR';
 
   return (
     <div className="max-w-xl mx-auto mt-16">
@@ -208,12 +230,21 @@ function DashboardHome() {
 
 /* ─── APP ROOT ──────────────────────────────────────────────────── */
 function App() {
-  const [authToken, setAuthToken] = useState(localStorage.getItem('access_token'));
+  const [authToken, setAuthToken] = useState(sessionStorage.getItem('access_token'));
   const [permissions, setPermissions] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
-    const role = localStorage.getItem('user_role');
+    const handleAuthError = (e) => {
+      setAuthError(e.detail.type);
+    };
+    window.addEventListener('auth_error', handleAuthError);
+    return () => window.removeEventListener('auth_error', handleAuthError);
+  }, []);
+
+  useEffect(() => {
+    const role = sessionStorage.getItem('user_role');
     if (authToken && role !== 'OWNER' && role !== 'SUPER_ADMIN') {
       fetchPermissions();
     }
@@ -221,12 +252,64 @@ function App() {
 
   const fetchPermissions = async () => {
     try {
+      // 1. Obtener datos actualizados del usuario (ej: si le cambiaron la sucursal)
+      try {
+        const meRes = await api.get('/users/me');
+        const currentSucursalId = sessionStorage.getItem('user_sucursal_id');
+        
+        // Si la sucursal cambió, actualizamos y recargamos para limpiar estado de componentes
+        if (meRes.data.sucursal_id !== currentSucursalId && meRes.data.role !== 'OWNER' && meRes.data.role !== 'SUPER_ADMIN') {
+          sessionStorage.setItem('user_sucursal_id', meRes.data.sucursal_id || '');
+          sessionStorage.setItem('user_sucursal_name', meRes.data.sucursal_name || '');
+          window.location.reload();
+          return;
+        }
+      } catch(e) {
+        // Ignorar si el endpoint falla (ej. versión antigua del backend)
+      }
+
+      // 2. Obtener permisos
       const res = await api.get('/users/permissions');
       setPermissions(res.data);
+      
+      const role = sessionStorage.getItem('user_role');
+      const myPerms = res.data.find(p => p.role === role);
+      if (myPerms) {
+        sessionStorage.setItem('permissions', JSON.stringify(myPerms));
+      }
     } catch (err) {
       console.error('Error fetching permissions', err);
     }
   };
+
+  if (authError) {
+    let msg = "Tu sesión ha expirado o hubo un problema de seguridad.";
+    if (authError === 'BRANCH_CHANGED') msg = "Tu asignación de sucursal ha sido modificada por un administrador. Por favor, inicia sesión nuevamente para cargar el inventario de tu nueva sucursal.";
+    if (authError === 'BRANCH_DISABLED') msg = "La sucursal actual ha sido desactivada. Por favor, inicia sesión nuevamente para cargar tu nueva sucursal.";
+    if (authError === 'TENANT_BLOCKED') msg = "Tu tienda ha sido bloqueada por la administración central. Por favor, contacta a soporte.";
+    if (authError === 'USER_DISABLED') msg = "Tu cuenta de usuario ha sido desactivada por un administrador.";
+
+    return (
+      <div className="fixed inset-0 bg-slate-900/90 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center border border-slate-200">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ShieldAlert className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-black text-slate-900 mb-4 font-sans">Acceso Interrumpido</h2>
+          <p className="text-slate-600 mb-8 leading-relaxed font-medium">{msg}</p>
+          <button 
+            onClick={() => {
+              sessionStorage.clear();
+              window.location.href = '/login';
+            }}
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl transition-colors"
+          >
+            Volver al inicio de sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <ToastProvider>
