@@ -119,7 +119,7 @@
             android:textStyle="italic"
             android:layout_marginTop="8dp"
             android:padding="8dp"
-            android:background="#f8fafc"
+            android:background="@color/bg_dark"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvMotivo" />

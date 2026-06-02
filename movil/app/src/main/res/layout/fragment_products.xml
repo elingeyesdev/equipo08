@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#f8f9fc">
+    android:background="@color/bg_dark">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -98,6 +98,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
@@ -112,6 +113,14 @@
                     android:hint="Variante / Especificación (Opcional)"
                     android:textColor="#2b3b55" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:id="@+id/llAttributesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"

@@ -74,12 +74,10 @@ public class ProvidersFragment extends Fragment {
                 public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         etRazonSocial.setText(response.body().getName());
-                        etEmail.setText(response.body().getContactEmail() != null ? response.body().getContactEmail() : "Sin email");
-                        Toast.makeText(getContext(), "Proveedor encontrado", Toast.LENGTH_SHORT).show();
+                        etEmail.setText(response.body().getContactEmail() != null ? response.body().getContactEmail() : "");
+                        Toast.makeText(getContext(), "Proveedor Maestro encontrado y autocompletado.", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(getContext(), "NIT no encontrado en la BD global", Toast.LENGTH_SHORT).show();
-                        etRazonSocial.setText("");
-                        etEmail.setText("");
+                        Toast.makeText(getContext(), "NIT no registrado globalmente. Puedes ingresar los datos manualmente para registrarlo.", Toast.LENGTH_LONG).show();
                     }
                 }
                 @Override
@@ -137,7 +135,7 @@ public class ProvidersFragment extends Fragment {
             return;
         }
 
-        Proveedor request = new Proveedor(name, email.equals("Sin email") || email.isEmpty() ? null : email, nit);
+        Proveedor request = new Proveedor(name, email.isEmpty() ? null : email, nit);
         apiService.createProveedor(request).enqueue(new Callback<Proveedor>() {
             @Override
             public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {

@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             menu.findItem(R.id.nav_sucursales).setVisible(pr.isSucursalesVer());
                             menu.findItem(R.id.nav_sourcing).setVisible(pr.isSourcingVer());
                             menu.findItem(R.id.nav_stock).setVisible(pr.isInventarioVer());
-                            menu.findItem(R.id.nav_sales).setVisible(pr.isInventarioVer());
+                            menu.findItem(R.id.nav_sales).setVisible(pr.isVentasVer());
                             menu.findItem(R.id.nav_audit_reports).setVisible(pr.isInventarioVer());
                             menu.findItem(R.id.nav_empleados).setVisible(pr.isUsuariosVer());
                             break;

@@ -50,6 +50,19 @@ public class ProductsFragment extends Fragment {
 
     private List<Proveedor> proveedoresList = new ArrayList<>();
 
+    private com.google.android.material.textfield.TextInputLayout tilDescription;
+    private android.widget.LinearLayout llAttributesContainer;
+
+    private static final java.util.Map<String, String[][]> CATEGORY_ATTRIBUTES = new java.util.HashMap<>();
+    static {
+        CATEGORY_ATTRIBUTES.put("Bebidas", new String[][]{{"sabor", "Sabor"}, {"volumen_ml", "Volumen (ML)"}});
+        CATEGORY_ATTRIBUTES.put("Ropa y Moda", new String[][]{{"talla", "Talla"}, {"color", "Color"}, {"genero", "Género"}});
+        CATEGORY_ATTRIBUTES.put("Zapatos y Calzado", new String[][]{{"talla", "Talla"}, {"color", "Color"}});
+        CATEGORY_ATTRIBUTES.put("Electrónica y Tecnología", new String[][]{{"marca", "Marca"}, {"modelo", "Modelo"}, {"garantia", "Garantía (Meses)"}});
+        CATEGORY_ATTRIBUTES.put("Abarrotes y Alimentos", new String[][]{{"peso", "Peso/Gramaje"}, {"marca", "Marca"}});
+        CATEGORY_ATTRIBUTES.put("Belleza y Cuidado Personal", new String[][]{{"volumen_ml", "Volumen (ML)"}, {"fragancia", "Fragancia / Tono"}});
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -68,6 +81,18 @@ public class ProductsFragment extends Fragment {
         spinnerCategoria = view.findViewById(R.id.spinnerCategoria);
         etStockMinimo = view.findViewById(R.id.etStockMinimo);
         recyclerView = view.findViewById(R.id.recyclerView);
+
+        tilDescription = view.findViewById(R.id.tilDescription);
+        llAttributesContainer = view.findViewById(R.id.llAttributesContainer);
+
+        spinnerCategoria.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                updateAttributeFields(editingProducto != null ? editingProducto.getAttributes() : null);
+            }
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
 
         // Setup Categories
         String[] categorias = {
@@ -145,6 +170,8 @@ public class ProductsFragment extends Fragment {
             editingProducto = null;
             etName.setText("", false); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText(""); etStockMinimo.setText("");
             btnGuardar.setText("Nuevo Artículo");
+            if (llAttributesContainer != null) llAttributesContainer.removeAllViews();
+            if (tilDescription != null) tilDescription.setVisibility(View.VISIBLE);
         }
         
         isFormVisible = !isFormVisible || fromEdit;
@@ -180,6 +207,9 @@ public class ProductsFragment extends Fragment {
             }
         }
         
+        // Force attributes generation even if category selection listener doesn't fire
+        updateAttributeFields(producto.getAttributes());
+
         // Proveedor
         if (producto.getProveedorId() != null) {
             for (int i = 0; i < proveedoresList.size(); i++) {
@@ -293,6 +323,25 @@ public class ProductsFragment extends Fragment {
 
         Producto request = new Producto(name, sku, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
         request.setStockMinimo(stockMinimo);
+
+        java.util.Map<String, String> attributes = new java.util.HashMap<>();
+        String[][] attrs = CATEGORY_ATTRIBUTES.get(cat);
+        if (attrs != null) {
+            for (int i = 0; i < llAttributesContainer.getChildCount(); i++) {
+                View child = llAttributesContainer.getChildAt(i);
+                if (child instanceof com.google.android.material.textfield.TextInputLayout) {
+                    com.google.android.material.textfield.TextInputLayout layout = (com.google.android.material.textfield.TextInputLayout) child;
+                    EditText et = layout.getEditText();
+                    if (et != null && et.getTag() != null) {
+                        String key = et.getTag().toString();
+                        String val = et.getText().toString().trim();
+                        attributes.put(key, val);
+                    }
+                }
+            }
+            request.setDescription(null);
+        }
+        request.setAttributes(attributes);
         
         if (editingProducto != null) {
             apiService.updateProducto(editingProducto.getId(), request).enqueue(new Callback<Producto>() {
@@ -358,6 +407,38 @@ public class ProductsFragment extends Fragment {
                 Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void updateAttributeFields(@Nullable java.util.Map<String, String> existingValues) {
+        if (getContext() == null || llAttributesContainer == null) return;
+        llAttributesContainer.removeAllViews();
+        String selectedCategory = spinnerCategoria.getSelectedItem() != null ? spinnerCategoria.getSelectedItem().toString() : "";
+        String[][] attrs = CATEGORY_ATTRIBUTES.get(selectedCategory);
+
+        if (attrs != null) {
+            if (tilDescription != null) tilDescription.setVisibility(View.GONE);
+            llAttributesContainer.setVisibility(View.VISIBLE);
+
+            for (String[] attr : attrs) {
+                String key = attr[0];
+                String label = attr[1];
+
+                View inputView = LayoutInflater.from(getContext()).inflate(R.layout.item_attribute_input, llAttributesContainer, false);
+                com.google.android.material.textfield.TextInputLayout layout = (com.google.android.material.textfield.TextInputLayout) inputView;
+                EditText et = layout.findViewById(R.id.etAttributeInput);
+                if (et != null) {
+                    et.setHint(label);
+                    et.setTag(key);
+                    if (existingValues != null && existingValues.containsKey(key)) {
+                        et.setText(existingValues.get(key));
+                    }
+                }
+                llAttributesContainer.addView(inputView);
+            }
+        } else {
+            if (tilDescription != null) tilDescription.setVisibility(View.VISIBLE);
+            llAttributesContainer.setVisibility(View.GONE);
+        }
     }
 
     @Override

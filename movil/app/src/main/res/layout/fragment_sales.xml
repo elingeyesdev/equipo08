@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#f8f9fc"
+    android:background="@color/bg_dark"
     android:padding="16dp">
 
     <!-- Header -->
@@ -241,7 +241,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="120dp"
                             android:layout_marginBottom="12dp"
-                            android:background="#f8f9fc"
+                            android:background="@color/bg_dark"
                             android:padding="4dp"/>
 
                         <!-- Checkout Button -->

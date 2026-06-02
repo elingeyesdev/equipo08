@@ -36,6 +36,7 @@ public class PermisosFragment extends Fragment {
     private Map<String, Switch> vendedorSwitches = new HashMap<>();
 
     private String[] categorias = {
+            "Punto de Venta (POS)",
             "Sucursales Físicas",
             "Catálogo Central (Productos)",
             "Gestión de Proveedores",
@@ -59,6 +60,12 @@ public class PermisosFragment extends Fragment {
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
         // Inicializar datos EXACTAMENTE como en el frontend
+        permisosPorCategoria.put("Punto de Venta (POS)", new String[]{
+                "Acceder a la Terminal de POS / Ventas",
+                "Procesar y Emitir Ventas",
+                "Modificar Registros de Ventas",
+                "Anular / Eliminar Transacciones"
+        });
         permisosPorCategoria.put("Sucursales Físicas", new String[]{
                 "Consultar Directorio Geográfico",
                 "Registrar Nuevas Sucursales",
@@ -200,6 +207,11 @@ public class PermisosFragment extends Fragment {
                             setSwitchSafe(targetSwitches, "Contratar Personal", pr.isUsuariosCrear());
                             setSwitchSafe(targetSwitches, "Editar Datos de Personal", pr.isUsuariosEditar());
                             setSwitchSafe(targetSwitches, "Desvincular Personal", pr.isUsuariosEliminar());
+
+                            setSwitchSafe(targetSwitches, "Acceder a la Terminal de POS / Ventas", pr.isVentasVer());
+                            setSwitchSafe(targetSwitches, "Procesar y Emitir Ventas", pr.isVentasCrear());
+                            setSwitchSafe(targetSwitches, "Modificar Registros de Ventas", pr.isVentasEditar());
+                            setSwitchSafe(targetSwitches, "Anular / Eliminar Transacciones", pr.isVentasEliminar());
                         }
                     }
                 }
@@ -247,6 +259,11 @@ public class PermisosFragment extends Fragment {
         req.setUsuariosCrear(getSwitchSafe(switchesMap, "Contratar Personal"));
         req.setUsuariosEditar(getSwitchSafe(switchesMap, "Editar Datos de Personal"));
         req.setUsuariosEliminar(getSwitchSafe(switchesMap, "Desvincular Personal"));
+
+        req.setVentasVer(getSwitchSafe(switchesMap, "Acceder a la Terminal de POS / Ventas"));
+        req.setVentasCrear(getSwitchSafe(switchesMap, "Procesar y Emitir Ventas"));
+        req.setVentasEditar(getSwitchSafe(switchesMap, "Modificar Registros de Ventas"));
+        req.setVentasEliminar(getSwitchSafe(switchesMap, "Anular / Eliminar Transacciones"));
 
         apiService.updatePermisos(req).enqueue(new Callback<PermisosRoles>() {
             @Override

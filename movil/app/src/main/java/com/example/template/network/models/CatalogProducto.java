@@ -27,6 +27,9 @@ public class CatalogProducto {
     @SerializedName("stockTotal")
     private int stockTotal;
 
+    @SerializedName("attributes")
+    private java.util.Map<String, String> attributes;
+
     public CatalogProducto(String id, String name, String sku, String description, String category, double precioVenta, String imagenUrl, int stockTotal) {
         this.id = id;
         this.name = name;
@@ -46,4 +49,5 @@ public class CatalogProducto {
     public double getPrecioVenta() { return precioVenta; }
     public String getImagenUrl() { return imagenUrl; }
     public int getStockTotal() { return stockTotal; }
+    public java.util.Map<String, String> getAttributes() { return attributes; }
 }

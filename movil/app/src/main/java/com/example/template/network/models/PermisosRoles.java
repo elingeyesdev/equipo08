@@ -60,6 +60,15 @@ public class PermisosRoles {
     @SerializedName("usuarios_eliminar")
     private boolean usuariosEliminar;
 
+    @SerializedName("ventas_ver")
+    private boolean ventasVer;
+    @SerializedName("ventas_crear")
+    private boolean ventasCrear;
+    @SerializedName("ventas_editar")
+    private boolean ventasEditar;
+    @SerializedName("ventas_eliminar")
+    private boolean ventasEliminar;
+
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
@@ -117,6 +126,15 @@ public class PermisosRoles {
     public boolean isUsuariosEliminar() { return usuariosEliminar; }
     public void setUsuariosEliminar(boolean usuariosEliminar) { this.usuariosEliminar = usuariosEliminar; }
 
+    public boolean isVentasVer() { return ventasVer; }
+    public void setVentasVer(boolean ventasVer) { this.ventasVer = ventasVer; }
+    public boolean isVentasCrear() { return ventasCrear; }
+    public void setVentasCrear(boolean ventasCrear) { this.ventasCrear = ventasCrear; }
+    public boolean isVentasEditar() { return ventasEditar; }
+    public void setVentasEditar(boolean ventasEditar) { this.ventasEditar = ventasEditar; }
+    public boolean isVentasEliminar() { return ventasEliminar; }
+    public void setVentasEliminar(boolean ventasEliminar) { this.ventasEliminar = ventasEliminar; }
+
     // Helper methods for backwards compatibility with other fragments
     public boolean isSucursalesGestionar() { return sucursalesCrear || sucursalesEditar || sucursalesEliminar; }
     public boolean isCatalogoGestionar() { return catalogoCrear || catalogoEditar || catalogoEliminar; }
@@ -124,4 +142,5 @@ public class PermisosRoles {
     public boolean isSourcingGestionar() { return sourcingCrear || sourcingEditar || sourcingEliminar; }
     public boolean isInventarioGestionar() { return inventarioCrear || inventarioEditar || inventarioEliminar; }
     public boolean isUsuariosGestionar() { return usuariosCrear || usuariosEditar || usuariosEliminar; }
+    public boolean isVentasGestionar() { return ventasCrear || ventasEditar || ventasEliminar; }
 }

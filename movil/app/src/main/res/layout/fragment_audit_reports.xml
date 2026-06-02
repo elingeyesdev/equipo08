@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#f8f9fc">
+    android:background="@color/bg_dark">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -152,7 +152,7 @@
                         android:layout_height="40dp"
                         android:text="dd/mm/yyyy"
                         android:textSize="12sp"
-                        android:backgroundTint="#f8f9fc"
+                        android:backgroundTint="@color/bg_dark"
                         android:textColor="#2b3b55" />
                     <TextView
                         android:layout_width="wrap_content"
@@ -168,7 +168,7 @@
                         android:layout_height="40dp"
                         android:text="dd/mm/yyyy"
                         android:textSize="12sp"
-                        android:backgroundTint="#f8f9fc"
+                        android:backgroundTint="@color/bg_dark"
                         android:textColor="#2b3b55" />
                 </LinearLayout>
                 
@@ -245,7 +245,7 @@
                     android:layout_marginTop="8dp"
                     android:text="Limpiar"
                     android:textSize="12sp"
-                    android:backgroundTint="#f8f9fc"
+                    android:backgroundTint="@color/bg_dark"
                     android:textColor="#2b3b55"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>

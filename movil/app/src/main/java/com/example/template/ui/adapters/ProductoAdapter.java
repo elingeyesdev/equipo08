@@ -48,10 +48,27 @@ public class ProductoAdapter extends RecyclerView.Adapter<ProductoAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Producto p = list.get(position);
-        holder.tvSku.setText("SKU: " + p.getSku());
+        holder.tvSku.setVisibility(View.GONE);
         holder.tvNombre.setText(p.getName());
         
-        if (p.getDescription() != null && !p.getDescription().isEmpty()) {
+        if (p.getAttributes() != null && !p.getAttributes().isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (java.util.Map.Entry<String, String> entry : p.getAttributes().entrySet()) {
+                if (entry.getValue() != null && !entry.getValue().trim().isEmpty()) {
+                    if (sb.length() > 0) sb.append(", ");
+                    sb.append(entry.getKey()).append(": ").append(entry.getValue());
+                }
+            }
+            if (sb.length() > 0) {
+                holder.tvVariant.setVisibility(View.VISIBLE);
+                holder.tvVariant.setText("Atributos: " + sb.toString());
+            } else if (p.getDescription() != null && !p.getDescription().isEmpty()) {
+                holder.tvVariant.setVisibility(View.VISIBLE);
+                holder.tvVariant.setText("Variante: " + p.getDescription());
+            } else {
+                holder.tvVariant.setVisibility(View.GONE);
+            }
+        } else if (p.getDescription() != null && !p.getDescription().isEmpty()) {
             holder.tvVariant.setVisibility(View.VISIBLE);
             holder.tvVariant.setText("Variante: " + p.getDescription());
         } else {

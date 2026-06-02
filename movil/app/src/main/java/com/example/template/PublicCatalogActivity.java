@@ -318,8 +318,27 @@ public class PublicCatalogActivity extends AppCompatActivity {
 
         if (tvDetailCategory != null) tvDetailCategory.setText(product.getCategory().toUpperCase());
         if (tvDetailName != null) tvDetailName.setText(product.getName());
-        if (tvDetailSku != null) tvDetailSku.setText("SKU: " + product.getSku());
-        if (tvDetailDescription != null) tvDetailDescription.setText(product.getDescription());
+        if (tvDetailSku != null) tvDetailSku.setVisibility(View.GONE);
+        if (tvDetailDescription != null) {
+            String desc = product.getDescription();
+            if (product.getAttributes() != null && !product.getAttributes().isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                for (java.util.Map.Entry<String, String> entry : product.getAttributes().entrySet()) {
+                    if (entry.getValue() != null && !entry.getValue().trim().isEmpty()) {
+                        if (sb.length() > 0) sb.append("\n");
+                        sb.append(entry.getKey()).append(": ").append(entry.getValue());
+                    }
+                }
+                if (sb.length() > 0) {
+                    if (desc != null && !desc.trim().isEmpty()) {
+                        desc = desc + "\n\nEspecificaciones:\n" + sb.toString();
+                    } else {
+                        desc = sb.toString();
+                    }
+                }
+            }
+            tvDetailDescription.setText(desc != null ? desc : "");
+        }
         if (tvDetailPrice != null) tvDetailPrice.setText(String.format("Bs %.2f", product.getPrecioVenta()));
 
         ImageLoader.loadImage(product.getImagenUrl(), ivDetailImage);

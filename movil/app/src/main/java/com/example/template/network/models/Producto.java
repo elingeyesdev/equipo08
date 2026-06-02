@@ -12,6 +12,12 @@ public class Producto {
     private String description;
     private int stockMinimo;
 
+    @com.google.gson.annotations.SerializedName("imagen_url")
+    private String imagenUrl;
+
+    @com.google.gson.annotations.SerializedName("attributes")
+    private java.util.Map<String, String> attributes;
+
     public Producto(String name, String sku, String category, double precioCosto, double precioVenta, String proveedor_id, String description) {
         this.name = name;
         this.sku = sku;
@@ -31,8 +37,13 @@ public class Producto {
     public double getPrecioVenta() { return precioVenta; }
     public Proveedor getProveedor() { return proveedor; }
     public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     public int getStockMinimo() { return stockMinimo <= 0 ? 10 : stockMinimo; }
     public void setStockMinimo(int stockMinimo) { this.stockMinimo = stockMinimo; }
+    public String getImagenUrl() { return imagenUrl; }
+    public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
+    public java.util.Map<String, String> getAttributes() { return attributes; }
+    public void setAttributes(java.util.Map<String, String> attributes) { this.attributes = attributes; }
 
     @Override
     public String toString() {
