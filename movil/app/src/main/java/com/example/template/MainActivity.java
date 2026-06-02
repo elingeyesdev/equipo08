@@ -22,6 +22,7 @@ import com.example.template.ui.SucursalesFragment;
 import com.example.template.ui.EmpleadosFragment;
 import com.example.template.ui.PermisosFragment;
 import com.example.template.ui.SalesFragment;
+import com.example.template.ui.SettingsFragment;
 import com.example.template.utils.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
@@ -112,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Default hide administration stuff for non-owners
         menu.findItem(R.id.nav_permisos).setVisible(false);
+        menu.findItem(R.id.nav_settings).setVisible(false);
 
         ApiClient.getClient(this).create(ApiService.class).getPermisos().enqueue(new Callback<List<PermisosRoles>>() {
             @Override
@@ -162,6 +164,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new EmpleadosFragment();
         } else if (itemId == R.id.nav_permisos) {
             selectedFragment = new PermisosFragment();
+        } else if (itemId == R.id.nav_settings) {
+            selectedFragment = new SettingsFragment();
         } else if (itemId == R.id.nav_logout) {
             sessionManager.logout();
             startActivity(new Intent(this, LandingActivity.class));
@@ -185,6 +189,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    public void updateToolbarTitle(String title) {
+        if (toolbar != null) {
+            toolbar.setTitle("OmniMall - " + title);
         }
     }
 }

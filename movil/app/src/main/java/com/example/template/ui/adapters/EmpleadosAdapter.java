@@ -68,9 +68,9 @@ public class EmpleadosAdapter extends RecyclerView.Adapter<EmpleadosAdapter.View
         String estado = e.getEstado() != null ? e.getEstado() : "Activo";
         holder.tvEstado.setText(estado);
         if ("Activo".equalsIgnoreCase(estado)) {
-            holder.tvEstado.setTextColor(Color.parseColor("#10b981")); // Green
+            holder.tvEstado.setTextColor(Color.parseColor("#166534")); // Green
         } else {
-            holder.tvEstado.setTextColor(Color.parseColor("#64748b")); // Gray
+            holder.tvEstado.setTextColor(Color.parseColor("#475569")); // Gray
         }
 
         holder.btnDelete.setOnClickListener(v -> {

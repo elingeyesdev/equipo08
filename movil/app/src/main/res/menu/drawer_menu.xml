@@ -3,48 +3,52 @@
 
     <item
         android:id="@+id/nav_providers"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@drawable/ic_providers"
         android:title="Proveedores" />
     <item
         android:id="@+id/nav_sucursales"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@drawable/ic_sucursales"
         android:title="Sucursales" />
     <item
         android:id="@+id/nav_products"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@drawable/ic_products"
         android:title="Catálogo" />
     <item
         android:id="@+id/nav_sourcing"
-        android:icon="@android:drawable/ic_menu_add"
+        android:icon="@drawable/ic_sourcing"
         android:title="Lotes (Sourcing)" />
     <item
         android:id="@+id/nav_stock"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:icon="@drawable/ic_stock"
         android:title="Inventario" />
     <item
         android:id="@+id/nav_sales"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@drawable/ic_sales"
         android:title="Punto de Venta (POS)" />
     <item
         android:id="@+id/nav_audit_reports"
-        android:icon="@android:drawable/ic_menu_recent_history"
+        android:icon="@drawable/ic_audit"
         android:title="Reportes de Auditoría" />
         
     <item android:title="Administración">
         <menu>
             <item
                 android:id="@+id/nav_empleados"
-                android:icon="@android:drawable/ic_menu_myplaces"
+                android:icon="@drawable/ic_empleados"
                 android:title="Empleados" />
             <item
                 android:id="@+id/nav_permisos"
-                android:icon="@android:drawable/ic_menu_manage"
+                android:icon="@drawable/ic_permissions"
                 android:title="Permisos" />
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_settings"
+                android:title="Ajustes" />
         </menu>
     </item>
 
     <item
         android:id="@+id/nav_logout"
-        android:icon="@android:drawable/ic_lock_power_off"
+        android:icon="@drawable/ic_logout"
         android:title="Cerrar Sesión" />
 </menu>

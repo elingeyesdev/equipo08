@@ -54,6 +54,11 @@ public class SessionManager {
         return prefs.getString(KEY_ROLE, "VENDEDOR");
     }
 
+    public void updateTenantName(String tenantName) {
+        editor.putString(KEY_TENANT_NAME, tenantName);
+        editor.apply();
+    }
+
     public void logout() {
         editor.clear();
         editor.apply();

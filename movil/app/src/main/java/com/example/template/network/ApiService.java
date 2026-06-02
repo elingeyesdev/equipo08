@@ -102,4 +102,10 @@ public interface ApiService {
 
     @retrofit2.http.GET("catalog/{domain}")
     Call<com.example.template.network.models.CatalogResponse> getCatalogByDomain(@retrofit2.http.Path("domain") String domain);
+
+    @retrofit2.http.GET("tenant/profile")
+    Call<com.example.template.network.models.TenantProfile> getTenantProfile();
+
+    @retrofit2.http.PATCH("tenant/profile")
+    Call<com.example.template.network.models.TenantProfile> updateTenantProfile(@Body com.example.template.network.models.TenantProfile profile);
 }

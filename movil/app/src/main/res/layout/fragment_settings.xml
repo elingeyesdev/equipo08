@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f8f9fc">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Title & Subtitle Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ajustes del Negocio"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#2b3b55" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Personaliza la información y apariencia de tu tienda."
+                    android:textColor="#5a6a85"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <!-- Card Settings Form -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardSettingsForm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                android:backgroundTint="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Perfil y Marca"
+                        android:textStyle="bold"
+                        android:textColor="#2b3b55"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="20dp"/>
+
+                    <!-- Store Name -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:boxBackgroundColor="#f1f5f9"
+                        app:boxCornerRadiusTopStart="8dp"
+                        app:boxCornerRadiusTopEnd="8dp"
+                        app:boxStrokeWidth="0dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSettingsStoreName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Nombre de la Tienda *"
+                            android:inputType="text"
+                            android:textColor="#2b3b55" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Contact Phone -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:boxBackgroundColor="#f1f5f9"
+                        app:boxCornerRadiusTopStart="8dp"
+                        app:boxCornerRadiusTopEnd="8dp"
+                        app:boxStrokeWidth="0dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSettingsContactPhone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Teléfono de Contacto (WhatsApp)"
+                            android:inputType="phone"
+                            android:textColor="#2b3b55" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Logo URL -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:boxBackgroundColor="#f1f5f9"
+                        app:boxCornerRadiusTopStart="8dp"
+                        app:boxCornerRadiusTopEnd="8dp"
+                        app:boxStrokeWidth="0dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSettingsLogoUrl"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="URL del Logo"
+                            android:inputType="textUri"
+                            android:textColor="#2b3b55" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Brand Color Selection -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Color de Marca"
+                        android:textColor="#5a6a85"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="24dp">
+
+                        <!-- Color Preview Box -->
+                        <View
+                            android:id="@+id/viewSettingsColorPreview"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/bg_circle_white"
+                            android:backgroundTint="#184e77"
+                            android:layout_marginEnd="12dp" />
+
+                        <!-- Brand Color Text Input -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            app:boxBackgroundColor="#f1f5f9"
+                            app:boxCornerRadiusTopStart="8dp"
+                            app:boxCornerRadiusTopEnd="8dp"
+                            app:boxStrokeWidth="0dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etSettingsBrandColor"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Código Color (HEX) *"
+                                android:inputType="text"
+                                android:textColor="#2b3b55"
+                                android:maxLines="1" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <!-- Save Changes Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSettingsSave"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        app:cornerRadius="8dp"
+                        android:backgroundTint="#0f172a"
+                        android:textColor="#ffffff"
+                        android:text="Guardar Cambios"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Center Progress Loading -->
+    <ProgressBar
+        android:id="@+id/pbSettingsLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="#2563eb" />
+
+</FrameLayout>

@@ -45,8 +45,8 @@
                 android:layout_centerVertical="true"
                 android:text="Filtrar Reporte"
                 android:textSize="12sp"
-                android:backgroundTint="#ffffff"
-                android:textColor="#2b3b55" />
+                android:backgroundTint="#2563eb"
+                android:textColor="#ffffff" />
         </RelativeLayout>
 
         <!-- KPI 1 -->
