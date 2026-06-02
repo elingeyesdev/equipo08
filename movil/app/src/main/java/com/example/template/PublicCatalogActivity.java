@@ -445,7 +445,11 @@ public class PublicCatalogActivity extends AppCompatActivity {
         if (cartItems.isEmpty()) return;
 
         StringBuilder sb = new StringBuilder();
-        sb.append("¡Hola! Quisiera hacer un pedido de ").append(storeName).append(":\n\n");
+        String displayStoreName = storeName;
+        if (displayStoreName != null && !displayStoreName.trim().toLowerCase().startsWith("tienda")) {
+            displayStoreName = "Tienda " + displayStoreName;
+        }
+        sb.append("Hola! Quisiera hacer un pedido de ").append(displayStoreName).append(":\n\n");
 
         double total = 0;
         for (CatalogCartItem item : cartItems) {
@@ -456,7 +460,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
             total += subtotal;
         }
 
-        sb.append("\n*Total estimado: Bs ").append(String.format("%.2f", total)).append("*");
+        sb.append("\nTotal estimado: Bs ").append(String.format("%.2f", total));
 
         String phone = storePhone.replaceAll("\\D", "");
         if (phone.length() == 8) {

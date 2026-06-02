@@ -261,7 +261,6 @@
         app:icon="@android:drawable/ic_input_add"
         app:iconTint="#FFFFFF"
         android:backgroundTint="#10B981"
-        android:visibility="gone"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"/>
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

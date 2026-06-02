@@ -128,14 +128,16 @@
                         android:textColor="#5a6a85"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="8dp"
+                        android:visibility="gone" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="24dp">
+                        android:layout_marginBottom="24dp"
+                        android:visibility="gone">
 
                         <!-- Color Preview Box -->
                         <View
