@@ -99,4 +99,7 @@ public interface ApiService {
 
     @retrofit2.http.GET("ventas/{id}")
     Call<com.example.template.network.models.Venta> getVenta(@retrofit2.http.Path("id") String id);
+
+    @retrofit2.http.GET("catalog/{domain}")
+    Call<com.example.template.network.models.CatalogResponse> getCatalogByDomain(@retrofit2.http.Path("domain") String domain);
 }

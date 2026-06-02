@@ -85,32 +85,76 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="64dp"
+        android:layout_marginBottom="32dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <!-- Acceso al Catálogo Público -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="12dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#FFFFFF"
+            android:backgroundTint="#1D4ED8">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp">
+
+                <EditText
+                    android:id="@+id/etStoreDomain"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="48dp"
+                    android:background="@android:color/transparent"
+                    android:hint="Dominio de tienda (ej: nike)"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#93C5FD"
+                    android:textSize="14sp"
+                    android:inputType="text"
+                    android:maxLines="1" />
+
+                <ImageButton
+                    android:id="@+id/btnGoToCatalog"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@android:drawable/ic_media_play"
+                    app:tint="#FFFFFF"
+                    android:contentDescription="Ir al catálogo" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
         <Button
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="56dp"
             android:backgroundTint="@android:color/white"
             android:text="EMPEZAR AHORA"
             android:textColor="@color/accent_blue"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
-            app:cornerRadius="32dp" />
+            app:cornerRadius="28dp" />
 
         <Button
             android:id="@+id/btnLogin"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginTop="16dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
             android:text="INICIAR SESIÓN"
             android:textColor="@android:color/white"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
     </LinearLayout>
 
