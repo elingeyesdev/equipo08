@@ -33,9 +33,9 @@ export default function SucursalesPage() {
     setHorariosData(newH);
   };
 
-  const userRole = localStorage.getItem('user_role');
-  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
-  const tenantName = localStorage.getItem('tenant_name') || 'Tienda';
+  const userRole = sessionStorage.getItem('user_role');
+  const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
+  const tenantName = sessionStorage.getItem('tenant_name') || 'Tienda';
 
   const hasPermission = (key) => {
     if (userRole === 'OWNER') return true;
@@ -198,22 +198,31 @@ export default function SucursalesPage() {
                 <label>Horarios de Atención</label>
                 <div className="flex flex-col gap-4 mt-1">
                   {horariosData.map((h, i) => (
-                    <div key={i} className="flex flex-col gap-3 p-4 bg-slate-50/50 border border-slate-200/80 rounded-xl relative">
+                    <div key={i} className="flex flex-col gap-3 p-4 rounded-xl relative" style={{ backgroundColor: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
                       <div>
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Días Aplicables:</span>
                         <div className="flex flex-wrap gap-1.5">
                           {DAYS_OF_WEEK.map(day => {
                             const active = h.days.includes(day);
+                            const isUsedElsewhere = horariosData.some((block, idx) => idx !== i && block.days.includes(day));
                             return (
                               <button 
                                 key={day} 
                                 type="button" 
+                                disabled={isUsedElsewhere}
                                 onClick={() => handleUpdateHorarioDays(i, day)}
                                 className={`px-2.5 py-1 text-xs font-semibold rounded-full border transition-all ${
                                   active 
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' 
-                                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
+                                    ? 'shadow-sm' 
+                                    : isUsedElsewhere
+                                      ? 'cursor-not-allowed opacity-30'
+                                      : 'opacity-70 hover:opacity-100'
                                 }`}
+                                style={{
+                                  backgroundColor: active ? 'var(--txt-primary)' : 'transparent',
+                                  color: active ? 'var(--bg-card)' : 'var(--txt-primary)',
+                                  borderColor: active ? 'var(--txt-primary)' : 'var(--border)'
+                                }}
                               >
                                 {day.slice(0, 3)}
                               </button>
@@ -245,7 +254,12 @@ export default function SucursalesPage() {
                         <button 
                           type="button" 
                           onClick={() => setHorariosData(horariosData.filter((_, idx) => idx !== i))} 
-                          className="p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-100 hover:border-rose-200 text-rose-600 rounded-lg absolute top-4 right-4"
+                          className="p-1.5 rounded-lg absolute top-4 right-4 transition-all"
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: '1px solid var(--border)',
+                            color: 'var(--danger)'
+                          }}
                           title="Eliminar horario"
                         >
                           <Trash2 size={14} />
@@ -257,7 +271,12 @@ export default function SucursalesPage() {
                   <button 
                     type="button" 
                     onClick={handleAddHorario} 
-                    className="self-start py-2 px-4 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-white border border-dashed border-indigo-300 text-indigo-600 hover:bg-indigo-50 transition-all"
+                    className="self-start py-2 px-4 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all"
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: '1px dashed var(--border)',
+                      color: 'var(--txt-primary)'
+                    }}
                   >
                     <Plus size={14} /> 
                     <span>Agregar Bloque de Horario</span>
@@ -267,8 +286,8 @@ export default function SucursalesPage() {
               <div className="form-group">
                 <label htmlFor="branch-status">Estado de Operación</label>
                 <select id="branch-status" value={formData.isActive} onChange={e => setFormData({...formData, isActive: e.target.value === 'true'})}>
-                  <option value="true">Activa y Operando</option>
-                  <option value="false">Clausurada / Inactiva</option>
+                  <option value="true">Activa</option>
+                  <option value="false">Inactiva</option>
                 </select>
               </div>
             </div>
@@ -358,7 +377,7 @@ export default function SucursalesPage() {
                       </td>
                       <td className="text-center">
                         <span className={`badge ${s.isActive ? 'success' : 'error'}`}>
-                          {s.isActive ? 'Operativa' : 'Inactiva'}
+                          {s.isActive ? 'Activa' : 'Inactiva'}
                         </span>
                       </td>
                       {hasPermission('sucursales_editar') && (

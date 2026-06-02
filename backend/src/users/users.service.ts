@@ -118,6 +118,10 @@ export class UsersService {
       usuarios_crear: false,
       usuarios_editar: false,
       usuarios_eliminar: false,
+      ventas_ver: true,
+      ventas_crear: true,
+      ventas_editar: true,
+      ventas_eliminar: false,
     });
 
     const vendedor = this.permissionsRep.create({
@@ -147,6 +151,10 @@ export class UsersService {
       usuarios_crear: false,
       usuarios_editar: false,
       usuarios_eliminar: false,
+      ventas_ver: true,
+      ventas_crear: true,
+      ventas_editar: false,
+      ventas_eliminar: false,
     });
 
     if (manager) {

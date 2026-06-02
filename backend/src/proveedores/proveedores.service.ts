@@ -63,15 +63,26 @@ export class ProveedoresService implements OnModuleInit {
   }
 
   async create(tenant_id: string, dto: CreateProveedorDto): Promise<Proveedor> {
-    if (!dto.taxId) throw new BadRequestException('NIT es obligatorio para anexar un proveedor global.');
+    if (!dto.taxId) throw new BadRequestException('NIT es obligatorio para agregar un proveedor.');
     
-    const globalProv = await this.findByGlobalNit(dto.taxId);
+    // 1. Buscar si ya existe en el directorio global
+    let globalProv = await this.proveRep.findOne({ where: { tenant_id: 'GLOBAL', taxId: dto.taxId } });
+    
     if (!globalProv) {
-      throw new BadRequestException('El NIT proporcionado no está registrado en el Directorio Mundial. Imposible crear.');
+      // Si no existe globalmente, lo creamos para que otras tiendas puedan reutilizarlo
+      if (!dto.name) throw new BadRequestException('El nombre del proveedor es obligatorio para registrar un NIT nuevo.');
+      globalProv = this.proveRep.create({
+        tenant_id: 'GLOBAL',
+        name: dto.name,
+        taxId: dto.taxId,
+        contactEmail: dto.contactEmail || undefined
+      });
+      await this.proveRep.save(globalProv);
+    } else {
+      // Si ya existe globalmente, heredamos su nombre oficial y correo
+      dto.name = globalProv.name;
+      dto.contactEmail = globalProv.contactEmail || dto.contactEmail;
     }
-    
-    dto.name = globalProv.name;
-    dto.contactEmail = globalProv.contactEmail;
 
     await this.validateProveedor(tenant_id, dto);
     const proveedor = this.proveRep.create({ ...dto, tenant_id });
@@ -80,7 +91,6 @@ export class ProveedoresService implements OnModuleInit {
 
   async findByGlobalNit(nit: string): Promise<Proveedor | null> {
     const prov = await this.proveRep.findOne({ where: { tenant_id: 'GLOBAL', taxId: nit } });
-    if (!prov) throw new NotFoundException(`El NIT ${nit} no se encuentra en el Registro Maestro Global.`);
     return prov;
   }
 

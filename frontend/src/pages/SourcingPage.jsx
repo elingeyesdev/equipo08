@@ -17,13 +17,15 @@ export default function SourcingPage() {
   const [filterSucursal, setFilterSucursal] = useState('ALL');
   const [filterDateStart, setFilterDateStart] = useState('');
   const [filterDateEnd, setFilterDateEnd] = useState('');
+  const [filterExpiryStart, setFilterExpiryStart] = useState('');
+  const [filterExpiryEnd, setFilterExpiryEnd] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [loteForm, setLoteForm] = useState({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
   const toast = useToast();
 
-  const userRole = localStorage.getItem('user_role');
-  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
-  const tenantName = localStorage.getItem('tenant_name') || 'Sucursal';
+  const userRole = sessionStorage.getItem('user_role');
+  const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
+  const tenantName = sessionStorage.getItem('tenant_name') || 'Sucursal';
 
   const hasPermission = (key) => {
     if (userRole === 'OWNER') return true;
@@ -189,7 +191,7 @@ export default function SourcingPage() {
                   setLoteForm({...loteForm, producto_id: e.target.value, proveedor_id: selectedProd ? selectedProd.proveedor_id : ''});
                 }} disabled={editingId ? true : false}>
                   <option value="">Seleccione artículo...</option>
-                  {products.map(p => <option key={p.id} value={p.id}>{p.name} {p.description ? `- ${p.description}` : ''} ({p.sku})</option>)}
+                  {products.map(p => <option key={p.id} value={p.id}>{p.name} {p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''} </option>)}
                 </select>
               </div>
 
@@ -256,7 +258,7 @@ export default function SourcingPage() {
               className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
             >
               <option value="ALL">-- Todos los productos --</option>
-              {products.map(p => <option key={p.id} value={p.id}>{p.name} {p.description ? `- ${p.description}` : ''} ({p.sku})</option>)}
+              {products.map(p => <option key={p.id} value={p.id}>{p.name} {p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''} </option>)}
             </select>
           </div>
           <div className="flex-1 min-w-[150px]">
@@ -271,7 +273,7 @@ export default function SourcingPage() {
             </select>
           </div>
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Vence desde</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ingreso desde</label>
             <input
               type="date"
               value={filterDateStart}
@@ -280,7 +282,7 @@ export default function SourcingPage() {
             />
           </div>
           <div className="flex-1 min-w-[150px]">
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Vence hasta</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ingreso hasta</label>
             <input
               type="date"
               value={filterDateEnd}
@@ -288,8 +290,26 @@ export default function SourcingPage() {
               className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
             />
           </div>
+          <div className="flex-1 min-w-[150px]">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Vence desde</label>
+            <input
+              type="date"
+              value={filterExpiryStart}
+              onChange={e => setFilterExpiryStart(e.target.value)}
+              className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+            />
+          </div>
+          <div className="flex-1 min-w-[150px]">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Vence hasta</label>
+            <input
+              type="date"
+              value={filterExpiryEnd}
+              onChange={e => setFilterExpiryEnd(e.target.value)}
+              className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+            />
+          </div>
           <div className="w-full md:w-auto flex justify-end mt-2 md:mt-0">
-             <button onClick={() => { setFilterProducto('ALL'); setFilterSucursal('ALL'); setFilterDateStart(''); setFilterDateEnd(''); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider transition-colors mb-2">
+             <button onClick={() => { setFilterProducto('ALL'); setFilterSucursal('ALL'); setFilterDateStart(''); setFilterDateEnd(''); setFilterExpiryStart(''); setFilterExpiryEnd(''); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider transition-colors mb-2">
                Limpiar Filtros
              </button>
           </div>
@@ -322,9 +342,21 @@ export default function SourcingPage() {
                   const filtered = historial.filter(h => {
                     if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
                     if (filterSucursal !== 'ALL' && h.sucursal_id !== filterSucursal) return false;
-                    if (filterDateStart && h.fechaVencimiento && h.fechaVencimiento < filterDateStart) return false;
-                    if (filterDateEnd && h.fechaVencimiento && h.fechaVencimiento > filterDateEnd) return false;
-                    if ((filterDateStart || filterDateEnd) && !h.fechaVencimiento) return false; // Filter out those without exp date if date filter is active
+                    
+                    // Filtrar por Fecha de Ingreso (fechaIngreso)
+                    if (filterDateStart) {
+                      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
+                      if (rowDate < filterDateStart) return false;
+                    }
+                    if (filterDateEnd) {
+                      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
+                      if (rowDate > filterDateEnd) return false;
+                    }
+
+                    // Filtrar por Fecha de Vencimiento
+                    if (filterExpiryStart && h.fechaVencimiento && h.fechaVencimiento < filterExpiryStart) return false;
+                    if (filterExpiryEnd && h.fechaVencimiento && h.fechaVencimiento > filterExpiryEnd) return false;
+                    if ((filterExpiryStart || filterExpiryEnd) && !h.fechaVencimiento) return false;
                     return true;
                   });
                   if (filtered.length === 0) return (
@@ -362,11 +394,19 @@ export default function SourcingPage() {
                         </td>
                         <td className="font-medium text-slate-800">
                           {h.producto?.name || '---'}
-                          {h.producto?.description && (
-                            <span className="text-xs text-slate-455 mt-0.5 block">
-                              Variante: {h.producto.description}
-                            </span>
-                          )}
+                          {(h.producto?.attributes && Object.keys(h.producto.attributes).length > 0) ? (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {Object.entries(h.producto.attributes).map(([key, val]) => val ? (
+                                <span key={key} className="text-[10px] text-slate-500 font-semibold border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-50">
+                                  {key}: {val}
+                                </span>
+                              ) : null)}
+                            </div>
+                          ) : h.producto?.description ? (
+                            <div className="text-xs text-slate-500 font-semibold mt-0.5 flex items-center gap-1">
+                              Var: {h.producto.description}
+                            </div>
+                          ) : null}
                           <span className="text-xs text-slate-400 font-mono mt-0.5 block">SKU: {h.producto?.sku}</span>
                         </td>
                         <td className="text-xs text-slate-600 font-medium">{h.proveedor?.name || '---'}</td>

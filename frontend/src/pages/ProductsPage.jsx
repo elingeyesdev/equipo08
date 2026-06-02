@@ -4,6 +4,15 @@ import { PackageSearch, Plus, X, Loader2, Edit2, Trash2, AlertTriangle, Tag, Sea
 import { useToast } from '../components/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 
+const CATEGORY_ATTRIBUTES = {
+  "Bebidas": [{ key: "sabor", label: "Sabor" }, { key: "volumen_ml", label: "Volumen (ML)" }],
+  "Ropa y Moda": [{ key: "talla", label: "Talla" }, { key: "color", label: "Color" }, { key: "genero", label: "Género" }],
+  "Zapatos y Calzado": [{ key: "talla", label: "Talla" }, { key: "color", label: "Color" }],
+  "Electrónica y Tecnología": [{ key: "marca", label: "Marca" }, { key: "modelo", label: "Modelo" }, { key: "garantia", label: "Garantía (Meses)" }],
+  "Abarrotes y Alimentos": [{ key: "peso", label: "Peso/Gramaje" }, { key: "marca", label: "Marca" }],
+  "Belleza y Cuidado Personal": [{ key: "volumen_ml", label: "Volumen (ML)" }, { key: "fragancia", label: "Fragancia / Tono" }]
+};
+
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [providers, setProviders] = useState([]);
@@ -12,15 +21,15 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [formData, setFormData] = useState({ 
-    name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '' 
+    name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '', attributes: {} 
   });
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const toast = useToast();
 
-  const userRole = localStorage.getItem('user_role');
-  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+  const userRole = sessionStorage.getItem('user_role');
+  const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
 
   const hasPermission = (key) => {
     if (userRole === 'OWNER') return true;
@@ -56,8 +65,9 @@ export default function ProductsPage() {
       precioCosto: p.precioCosto || '',
       precioVenta: p.precioVenta || '',
       description: p.description || '',
-      stockMinimo: p.stockMinimo !== undefined ? p.stockMinimo : 10,
-      imagen_url: p.imagen_url || ''
+      stockMinimo: p.stockMinimo,
+      imagen_url: p.imagen_url || '',
+      attributes: p.attributes || {}
     });
     setShowForm(true);
   };
@@ -104,7 +114,7 @@ export default function ProductsPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '' });
+    setFormData({ name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '', attributes: {} });
     setEditingId(null);
     setShowForm(false);
   };
@@ -181,16 +191,32 @@ export default function ProductsPage() {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="prod-desc">Variante / Especificación</label>
-                <input 
-                  id="prod-desc"
-                  type="text" 
-                  value={formData.description} 
-                  onChange={e => setFormData({...formData, description: e.target.value})} 
-                  placeholder="Ej. Zero Calorías, Talla M, Color Negro" 
-                />
-              </div>
+              {CATEGORY_ATTRIBUTES[formData.category] ? CATEGORY_ATTRIBUTES[formData.category].map(attr => (
+                <div className="form-group" key={attr.key}>
+                  <label htmlFor={`attr-${attr.key}`}>{attr.label}</label>
+                  <input
+                    id={`attr-${attr.key}`}
+                    type="text"
+                    value={formData.attributes?.[attr.key] || ''}
+                    onChange={e => setFormData({
+                      ...formData, 
+                      attributes: { ...(formData.attributes || {}), [attr.key]: e.target.value }
+                    })}
+                    placeholder={`Ej. ${attr.label}`}
+                  />
+                </div>
+              )) : (
+                <div className="form-group">
+                  <label htmlFor="prod-desc">Especificaciones (Opcional)</label>
+                  <input 
+                    id="prod-desc"
+                    type="text" 
+                    value={formData.description} 
+                    onChange={e => setFormData({...formData, description: e.target.value})} 
+                    placeholder="Ej. Detalles generales..." 
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label htmlFor="prod-sku">SKU (Código Único) *</label>
@@ -206,7 +232,7 @@ export default function ProductsPage() {
 
               <div className="form-group">
                 <label htmlFor="prod-category">Categoría Global *</label>
-                <select id="prod-category" required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                <select id="prod-category" required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value, attributes: {}})}>
                   <option value="Abarrotes y Alimentos">Abarrotes y Alimentos</option>
                   <option value="Bebidas">Bebidas</option>
                   <option value="Ropa y Moda">Ropa y Moda</option>
@@ -408,7 +434,15 @@ export default function ProductsPage() {
                           </div>
                           <div className="flex flex-col items-start gap-1">
                             <span className="font-bold text-slate-900 text-base leading-tight">{p.name}</span>
-                            {p.description ? (
+                            {p.attributes && Object.keys(p.attributes).length > 0 ? (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {Object.entries(p.attributes).map(([key, val]) => val ? (
+                                  <span key={key} className="text-[10px] text-slate-500 font-semibold border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-50">
+                                    {key}: {val}
+                                  </span>
+                                ) : null)}
+                              </div>
+                            ) : p.description ? (
                               <span className="text-xs text-slate-500 font-semibold truncate max-w-[150px]">Var: {p.description}</span>
                             ) : null}
                             <span className="font-mono text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-md uppercase tracking-wider">

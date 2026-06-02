@@ -330,7 +330,6 @@ export default function UsersPage() {
                       <td>
                         {user.sucursal ? (
                           <div className="flex items-center gap-1.5 text-xs text-slate-700 font-semibold">
-                            <Store size={12} className="text-slate-400" />
                             <span>{user.sucursal.name}</span>
                           </div>
                         ) : (

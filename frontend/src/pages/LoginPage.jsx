@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useToast } from '../components/ToastContext';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Rocket } from 'lucide-react';
+import { Mail, Lock, ArrowRight, MousePointerClick } from 'lucide-react';
 
 export default function LoginPage({ setAuthToken }) {
   const [email, setEmail] = useState('');
@@ -20,15 +20,17 @@ export default function LoginPage({ setAuthToken }) {
       const response = await api.post('/auth/login', { email, password });
       const { access_token, user } = response.data;
       
-      // Guardar todo en localStorage
-      localStorage.setItem('access_token', access_token);
-      localStorage.setItem('user_id', user.id);
-      localStorage.setItem('user_name', user.name);
-      localStorage.setItem('user_role', user.role);
-      localStorage.setItem('tenant_id', user.tenant_id);
-      localStorage.setItem('tenant_name', user.tenant_name);
-      localStorage.setItem('tenant_logo', user.tenant_logoUrl || '');
-      localStorage.setItem('permissions', JSON.stringify(user.permissions || {}));
+      // Guardar todo en sessionStorage
+      sessionStorage.setItem('access_token', access_token);
+      sessionStorage.setItem('user_id', user.id);
+      sessionStorage.setItem('user_name', user.name);
+      sessionStorage.setItem('user_role', user.role);
+      sessionStorage.setItem('tenant_id', user.tenant_id);
+      sessionStorage.setItem('tenant_name', user.tenant_name);
+      sessionStorage.setItem('tenant_logo', user.tenant_logoUrl || '');
+      sessionStorage.setItem('user_sucursal_id', user.sucursal_id || '');
+      sessionStorage.setItem('user_sucursal_name', user.sucursal_name || '');
+      sessionStorage.setItem('permissions', JSON.stringify(user.permissions || {}));
       
       setAuthToken(access_token);
       
@@ -47,66 +49,53 @@ export default function LoginPage({ setAuthToken }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a1624] flex items-center justify-center p-4 relative overflow-hidden font-sans">
-      {/* Background decorations */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-sky-600/20 rounded-full blur-[120px] pointer-events-none" />
-      
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="w-full max-w-md bg-[#111c2e]/80 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-8 md:p-10 relative z-10"
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-8 md:p-10 z-10"
       >
         <div className="flex justify-center mb-8">
-          <div className="flex items-center justify-center">
-            <span className="text-4xl font-black text-white tracking-tighter flex items-center">
-              BolCl
-              <div className="relative mx-0.5 flex flex-col items-center justify-center">
-                <Rocket size={32} className="text-[#ff5100] -mt-2" fill="currentColor" />
-                <div className="flex gap-1 mt-1">
-                  <div className="w-1 h-2 bg-[#ff5100] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-1 h-3 bg-[#ff5100] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-1 h-2 bg-[#ff5100] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-              </div>
-              ck
-            </span>
-          </div>
+          <span className="text-3xl font-black text-slate-900 tracking-tight flex items-center">
+            BolCl
+            <MousePointerClick size={28} className="text-slate-700 mx-0.5" strokeWidth={2.5} />
+            ck
+          </span>
         </div>
         
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-black text-white tracking-tight mb-2">Bienvenido</h2>
-          <p className="text-white/50 text-sm font-medium">Ingresa a tu panel de control comercial</p>
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Bienvenido</h2>
+          <p className="text-slate-500 text-sm font-medium">Ingresa a tu panel de control</p>
         </div>
         
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold text-white/60 uppercase tracking-wider mb-2">Correo Electrónico</label>
+            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Correo Electrónico</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="email" 
                 value={email} 
                 onChange={e => setEmail(e.target.value)} 
                 required 
                 placeholder="admin@mitienda.com"
-                className="w-full bg-[#0a1624] border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-medium"
+                className="w-full bg-white border border-slate-300 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors font-medium"
               />
             </div>
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-white/60 uppercase tracking-wider mb-2">Contraseña</label>
+            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="password" 
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
                 required 
                 placeholder="••••••••"
-                className="w-full bg-[#0a1624] border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all font-medium"
+                className="w-full bg-white border border-slate-300 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors font-medium"
               />
             </div>
           </div>
@@ -114,16 +103,16 @@ export default function LoginPage({ setAuthToken }) {
           <button 
             type="submit" 
             disabled={loading} 
-            className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2 shadow-lg shadow-indigo-500/25"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-2 shadow-sm"
           >
             {loading ? 'Verificando...' : 'Ingresar al Sistema'} 
             {!loading && <ArrowRight size={18} />}
           </button>
         </form>
 
-        <div className="mt-8 text-center text-sm text-white/40 font-medium">
+        <div className="mt-8 text-center text-sm text-slate-500 font-medium">
           ¿No tienes una cuenta?{' '}
-          <span className="text-sky-400 font-bold cursor-pointer hover:text-sky-300 transition-colors" onClick={() => navigate('/register')}>
+          <span className="text-blue-600 font-semibold cursor-pointer hover:text-blue-700 hover:underline transition-colors" onClick={() => navigate('/register')}>
             Registra tu tienda
           </span>
         </div>

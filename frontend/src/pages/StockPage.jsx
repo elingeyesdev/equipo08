@@ -22,9 +22,9 @@ export default function StockPage() {
 
   const toast = useToast();
 
-  const userRole = localStorage.getItem('user_role');
-  const userPermissions = JSON.parse(localStorage.getItem('permissions') || '{}');
-  const tenantName = localStorage.getItem('tenant_name') || 'Sucursal';
+  const userRole = sessionStorage.getItem('user_role');
+  const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
+  const tenantName = sessionStorage.getItem('tenant_name') || 'Sucursal';
 
   const hasPermission = (key) => {
     if (userRole === 'OWNER') return true;
@@ -234,13 +234,13 @@ export default function StockPage() {
 
       {/* Alertas Automáticas Banner */}
       {!auditItem && alertasStock.length > 0 && (
-        <div className="p-4 bg-gradient-to-r from-rose-500 to-rose-600 border border-rose-600 rounded-2xl flex items-start gap-3 shadow-md">
-          <div className="bg-white/20 p-2 rounded-full text-white backdrop-blur-sm">
-             <AlertTriangle size={18} />
+        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm">
+          <div className="bg-red-100 p-2 rounded-full text-red-600">
+             <AlertTriangle size={18} strokeWidth={2.5} />
           </div>
           <div>
-             <h4 className="font-black text-white text-sm m-0">Alertas de Inventario Bajo ({alertasStock.length})</h4>
-             <p className="text-rose-50 text-xs mt-0.5 m-0 font-medium">Hay productos que se encuentran por debajo del stock mínimo configurado. Recomendamos generar reposiciones.</p>
+             <h4 className="font-bold text-red-900 text-sm m-0">Alertas de Inventario Bajo ({alertasStock.length})</h4>
+             <p className="text-red-700 text-xs mt-0.5 m-0 font-medium">Hay productos que se encuentran por debajo del stock mínimo configurado. Recomendamos generar reposiciones.</p>
           </div>
         </div>
       )}
@@ -357,16 +357,16 @@ export default function StockPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-rose-500 to-rose-600 border border-rose-600 p-6 rounded-2xl shadow-md flex items-center justify-between transition-transform hover:-translate-y-1">
+          <div className="bg-red-50 border border-red-200 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:-translate-y-1">
             <div>
-              <span className="text-rose-100 font-bold uppercase tracking-wider text-[10px] block">Pérdida por Desajuste Acumulado</span>
-              <span className="text-2xl font-black text-white mt-1 block drop-shadow-sm">
+              <span className="text-red-700 font-bold uppercase tracking-wider text-[10px] block">Pérdida por Desajuste Acumulado</span>
+              <span className="text-2xl font-black text-red-900 mt-1 block drop-shadow-sm">
                 Bs. {historicalLossValue.toFixed(2)}
               </span>
             </div>
             <a 
               href="/audit-reports"
-              className="btn-premium btn-premium-sm border-rose-400 text-rose-700 hover:text-rose-800 hover:border-rose-500 bg-white shadow-sm"
+              className="py-2 px-4 rounded-lg border border-red-200 bg-white text-red-700 hover:text-red-800 hover:bg-red-50 font-bold text-sm shadow-sm transition-colors"
             >
               <span>Ver Auditorías</span>
             </a>

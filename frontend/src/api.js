@@ -6,7 +6,7 @@ const api = axios.create({
 
 // Interceptor para inyectar el Token
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
+  const token = sessionStorage.getItem('access_token');
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
@@ -18,8 +18,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && !error.config.url.includes('/auth/')) {
-      localStorage.clear();
-      window.location.href = '/login';
+      const msg = error.response.data.message;
+      if (['USER_DISABLED', 'TENANT_BLOCKED', 'BRANCH_CHANGED', 'BRANCH_DISABLED'].includes(msg)) {
+        window.dispatchEvent(new CustomEvent('auth_error', { detail: { type: msg } }));
+      } else {
+        sessionStorage.clear();
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

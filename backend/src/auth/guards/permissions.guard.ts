@@ -35,6 +35,12 @@ export class PermissionsGuard implements CanActivate {
     // Transformar la clave del permiso (ej: 'sucursales.ver' -> 'sucursales_ver')
     const entityField = requiredPermission.replace('.', '_');
     
+    // Permitir lectura de sucursales e inventario básica si el rol tiene asignado operar el POS
+    if ((requiredPermission === 'sucursales.ver' || requiredPermission === 'inventario.ver') && 
+        (rolePerm.ventas_ver || rolePerm.ventas_crear)) {
+      return true;
+    }
+    
     return !!(rolePerm as any)[entityField];
   }
 }

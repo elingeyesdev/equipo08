@@ -18,6 +18,11 @@ export default function SalesPage() {
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(null);
 
+  const userRole = sessionStorage.getItem('user_role');
+  const userSucursalId = sessionStorage.getItem('user_sucursal_id');
+  const userSucursalName = sessionStorage.getItem('user_sucursal_name');
+  const isBranchLocked = userRole !== 'OWNER' && !!userSucursalId;
+
   const toast = useToast();
 
   useEffect(() => {
@@ -35,6 +40,18 @@ export default function SalesPage() {
 
   const fetchSucursales = async () => {
     try {
+      const userSucursalId = sessionStorage.getItem('user_sucursal_id');
+      const userSucursalName = sessionStorage.getItem('user_sucursal_name');
+      const userRole = sessionStorage.getItem('user_role');
+      
+      // Si es un empleado (Vendedor o Supervisor) y tiene una sucursal asignada, se auto-selecciona y bloquea
+      if (userRole !== 'OWNER' && userSucursalId) {
+        const myBranch = { id: userSucursalId, name: userSucursalName || 'Mi Sucursal' };
+        setSucursales([myBranch]);
+        setSelectedBranch(userSucursalId);
+        return;
+      }
+
       const { data } = await api.get('/sucursales');
       const activos = data.filter(s => s.isActive);
       setSucursales(activos);
@@ -181,13 +198,20 @@ export default function SalesPage() {
             <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
               <ShoppingCart size={20} className="text-indigo-600" /> Terminal de Venta
             </h3>
-            <p className="text-sm text-slate-500 mt-1 font-medium">Selecciona la sucursal y añade productos al carrito.</p>
+            <p className="text-sm text-slate-500 mt-1 font-medium">
+              {isBranchLocked ? `Sucursal: ${userSucursalName || 'Asignada'}. Añade productos al carrito.` : 'Selecciona la sucursal y añade productos al carrito.'}
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <select 
               value={selectedBranch} 
               onChange={e => { setSelectedBranch(e.target.value); setCart([]); }}
-              className="py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer shadow-sm"
+              disabled={isBranchLocked}
+              className={`py-2 px-4 border rounded-xl text-sm font-bold transition-all shadow-sm ${
+                isBranchLocked 
+                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed' 
+                  : 'bg-slate-50 border-slate-200 text-slate-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500'
+              }`}
             >
               <option value="" disabled>-- Seleccione Sucursal --</option>
               {sucursales.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}

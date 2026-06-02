@@ -35,4 +35,9 @@ export class UpdatePermissionsDto {
   @IsBoolean() @IsOptional() usuarios_crear?: boolean;
   @IsBoolean() @IsOptional() usuarios_editar?: boolean;
   @IsBoolean() @IsOptional() usuarios_eliminar?: boolean;
+
+  @IsBoolean() @IsOptional() ventas_ver?: boolean;
+  @IsBoolean() @IsOptional() ventas_crear?: boolean;
+  @IsBoolean() @IsOptional() ventas_editar?: boolean;
+  @IsBoolean() @IsOptional() ventas_eliminar?: boolean;
 }

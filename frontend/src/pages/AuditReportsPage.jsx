@@ -70,12 +70,17 @@ export default function AuditReportsPage() {
 
   const filteredAjustes = ajustes.filter(a => {
     let validDate = true;
-    if (startDate && endDate) {
-       const rowDate = new Date(a.fecha);
-       const start = new Date(startDate);
-       const end = new Date(endDate);
-       end.setHours(23, 59, 59, 999);
-       validDate = rowDate >= start && rowDate <= end;
+    if (a.fecha) {
+      const rowDate = new Date(a.fecha);
+      if (startDate) {
+        const start = new Date(startDate);
+        if (rowDate < start) validDate = false;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        if (rowDate > end) validDate = false;
+      }
     }
     let validUser = true;
     if (selectedUser !== 'ALL') {
@@ -118,11 +123,11 @@ export default function AuditReportsPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4">
         {/* Loss Card */}
-        <div className="bg-gradient-to-br from-rose-500 to-rose-600 border border-rose-600 rounded-2xl p-6 shadow-md text-white">
-          <span className="text-xs font-bold text-rose-100 uppercase tracking-wide">
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm border-l-4 border-l-red-500">
+          <span className="text-xs font-bold text-red-700 uppercase tracking-wide">
             Pérdida Total Estimada
           </span>
-          <p className="text-2xl font-black text-white mt-1 font-mono drop-shadow-sm">
+          <p className="text-3xl font-black text-red-600 mt-1">
             Bs {totalFilteredLoss.toFixed(2)}
           </p>
         </div>
@@ -132,7 +137,7 @@ export default function AuditReportsPage() {
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
             Ajustes Encontrados
           </span>
-          <p className="text-2xl font-bold text-blue-700 mt-1 font-mono">
+          <p className="text-3xl font-black text-slate-900 mt-1">
             {filteredAjustes.length}
           </p>
         </div>

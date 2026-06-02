@@ -16,6 +16,10 @@ export class CreateProductoDto {
   description?: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  attributes?: Record<string, any>;
+
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   category?: string;
