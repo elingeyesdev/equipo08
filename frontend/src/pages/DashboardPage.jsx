@@ -26,20 +26,20 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       // Usamos Promise.all para cargar optimizadamente en paralelo.
-      // Atrapamos errores individualmente para no romper todo si el usuario no tiene permisos (ej. Vendedor).
-      const [salesRes, stockRes, ajustesRes] = await Promise.all([
-        api.get('/ventas').catch(() => ({ data: [] })),
+      const [kpisRes, stockRes, ajustesRes] = await Promise.all([
+        api.get('/ventas/kpis/dashboard').catch(() => ({ data: { totalVentas: 0, ingresosTotales: 0, utilidadTotal: 0, recentSales: [] } })),
         api.get('/stock').catch(() => ({ data: [] })),
         api.get('/ajustes').catch(() => ({ data: [] }))
       ]);
 
-      const sales = salesRes.data || [];
+      const kpis = kpisRes.data;
       const stock = stockRes.data || [];
       const ajustes = ajustesRes.data || [];
 
       // Validar consistencia e interpretar información
-      const totalSales = sales.length;
-      const totalRevenue = sales.reduce((acc, sale) => acc + Number(sale.total), 0);
+      const totalSales = kpis.totalVentas;
+      const totalRevenue = kpis.ingresosTotales;
+      const totalProfit = kpis.utilidadTotal;
       
       const totalStockItems = stock.reduce((acc, item) => acc + Number(item.cantidad), 0);
       const totalStockValue = stock.reduce((acc, item) => {
@@ -50,13 +50,12 @@ export default function DashboardPage() {
       const totalLosses = ajustes.reduce((acc, aj) => acc + Number(aj.valor_perdido || 0), 0);
 
       // Obtener últimas 5 ventas para mostrar actividad reciente
-      const recentSales = [...sales]
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 5);
+      const recentSales = kpis.recentSales || [];
 
       setMetrics({
         totalSales,
         totalRevenue,
+        totalProfit,
         totalStockItems,
         totalStockValue,
         totalLosses,
@@ -97,7 +96,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 lg:grid-cols-3 gap-6 mb-8">
         
         {/* Card: Ventas Realizadas */}
         <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
@@ -129,6 +128,24 @@ export default function DashboardPage() {
             </div>
             <div className="text-[11px] font-bold text-blue-600 flex items-center gap-1">
               <TrendingUp size={12} /> <span className="text-[var(--txt-muted)] font-medium ml-1">Ingreso Bruto</span>
+            </div>
+          </div>
+        )}
+
+        {/* Card: Utilidad Bruta */}
+        {!isBasicSeller && (
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <p className="text-xs font-bold text-[var(--txt-secondary)] uppercase tracking-wider mb-1">Utilidad Bruta</p>
+                <h3 className="text-2xl font-black text-green-600">Bs {metrics.totalProfit.toFixed(2)}</h3>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center dark:bg-green-900/20 dark:border-green-900/30">
+                <TrendingUp size={18} className="text-green-500" />
+              </div>
+            </div>
+            <div className="text-[11px] font-bold text-green-600 flex items-center gap-1">
+              <TrendingUp size={12} /> <span className="text-[var(--txt-muted)] font-medium ml-1">Ganancia Neta</span>
             </div>
           </div>
         )}
