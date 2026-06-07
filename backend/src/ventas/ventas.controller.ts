@@ -24,6 +24,12 @@ export class VentasController {
     return this.ventasService.findAll(tenant_id);
   }
 
+  @Get('kpis/dashboard')
+  @RequirePermission('ventas.ver')
+  async getKpis(@TenantId() tenant_id: string) {
+    return this.ventasService.getDashboardKpis(tenant_id);
+  }
+
   @Get(':id')
   @RequirePermission('ventas.ver')
   async findOne(@Param('id') id: string, @TenantId() tenant_id: string) {
