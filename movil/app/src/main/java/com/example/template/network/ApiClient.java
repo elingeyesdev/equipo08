@@ -1,15 +1,25 @@
 package com.example.template.network;
 
 import android.content.Context;
+import java.security.cert.CertificateException;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
+    // Configura aquí la URL de tu API en HTTPS (ngrok)
     private static final String BASE_URL = "https://runner-affair-gratitude.ngrok-free.dev/api/";
-    // Para usar el emulador local de Android Studio, descomenta la siguiente línea y comenta la de arriba:
-    // private static final String BASE_URL = "http://10.0.2.2:3000/api/";
+    
+    // Activa esto (true) en desarrollo para omitir la validación de certificados SSL de ngrok
+    private static final boolean OMITIR_CERTIFICADOS_SSL = true;
+
     private static Retrofit retrofit = null;
 
     public static Retrofit getClient(Context context) {
@@ -17,7 +27,15 @@ public class ApiClient {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-            OkHttpClient client = new OkHttpClient.Builder()
+            OkHttpClient.Builder clientBuilder;
+            
+            if (OMITIR_CERTIFICADOS_SSL && BASE_URL.startsWith("https")) {
+                clientBuilder = getUnsafeOkHttpClientBuilder();
+            } else {
+                clientBuilder = new OkHttpClient.Builder();
+            }
+
+            OkHttpClient client = clientBuilder
                     .addInterceptor(logging)
                     .addInterceptor(new TenantInterceptor(context))
                     .build();
@@ -29,5 +47,42 @@ public class ApiClient {
                     .build();
         }
         return retrofit;
+    }
+
+    private static OkHttpClient.Builder getUnsafeOkHttpClientBuilder() {
+        try {
+            final TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    @Override
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {}
+
+                    @Override
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {}
+
+                    @Override
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return new java.security.cert.X509Certificate[]{};
+                    }
+                }
+            };
+
+            // Usamos "TLS" para asegurar compatibilidad con protocolos modernos requeridos por ngrok
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
+            builder.hostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
+            return builder;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
