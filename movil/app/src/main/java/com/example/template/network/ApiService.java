@@ -94,6 +94,9 @@ public interface ApiService {
     @retrofit2.http.GET("ventas")
     Call<java.util.List<com.example.template.network.models.Venta>> getVentas();
 
+    @retrofit2.http.GET("ventas/kpis/dashboard")
+    Call<com.example.template.network.models.DashboardKpis> getDashboardKpis();
+
     @POST("ventas")
     Call<com.example.template.network.models.Venta> createVenta(@Body com.example.template.network.models.VentaRequest request);
 
