@@ -28,6 +28,7 @@ export class VentasService {
   async create(dto: CreateVentaDto, tenant_id: string): Promise<Venta> {
     const detalle = [];
     let total = 0;
+    let costoTotal = 0;
 
     // Validate and process each item
     for (const item of dto.items) {
@@ -48,6 +49,8 @@ export class VentasService {
       // Calculate cost proportion to reduce inventory value accurately
       const avgCost = stockDisponible > 0 ? (Number(stock?.valorAdquisicion || 0) / stockDisponible) : 0;
       const proportionalCost = avgCost * item.cantidad;
+      
+      costoTotal += proportionalCost;
 
       // Reduce stock
       await this.stockService.sumStock(tenant_id, dto.sucursal_id, producto.id, -item.cantidad, -proportionalCost);
@@ -58,9 +61,12 @@ export class VentasService {
         name: producto.name,
         cantidad: item.cantidad,
         precioUnitario,
+        costoUnitario: avgCost,
         subtotal
       });
     }
+
+    const utilidadTotal = total - costoTotal;
 
     const numeroComprobante = `FAC-${Date.now()}`;
 
@@ -71,7 +77,9 @@ export class VentasService {
       clienteNombre: dto.clienteNombre,
       clienteDocumento: dto.clienteDocumento,
       detalle,
-      total
+      total,
+      costoTotal,
+      utilidadTotal
     });
 
     const savedVenta = await this.ventaRep.save(venta);
@@ -94,6 +102,31 @@ export class VentasService {
     const venta = await this.ventaRep.findOne({ where: { id, tenant_id }, relations: ['sucursal'] });
     if (!venta) throw new NotFoundException('Venta no encontrada');
     return venta;
+  }
+
+  async getDashboardKpis(tenant_id: string): Promise<any> {
+    const kpis = await this.ventaRep
+      .createQueryBuilder('venta')
+      .where('venta.tenant_id = :tenant_id', { tenant_id })
+      .select('SUM(venta.total)', 'sumTotal')
+      .addSelect('SUM(venta.costoTotal)', 'sumCosto')
+      .addSelect('SUM(venta.utilidadTotal)', 'sumUtilidad')
+      .addSelect('COUNT(venta.id)', 'countVentas')
+      .getRawOne();
+
+    const recentSales = await this.ventaRep.find({
+      where: { tenant_id },
+      order: { fecha: 'DESC' },
+      take: 5
+    });
+
+    return {
+      totalVentas: Number(kpis.countVentas || 0),
+      ingresosTotales: Number(kpis.sumTotal || 0),
+      costoTotal: Number(kpis.sumCosto || 0),
+      utilidadTotal: Number(kpis.sumUtilidad || 0),
+      recentSales
+    };
   }
 
   async generatePdf(id: string, tenant_id: string): Promise<string> {
