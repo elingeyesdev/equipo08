@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 
+import com.example.template.ui.HomeFragment;
 import com.example.template.ui.ProductsFragment;
 import com.example.template.ui.ProvidersFragment;
 import com.example.template.ui.SourcingFragment;
@@ -93,9 +94,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // initial load
         if (savedInstanceState == null) {
-            navigationView.setCheckedItem(R.id.nav_providers);
+            navigationView.setCheckedItem(R.id.nav_home);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new ProvidersFragment())
+                    .replace(R.id.fragment_container, new HomeFragment())
                     .commit();
         }
 
@@ -146,7 +147,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Fragment selectedFragment = null;
         int itemId = item.getItemId();
 
-        if (itemId == R.id.nav_providers) {
+        if (itemId == R.id.nav_home) {
+            selectedFragment = new HomeFragment();
+        } else if (itemId == R.id.nav_providers) {
             selectedFragment = new ProvidersFragment();
         } else if (itemId == R.id.nav_products) {
             selectedFragment = new ProductsFragment();

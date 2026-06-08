@@ -2,6 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Inicio (Dashboard)" />
+    <item
         android:id="@+id/nav_providers"
         android:icon="@drawable/ic_providers"
         android:title="Proveedores" />
