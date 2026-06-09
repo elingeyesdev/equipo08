@@ -117,6 +117,7 @@ public class EmpleadosFragment extends Fragment {
             etNombre.setText("");
             etEmail.setText("");
             etPassword.setText("");
+            spinnerSucursal.setSelection(0);
             btnGuardar.setText("Confirmar Alta de Personal");
         }
         
@@ -149,10 +150,12 @@ public class EmpleadosFragment extends Fragment {
         if (empleado.getSucursalId() != null) {
             for (int i = 0; i < sucursalesList.size(); i++) {
                 if (sucursalesList.get(i).getId().equals(empleado.getSucursalId())) {
-                    spinnerSucursal.setSelection(i);
+                    spinnerSucursal.setSelection(i + 1);
                     break;
                 }
             }
+        } else {
+            spinnerSucursal.setSelection(0);
         }
         
         if (!isFormVisible) {
@@ -173,6 +176,7 @@ public class EmpleadosFragment extends Fragment {
                     }
                     
                     List<String> sucNames = new ArrayList<>();
+                    sucNames.add("- Acceso Completo (HQ / Administración) -");
                     List<String> filterSucNames = new ArrayList<>();
                     filterSucNames.add("Todas las sucursales");
                     
@@ -207,21 +211,51 @@ public class EmpleadosFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Empleado>> call, Response<List<Empleado>> response) {
                 allEmpleados = new ArrayList<>();
+                List<Empleado> body = response.body();
                 
-                // Add the Owner manually
-                Empleado owner = new Empleado();
-                owner.setId("owner_id");
-                String tenantName = sessionManager != null ? sessionManager.getTenantName() : "Mi Tienda";
+                boolean hasOwner = false;
                 String ownerEmail = sessionManager != null ? sessionManager.getEmail() : "admin@mitienda.com";
-                owner.setNombreCompleto(tenantName);
-                owner.setCorreo(ownerEmail);
-                owner.setRol("OWNER");
-                owner.setSucursalNombre("Administración Global");
-                owner.setEstado("Activo");
-                allEmpleados.add(owner);
+                String tenantName = sessionManager != null ? sessionManager.getTenantName() : "Mi Tienda";
+
+                if (response.isSuccessful() && body != null) {
+                    for (Empleado emp : body) {
+                        if (emp.getRol() != null && "OWNER".equalsIgnoreCase(emp.getRol().trim())) {
+                            hasOwner = true;
+                            break;
+                        }
+                        if (emp.getCorreo() != null && emp.getCorreo().equalsIgnoreCase(ownerEmail.trim())) {
+                            hasOwner = true;
+                            break;
+                        }
+                    }
+                }
                 
-                if (response.isSuccessful() && response.body() != null) {
-                    allEmpleados.addAll(response.body());
+                if (!hasOwner) {
+                    // Add the Owner manually
+                    Empleado owner = new Empleado();
+                    owner.setId("owner_id");
+                    owner.setNombreCompleto(tenantName);
+                    owner.setCorreo(ownerEmail);
+                    owner.setRol("OWNER");
+                    owner.setSucursalNombre("Acceso Global (HQ)");
+                    owner.setEstado("Activo");
+                    allEmpleados.add(owner);
+                }
+                
+                if (response.isSuccessful() && body != null) {
+                    for (Empleado emp : body) {
+                        boolean isDuplicate = false;
+                        for (Empleado existing : allEmpleados) {
+                            if ((emp.getId() != null && emp.getId().equals(existing.getId())) ||
+                                (emp.getCorreo() != null && emp.getCorreo().equalsIgnoreCase(existing.getCorreo()))) {
+                                isDuplicate = true;
+                                break;
+                            }
+                        }
+                        if (!isDuplicate) {
+                            allEmpleados.add(emp);
+                        }
+                    }
                 }
                 applyFilters();
             }
@@ -258,10 +292,8 @@ public class EmpleadosFragment extends Fragment {
         
         int sucIndex = spinnerSucursal.getSelectedItemPosition();
         String sucursalId = null;
-        String sucursalNombre = null;
-        if (sucIndex >= 0 && sucIndex < sucursalesList.size()) {
-            sucursalId = sucursalesList.get(sucIndex).getId();
-            sucursalNombre = sucursalesList.get(sucIndex).getName();
+        if (sucIndex > 0 && (sucIndex - 1) < sucursalesList.size()) {
+            sucursalId = sucursalesList.get(sucIndex - 1).getId();
         }
 
         if (nombre.isEmpty()) { etNombre.setError("Requerido"); return; }

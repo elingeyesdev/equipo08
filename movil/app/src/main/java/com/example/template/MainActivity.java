@@ -11,6 +11,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 
 
 import com.example.template.ui.HomeFragment;
@@ -98,6 +101,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new HomeFragment())
                     .commit();
+        }
+
+        MenuItem adminItem = navigationView.getMenu().findItem(R.id.nav_admin_group);
+        if (adminItem != null) {
+            SpannableString s = new SpannableString(adminItem.getTitle());
+            s.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.primary_color)), 0, s.length(), 0);
+            adminItem.setTitle(s);
         }
 
         applyPermissions();

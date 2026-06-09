@@ -132,6 +132,86 @@
             <TextView 
                 android:layout_width="wrap_content" 
                 android:layout_height="wrap_content" 
+                android:text="Horarios de Atención" 
+                android:textColor="#5a6a85"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:background="@drawable/edit_text_bg"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:id="@+id/tvSelectedDaysLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Días: Lunes, Martes, Miércoles, Jueves, Viernes"
+                    android:textColor="#2b3b55"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnSelectDays"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:backgroundTint="#64748b"
+                    android:text="Cambiar Días"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp"
+                    style="@style/Widget.MaterialComponents.Button.TextButton" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="De: "
+                        android:textColor="#5a6a85"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/btnStartTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="08:00"
+                        android:backgroundTint="#f1f5f9"
+                        android:textColor="#2b3b55"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="A: "
+                        android:textColor="#5a6a85"
+                        android:textSize="14sp" />
+
+                    <Button
+                        android:id="@+id/btnEndTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="18:00"
+                        android:backgroundTint="#f1f5f9"
+                        android:textColor="#2b3b55"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
                 android:text="Estado de Operación" 
                 android:textColor="#5a6a85"
                 android:layout_marginBottom="4dp"/>

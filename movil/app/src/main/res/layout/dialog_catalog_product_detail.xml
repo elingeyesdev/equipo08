@@ -15,8 +15,9 @@
         <ImageView
             android:id="@+id/ivDetailImage"
             android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:scaleType="centerCrop"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
             android:background="#0A1624"
             android:src="@android:drawable/ic_menu_gallery" />
 

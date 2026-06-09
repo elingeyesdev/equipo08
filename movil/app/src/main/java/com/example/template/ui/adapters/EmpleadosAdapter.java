@@ -63,7 +63,7 @@ public class EmpleadosAdapter extends RecyclerView.Adapter<EmpleadosAdapter.View
             }
         }
         
-        holder.tvSucursal.setText(e.getSucursalNombre() != null ? e.getSucursalNombre() : "Sucursal");
+        holder.tvSucursal.setText(e.getSucursalNombre() != null ? e.getSucursalNombre() : "Acceso Global (HQ)");
 
         String estado = e.getEstado() != null ? e.getEstado() : "Activo";
         holder.tvEstado.setText(estado);

@@ -39,7 +39,7 @@ public class ProductsFragment extends Fragment {
     private Button btnToggleForm, btnGuardar;
     private CardView cardForm;
     private AutoCompleteTextView etName;
-    private EditText etSku, etPrecioCoste, etPrecioVenta, etDescription, etStockMinimo;
+    private EditText etSku, etPrecioCoste, etPrecioVenta, etDescription, etStockMinimo, etImagenUrl;
     private TextView tvMargen;
     private Spinner spinnerProveedor, spinnerCategoria;
     private RecyclerView recyclerView;
@@ -80,6 +80,7 @@ public class ProductsFragment extends Fragment {
         spinnerProveedor = view.findViewById(R.id.spinnerProveedor);
         spinnerCategoria = view.findViewById(R.id.spinnerCategoria);
         etStockMinimo = view.findViewById(R.id.etStockMinimo);
+        etImagenUrl = view.findViewById(R.id.etImagenUrl);
         recyclerView = view.findViewById(R.id.recyclerView);
 
         tilDescription = view.findViewById(R.id.tilDescription);
@@ -168,7 +169,7 @@ public class ProductsFragment extends Fragment {
     private void toggleForm(boolean fromEdit) {
         if (!fromEdit) {
             editingProducto = null;
-            etName.setText("", false); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText(""); etStockMinimo.setText("");
+            etName.setText("", false); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText(""); etStockMinimo.setText(""); etImagenUrl.setText("");
             btnGuardar.setText("Nuevo Artículo");
             if (llAttributesContainer != null) llAttributesContainer.removeAllViews();
             if (tilDescription != null) tilDescription.setVisibility(View.VISIBLE);
@@ -194,6 +195,7 @@ public class ProductsFragment extends Fragment {
         etPrecioCoste.setText(String.valueOf(producto.getPrecioCosto()));
         etPrecioVenta.setText(String.valueOf(producto.getPrecioVenta()));
         etStockMinimo.setText(String.valueOf(producto.getStockMinimo()));
+        etImagenUrl.setText(producto.getImagenUrl() != null ? producto.getImagenUrl() : "");
         btnGuardar.setText("Actualizar Artículo");
         
         // Categoria
@@ -320,9 +322,11 @@ public class ProductsFragment extends Fragment {
 
         String stockMinimoStr = etStockMinimo.getText().toString().trim();
         int stockMinimo = stockMinimoStr.isEmpty() ? 10 : Integer.parseInt(stockMinimoStr);
+        String imagenUrl = etImagenUrl.getText().toString().trim();
 
         Producto request = new Producto(name, sku, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
         request.setStockMinimo(stockMinimo);
+        request.setImagenUrl(imagenUrl.isEmpty() ? null : imagenUrl);
 
         java.util.Map<String, String> attributes = new java.util.HashMap<>();
         String[][] attrs = CATEGORY_ATTRIBUTES.get(cat);

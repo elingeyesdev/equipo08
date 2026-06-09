@@ -37,12 +37,12 @@ public class PermisosFragment extends Fragment {
 
     private String[] categorias = {
             "Punto de Venta (POS)",
-            "Sucursales Físicas",
             "Catálogo Central (Productos)",
             "Gestión de Proveedores",
-            "Auditoría Sourcing (Lotes)",
-            "Niveles de Inventario y Ajustes",
-            "Recursos Humanos"
+            "Sourcing (Recepción de Stock)",
+            "Ajustes de Inventario",
+            "Recursos Humanos",
+            "Sucursales Físicas"
     };
 
     private Map<String, String[]> permisosPorCategoria = new HashMap<>();
@@ -66,12 +66,6 @@ public class PermisosFragment extends Fragment {
                 "Modificar Registros de Ventas",
                 "Anular / Eliminar Transacciones"
         });
-        permisosPorCategoria.put("Sucursales Físicas", new String[]{
-                "Consultar Directorio Geográfico",
-                "Registrar Nuevas Sucursales",
-                "Editar Datos de Sucursales",
-                "Dar de Baja Sucursales"
-        });
         permisosPorCategoria.put("Catálogo Central (Productos)", new String[]{
                 "Visualización Global de Productos",
                 "Añadir Nuevos Productos",
@@ -84,23 +78,29 @@ public class PermisosFragment extends Fragment {
                 "Editar Datos de Proveedores",
                 "Dar de Baja Proveedores"
         });
-        permisosPorCategoria.put("Auditoría Sourcing (Lotes)", new String[]{
-                "Inspeccionar Historial de Accesos",
-                "Registrar Nuevos Lotes",
+        permisosPorCategoria.put("Sourcing (Recepción de Stock)", new String[]{
+                "Inspeccionar Lotes de Compra",
+                "Registrar Nuevos Ingresos",
                 "Editar Lotes Existentes",
                 "Anular Lotes Ingresados"
         });
-        permisosPorCategoria.put("Niveles de Inventario y Ajustes", new String[]{
-                "Visualización de Cantidades",
-                "Registrar Incidencias / Ajustes",
+        permisosPorCategoria.put("Ajustes de Inventario", new String[]{
+                "Visualización de Auditorías",
+                "Registrar Actas de Ajuste",
                 "Modificar Incidencias",
-                "Eliminar Incidencias"
+                "Eliminar Historial de Pérdidas"
         });
         permisosPorCategoria.put("Recursos Humanos", new String[]{
                 "Consultar Organigrama Interno",
                 "Contratar Personal",
                 "Editar Datos de Personal",
                 "Desvincular Personal"
+        });
+        permisosPorCategoria.put("Sucursales Físicas", new String[]{
+                "Consultar Directorio Geográfico",
+                "Registrar Nuevas Sucursales",
+                "Editar Datos de Sucursales",
+                "Dar de Baja Sucursales"
         });
 
         buildUI(llSupervisorPermisos, supervisorSwitches);
@@ -115,29 +115,84 @@ public class PermisosFragment extends Fragment {
 
     private void buildUI(LinearLayout parent, Map<String, Switch> switchesMap) {
         for (String cat : categorias) {
+            // Container for this category
+            LinearLayout catContainer = new LinearLayout(getContext());
+            catContainer.setOrientation(LinearLayout.VERTICAL);
+            catContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            ));
+            catContainer.setPadding(0, 8, 0, 8);
+            catContainer.setBackgroundResource(android.R.drawable.list_selector_background);
+
+            // Header for Category
+            LinearLayout headerLayout = new LinearLayout(getContext());
+            headerLayout.setOrientation(LinearLayout.HORIZONTAL);
+            headerLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            ));
+            headerLayout.setPadding(16, 24, 16, 24);
+            headerLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            
             // Categoria Title
             TextView tvCat = new TextView(getContext());
             tvCat.setText(cat);
             tvCat.setTypeface(null, android.graphics.Typeface.BOLD);
-            tvCat.setTextColor(android.graphics.Color.parseColor("#2b3b55"));
-            tvCat.setPadding(0, 16, 0, 8);
-            parent.addView(tvCat);
+            tvCat.setTextColor(android.graphics.Color.parseColor("#374151"));
+            tvCat.setTextSize(14f);
+            LinearLayout.LayoutParams tvCatParams = new LinearLayout.LayoutParams(
+                    0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f
+            );
+            tvCat.setLayoutParams(tvCatParams);
+            headerLayout.addView(tvCat);
+
+            // Toggle Icon (Chevron)
+            android.widget.ImageView iconChevron = new android.widget.ImageView(getContext());
+            iconChevron.setImageResource(android.R.drawable.arrow_down_float);
+            iconChevron.setColorFilter(android.graphics.Color.parseColor("#9ca3af"));
+            headerLayout.addView(iconChevron);
+
+            catContainer.addView(headerLayout);
+
+            // Permisos List Container (Initially Hidden)
+            LinearLayout listContainer = new LinearLayout(getContext());
+            listContainer.setOrientation(LinearLayout.VERTICAL);
+            listContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            ));
+            listContainer.setPadding(16, 0, 16, 16);
+            listContainer.setVisibility(View.GONE);
+
+            // Toggle logic
+            headerLayout.setOnClickListener(v -> {
+                if (listContainer.getVisibility() == View.VISIBLE) {
+                    listContainer.setVisibility(View.GONE);
+                    iconChevron.setImageResource(android.R.drawable.arrow_down_float);
+                } else {
+                    listContainer.setVisibility(View.VISIBLE);
+                    iconChevron.setImageResource(android.R.drawable.arrow_up_float);
+                }
+            });
 
             // Permisos
             String[] perms = permisosPorCategoria.get(cat);
             if (perms != null) {
-                for (String p : perms) {
+                for (int i = 0; i < perms.length; i++) {
+                    String p = perms[i];
                     LinearLayout row = new LinearLayout(getContext());
                     row.setOrientation(LinearLayout.HORIZONTAL);
                     row.setLayoutParams(new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
                     ));
-                    row.setPadding(0, 8, 0, 8);
+                    row.setPadding(0, 16, 0, 16);
 
                     TextView tvPermiso = new TextView(getContext());
                     tvPermiso.setText(p);
-                    tvPermiso.setTextColor(android.graphics.Color.parseColor("#5a6a85"));
+                    tvPermiso.setTextColor(android.graphics.Color.parseColor("#4b5563"));
+                    tvPermiso.setTextSize(12f);
                     LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
                             0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f
                     );
@@ -148,9 +203,30 @@ public class PermisosFragment extends Fragment {
                     switchesMap.put(p, sw);
                     row.addView(sw);
 
-                    parent.addView(row);
+                    listContainer.addView(row);
+                    
+                    // Add divider unless it's the last item
+                    if (i < perms.length - 1) {
+                        View divider = new View(getContext());
+                        divider.setLayoutParams(new LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT, 1
+                        ));
+                        divider.setBackgroundColor(android.graphics.Color.parseColor("#f3f4f6"));
+                        listContainer.addView(divider);
+                    }
                 }
             }
+
+            catContainer.addView(listContainer);
+            
+            // Add outer divider
+            parent.addView(catContainer);
+            View outerDivider = new View(getContext());
+            outerDivider.setLayoutParams(new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, 2
+            ));
+            outerDivider.setBackgroundColor(android.graphics.Color.parseColor("#e5e7eb"));
+            parent.addView(outerDivider);
         }
     }
 
@@ -193,15 +269,15 @@ public class PermisosFragment extends Fragment {
                             setSwitchSafe(targetSwitches, "Editar Datos de Proveedores", pr.isProveedoresEditar());
                             setSwitchSafe(targetSwitches, "Dar de Baja Proveedores", pr.isProveedoresEliminar());
                             
-                            setSwitchSafe(targetSwitches, "Inspeccionar Historial de Accesos", pr.isSourcingVer());
-                            setSwitchSafe(targetSwitches, "Registrar Nuevos Lotes", pr.isSourcingCrear());
+                            setSwitchSafe(targetSwitches, "Inspeccionar Lotes de Compra", pr.isSourcingVer());
+                            setSwitchSafe(targetSwitches, "Registrar Nuevos Ingresos", pr.isSourcingCrear());
                             setSwitchSafe(targetSwitches, "Editar Lotes Existentes", pr.isSourcingEditar());
                             setSwitchSafe(targetSwitches, "Anular Lotes Ingresados", pr.isSourcingEliminar());
                             
-                            setSwitchSafe(targetSwitches, "Visualización de Cantidades", pr.isInventarioVer());
-                            setSwitchSafe(targetSwitches, "Registrar Incidencias / Ajustes", pr.isInventarioCrear());
+                            setSwitchSafe(targetSwitches, "Visualización de Auditorías", pr.isInventarioVer());
+                            setSwitchSafe(targetSwitches, "Registrar Actas de Ajuste", pr.isInventarioCrear());
                             setSwitchSafe(targetSwitches, "Modificar Incidencias", pr.isInventarioEditar());
-                            setSwitchSafe(targetSwitches, "Eliminar Incidencias", pr.isInventarioEliminar());
+                            setSwitchSafe(targetSwitches, "Eliminar Historial de Pérdidas", pr.isInventarioEliminar());
                             
                             setSwitchSafe(targetSwitches, "Consultar Organigrama Interno", pr.isUsuariosVer());
                             setSwitchSafe(targetSwitches, "Contratar Personal", pr.isUsuariosCrear());
@@ -245,15 +321,15 @@ public class PermisosFragment extends Fragment {
         req.setProveedoresEditar(getSwitchSafe(switchesMap, "Editar Datos de Proveedores"));
         req.setProveedoresEliminar(getSwitchSafe(switchesMap, "Dar de Baja Proveedores"));
         
-        req.setSourcingVer(getSwitchSafe(switchesMap, "Inspeccionar Historial de Accesos"));
-        req.setSourcingCrear(getSwitchSafe(switchesMap, "Registrar Nuevos Lotes"));
+        req.setSourcingVer(getSwitchSafe(switchesMap, "Inspeccionar Lotes de Compra"));
+        req.setSourcingCrear(getSwitchSafe(switchesMap, "Registrar Nuevos Ingresos"));
         req.setSourcingEditar(getSwitchSafe(switchesMap, "Editar Lotes Existentes"));
         req.setSourcingEliminar(getSwitchSafe(switchesMap, "Anular Lotes Ingresados"));
         
-        req.setInventarioVer(getSwitchSafe(switchesMap, "Visualización de Cantidades"));
-        req.setInventarioCrear(getSwitchSafe(switchesMap, "Registrar Incidencias / Ajustes"));
+        req.setInventarioVer(getSwitchSafe(switchesMap, "Visualización de Auditorías"));
+        req.setInventarioCrear(getSwitchSafe(switchesMap, "Registrar Actas de Ajuste"));
         req.setInventarioEditar(getSwitchSafe(switchesMap, "Modificar Incidencias"));
-        req.setInventarioEliminar(getSwitchSafe(switchesMap, "Eliminar Incidencias"));
+        req.setInventarioEliminar(getSwitchSafe(switchesMap, "Eliminar Historial de Pérdidas"));
         
         req.setUsuariosVer(getSwitchSafe(switchesMap, "Consultar Organigrama Interno"));
         req.setUsuariosCrear(getSwitchSafe(switchesMap, "Contratar Personal"));

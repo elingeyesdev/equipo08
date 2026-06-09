@@ -11,6 +11,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,6 +46,14 @@ public class SucursalesFragment extends Fragment {
     private boolean isFormVisible = false;
     private Sucursal editingSucursal = null;
 
+    // Schedule Picker UI
+    private TextView tvSelectedDaysLabel;
+    private Button btnSelectDays, btnStartTime, btnEndTime;
+    private final String[] DAYS_OF_WEEK = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
+    private final java.util.List<String> selectedDays = new ArrayList<>();
+    private String startTime = "08:00";
+    private String endTime = "18:00";
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -56,6 +65,17 @@ public class SucursalesFragment extends Fragment {
         etName = view.findViewById(R.id.etName);
         etAddress = view.findViewById(R.id.etAddress);
         etPhone = view.findViewById(R.id.etPhone);
+
+        tvSelectedDaysLabel = view.findViewById(R.id.tvSelectedDaysLabel);
+        btnSelectDays = view.findViewById(R.id.btnSelectDays);
+        btnStartTime = view.findViewById(R.id.btnStartTime);
+        btnEndTime = view.findViewById(R.id.btnEndTime);
+
+        btnSelectDays.setOnClickListener(v -> showDaysPickerDialog());
+        btnStartTime.setOnClickListener(v -> showTimePickerDialog(true));
+        btnEndTime.setOnClickListener(v -> showTimePickerDialog(false));
+
+        resetScheduleToDefault();
         spinnerStatus = view.findViewById(R.id.spinnerStatus);
         recyclerView = view.findViewById(R.id.recyclerView);
 
@@ -128,6 +148,7 @@ public class SucursalesFragment extends Fragment {
         if (!fromEdit) {
             editingSucursal = null;
             etName.setText(""); etAddress.setText(""); etPhone.setText("");
+            resetScheduleToDefault();
             spinnerStatus.setSelection(0);
             btnGuardar.setText("Crear Sucursal Físicamente");
         }
@@ -149,6 +170,33 @@ public class SucursalesFragment extends Fragment {
         etName.setText(sucursal.getName());
         etAddress.setText(sucursal.getAddress() != null ? sucursal.getAddress() : "");
         etPhone.setText(sucursal.getPhone() != null ? sucursal.getPhone() : "");
+        
+        selectedDays.clear();
+        String json = sucursal.getHorarios();
+        if (json != null && !json.isEmpty()) {
+            try {
+                com.google.gson.JsonArray array = new com.google.gson.JsonParser().parse(json).getAsJsonArray();
+                if (array.size() > 0) {
+                    com.google.gson.JsonObject obj = array.get(0).getAsJsonObject();
+                    com.google.gson.JsonArray days = obj.getAsJsonArray("days");
+                    for (int i = 0; i < days.size(); i++) {
+                        selectedDays.add(days.get(i).getAsString());
+                    }
+                    startTime = obj.get("start").getAsString();
+                    endTime = obj.get("end").getAsString();
+                } else {
+                    resetScheduleToDefault();
+                }
+            } catch (Exception e) {
+                resetScheduleToDefault();
+            }
+        } else {
+            resetScheduleToDefault();
+        }
+        updateDaysLabel();
+        btnStartTime.setText(startTime);
+        btnEndTime.setText(endTime);
+
         spinnerStatus.setSelection(sucursal.isActive() ? 0 : 1);
         btnGuardar.setText("Actualizar Sucursal");
         
@@ -202,11 +250,28 @@ public class SucursalesFragment extends Fragment {
             return;
         }
 
+        String horariosJson = null;
+        if (!selectedDays.isEmpty()) {
+            com.google.gson.JsonArray daysArray = new com.google.gson.JsonArray();
+            for (String day : selectedDays) {
+                daysArray.add(day);
+            }
+            com.google.gson.JsonObject block = new com.google.gson.JsonObject();
+            block.add("days", daysArray);
+            block.addProperty("start", startTime);
+            block.addProperty("end", endTime);
+
+            com.google.gson.JsonArray scheduleArray = new com.google.gson.JsonArray();
+            scheduleArray.add(block);
+            horariosJson = scheduleArray.toString();
+        }
+
         Sucursal request = new Sucursal(
                 name,
                 address.isEmpty() ? null : address,
                 phone.isEmpty() ? null : phone,
-                isActive
+                isActive,
+                horariosJson
         );
 
         if (editingSucursal != null) {
@@ -273,6 +338,90 @@ public class SucursalesFragment extends Fragment {
                 Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showDaysPickerDialog() {
+        if (getContext() == null) return;
+        boolean[] checkedItems = new boolean[DAYS_OF_WEEK.length];
+        for (int i = 0; i < DAYS_OF_WEEK.length; i++) {
+            checkedItems[i] = selectedDays.contains(DAYS_OF_WEEK[i]);
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(getContext())
+            .setTitle("Seleccionar Días")
+            .setMultiChoiceItems(DAYS_OF_WEEK, checkedItems, (dialog, which, isChecked) -> {
+                if (isChecked) {
+                    if (!selectedDays.contains(DAYS_OF_WEEK[which])) {
+                        selectedDays.add(DAYS_OF_WEEK[which]);
+                    }
+                } else {
+                    selectedDays.remove(DAYS_OF_WEEK[which]);
+                }
+            })
+            .setPositiveButton("Aceptar", (dialog, which) -> updateDaysLabel())
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    private void updateDaysLabel() {
+        java.util.List<String> sortedSelected = new ArrayList<>();
+        for (String day : DAYS_OF_WEEK) {
+            if (selectedDays.contains(day)) {
+                sortedSelected.add(day);
+            }
+        }
+        selectedDays.clear();
+        selectedDays.addAll(sortedSelected);
+
+        if (selectedDays.isEmpty()) {
+            tvSelectedDaysLabel.setText("Días: Ninguno seleccionado");
+        } else if (selectedDays.size() == 7) {
+            tvSelectedDaysLabel.setText("Días: Todos los días");
+        } else {
+            StringBuilder sb = new StringBuilder("Días: ");
+            for (int i = 0; i < selectedDays.size(); i++) {
+                sb.append(selectedDays.get(i));
+                if (i < selectedDays.size() - 1) sb.append(", ");
+            }
+            tvSelectedDaysLabel.setText(sb.toString());
+        }
+    }
+
+    private void showTimePickerDialog(boolean isStart) {
+        if (getContext() == null) return;
+        String currentTime = isStart ? startTime : endTime;
+        int hour = 8;
+        int minute = 0;
+        try {
+            String[] parts = currentTime.split(":");
+            hour = Integer.parseInt(parts[0]);
+            minute = Integer.parseInt(parts[1]);
+        } catch (Exception e) {}
+
+        new android.app.TimePickerDialog(getContext(), (view, hourOfDay, min) -> {
+            String formattedTime = String.format(java.util.Locale.US, "%02d:%02d", hourOfDay, min);
+            if (isStart) {
+                startTime = formattedTime;
+                btnStartTime.setText(startTime);
+            } else {
+                endTime = formattedTime;
+                btnEndTime.setText(endTime);
+            }
+        }, hour, minute, true).show();
+    }
+
+    private void resetScheduleToDefault() {
+        selectedDays.clear();
+        selectedDays.add("Lunes");
+        selectedDays.add("Martes");
+        selectedDays.add("Miércoles");
+        selectedDays.add("Jueves");
+        selectedDays.add("Viernes");
+        updateDaysLabel();
+        startTime = "08:00";
+        endTime = "18:00";
+        if (btnStartTime != null) btnStartTime.setText(startTime);
+        if (btnEndTime != null) btnEndTime.setText(endTime);
     }
 
     @Override

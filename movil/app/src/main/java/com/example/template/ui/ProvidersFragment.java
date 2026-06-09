@@ -69,19 +69,35 @@ public class ProvidersFragment extends Fragment {
                 etNit.setError("Ingrese un NIT");
                 return;
             }
-            apiService.getGlobalProveedor(nit).enqueue(new Callback<Proveedor>() {
+            apiService.getGlobalProveedor(nit).enqueue(new retrofit2.Callback<okhttp3.ResponseBody>() {
                 @Override
-                public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {
+                public void onResponse(retrofit2.Call<okhttp3.ResponseBody> call, retrofit2.Response<okhttp3.ResponseBody> response) {
                     if (response.isSuccessful() && response.body() != null) {
-                        etRazonSocial.setText(response.body().getName());
-                        etEmail.setText(response.body().getContactEmail() != null ? response.body().getContactEmail() : "");
-                        Toast.makeText(getContext(), "Proveedor Maestro encontrado y autocompletado.", Toast.LENGTH_SHORT).show();
+                        try {
+                            String json = response.body().string();
+                            if (json == null || json.trim().isEmpty() || json.trim().equals("null")) {
+                                Toast.makeText(getContext(), "NIT no registrado globalmente. Puedes ingresar los datos manualmente para registrarlo.", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            com.example.template.network.models.Proveedor proveedor = new com.google.gson.Gson().fromJson(json, com.example.template.network.models.Proveedor.class);
+                            if (proveedor != null && proveedor.getName() != null) {
+                                etRazonSocial.setText(proveedor.getName());
+                                etEmail.setText(proveedor.getContactEmail() != null ? proveedor.getContactEmail() : "");
+                                Toast.makeText(getContext(), "Proveedor Maestro encontrado y autocompletado.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext(), "NIT no registrado globalmente. Puedes ingresar los datos manualmente para registrarlo.", Toast.LENGTH_LONG).show();
+                            }
+                        } catch (java.io.IOException e) {
+                            Toast.makeText(getContext(), "Error al leer respuesta: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        } catch (com.google.gson.JsonSyntaxException e) {
+                            Toast.makeText(getContext(), "Error de formato de datos: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(getContext(), "NIT no registrado globalmente. Puedes ingresar los datos manualmente para registrarlo.", Toast.LENGTH_LONG).show();
                     }
                 }
                 @Override
-                public void onFailure(Call<Proveedor> call, Throwable t) {
+                public void onFailure(retrofit2.Call<okhttp3.ResponseBody> call, Throwable t) {
                     Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });

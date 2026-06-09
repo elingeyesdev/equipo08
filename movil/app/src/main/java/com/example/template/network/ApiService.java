@@ -58,7 +58,7 @@ public interface ApiService {
     Call<Void> deleteLote(@retrofit2.http.Path("id") String id);
 
     @retrofit2.http.GET("proveedores/global/{nit}")
-    Call<com.example.template.network.models.Proveedor> getGlobalProveedor(@retrofit2.http.Path("nit") String nit);
+    Call<okhttp3.ResponseBody> getGlobalProveedor(@retrofit2.http.Path("nit") String nit);
 
 
     @retrofit2.http.GET("stock")

@@ -58,6 +58,38 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
         holder.tvDireccion.setText(s.getAddress() != null && !s.getAddress().isEmpty() ? s.getAddress() : "Sin Dirección");
         holder.tvTelefono.setText("Teléfono: " + (s.getPhone() != null && !s.getPhone().isEmpty() ? s.getPhone() : "N/A"));
         
+        if (s.getHorarios() != null && !s.getHorarios().isEmpty()) {
+            holder.tvHorarios.setVisibility(View.VISIBLE);
+            try {
+                com.google.gson.JsonArray array = new com.google.gson.JsonParser().parse(s.getHorarios()).getAsJsonArray();
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < array.size(); i++) {
+                    com.google.gson.JsonObject obj = array.get(i).getAsJsonObject();
+                    com.google.gson.JsonArray days = obj.getAsJsonArray("days");
+                    String start = obj.get("start").getAsString();
+                    String end = obj.get("end").getAsString();
+                    
+                    if (days.size() == 7) {
+                        sb.append("Todos los días: ");
+                    } else {
+                        for (int d = 0; d < days.size(); d++) {
+                            String day = days.get(d).getAsString();
+                            sb.append(day.substring(0, Math.min(day.length(), 3)));
+                            if (d < days.size() - 1) sb.append(", ");
+                        }
+                        sb.append(": ");
+                    }
+                    sb.append(start).append(" - ").append(end);
+                    if (i < array.size() - 1) sb.append("\n");
+                }
+                holder.tvHorarios.setText("Horario: " + sb.toString());
+            } catch (Exception e) {
+                holder.tvHorarios.setText("Horario: " + s.getHorarios());
+            }
+        } else {
+            holder.tvHorarios.setVisibility(View.GONE);
+        }
+        
         if (s.isActive()) {
             holder.tvEstado.setText("Operativa");
             holder.tvEstado.setTextColor(Color.parseColor("#166534")); // Green
@@ -93,7 +125,7 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTienda, tvNombre, tvDireccion, tvTelefono, tvEstado;
+        TextView tvTienda, tvNombre, tvDireccion, tvTelefono, tvEstado, tvHorarios;
         ImageButton btnDelete, btnEdit;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -102,6 +134,7 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
             tvDireccion = itemView.findViewById(R.id.tvDireccion);
             tvTelefono = itemView.findViewById(R.id.tvTelefono);
             tvEstado = itemView.findViewById(R.id.tvEstado);
+            tvHorarios = itemView.findViewById(R.id.tvHorarios);
             btnDelete = itemView.findViewById(R.id.btnDelete);
             btnEdit = itemView.findViewById(R.id.btnEdit);
         }
