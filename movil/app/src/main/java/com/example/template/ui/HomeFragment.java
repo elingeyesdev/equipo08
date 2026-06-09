@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.template.MainActivity;
 import com.example.template.R;
 import com.example.template.network.ApiClient;
 import com.example.template.network.ApiService;
@@ -51,6 +52,7 @@ public class HomeFragment extends Fragment {
     private TextView tvMetricLosses;
 
     // Card containers (to hide/show based on user role)
+    private CardView cvMetricSales;
     private CardView cvMetricRevenue;
     private CardView cvMetricProfit;
     private CardView cvMetricLosses;
@@ -106,6 +108,17 @@ public class HomeFragment extends Fragment {
 
         // Apply role security
         applyRoleSecurity();
+
+        // Navigate to sales history on KPI click
+        cvMetricSales = view.findViewById(R.id.cvMetricSales);
+        View.OnClickListener kpiClickListener = v -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).navigateToSalesHistory();
+            }
+        };
+        if (cvMetricSales != null) cvMetricSales.setOnClickListener(kpiClickListener);
+        if (cvMetricRevenue != null) cvMetricRevenue.setOnClickListener(kpiClickListener);
+        if (cvMetricProfit != null) cvMetricProfit.setOnClickListener(kpiClickListener);
 
         // Load data in parallel
         loadDashboardData();

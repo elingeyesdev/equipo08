@@ -117,7 +117,8 @@
                     android:padding="10dp"
                     android:drawableStart="@android:drawable/ic_menu_search"
                     android:drawablePadding="8dp"
-                    android:textColor="#2b3b55"
+                    android:textColor="#000000"
+                    android:textColorHint="#64748b"
                     android:textSize="14sp"
                     android:inputType="text"
                     android:maxLines="1" />
@@ -219,6 +220,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1.2"
                                 android:hint="Cliente"
+                                android:textColor="#000000"
+                                android:textColorHint="#64748b"
                                 android:textSize="13sp"
                                 android:background="@drawable/edit_text_bg"
                                 android:padding="10dp"
@@ -230,6 +233,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="0.8"
                                 android:hint="NIT / CI"
+                                android:textColor="#000000"
+                                android:textColorHint="#64748b"
                                 android:textSize="13sp"
                                 android:background="@drawable/edit_text_bg"
                                 android:padding="10dp"/>
@@ -275,12 +280,166 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rvSalesHistory"
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    android:paddingBottom="12dp" />
+                    android:fillViewport="true">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Toggle Filters Button -->
+                        <Button
+                            android:id="@+id/btnToggleHistoryFilters"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="Filtrar Ventas"
+                            android:textSize="12sp"
+                            android:backgroundTint="#0f172a"
+                            android:textColor="#ffffff" />
+
+                        <!-- History Filters Panel -->
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/cardHistoryFilters"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:visibility="gone"
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="2dp"
+                            app:cardBackgroundColor="#ffffff">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="12dp">
+
+                                <EditText
+                                    android:id="@+id/etSearchHistory"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="40dp"
+                                    android:hint="Buscar por Cliente o Documento..."
+                                    android:background="@drawable/edit_text_bg"
+                                    android:paddingHorizontal="10dp"
+                                    android:drawableStart="@android:drawable/ic_menu_search"
+                                    android:drawablePadding="8dp"
+                                    android:textColor="#000000"
+                                    android:textColorHint="#64748b"
+                                    android:textSize="13sp"
+                                    android:layout_marginBottom="8dp" />
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginBottom="8dp">
+
+                                    <Button
+                                        android:id="@+id/btnDateFromHistory"
+                                        android:layout_width="0dp"
+                                        android:layout_weight="1"
+                                        android:layout_height="36dp"
+                                        android:text="Desde"
+                                        android:textSize="11sp"
+                                        android:backgroundTint="#f1f5f9"
+                                        android:textColor="#475569"
+                                        android:layout_marginEnd="4dp" />
+
+                                    <Button
+                                        android:id="@+id/btnDateToHistory"
+                                        android:layout_width="0dp"
+                                        android:layout_weight="1"
+                                        android:layout_height="36dp"
+                                        android:text="Hasta"
+                                        android:textSize="11sp"
+                                        android:backgroundTint="#f1f5f9"
+                                        android:textColor="#475569"
+                                        android:layout_marginStart="4dp" />
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginBottom="8dp">
+
+                                    <RelativeLayout
+                                        android:layout_width="0dp"
+                                        android:layout_weight="1"
+                                        android:layout_height="40dp"
+                                        android:layout_marginEnd="4dp"
+                                        android:background="@drawable/edit_text_bg">
+
+                                        <Spinner
+                                            android:id="@+id/spinnerBranchHistory"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:background="@null"
+                                            android:paddingStart="8dp"
+                                            android:paddingEnd="24dp" />
+
+                                        <ImageView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:src="@android:drawable/arrow_down_float"
+                                            android:layout_alignParentEnd="true"
+                                            android:layout_centerVertical="true"
+                                            android:layout_marginEnd="8dp"
+                                            app:tint="#5a6a85" />
+                                    </RelativeLayout>
+
+                                    <RelativeLayout
+                                        android:layout_width="0dp"
+                                        android:layout_weight="1"
+                                        android:layout_height="40dp"
+                                        android:layout_marginStart="4dp"
+                                        android:background="@drawable/edit_text_bg">
+
+                                        <Spinner
+                                            android:id="@+id/spinnerPaymentHistory"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:background="@null"
+                                            android:paddingStart="8dp"
+                                            android:paddingEnd="24dp" />
+
+                                        <ImageView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:src="@android:drawable/arrow_down_float"
+                                            android:layout_alignParentEnd="true"
+                                            android:layout_centerVertical="true"
+                                            android:layout_marginEnd="8dp"
+                                            app:tint="#5a6a85" />
+                                    </RelativeLayout>
+                                </LinearLayout>
+
+                                <Button
+                                    android:id="@+id/btnClearHistoryFilters"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="36dp"
+                                    android:layout_gravity="end"
+                                    android:text="Limpiar Filtros"
+                                    android:textSize="11sp"
+                                    android:backgroundTint="#e2e8f0"
+                                    android:textColor="#475569" />
+                            </LinearLayout>
+                        </androidx.cardview.widget.CardView>
+
+                        <!-- History RecyclerView -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvSalesHistory"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false"
+                            android:paddingBottom="12dp"
+                            android:nestedScrollingEnabled="false" />
+                    </LinearLayout>
+                </androidx.core.widget.NestedScrollView>
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
         </LinearLayout>
 

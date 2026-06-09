@@ -28,6 +28,7 @@ import com.example.template.ui.PermisosFragment;
 import com.example.template.ui.SalesFragment;
 import com.example.template.ui.SettingsFragment;
 import com.example.template.utils.SessionManager;
+import com.example.template.network.models.TenantProfile;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
 
@@ -92,8 +93,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         android.widget.TextView navUsername = headerView.findViewById(R.id.nav_header_name);
         android.widget.TextView navRole = headerView.findViewById(R.id.nav_header_role);
+        android.widget.ImageView navLogo = headerView.findViewById(R.id.nav_header_logo);
         if (navUsername != null) navUsername.setText(sessionManager.getUserName());
         if (navRole != null) navRole.setText(sessionManager.getRole());
+        if (navLogo != null && sessionManager.getLogoUrl() != null) {
+            com.example.template.utils.ImageLoader.loadImage(sessionManager.getLogoUrl(), navLogo);
+        }
+
+        // Fetch latest tenant profile to sync logo & tenant name
+        ApiClient.getClient(this).create(ApiService.class).getTenantProfile().enqueue(new Callback<TenantProfile>() {
+            @Override
+            public void onResponse(Call<TenantProfile> call, Response<TenantProfile> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TenantProfile profile = response.body();
+                    sessionManager.updateTenantName(profile.getName());
+                    sessionManager.updateLogoUrl(profile.getLogoUrl());
+                    updateToolbarTitle(profile.getName());
+                    updateNavHeaderLogo(profile.getLogoUrl());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TenantProfile> call, Throwable t) {
+                // Network error, fallback to cached settings
+            }
+        });
 
         // initial load
         if (savedInstanceState == null) {
@@ -209,5 +233,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (toolbar != null) {
             toolbar.setTitle(title);
         }
+    }
+
+    public void updateNavHeaderLogo(String logoUrl) {
+        android.view.View headerView = navigationView.getHeaderView(0);
+        if (headerView != null) {
+            android.widget.ImageView navLogo = headerView.findViewById(R.id.nav_header_logo);
+            if (navLogo != null) {
+                com.example.template.utils.ImageLoader.loadImage(logoUrl, navLogo);
+            }
+        }
+    }
+
+    public void navigateToSalesHistory() {
+        navigationView.setCheckedItem(R.id.nav_sales);
+        SalesFragment salesFragment = new SalesFragment();
+        Bundle args = new Bundle();
+        args.putBoolean("openHistoryTab", true);
+        salesFragment.setArguments(args);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, salesFragment)
+                .commit();
     }
 }

@@ -153,7 +153,8 @@
                         android:padding="12dp"
                         android:drawableStart="@android:drawable/ic_menu_search"
                         android:drawablePadding="8dp"
-                        android:textColor="#2b3b55"
+                        android:textColor="#000000"
+                        android:textColorHint="#64748b"
                         android:inputType="text"
                         android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>

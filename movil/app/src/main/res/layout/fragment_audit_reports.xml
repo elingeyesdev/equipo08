@@ -22,7 +22,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_alignParentStart="true"
-                android:layout_toStartOf="@+id/btnToggleFilter"
+                android:layout_toStartOf="@+id/llHeaderButtons"
                 android:layout_marginEnd="8dp">
                 <TextView
                     android:layout_width="wrap_content"
@@ -37,17 +37,218 @@
                     android:text="Dashboard de histórico de ajustes."
                     android:textColor="#5a6a85" />
             </LinearLayout>
-            <Button
-                android:id="@+id/btnToggleFilter"
+            
+            <LinearLayout
+                android:id="@+id/llHeaderButtons"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:text="Filtrar Reporte"
-                android:textSize="12sp"
-                android:backgroundTint="#2563eb"
-                android:textColor="#ffffff" />
+                android:layout_centerVertical="true">
+                
+                <Button
+                    android:id="@+id/btnToggleAuditForm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Registrar Auditoría"
+                    android:textSize="12sp"
+                    android:backgroundTint="#0f172a"
+                    android:textColor="#ffffff" />
+                    
+                <Button
+                    android:id="@+id/btnToggleFilter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Filtrar Reporte"
+                    android:textSize="12sp"
+                    android:backgroundTint="#2563eb"
+                    android:textColor="#ffffff" />
+            </LinearLayout>
         </RelativeLayout>
+
+        <!-- Audit Form Section -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardAuditForm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#ffffff">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nueva Auditoría"
+                    android:textColor="#0f172a"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="12dp"/>
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sucursal"
+                    android:textColor="#334155"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/edit_text_bg">
+                    <Spinner
+                        android:id="@+id/spinnerSucursalAudit"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="36dp" />
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@android:drawable/arrow_down_float"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#5a6a85" />
+                </RelativeLayout>
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Producto"
+                    android:layout_marginTop="8dp"
+                    android:textColor="#334155"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/edit_text_bg">
+                    <Spinner
+                        android:id="@+id/spinnerProductoAudit"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="36dp" />
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@android:drawable/arrow_down_float"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#5a6a85" />
+                </RelativeLayout>
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cantidad de Unidades Perdidas"
+                    android:layout_marginTop="8dp"
+                    android:textColor="#334155"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+                <EditText
+                    android:id="@+id/etUnidadesPerdidas"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="Ej. 5"
+                    android:inputType="number"
+                    android:background="@drawable/edit_text_bg"
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#000000"
+                    android:textColorHint="#64748b"/>
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Motivo"
+                    android:layout_marginTop="8dp"
+                    android:textColor="#334155"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/edit_text_bg">
+                    <Spinner
+                        android:id="@+id/spinnerMotivoAudit"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="36dp" />
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@android:drawable/arrow_down_float"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#5a6a85" />
+                </RelativeLayout>
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Observaciones"
+                    android:layout_marginTop="8dp"
+                    android:textColor="#334155"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+                <EditText
+                    android:id="@+id/etObservacionesAudit"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:hint="Detalles..."
+                    android:inputType="textMultiLine"
+                    android:gravity="top|start"
+                    android:background="@drawable/edit_text_bg"
+                    android:padding="12dp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#000000"
+                    android:textColorHint="#64748b"/>
+                    
+                <LinearLayout
+                    android:id="@+id/llWarningAudit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="#fef2f2"
+                    android:padding="8dp"
+                    android:visibility="gone">
+                    <TextView
+                        android:id="@+id/tvWarningAudit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#991b1b"
+                        android:textSize="12sp"/>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnSubmitAudit"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Procesar Ajuste"
+                    android:backgroundTint="#0f172a"
+                    android:textColor="#ffffff"
+                    android:enabled="false"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <!-- KPI 1 -->
         <androidx.cardview.widget.CardView

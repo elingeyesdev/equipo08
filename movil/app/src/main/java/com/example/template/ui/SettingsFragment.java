@@ -165,8 +165,10 @@ public class SettingsFragment extends Fragment {
                         // Actualizar caché de sesión y título del toolbar en tiempo real
                         com.example.template.utils.SessionManager session = new com.example.template.utils.SessionManager(getContext());
                         session.updateTenantName(name);
+                        session.updateLogoUrl(logoUrl);
                         if (getActivity() instanceof MainActivity) {
                             ((MainActivity) getActivity()).updateToolbarTitle(name);
+                            ((MainActivity) getActivity()).updateNavHeaderLogo(logoUrl);
                         }
 
                         // Recargar para confirmar persistencia

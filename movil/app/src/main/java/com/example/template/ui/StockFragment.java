@@ -30,9 +30,11 @@ import androidx.cardview.widget.CardView;
 import com.example.template.R;
 import com.example.template.network.ApiClient;
 import com.example.template.network.ApiService;
+import com.example.template.network.models.AjusteRequest;
+
 import com.example.template.network.models.Stock;
 import com.example.template.network.models.Sucursal;
-import com.example.template.network.models.AjusteRequest;
+import com.example.template.network.models.TrasladoRequest;
 import com.example.template.ui.adapters.StockAdapter;
 
 import java.util.ArrayList;
@@ -84,10 +86,10 @@ public class StockFragment extends Fragment {
         });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new StockAdapter(new ArrayList<>(), new StockAdapter.OnIncidenciaClickListener() {
+        adapter = new StockAdapter(new ArrayList<>(), new StockAdapter.OnTrasladoClickListener() {
             @Override
-            public void onIncidenciaClick(Stock stock) {
-                showIncidenciaDialog(stock);
+            public void onTrasladoClick(Stock stock) {
+                showTrasladoDialog(stock);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -292,33 +294,37 @@ public class StockFragment extends Fragment {
         }
     }
 
-    private void showIncidenciaDialog(Stock stock) {
+    private void showTrasladoDialog(Stock stock) {
         if (getContext() == null) return;
 
-        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_incidencia, null);
-        EditText etCantidadFisica = dialogView.findViewById(R.id.etCantidadFisica);
-        Spinner spinnerMotivo = dialogView.findViewById(R.id.spinnerMotivo);
-        EditText etObservaciones = dialogView.findViewById(R.id.etObservaciones);
-        TextView tvAuditInfo = dialogView.findViewById(R.id.tvAuditInfo);
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_traslado, null);
+        EditText etCantidad = dialogView.findViewById(R.id.etCantidad);
+        Spinner spinnerSucursalDestino = dialogView.findViewById(R.id.spinnerSucursalDestino);
+        TextView tvTrasladoInfo = dialogView.findViewById(R.id.tvTrasladoInfo);
         LinearLayout llWarningBox = dialogView.findViewById(R.id.llWarningBox);
         TextView tvWarningText = dialogView.findViewById(R.id.tvWarningText);
         Button btnCancelar = dialogView.findViewById(R.id.btnCancelar);
         Button btnProcesar = dialogView.findViewById(R.id.btnProcesar);
         ImageButton btnClose = dialogView.findViewById(R.id.btnClose);
 
-        String[] motivos = {"ERROR_REGISTRO", "DANO_MERMA", "ROBO_O_PERDIDA", "CADUCIDAD"};
-        String[] motivosLabels = {"Error de Registro Numérico", "Artículo Dañado / Extraviado", "Robo / No Habido", "Caducidad / Vencimiento"};
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, motivosLabels);
+        // Filter out current branch
+        List<Sucursal> validDestinations = new ArrayList<>();
+        List<String> validDestinationsNames = new ArrayList<>();
+        for (Sucursal s : sucursalesList) {
+            if (!s.getId().equals(stock.getSucursalId())) {
+                validDestinations.add(s);
+                validDestinationsNames.add(s.getName());
+            }
+        }
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, validDestinationsNames);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerMotivo.setAdapter(spinnerAdapter);
+        spinnerSucursalDestino.setAdapter(spinnerAdapter);
 
         String prodName = stock.getProducto() != null ? stock.getProducto().getName() : "Producto";
         String sucName = stock.getSucursal() != null ? stock.getSucursal().getName() : "Sucursal";
-        String infoText = "Estás auditando <b>" + prodName + "</b> en <b>" + sucName + "</b>. Actualmente el sistema registra <b>" + stock.getCantidadTotal() + "</b> unidades.";
-        tvAuditInfo.setText(Html.fromHtml(infoText, Html.FROM_HTML_MODE_LEGACY));
-
-        // Pre-fill
-        etCantidadFisica.setText(String.valueOf(stock.getCantidadTotal()));
+        String infoText = "Moverás " + prodName + " desde la sucursal origen " + sucName + ". Unidades disponibles para transferir: " + stock.getCantidadTotal() + ".";
+        tvTrasladoInfo.setText(infoText);
 
         AlertDialog dialog = new AlertDialog.Builder(getContext())
             .setView(dialogView)
@@ -328,7 +334,7 @@ public class StockFragment extends Fragment {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
 
-        etCantidadFisica.addTextChangedListener(new TextWatcher() {
+        etCantidad.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
@@ -342,29 +348,16 @@ public class StockFragment extends Fragment {
                     return;
                 }
                 
-                int cantidadFisica = Integer.parseInt(s.toString());
-                int delta = cantidadFisica - stock.getCantidadTotal();
+                int cantidad = Integer.parseInt(s.toString());
                 
-                if (delta < 0) {
+                if (cantidad > stock.getCantidadTotal() || cantidad < 1) {
                     llWarningBox.setVisibility(View.VISIBLE);
-                    double costoFijo = stock.getProducto() != null ? stock.getProducto().getPrecioCosto() : 0.0;
-                    double lostValue = Math.abs(delta) * costoFijo;
-                    String warningMsg = "<b>⚠ Impacto Financiero Directo:</b> La diferencia de " + Math.abs(delta) + " unidades resultará en una pérdida de valuación estimada de <b>Bs. " + String.format("%.2f", lostValue) + "</b> para esta sucursal.";
-                    tvWarningText.setText(Html.fromHtml(warningMsg, Html.FROM_HTML_MODE_LEGACY));
-                    
-                    btnProcesar.setEnabled(true);
-                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d97706")));
-                } else if (delta > 0) {
-                    llWarningBox.setVisibility(View.VISIBLE);
-                    String warningMsg = "<b>❌ Excedente Anómalo Detectado:</b> No puedes declarar una cantidad física (" + cantidadFisica + ") mayor a la registrada en sistema (" + stock.getCantidadTotal() + ").<br/>Si ingresó mercancía nueva, debes hacerlo formalmente mediante Lotes / Sourcing.";
-                    tvWarningText.setText(Html.fromHtml(warningMsg, Html.FROM_HTML_MODE_LEGACY));
-                    
                     btnProcesar.setEnabled(false);
                     btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d1d5db")));
                 } else {
                     llWarningBox.setVisibility(View.GONE);
                     btnProcesar.setEnabled(true);
-                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d97706")));
+                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#2563eb")));
                 }
             }
         });
@@ -373,46 +366,41 @@ public class StockFragment extends Fragment {
         btnClose.setOnClickListener(v -> dialog.dismiss());
         
         btnProcesar.setOnClickListener(v -> {
-            String cantStr = etCantidadFisica.getText().toString().trim();
-            String obs = etObservaciones.getText().toString().trim();
-            String motivo = motivos[spinnerMotivo.getSelectedItemPosition()];
+            String cantStr = etCantidad.getText().toString().trim();
+            if (cantStr.isEmpty()) return;
 
-            if (cantStr.isEmpty()) {
-                Toast.makeText(getContext(), "La cantidad física es requerida", Toast.LENGTH_SHORT).show();
+            int cantidad = Integer.parseInt(cantStr);
+            if (cantidad > stock.getCantidadTotal() || cantidad < 1) return;
+            
+            if (validDestinations.isEmpty() || spinnerSucursalDestino.getSelectedItemPosition() < 0) {
+                Toast.makeText(getContext(), "No hay sucursal destino válida", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            int cantidadFisica = Integer.parseInt(cantStr);
-            if (cantidadFisica > stock.getCantidadTotal()) {
-                Toast.makeText(getContext(), "No puedes declarar una cantidad física mayor a la del sistema", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            submitIncidencia(stock, cantidadFisica, motivo, obs);
+            Sucursal toSucursal = validDestinations.get(spinnerSucursalDestino.getSelectedItemPosition());
+            submitTraslado(stock, toSucursal.getId(), cantidad);
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void submitIncidencia(Stock stock, int cantidadFisica, String motivo, String observaciones) {
-        AjusteRequest request = new AjusteRequest(
+    private void submitTraslado(Stock stock, String toSucursalId, int cantidad) {
+        TrasladoRequest request = new TrasladoRequest(
             stock.getSucursalId(),
+            toSucursalId,
             stock.getProductoId(),
-            stock.getCantidadTotal(),
-            cantidadFisica,
-            motivo,
-            observaciones.isEmpty() ? null : observaciones
+            cantidad
         );
 
-        apiService.createAjuste(request).enqueue(new Callback<Void>() {
+        apiService.transferStock(request).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Ajuste registrado", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Traslado exitoso", Toast.LENGTH_SHORT).show();
                     loadStock(); // refresh inventory
                 } else {
-                    Toast.makeText(getContext(), "Error al registrar ajuste", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error al trasladar inventario", Toast.LENGTH_SHORT).show();
                 }
             }
 

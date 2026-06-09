@@ -64,6 +64,9 @@ public interface ApiService {
     @retrofit2.http.GET("stock")
     Call<java.util.List<com.example.template.network.models.Stock>> getStock();
 
+    @POST("stock/transfer")
+    Call<Void> transferStock(@Body com.example.template.network.models.TrasladoRequest request);
+
     @POST("ajustes")
     Call<Void> createAjuste(@Body com.example.template.network.models.AjusteRequest request);
 

@@ -10,6 +10,7 @@ public class Venta {
     private String clienteNombre;
     private String clienteDocumento;
     private String fecha;
+    private String metodo_pago;
     private List<DetalleItem> detalle;
     private double total;
     private Sucursal sucursal;
@@ -43,4 +44,7 @@ public class Venta {
 
     public Sucursal getSucursal() { return sucursal; }
     public void setSucursal(Sucursal sucursal) { this.sucursal = sucursal; }
+
+    public String getMetodoPago() { return metodo_pago; }
+    public void setMetodoPago(String metodo_pago) { this.metodo_pago = metodo_pago; }
 }

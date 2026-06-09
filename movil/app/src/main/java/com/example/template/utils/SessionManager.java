@@ -59,6 +59,15 @@ public class SessionManager {
         editor.apply();
     }
 
+    public void updateLogoUrl(String logoUrl) {
+        editor.putString("tenant_logo_url", logoUrl);
+        editor.apply();
+    }
+
+    public String getLogoUrl() {
+        return prefs.getString("tenant_logo_url", null);
+    }
+
     public void logout() {
         editor.clear();
         editor.apply();

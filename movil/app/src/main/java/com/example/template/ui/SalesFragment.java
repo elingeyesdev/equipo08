@@ -82,6 +82,17 @@ public class SalesFragment extends Fragment {
     private List<Stock> allStockList = new ArrayList<>();
     private List<Stock> filteredStockList = new ArrayList<>();
     private List<Venta> salesHistoryList = new ArrayList<>();
+    private List<Venta> allSalesHistoryList = new ArrayList<>();
+    
+    // History Filters
+    private Button btnToggleHistoryFilters;
+    private CardView cardHistoryFilters;
+    private EditText etSearchHistory;
+    private Button btnDateFromHistory, btnDateToHistory, btnClearHistoryFilters;
+    private Spinner spinnerBranchHistory, spinnerPaymentHistory;
+    private java.util.Calendar historyCalFrom = null, historyCalTo = null;
+    private java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.US);
+
     
     // Cart products list in memory
     private List<CartProduct> cartProducts = new ArrayList<>();
@@ -118,6 +129,14 @@ public class SalesFragment extends Fragment {
 
         // Bind History
         rvSalesHistory = view.findViewById(R.id.rvSalesHistory);
+        btnToggleHistoryFilters = view.findViewById(R.id.btnToggleHistoryFilters);
+        cardHistoryFilters = view.findViewById(R.id.cardHistoryFilters);
+        etSearchHistory = view.findViewById(R.id.etSearchHistory);
+        btnDateFromHistory = view.findViewById(R.id.btnDateFromHistory);
+        btnDateToHistory = view.findViewById(R.id.btnDateToHistory);
+        btnClearHistoryFilters = view.findViewById(R.id.btnClearHistoryFilters);
+        spinnerBranchHistory = view.findViewById(R.id.spinnerBranchHistory);
+        spinnerPaymentHistory = view.findViewById(R.id.spinnerPaymentHistory);
 
         // Bind SwipeRefreshLayouts
         swipeRefreshProducts = view.findViewById(R.id.swipeRefreshProducts);
@@ -133,6 +152,10 @@ public class SalesFragment extends Fragment {
 
         loadSucursales();
         loadStock();
+
+        if (getArguments() != null && getArguments().getBoolean("openHistoryTab", false)) {
+            btnTabHistory.performClick();
+        }
 
         return view;
     }
@@ -230,6 +253,39 @@ public class SalesFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+
+        etSearchHistory.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { filterSalesHistory(); }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        btnToggleHistoryFilters.setOnClickListener(v -> {
+            if (cardHistoryFilters.getVisibility() == View.VISIBLE) {
+                cardHistoryFilters.setVisibility(View.GONE);
+                btnToggleHistoryFilters.setText("Filtrar Ventas (Mostrar)");
+            } else {
+                cardHistoryFilters.setVisibility(View.VISIBLE);
+                btnToggleHistoryFilters.setText("Filtrar Ventas (Ocultar)");
+            }
+        });
+        btnToggleHistoryFilters.setText("Filtrar Ventas (Mostrar)");
+
+        btnDateFromHistory.setOnClickListener(v -> showHistoryDatePicker(true));
+        btnDateToHistory.setOnClickListener(v -> showHistoryDatePicker(false));
+        btnClearHistoryFilters.setOnClickListener(v -> clearHistoryFilters());
+
+        AdapterView.OnItemSelectedListener historyFilterListener = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { filterSalesHistory(); }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        };
+        spinnerBranchHistory.setOnItemSelectedListener(historyFilterListener);
+        spinnerPaymentHistory.setOnItemSelectedListener(historyFilterListener);
     }
 
     private void loadSucursales() {
@@ -266,6 +322,23 @@ public class SalesFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, options);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerBranch.setAdapter(adapter);
+
+        List<String> historyBranchOptions = new ArrayList<>();
+        historyBranchOptions.add("Cualquier Sucursal");
+        historyBranchOptions.addAll(options);
+        ArrayAdapter<String> historyBranchAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, historyBranchOptions);
+        historyBranchAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerBranchHistory.setAdapter(historyBranchAdapter);
+
+        List<String> paymentOptions = new ArrayList<>();
+        paymentOptions.add("Cualquier Método");
+        paymentOptions.add("EFECTIVO");
+        paymentOptions.add("QR");
+        paymentOptions.add("TRANSFERENCIA");
+        paymentOptions.add("TARJETA");
+        ArrayAdapter<String> paymentAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, paymentOptions);
+        paymentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPaymentHistory.setAdapter(paymentAdapter);
     }
 
     private void loadStock() {
@@ -293,9 +366,9 @@ public class SalesFragment extends Fragment {
             public void onResponse(Call<List<Venta>> call, Response<List<Venta>> response) {
                 if (swipeRefreshHistory != null) swipeRefreshHistory.setRefreshing(false);
                 if (response.isSuccessful() && response.body() != null) {
-                    salesHistoryList.clear();
-                    salesHistoryList.addAll(response.body());
-                    historyAdapter.notifyDataSetChanged();
+                    allSalesHistoryList.clear();
+                    allSalesHistoryList.addAll(response.body());
+                    filterSalesHistory();
                 }
             }
 
@@ -305,6 +378,88 @@ public class SalesFragment extends Fragment {
                 if(getContext() != null) Toast.makeText(getContext(), "Error al cargar historial", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void clearHistoryFilters() {
+        historyCalFrom = null;
+        historyCalTo = null;
+        btnDateFromHistory.setText("Desde");
+        btnDateToHistory.setText("Hasta");
+        spinnerBranchHistory.setSelection(0);
+        spinnerPaymentHistory.setSelection(0);
+        etSearchHistory.setText("");
+        filterSalesHistory();
+    }
+
+    private void showHistoryDatePicker(boolean isFrom) {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        if (isFrom && historyCalFrom != null) c = historyCalFrom;
+        else if (!isFrom && historyCalTo != null) c = historyCalTo;
+
+        android.app.DatePickerDialog dpd = new android.app.DatePickerDialog(getContext(), (view, year, month, dayOfMonth) -> {
+            java.util.Calendar selected = java.util.Calendar.getInstance();
+            selected.set(year, month, dayOfMonth, 0, 0, 0);
+            if (isFrom) {
+                historyCalFrom = selected;
+                btnDateFromHistory.setText(dateFormat.format(historyCalFrom.getTime()));
+            } else {
+                historyCalTo = selected;
+                historyCalTo.set(java.util.Calendar.HOUR_OF_DAY, 23);
+                historyCalTo.set(java.util.Calendar.MINUTE, 59);
+                historyCalTo.set(java.util.Calendar.SECOND, 59);
+                btnDateToHistory.setText(dateFormat.format(historyCalTo.getTime()));
+            }
+            filterSalesHistory();
+        }, c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH));
+        dpd.show();
+    }
+
+    private void filterSalesHistory() {
+        salesHistoryList.clear();
+        String query = etSearchHistory.getText().toString().toLowerCase().trim();
+        String selBranch = spinnerBranchHistory.getSelectedItem() != null ? spinnerBranchHistory.getSelectedItem().toString() : "Cualquier Sucursal";
+        String selPayment = spinnerPaymentHistory.getSelectedItem() != null ? spinnerPaymentHistory.getSelectedItem().toString() : "Cualquier Método";
+
+        java.text.SimpleDateFormat utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
+        utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+
+        for (Venta v : allSalesHistoryList) {
+            boolean matches = true;
+
+            if (!query.isEmpty()) {
+                String cliente = v.getClienteNombre() != null ? v.getClienteNombre().toLowerCase() : "";
+                String doc = v.getClienteDocumento() != null ? v.getClienteDocumento().toLowerCase() : "";
+                if (!cliente.contains(query) && !doc.contains(query)) {
+                    matches = false;
+                }
+            }
+
+            if (!"Cualquier Sucursal".equals(selBranch)) {
+                String branchName = v.getSucursal() != null ? v.getSucursal().getName() : "";
+                if (!selBranch.equals(branchName)) matches = false;
+            }
+
+            if (!"Cualquier Método".equals(selPayment)) {
+                if (v.getMetodoPago() == null || !v.getMetodoPago().equalsIgnoreCase(selPayment)) {
+                    matches = false;
+                }
+            }
+
+            if (historyCalFrom != null || historyCalTo != null) {
+                if (v.getFecha() != null) {
+                    try {
+                        java.util.Date d = utcFormat.parse(v.getFecha());
+                        if (historyCalFrom != null && d.before(historyCalFrom.getTime())) matches = false;
+                        if (historyCalTo != null && d.after(historyCalTo.getTime())) matches = false;
+                    } catch (Exception e) {}
+                }
+            }
+
+            if (matches) {
+                salesHistoryList.add(v);
+            }
+        }
+        historyAdapter.notifyDataSetChanged();
     }
 
     private void filterCatalog() {

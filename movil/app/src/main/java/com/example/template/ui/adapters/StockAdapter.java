@@ -17,13 +17,13 @@ import java.util.List;
 public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> {
 
     private List<Stock> list;
-    private OnIncidenciaClickListener listener;
+    private OnTrasladoClickListener listener;
 
-    public interface OnIncidenciaClickListener {
-        void onIncidenciaClick(Stock stock);
+    public interface OnTrasladoClickListener {
+        void onTrasladoClick(Stock stock);
     }
 
-    public StockAdapter(List<Stock> list, OnIncidenciaClickListener listener) {
+    public StockAdapter(List<Stock> list, OnTrasladoClickListener listener) {
         this.list = list;
         this.listener = listener;
     }
@@ -80,9 +80,9 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
             holder.cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
         }
 
-        holder.btnIncidencia.setOnClickListener(v -> {
+        holder.btnTrasladar.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onIncidenciaClick(s);
+                listener.onTrasladoClick(s);
             }
         });
     }
@@ -94,7 +94,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvSku, tvNombre, tvStock, tvSucursal, tvCostoFijo, tvValuacion, tvMinStock;
-        android.widget.Button btnIncidencia;
+        android.widget.Button btnTrasladar;
         CardView cardView;
         ConstraintLayout layoutContainer;
         
@@ -107,7 +107,7 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
             tvCostoFijo = itemView.findViewById(R.id.tvCostoFijo);
             tvValuacion = itemView.findViewById(R.id.tvValuacion);
             tvMinStock = itemView.findViewById(R.id.tvMinStock);
-            btnIncidencia = itemView.findViewById(R.id.btnIncidencia);
+            btnTrasladar = itemView.findViewById(R.id.btnTrasladar);
             cardView = itemView.findViewById(R.id.cardView);
             layoutContainer = itemView.findViewById(R.id.layoutContainer);
         }

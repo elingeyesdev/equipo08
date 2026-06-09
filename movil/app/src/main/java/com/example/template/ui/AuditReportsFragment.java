@@ -32,6 +32,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.graphics.Color;
+
+import com.example.template.network.models.Sucursal;
+import com.example.template.network.models.Stock;
+import com.example.template.network.models.AjusteRequest;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -51,6 +61,19 @@ public class AuditReportsFragment extends Fragment {
     private Calendar calFrom = null;
     private Calendar calTo = null;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+
+    // Audit Form Variables
+    private Button btnToggleAuditForm, btnSubmitAudit;
+    private androidx.cardview.widget.CardView cardAuditForm;
+    private Spinner spinnerSucursalAudit, spinnerProductoAudit, spinnerMotivoAudit;
+    private EditText etUnidadesPerdidas, etObservacionesAudit;
+    private LinearLayout llWarningAudit;
+    private TextView tvWarningAudit;
+    private boolean isAuditFormVisible = false;
+
+    private List<Sucursal> sucursalesList = new ArrayList<>();
+    private List<Stock> stockList = new ArrayList<>();
+    private List<Stock> filteredStockList = new ArrayList<>();
 
     @Nullable
     @Override
@@ -87,6 +110,37 @@ public class AuditReportsFragment extends Fragment {
             }
         });
 
+        // Bind Audit Form
+        btnToggleAuditForm = view.findViewById(R.id.btnToggleAuditForm);
+        cardAuditForm = view.findViewById(R.id.cardAuditForm);
+        spinnerSucursalAudit = view.findViewById(R.id.spinnerSucursalAudit);
+        spinnerProductoAudit = view.findViewById(R.id.spinnerProductoAudit);
+        spinnerMotivoAudit = view.findViewById(R.id.spinnerMotivoAudit);
+        etUnidadesPerdidas = view.findViewById(R.id.etUnidadesPerdidas);
+        etObservacionesAudit = view.findViewById(R.id.etObservacionesAudit);
+        llWarningAudit = view.findViewById(R.id.llWarningAudit);
+        tvWarningAudit = view.findViewById(R.id.tvWarningAudit);
+        btnSubmitAudit = view.findViewById(R.id.btnSubmitAudit);
+
+        btnToggleAuditForm.setOnClickListener(v -> {
+            isAuditFormVisible = !isAuditFormVisible;
+            if (isAuditFormVisible) {
+                cardAuditForm.setVisibility(View.VISIBLE);
+                btnToggleAuditForm.setText("Ocultar Formulario");
+            } else {
+                cardAuditForm.setVisibility(View.GONE);
+                btnToggleAuditForm.setText("Registrar Auditoría");
+            }
+        });
+
+        String[] motivos = {"ERROR_REGISTRO", "DANO_MERMA", "ROBO_O_PERDIDA", "CADUCIDAD"};
+        String[] motivosLabels = {"Error de Registro", "Dañado / Defectuoso", "Pérdida / Robo", "Producto Vencido"};
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, motivosLabels);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMotivoAudit.setAdapter(spinnerAdapter);
+
+        setupAuditFormLogic(motivos);
+
         btnDateFrom.setOnClickListener(v -> showDatePicker(true));
         btnDateTo.setOnClickListener(v -> showDatePicker(false));
 
@@ -114,8 +168,172 @@ public class AuditReportsFragment extends Fragment {
         spinnerCategory.setOnItemSelectedListener(filterListener);
 
         loadAudits();
+        loadSucursales();
+        loadStock();
 
         return view;
+    }
+
+    private void loadSucursales() {
+        apiService.getSucursales().enqueue(new Callback<List<Sucursal>>() {
+            @Override
+            public void onResponse(Call<List<Sucursal>> call, Response<List<Sucursal>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    sucursalesList = response.body();
+                    List<String> branchNames = new ArrayList<>();
+                    for (Sucursal s : sucursalesList) {
+                        branchNames.add(s.getName());
+                    }
+                    if (getContext() != null) {
+                        ArrayAdapter<String> branchAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, branchNames);
+                        branchAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinnerSucursalAudit.setAdapter(branchAdapter);
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Sucursal>> call, Throwable t) {}
+        });
+    }
+
+    private void loadStock() {
+        apiService.getStock().enqueue(new Callback<List<Stock>>() {
+            @Override
+            public void onResponse(Call<List<Stock>> call, Response<List<Stock>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    stockList = response.body();
+                    updateProductSpinner();
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Stock>> call, Throwable t) {}
+        });
+    }
+
+    private void updateProductSpinner() {
+        if (getContext() == null || sucursalesList.isEmpty() || spinnerSucursalAudit.getSelectedItemPosition() < 0) return;
+        
+        Sucursal selectedSucursal = sucursalesList.get(spinnerSucursalAudit.getSelectedItemPosition());
+        filteredStockList.clear();
+        List<String> productNames = new ArrayList<>();
+        
+        for (Stock s : stockList) {
+            if (s.getSucursalId() != null && s.getSucursalId().equals(selectedSucursal.getId()) && s.getProducto() != null) {
+                filteredStockList.add(s);
+                String sku = s.getProducto().getSku() != null ? s.getProducto().getSku() : "N/A";
+                productNames.add(s.getProducto().getName() + " (" + sku + ")");
+            }
+        }
+        
+        ArrayAdapter<String> productAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, productNames);
+        productAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerProductoAudit.setAdapter(productAdapter);
+        validateAuditForm();
+    }
+
+    private void setupAuditFormLogic(String[] motivos) {
+        spinnerSucursalAudit.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                updateProductSpinner();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        spinnerProductoAudit.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                validateAuditForm();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        etUnidadesPerdidas.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { validateAuditForm(); }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        btnSubmitAudit.setOnClickListener(v -> {
+            if (filteredStockList.isEmpty() || spinnerProductoAudit.getSelectedItemPosition() < 0) return;
+            Stock selectedStock = filteredStockList.get(spinnerProductoAudit.getSelectedItemPosition());
+            
+            String cantStr = etUnidadesPerdidas.getText().toString().trim();
+            int perdidas = cantStr.isEmpty() ? 0 : Integer.parseInt(cantStr);
+            int fisica = selectedStock.getCantidadTotal() - perdidas;
+            
+            String motivo = motivos[spinnerMotivoAudit.getSelectedItemPosition()];
+            String obs = etObservacionesAudit.getText().toString().trim();
+            
+            if (("DANO_MERMA".equals(motivo) || "ROBO_O_PERDIDA".equals(motivo) || "CADUCIDAD".equals(motivo)) && obs.isEmpty()) {
+                Toast.makeText(getContext(), "Observaciones requeridas para este motivo", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            AjusteRequest req = new AjusteRequest(
+                selectedStock.getSucursalId(),
+                selectedStock.getProductoId(),
+                selectedStock.getCantidadTotal(),
+                fisica,
+                motivo,
+                obs.isEmpty() ? null : obs
+            );
+
+            btnSubmitAudit.setEnabled(false);
+            apiService.createAjuste(req).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    btnSubmitAudit.setEnabled(true);
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Auditoría registrada", Toast.LENGTH_SHORT).show();
+                        etUnidadesPerdidas.setText("");
+                        etObservacionesAudit.setText("");
+                        cardAuditForm.setVisibility(View.GONE);
+                        isAuditFormVisible = false;
+                        btnToggleAuditForm.setText("Registrar Auditoría");
+                        loadAudits();
+                        loadStock();
+                    } else {
+                        Toast.makeText(getContext(), "Error al registrar", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    btnSubmitAudit.setEnabled(true);
+                    Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+    }
+
+    private void validateAuditForm() {
+        String cantStr = etUnidadesPerdidas.getText().toString().trim();
+        if (cantStr.isEmpty() || filteredStockList.isEmpty() || spinnerProductoAudit.getSelectedItemPosition() < 0) {
+            btnSubmitAudit.setEnabled(false);
+            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d1d5db")));
+            llWarningAudit.setVisibility(View.GONE);
+            return;
+        }
+        
+        Stock selectedStock = filteredStockList.get(spinnerProductoAudit.getSelectedItemPosition());
+        int perdidas = Integer.parseInt(cantStr);
+        int sistema = selectedStock.getCantidadTotal();
+        
+        if (perdidas > sistema) {
+            llWarningAudit.setVisibility(View.VISIBLE);
+            tvWarningAudit.setText("No puedes perder más de las unidades disponibles en sistema (" + sistema + ")");
+            btnSubmitAudit.setEnabled(false);
+            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d1d5db")));
+        } else {
+            llWarningAudit.setVisibility(View.GONE);
+            btnSubmitAudit.setEnabled(true);
+            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0f172a")));
+        }
     }
 
     private void loadAudits() {
