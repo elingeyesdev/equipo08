@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { LayoutDashboard, TrendingUp, Archive, AlertTriangle, Receipt, Loader2, DollarSign } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Archive, AlertTriangle, Receipt, DollarSign, ArrowRight, ShoppingCart, BarChart2, Loader2 } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function DashboardPage() {
   const userName = sessionStorage.getItem('user_name') || 'Usuario';
@@ -41,10 +42,10 @@ export default function DashboardPage() {
       const totalRevenue = kpis.ingresosTotales;
       const totalProfit = kpis.utilidadTotal;
       
-      const totalStockItems = stock.reduce((acc, item) => acc + Number(item.cantidad), 0);
+      const totalStockItems = stock.reduce((acc, item) => acc + Number(item.cantidadTotal || item.cantidad || 0), 0);
       const totalStockValue = stock.reduce((acc, item) => {
-        const itemPrice = item.producto?.precio || 0;
-        return acc + (Number(item.cantidad) * Number(itemPrice));
+        const itemPrice = item.producto?.precioVenta || item.producto?.precio || 0;
+        return acc + (Number(item.cantidadTotal || item.cantidad || 0) * Number(itemPrice));
       }, 0);
 
       const totalLosses = ajustes.reduce((acc, aj) => acc + Number(aj.valor_perdido || 0), 0);
@@ -53,12 +54,12 @@ export default function DashboardPage() {
       const recentSales = kpis.recentSales || [];
 
       setMetrics({
-        totalSales,
-        totalRevenue,
-        totalProfit,
-        totalStockItems,
-        totalStockValue,
-        totalLosses,
+        totalSales: Number(totalSales) || 0,
+        totalRevenue: Number(totalRevenue) || 0,
+        totalProfit: Number(totalProfit) || 0,
+        totalStockItems: Number(totalStockItems) || 0,
+        totalStockValue: Number(totalStockValue) || 0,
+        totalLosses: Number(totalLosses) || 0,
         recentSales
       });
 
@@ -82,144 +83,147 @@ export default function DashboardPage() {
   const isBasicSeller = userRole === 'VENDEDOR';
 
   return (
-    <div className="max-w-6xl mx-auto pb-12 animate-fadeIn">
+    <div className="full-width-container animate-fadein space-y-6">
+      
       {/* HEADER */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-black text-[var(--txt-primary)] tracking-tight flex items-center gap-3">
-          <LayoutDashboard className="text-[var(--txt-secondary)]" size={32} />
-          Panel de Control
-        </h1>
-        <p className="text-[var(--txt-secondary)] font-medium mt-2">
-          Hola, <span className="font-bold text-[var(--txt-primary)]">{userName}</span>. 
-          Aquí tienes un resumen unificado del estado de tu tienda.
-        </p>
+      <div className="page-header-bar">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Hola, <b>{userName}</b>. Aquí tienes un resumen unificado del estado de tu tienda.</p>
+        </div>
       </div>
 
       {/* KPI GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 lg:grid-cols-3 gap-6 mb-8">
         
         {/* Card: Ventas Realizadas */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <p className="text-xs font-bold text-[var(--txt-secondary)] uppercase tracking-wider mb-1">Ventas Históricas</p>
-              <h3 className="text-2xl font-black text-[var(--txt-primary)]">{metrics.totalSales}</h3>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
-              <Receipt size={18} className="text-[var(--txt-primary)]" />
-            </div>
+        <div className="relative overflow-hidden rounded-xl bg-[#2563eb] text-white flex flex-col justify-between">
+          <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
+            <ShoppingCart size={100} strokeWidth={2} />
           </div>
-          <div className="text-[11px] font-bold text-green-600 flex items-center gap-1">
-            <TrendingUp size={12} /> <span className="text-[var(--txt-muted)] font-medium ml-1">Consistencia OK</span>
+          <div className="p-6 relative z-10 flex-1">
+            <h3 className="text-3xl font-semibold mb-1 text-white">{metrics.totalSales}</h3>
+            <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Ventas Históricas</p>
           </div>
+          <a href="/sales#historial" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">
+            Más información <ArrowRight size={14} />
+          </a>
         </div>
 
         {/* Card: Ingresos */}
         {!isBasicSeller && (
-          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-xs font-bold text-[var(--txt-secondary)] uppercase tracking-wider mb-1">Ingresos Totales</p>
-                <h3 className="text-2xl font-black text-[var(--txt-primary)]">Bs {metrics.totalRevenue.toFixed(2)}</h3>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
-                <DollarSign size={18} className="text-[var(--txt-primary)]" />
-              </div>
+          <div className="relative overflow-hidden rounded-xl bg-emerald-600 text-white flex flex-col justify-between">
+            <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
+              <DollarSign size={100} strokeWidth={2} />
             </div>
-            <div className="text-[11px] font-bold text-blue-600 flex items-center gap-1">
-              <TrendingUp size={12} /> <span className="text-[var(--txt-muted)] font-medium ml-1">Ingreso Bruto</span>
+            <div className="p-6 relative z-10 flex-1">
+              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {metrics.totalRevenue.toFixed(0)}</h3>
+              <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Ingreso Bruto</p>
             </div>
+            <a href="/sales#historial" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">
+              Más información <ArrowRight size={14} />
+            </a>
           </div>
         )}
 
         {/* Card: Utilidad Bruta */}
         {!isBasicSeller && (
-          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-xs font-bold text-[var(--txt-secondary)] uppercase tracking-wider mb-1">Utilidad Bruta</p>
-                <h3 className="text-2xl font-black text-green-600">Bs {metrics.totalProfit.toFixed(2)}</h3>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center dark:bg-green-900/20 dark:border-green-900/30">
-                <TrendingUp size={18} className="text-green-500" />
-              </div>
+          <div className="relative overflow-hidden rounded-xl bg-amber-500 text-white flex flex-col justify-between">
+            <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
+              <BarChart2 size={100} strokeWidth={2} />
             </div>
-            <div className="text-[11px] font-bold text-green-600 flex items-center gap-1">
-              <TrendingUp size={12} /> <span className="text-[var(--txt-muted)] font-medium ml-1">Ganancia Neta</span>
+            <div className="p-6 relative z-10 flex-1">
+              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {metrics.totalProfit.toFixed(0)}</h3>
+              <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Utilidad Neta</p>
             </div>
+            <a href="/sales#historial" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">
+              Más información <ArrowRight size={14} />
+            </a>
           </div>
         )}
 
         {/* Card: Inventario */}
-        <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <p className="text-xs font-bold text-[var(--txt-secondary)] uppercase tracking-wider mb-1">Stock Físico</p>
-              <h3 className="text-2xl font-black text-[var(--txt-primary)]">
-                {metrics.totalStockItems} <span className="text-sm font-medium text-[var(--txt-muted)]">unidades</span>
-              </h3>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
-              <Archive size={18} className="text-[var(--txt-primary)]" />
-            </div>
+        <div className="relative overflow-hidden rounded-xl bg-[#4f46e5] text-white flex flex-col justify-between">
+          <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
+            <Archive size={100} strokeWidth={2} />
           </div>
-          {!isBasicSeller ? (
-            <div className="text-[11px] text-[var(--txt-secondary)] font-medium flex items-center gap-1">
-              Valor estimado: <span className="font-bold text-[var(--txt-primary)]">Bs {metrics.totalStockValue.toFixed(2)}</span>
-            </div>
-          ) : (
-            <div className="text-[11px] text-[var(--txt-secondary)] font-medium">Disponibles en tienda</div>
-          )}
+          <div className="p-6 relative z-10 flex-1">
+            <h3 className="text-3xl font-semibold mb-1 text-white">{metrics.totalStockItems}</h3>
+            <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Unidades en Stock</p>
+          </div>
+          <a href="/stock" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">
+            Más información <ArrowRight size={14} />
+          </a>
         </div>
 
         {/* Card: Pérdidas / Ajustes */}
         {!isBasicSeller && (
-          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-xs font-bold text-[var(--txt-secondary)] uppercase tracking-wider mb-1">Pérdidas Confirmadas</p>
-                <h3 className="text-2xl font-black text-red-600">Bs {metrics.totalLosses.toFixed(2)}</h3>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center dark:bg-red-900/20 dark:border-red-900/30">
-                <AlertTriangle size={18} className="text-red-500" />
-              </div>
+          <div className="relative overflow-hidden rounded-xl bg-rose-600 text-white flex flex-col justify-between">
+            <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
+              <AlertTriangle size={100} strokeWidth={2} />
             </div>
-            <div className="text-[11px] font-bold text-[var(--txt-muted)] flex items-center gap-1">
-              Reportado en Auditorías
+            <div className="p-6 relative z-10 flex-1">
+              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {metrics.totalLosses.toFixed(0)}</h3>
+              <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Pérdidas Registradas</p>
             </div>
+            <a href="/audit-reports" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">
+              Más información <ArrowRight size={14} />
+            </a>
           </div>
         )}
       </div>
 
-      {/* ACTIVIDAD RECIENTE */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
-        <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--bg)] flex items-center gap-2">
-          <Receipt size={16} className="text-[var(--txt-secondary)]" />
-          <h2 className="text-sm font-bold text-[var(--txt-primary)] uppercase tracking-wider">Actividad Reciente (Últimas Ventas)</h2>
-        </div>
+      {/* CHARTS SECTION */}
+      <div className="mb-8">
         
-        {metrics.recentSales.length > 0 ? (
-          <div className="divide-y divide-[var(--border)]">
-            {metrics.recentSales.map((sale) => (
-              <div key={sale.id} className="p-4 px-6 flex items-center justify-between hover:bg-[var(--bg)] transition-colors">
-                <div>
-                  <p className="text-sm font-bold text-[var(--txt-primary)]">Venta #{sale.id.slice(0, 8)}</p>
-                  <p className="text-[11px] text-[var(--txt-secondary)] mt-0.5 font-medium">
-                    {new Date(sale.createdAt).toLocaleString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-black text-[var(--txt-primary)]">Bs {Number(sale.total).toFixed(2)}</p>
-                  <p className="text-[11px] text-[var(--txt-secondary)] font-medium">Completada</p>
-                </div>
-              </div>
-            ))}
+        {/* Gráfico Principal */}
+        <div className="bg-[#2c3136] border border-[#3a3f44] rounded-xl overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-[#3a3f44] flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Valor de Ventas</h2>
+            <div className="flex gap-4 items-center">
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs text-slate-400 font-bold">Ingresos</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-400"></div><span className="text-xs text-slate-400 font-bold">Utilidad</span></div>
+            </div>
           </div>
-        ) : (
-          <div className="p-10 text-center text-[var(--txt-secondary)] text-sm font-medium">
-            No hay registros de ventas recientes.
+          <div className="p-6 h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={(() => {
+                  const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+                  const weeklyData = [];
+                  for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const salesForDay = metrics.recentSales.filter(s => new Date(s.fecha || s.createdAt).getDate() === d.getDate());
+                    const total = salesForDay.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
+                    const util = salesForDay.reduce((acc, curr) => acc + (Number(curr.utilidadTotal) || (Number(curr.total)*0.4) || 0), 0);
+                    weeklyData.push({ name: days[d.getDay()], total, util });
+                  }
+                  return weeklyData;
+                })()}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorUtil" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#34d399" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#3a3f44" vertical={false} />
+                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
+                <Area type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
+                <Area type="monotone" dataKey="util" stroke="#34d399" strokeWidth={3} fillOpacity={1} fill="url(#colorUtil)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-        )}
+        </div>
+
       </div>
 
     </div>

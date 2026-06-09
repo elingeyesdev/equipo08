@@ -25,8 +25,9 @@ export default function LoginPage({ setAuthToken }) {
       sessionStorage.setItem('user_id', user.id);
       sessionStorage.setItem('user_name', user.name);
       sessionStorage.setItem('user_role', user.role);
-      sessionStorage.setItem('tenant_id', user.tenant_id);
-      sessionStorage.setItem('tenant_name', user.tenant_name);
+      sessionStorage.setItem('tenant_id', user.tenant_id || '');
+      sessionStorage.setItem('tenant_name', user.tenant_name || '');
+      sessionStorage.setItem('tenant_domain', user.tenant_domain || '');
       sessionStorage.setItem('tenant_logo', user.tenant_logoUrl || '');
       sessionStorage.setItem('user_sucursal_id', user.sucursal_id || '');
       sessionStorage.setItem('user_sucursal_name', user.sucursal_name || '');

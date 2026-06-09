@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { useToast } from '../components/ToastContext';
-import { Archive, MapPin, ClipboardList, AlertTriangle, Save, X, TrendingDown, Search, Printer } from 'lucide-react';
+import { Archive, MapPin, ClipboardList, AlertTriangle, Save, X, TrendingDown, Search, Printer, ArrowRightLeft } from 'lucide-react';
 
 export default function StockPage() {
   const [stock, setStock] = useState([]);
@@ -11,13 +11,13 @@ export default function StockPage() {
   const [searchProduct, setSearchProduct] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   
-  // Auditing Form State
-  const [auditItem, setAuditItem] = useState(null);
-  const [auditForm, setAuditForm] = useState({
-    cantidad_fisica: '',
-    motivo: 'ERROR_REGISTRO',
-    observaciones: ''
+  // Transfer Form State
+  const [transferItem, setTransferItem] = useState(null);
+  const [transferForm, setTransferForm] = useState({
+    to_sucursal_id: '',
+    cantidad: ''
   });
+
   const [saving, setSaving] = useState(false);
 
   const toast = useToast();
@@ -50,40 +50,39 @@ export default function StockPage() {
     });
   };
 
-  const handleOpenAudit = (item) => {
-    setAuditItem(item);
-    setAuditForm({
-      cantidad_fisica: item.cantidadTotal.toString(),
-      motivo: 'ERROR_REGISTRO',
-      observaciones: ''
+  const handleOpenTransfer = (item) => {
+    setTransferItem(item);
+    setTransferForm({
+      to_sucursal_id: '',
+      cantidad: ''
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCloseAudit = () => {
-    setAuditItem(null);
-    setAuditForm({ cantidad_fisica: '', motivo: 'ERROR_REGISTRO', observaciones: '' });
+  const handleCloseTransfer = () => {
+    setTransferItem(null);
+    setTransferForm({ to_sucursal_id: '', cantidad: '' });
   };
 
-  const handleSubmitAudit = async (e) => {
+  const handleSubmitTransfer = async (e) => {
     e.preventDefault();
+    if (!transferForm.to_sucursal_id) return toast.error('Selecciona una sucursal de destino');
+    
     setSaving(true);
     try {
       const payload = {
-        sucursal_id: auditItem.sucursal_id,
-        producto_id: auditItem.producto_id,
-        cantidad_sistema: auditItem.cantidadTotal,
-        cantidad_fisica: Number(auditForm.cantidad_fisica),
-        motivo: auditForm.motivo,
-        observaciones: auditForm.observaciones
+        from_sucursal_id: transferItem.sucursal_id,
+        to_sucursal_id: transferForm.to_sucursal_id,
+        producto_id: transferItem.producto_id,
+        cantidad: Number(transferForm.cantidad)
       };
 
-      await api.post('/ajustes', payload);
-      toast.success('Acta de auditoría registrada y stock actualizado síncronamente.');
-      handleCloseAudit();
-      fetchStock(); // Reload updated stock map
+      await api.post('/stock/transfer', payload);
+      toast.success('Stock transferido con éxito a la nueva sucursal.');
+      handleCloseTransfer();
+      fetchStock(); 
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error al procesar el ajuste de inventario');
+      toast.error(err.response?.data?.message || 'Error al transferir stock');
     } finally {
       setSaving(false);
     }
@@ -114,21 +113,6 @@ export default function StockPage() {
     }
     return acc + exactLoss;
   }, 0);
-
-  const getAuditDelta = () => {
-    if (!auditItem || auditForm.cantidad_fisica === '') return null;
-    return Number(auditForm.cantidad_fisica) - auditItem.cantidadTotal;
-  };
-
-  const getLostValue = () => {
-    const delta = getAuditDelta();
-    if (delta === null || delta >= 0 || !auditItem) return 0;
-    const valuation = Number(auditItem.valorAdquisicion || 0);
-    const avgCost = auditItem.cantidadTotal > 0 ? (valuation / auditItem.cantidadTotal) : 0;
-    return Math.abs(delta) * avgCost;
-  };
-
-  const delta = getAuditDelta();
 
   const alertasStock = filteredStock.filter(s => s.cantidadTotal < (s.producto?.stockMinimo || 10));
 
@@ -168,8 +152,7 @@ export default function StockPage() {
           <p>Control y valuación de stock por centros de costos segregados físicamente.</p>
         </div>
 
-        {!auditItem && (
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
             <button 
               onClick={() => setShowFilters(!showFilters)} 
               className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
@@ -192,11 +175,10 @@ export default function StockPage() {
               </button>
             )}
           </div>
-        )}
       </div>
 
       {/* Filter Panel */}
-      {showFilters && !auditItem && (
+      {showFilters && !transferItem && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-end md:items-center gap-4 animate-fadeIn">
           <div className="flex-1 w-full">
              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Buscar Producto</label>
@@ -233,7 +215,7 @@ export default function StockPage() {
       )}
 
       {/* Alertas Automáticas Banner */}
-      {!auditItem && alertasStock.length > 0 && (
+      {!transferItem && alertasStock.length > 0 && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm">
           <div className="bg-red-100 p-2 rounded-full text-red-600">
              <AlertTriangle size={18} strokeWidth={2.5} />
@@ -245,97 +227,70 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* Audit Inline Form */}
-      {auditItem && (
+      {/* Transfer Inline Form */}
+      {transferItem && (
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
-          <div className="flex justify-between items-center pb-4 border-b border-slate-105 mb-4">
+          <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 m-0">
-               <span>Registrar Acta de Auditoría (Ajuste Físico)</span>
+               <ArrowRightLeft size={18} className="text-indigo-600" />
+               <span>Traslado de Inventario a otra Sucursal</span>
             </h3>
-            <button onClick={handleCloseAudit} className="btn-premium-icon btn-premium-icon-danger">
+            <button onClick={handleCloseTransfer} className="btn-premium-icon btn-premium-icon-danger">
               <X size={15} />
             </button>
           </div>
 
           <div className="text-sm text-slate-600 mb-6 font-medium">
-            Estás auditando el stock de <strong className="text-slate-900 font-bold">{auditItem.producto?.name}</strong> en la sucursal <strong className="text-slate-900 font-bold">{auditItem.sucursal?.name}</strong>.<br/>
-            Unidades registradas actualmente en el sistema: <strong className="text-base font-extrabold text-slate-950">{auditItem.cantidadTotal}</strong>.
+            Moverás {transferItem.producto?.name} desde la sucursal origen {transferItem.sucursal?.name}.<br/>
+            Unidades disponibles para transferir: {transferItem.cantidadTotal}.
           </div>
 
-          <form onSubmit={handleSubmitAudit} className="space-y-4">
+          <form onSubmit={handleSubmitTransfer} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="form-group">
-                <label className="text-slate-700">Conteo Físico Real (Unidades) *</label>
+                <label className="text-slate-700">Sucursal de Destino *</label>
+                <select 
+                  value={transferForm.to_sucursal_id} 
+                  onChange={e => setTransferForm({...transferForm, to_sucursal_id: e.target.value})}
+                  required
+                  className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
+                >
+                  <option value="">Selecciona la sucursal...</option>
+                  {sucursales.filter(s => s.id !== transferItem.sucursal_id).map(s => (
+                    <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="text-slate-700">Cantidad a Transferir (Unidades) *</label>
                 <input 
                   type="number" 
-                  value={auditForm.cantidad_fisica} 
-                  onChange={e => setAuditForm({...auditForm, cantidad_fisica: e.target.value})} 
-                  placeholder="Cantidad contada físicamente"
+                  value={transferForm.cantidad} 
+                  onChange={e => setTransferForm({...transferForm, cantidad: e.target.value})} 
+                  placeholder="Ej. 50"
                   required 
-                  min="0"
+                  min="1"
+                  max={transferItem.cantidadTotal}
                   className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
                 />
               </div>
-
-              <div className="form-group">
-                <label className="text-slate-700">Motivo de Incidencia *</label>
-                <select 
-                  value={auditForm.motivo} 
-                  onChange={e => setAuditForm({...auditForm, motivo: e.target.value})}
-                  required
-                  className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10 animate-none"
-                >
-                  <option value="ERROR_REGISTRO">Error de Registro Numérico</option>
-                  <option value="DANO_MERMA">Artículo Dañado / Extraviado</option>
-                  <option value="ROBO_O_PERDIDA">Robo / No Habido</option>
-                  <option value="CADUCIDAD">Caducidad / Vencimiento</option>
-                </select>
-              </div>
-            </div>
-
-            {delta !== null && delta < 0 && (
-              <div className="p-4 bg-rose-50/50 border border-rose-100 text-rose-800 rounded-xl text-xs leading-relaxed font-medium">
-                <strong>⚠️ Impacto Financiero Directo:</strong> La pérdida declarada de {Math.abs(delta)} unidades resultará en un ajuste de valuación estimado de <strong className="font-bold">Bs. {getLostValue().toFixed(2)}</strong>.
-              </div>
-            )}
-            
-            {delta !== null && delta > 0 && userRole !== 'OWNER' && (
-              <div className="p-4 bg-rose-50/50 border border-rose-100 text-rose-800 rounded-xl text-xs leading-relaxed font-medium">
-                <strong>❌ Excedente Anómalo:</strong> No tienes permisos para declarar un excedente físico superior al del sistema ({auditItem.cantidadTotal}). Registra este reabastecimiento en la sección de Lotes (Sourcing).
-              </div>
-            )}
-            
-            {delta !== null && delta > 0 && userRole === 'OWNER' && (
-              <div className="p-4 bg-amber-50/50 border border-amber-200 text-amber-800 rounded-xl text-xs leading-relaxed font-medium">
-                <strong>⚠️ Excepción Habilitada:</strong> Declararás un excedente físico mayor al del sistema. Esta acción está restringida para el personal, pero habilitada para tu rol de Owner.
-              </div>
-            )}
-
-            <div className="form-group">
-              <label className="text-slate-755">Observaciones / Detalles</label>
-              <input 
-                type="text" 
-                value={auditForm.observaciones} 
-                onChange={e => setAuditForm({...auditForm, observaciones: e.target.value})} 
-                placeholder="Indica observaciones específicas sobre la discrepancia..."
-                className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
-              />
             </div>
 
             <div className="flex gap-3 justify-end pt-4 border-t border-slate-100">
               <button 
                 type="button" 
-                onClick={handleCloseAudit} 
+                onClick={handleCloseTransfer} 
                 className="btn-premium"
               >
                 Cancelar
               </button>
               <button 
                 type="submit" 
-                disabled={saving || auditForm.cantidad_fisica === '' || (delta > 0 && userRole !== 'OWNER')} 
-                className="btn-premium btn-premium-indigo"
+                disabled={saving || !transferForm.to_sucursal_id || !transferForm.cantidad} 
+                className="btn-premium bg-slate-900 text-white hover:bg-black hover:shadow-lg hover:shadow-slate-900/20"
               >
-                Procesar Ajuste de Stock
+                Confirmar Traslado
               </button>
             </div>
           </form>
@@ -343,7 +298,7 @@ export default function StockPage() {
       )}
       
       {/* Resumen Financiero Dash Cards */}
-      {!auditItem && (
+      {!transferItem && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:-translate-y-1">
             <div>
@@ -375,7 +330,7 @@ export default function StockPage() {
       )}
 
       {/* Main Stock Table */}
-      {!auditItem && (
+      {!transferItem && (
         <div className="table-premium-wrapper">
           <div className="overflow-x-auto">
             <table className="table-premium">
@@ -387,7 +342,7 @@ export default function StockPage() {
                   <th className="text-right" style={{ width: '12%' }}>Stock Físico</th>
                   <th className="text-right" style={{ width: '15%' }}>Costo Unitario Promedio</th>
                   <th className="text-right" style={{ width: '10%' }}>Valuación Total</th>
-                  {hasPermission('inventario_crear') && <th className="text-center" style={{ width: '8%' }}>Acciones</th>}
+                  <th className="text-center" style={{ width: '8%' }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -420,18 +375,17 @@ export default function StockPage() {
                         </td>
                         <td className="text-right text-slate-600 text-base font-mono font-bold">Bs {costoPromedio.toFixed(2)}</td>
                         <td className="text-right font-black text-indigo-700 font-mono text-xl">Bs {valuation.toFixed(2)}</td>
-                        {hasPermission('inventario_crear') && (
                           <td className="text-center">
-                            <button 
-                               onClick={() => handleOpenAudit(s)}
-                               className="btn-premium btn-premium-sm"
-                            >
-                              <ClipboardList size={13} />
-                              <span>Auditar</span>
-                            </button>
+                                <button 
+                                   onClick={() => handleOpenTransfer(s)}
+                                   className="btn-premium btn-premium-sm"
+                                   title="Trasladar a otra sucursal"
+                                >
+                                  <ArrowRightLeft size={14} />
+                                  <span>Trasladar</span>
+                                </button>
                           </td>
-                        )}
-                      </tr>
+                        </tr>
                     );
                   })
                 )}
