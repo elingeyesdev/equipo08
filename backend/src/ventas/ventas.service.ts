@@ -1,9 +1,10 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Venta } from './venta.entity';
 import { CreateVentaDto } from './dto/create-venta.dto';
 import { StockService } from '../stock/stock.service';
+import { Stock } from '../stock/stock.entity';
 import { Producto } from '../productos/producto.entity';
 import PDFDocument = require('pdfkit');
 import * as fs from 'fs';
@@ -17,6 +18,7 @@ export class VentasService {
     @InjectRepository(Producto)
     private readonly productoRep: Repository<Producto>,
     private readonly stockService: StockService,
+    private readonly dataSource: DataSource,
   ) {
     // Ensure temp directory exists
     const tempDir = path.join(process.cwd(), 'temp', 'comprobantes');
@@ -26,68 +28,87 @@ export class VentasService {
   }
 
   async create(dto: CreateVentaDto, tenant_id: string): Promise<Venta> {
-    const detalle = [];
-    let total = 0;
-    let costoTotal = 0;
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // Validate and process each item
-    for (const item of dto.items) {
-      const producto = await this.productoRep.findOne({ where: { id: item.producto_id, tenant_id } });
-      if (!producto) throw new NotFoundException(`Producto ${item.producto_id} no encontrado`);
+    try {
+      const detalle = [];
+      let total = 0;
+      let costoTotal = 0;
 
-      const stock = await this.stockService.getStockRow(tenant_id, dto.sucursal_id, producto.id);
-      const stockDisponible = stock ? stock.cantidadTotal : 0;
-      
-      if (stockDisponible < item.cantidad) {
-        throw new BadRequestException(`Stock insuficiente para ${producto.name}. Disponible: ${stockDisponible}`);
+      // Validate and process each item
+      for (const item of dto.items) {
+        const producto = await queryRunner.manager.findOne(Producto, { where: { id: item.producto_id, tenant_id } });
+        if (!producto) throw new NotFoundException(`Producto ${item.producto_id} no encontrado`);
+
+        const stock = await queryRunner.manager.findOne(Stock, { where: { tenant_id, sucursal_id: dto.sucursal_id, producto_id: producto.id } });
+        
+        if (!stock || stock.cantidadTotal < item.cantidad) {
+          throw new BadRequestException(`Stock insuficiente para ${producto.name}. Disponible: ${stock ? stock.cantidadTotal : 0}`);
+        }
+
+        const stockDisponible = stock.cantidadTotal;
+
+        const precioUnitario = Number(producto.precioVenta);
+        const subtotal = precioUnitario * item.cantidad;
+        total += subtotal;
+
+        // Calculate cost proportion to reduce inventory value accurately
+        const avgCost = stockDisponible > 0 ? (Number(stock.valorAdquisicion || 0) / stockDisponible) : 0;
+        const proportionalCost = avgCost * item.cantidad;
+        
+        costoTotal += proportionalCost;
+
+        // Reduce stock in transaction
+        stock.cantidadTotal = Number(stock.cantidadTotal) - item.cantidad;
+        stock.valorAdquisicion = Number(stock.valorAdquisicion) - proportionalCost;
+        await queryRunner.manager.save(Stock, stock);
+
+        detalle.push({
+          producto_id: producto.id,
+          sku: producto.sku,
+          name: producto.name,
+          cantidad: item.cantidad,
+          precioUnitario,
+          costoUnitario: avgCost,
+          subtotal
+        });
       }
 
-      const precioUnitario = Number(producto.precioVenta);
-      const subtotal = precioUnitario * item.cantidad;
-      total += subtotal;
+      const utilidadTotal = total - costoTotal;
+      const numeroComprobante = `FAC-${Date.now()}`;
 
-      // Calculate cost proportion to reduce inventory value accurately
-      const avgCost = stockDisponible > 0 ? (Number(stock?.valorAdquisicion || 0) / stockDisponible) : 0;
-      const proportionalCost = avgCost * item.cantidad;
-      
-      costoTotal += proportionalCost;
-
-      // Reduce stock
-      await this.stockService.sumStock(tenant_id, dto.sucursal_id, producto.id, -item.cantidad, -proportionalCost);
-
-      detalle.push({
-        producto_id: producto.id,
-        sku: producto.sku,
-        name: producto.name,
-        cantidad: item.cantidad,
-        precioUnitario,
-        costoUnitario: avgCost,
-        subtotal
+      const venta = queryRunner.manager.create(Venta, {
+        tenant_id,
+        sucursal_id: dto.sucursal_id,
+        numeroComprobante,
+        clienteNombre: dto.clienteNombre,
+        clienteDocumento: dto.clienteDocumento,
+        detalle,
+        total,
+        costoTotal,
+        utilidadTotal,
+        metodoPago: dto.metodoPago || 'Efectivo',
+        montoRecibido: dto.montoRecibido || total,
+        cambio: dto.cambio || 0,
+        vendedorNombre: dto.vendedorNombre || 'Sistema'
       });
+
+      const savedVenta = await queryRunner.manager.save(Venta, venta);
+
+      await queryRunner.commitTransaction();
+      
+      // Generate PDF asynchronously
+      this.generatePdf(savedVenta.id, tenant_id).catch(err => console.error('Error al generar PDF', err));
+
+      return savedVenta;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
-
-    const utilidadTotal = total - costoTotal;
-
-    const numeroComprobante = `FAC-${Date.now()}`;
-
-    const venta = this.ventaRep.create({
-      tenant_id,
-      sucursal_id: dto.sucursal_id,
-      numeroComprobante,
-      clienteNombre: dto.clienteNombre,
-      clienteDocumento: dto.clienteDocumento,
-      detalle,
-      total,
-      costoTotal,
-      utilidadTotal
-    });
-
-    const savedVenta = await this.ventaRep.save(venta);
-    
-    // Generate PDF asynchronously
-    this.generatePdf(savedVenta.id, tenant_id).catch(err => console.error('Error al generar PDF', err));
-
-    return savedVenta;
   }
 
   async findAll(tenant_id: string): Promise<Venta[]> {
@@ -145,6 +166,7 @@ export class VentasService {
       doc.fontSize(10).fillColor('#4b5563');
       doc.text(`Comprobante Nro: ${venta.numeroComprobante}`);
       doc.text(`Fecha: ${new Date(venta.fecha).toLocaleString()}`);
+      doc.text(`Cajero/Vendedor: ${venta.vendedorNombre || 'Sistema'}`);
       doc.text(`Sucursal: ${venta.sucursal ? venta.sucursal.name : 'Principal'}`);
       doc.moveDown();
 
@@ -184,6 +206,14 @@ export class VentasService {
       doc.font('Helvetica-Bold').fontSize(14).fillColor('#111827');
       doc.text('TOTAL:', 350, currentY, { width: 90, align: 'right' });
       doc.fillColor('#10b981').text(`Bs. ${Number(venta.total).toFixed(2)}`, 450, currentY, { width: 90, align: 'right' });
+
+      currentY += 25;
+      doc.font('Helvetica').fontSize(10).fillColor('#4b5563');
+      doc.text(`Método de Pago: ${venta.metodoPago || 'Efectivo'}`, 300, currentY, { width: 240, align: 'right' });
+      currentY += 15;
+      doc.text(`Monto Recibido: Bs. ${Number(venta.montoRecibido || 0).toFixed(2)}`, 300, currentY, { width: 240, align: 'right' });
+      currentY += 15;
+      doc.text(`Cambio / Vuelto: Bs. ${Number(venta.cambio || 0).toFixed(2)}`, 300, currentY, { width: 240, align: 'right' });
 
       // Footer
       doc.moveDown(3);

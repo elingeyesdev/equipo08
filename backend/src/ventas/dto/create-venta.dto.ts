@@ -28,4 +28,20 @@ export class CreateVentaDto {
   @ValidateNested({ each: true })
   @Type(() => VentaItemDto)
   items: VentaItemDto[];
+
+  @IsString()
+  @IsOptional()
+  metodoPago?: string;
+
+  @IsNumber()
+  @IsOptional()
+  montoRecibido?: number;
+
+  @IsNumber()
+  @IsOptional()
+  cambio?: number;
+
+  @IsString()
+  @IsOptional()
+  vendedorNombre?: string;
 }
