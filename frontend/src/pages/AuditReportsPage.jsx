@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ClipboardList, Filter, MapPin } from 'lucide-react';
+import { ClipboardList, Filter, MapPin, Plus, Save, X } from 'lucide-react';
 import api from '../api';
 import { useToast } from '../components/ToastContext';
 
@@ -7,7 +7,18 @@ export default function AuditReportsPage() {
   const [ajustes, setAjustes] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [sucursales, setSucursales] = useState([]);
+  const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [showAuditForm, setShowAuditForm] = useState(false);
+  const [auditForm, setAuditForm] = useState({
+    sucursal_id: '',
+    producto_id: '',
+    cantidad_fisica: '',
+    motivo: 'ERROR_REGISTRO',
+    observaciones: ''
+  });
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -25,16 +36,18 @@ export default function AuditReportsPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resAj, resUsr, resSuc, resStock] = await Promise.all([
+      const [resAj, resUsr, resSuc, resStock, resProd] = await Promise.all([
         api.get('/ajustes'),
         api.get('/users').catch(() => ({ data: [] })),
         api.get('/sucursales').catch(() => ({ data: [] })),
-        api.get('/stock').catch(() => ({ data: [] }))
+        api.get('/stock').catch(() => ({ data: [] })),
+        api.get('/productos').catch(() => ({ data: [] }))
       ]);
       setAjustes(resAj.data);
       setUsuarios(resUsr.data);
       setSucursales(resSuc.data);
       setStock(resStock.data);
+      setProductos(resProd.data);
     } catch (err) {
       console.error(err);
       toast.error('Error al descargar el registro analítico');
@@ -97,6 +110,45 @@ export default function AuditReportsPage() {
     return validDate && validUser && validMotivo && validSucursal;
   });
 
+  const handleSubmitAudit = async (e) => {
+    e.preventDefault();
+    if (!auditForm.sucursal_id || !auditForm.producto_id) {
+      return toast.error('Debes seleccionar sucursal y producto');
+    }
+
+    // Buscar la cantidad actual en sistema para ese producto+sucursal
+    const stockRow = stock.find(s => s.producto_id === auditForm.producto_id && s.sucursal_id === auditForm.sucursal_id);
+    const cantidadSistema = stockRow ? Number(stockRow.cantidadTotal) : 0;
+    const unidadesPerdidas = Number(auditForm.cantidad_fisica || 0);
+
+    if (unidadesPerdidas > cantidadSistema) {
+      return toast.error(`No puedes perder más de las unidades disponibles en sistema (${cantidadSistema})`);
+    }
+
+    const cantidadFisicaCalculada = cantidadSistema - unidadesPerdidas;
+
+    setSaving(true);
+    try {
+      const payload = {
+        sucursal_id: auditForm.sucursal_id,
+        producto_id: auditForm.producto_id,
+        cantidad_sistema: cantidadSistema,
+        cantidad_fisica: cantidadFisicaCalculada,
+        motivo: auditForm.motivo,
+        observaciones: auditForm.observaciones || ''
+      };
+      await api.post('/ajustes', payload);
+      toast.success('Auditoría registrada exitosamente');
+      setShowAuditForm(false);
+      setAuditForm({ sucursal_id: '', producto_id: '', cantidad_fisica: '', motivo: 'ERROR_REGISTRO', observaciones: '' });
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error al procesar el ajuste de inventario');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const totalFilteredLoss = filteredAjustes.reduce((acc, a) => acc + Number(a.valor_perdido || 0), 0);
 
   const [showFilters, setShowFilters] = useState(false);
@@ -109,16 +161,124 @@ export default function AuditReportsPage() {
           <h1>Registro Analítico de Ajustes</h1>
           <p>Historial y auditoría de variaciones físicas de stock detectadas.</p>
         </div>
-        <button
-          className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-            showFilters ? 'bg-indigo-500 text-white shadow-indigo-500/20' : 'bg-white/20 hover:bg-white/30 text-white'
-          }`}
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <Filter size={18} />
-          {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
-        </button>
+        <div className="flex gap-3 relative z-10">
+          <button
+            className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
+              showFilters ? 'bg-indigo-500 text-white shadow-indigo-500/20' : 'bg-white/20 hover:bg-white/30 text-white'
+            }`}
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter size={18} />
+            <span>{showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}</span>
+          </button>
+
+          <button
+            onClick={() => setShowAuditForm(!showAuditForm)}
+            className="py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm bg-white text-slate-900 hover:bg-slate-50"
+          >
+            {showAuditForm ? <X size={18} /> : <Plus size={18} />}
+            <span>{showAuditForm ? 'Cancelar' : 'Registrar Auditoría'}</span>
+          </button>
+        </div>
       </div>
+
+      {showAuditForm && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fadeIn">
+          <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 m-0">
+               <ClipboardList size={18} className="text-indigo-600" />
+               <span>Nueva Auditoría de Stock</span>
+            </h3>
+          </div>
+
+          <form onSubmit={handleSubmitAudit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-group">
+                <label className="text-slate-700">Sucursal *</label>
+                <select 
+                  value={auditForm.sucursal_id} 
+                  onChange={e => setAuditForm({...auditForm, sucursal_id: e.target.value})}
+                  required
+                  className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
+                >
+                  <option value="">Selecciona una sucursal...</option>
+                  {sucursales.map(s => <option key={s.id} value={s.id}>{s.name || s.nombre}</option>)}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="text-slate-700">Producto *</label>
+                <select 
+                  value={auditForm.producto_id} 
+                  onChange={e => setAuditForm({...auditForm, producto_id: e.target.value})}
+                  required
+                  className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
+                >
+                  <option value="">Selecciona un producto...</option>
+                  {productos.map(p => <option key={p.id} value={p.id}>{p.name || p.nombre} ({p.sku})</option>)}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="text-slate-700">Cantidad de Unidades Perdidas *</label>
+                <input 
+                  type="number" 
+                  value={auditForm.cantidad_fisica} 
+                  onChange={e => setAuditForm({...auditForm, cantidad_fisica: e.target.value})} 
+                  placeholder="Ej. 5"
+                  required 
+                  min="0"
+                  className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="text-slate-700">Motivo del Ajuste *</label>
+                <select 
+                  value={auditForm.motivo} 
+                  onChange={e => setAuditForm({...auditForm, motivo: e.target.value})} 
+                  required
+                  className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
+                >
+                  <option value="ERROR_REGISTRO">Error de Registro en Sistema</option>
+                  <option value="DANO_MERMA">Dañado / Defectuoso</option>
+                  <option value="ROBO_O_PERDIDA">Pérdida No Explicada / Robo</option>
+                  <option value="CADUCIDAD">Producto Vencido</option>
+                </select>
+              </div>
+
+              <div className="form-group md:col-span-2">
+                <label className="text-slate-700">Observaciones (Requerido para mermas/robos)</label>
+                <textarea 
+                  value={auditForm.observaciones} 
+                  onChange={e => setAuditForm({...auditForm, observaciones: e.target.value})} 
+                  placeholder="Explica qué pasó..."
+                  required={['DANO_MERMA', 'ROBO_O_PERDIDA', 'CADUCIDAD'].includes(auditForm.motivo)}
+                  className="w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all outline-none resize-none"
+                  rows="2"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 justify-end pt-4 border-t border-slate-100">
+              <button 
+                type="button" 
+                onClick={() => setShowAuditForm(false)} 
+                className="btn-premium"
+              >
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                disabled={saving} 
+                className="btn-premium bg-slate-900 text-white hover:bg-black hover:shadow-lg hover:shadow-slate-900/20"
+              >
+                Confirmar Ajuste Físico
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4">

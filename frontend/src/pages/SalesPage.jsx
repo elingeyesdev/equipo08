@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../api';
 import { useToast } from '../components/ToastContext';
-import { ShoppingCart, User, MapPin, Printer, Trash2, Download, Receipt, Search, Plus } from 'lucide-react';
+import { ShoppingCart, User, MapPin, Printer, Trash2, Download, Receipt, Search, Plus, Filter } from 'lucide-react';
 
 export default function SalesPage() {
   const [sucursales, setSucursales] = useState([]);
@@ -19,6 +19,38 @@ export default function SalesPage() {
   const [salesHistory, setSalesHistory] = useState([]);
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(null);
+  
+  // Tab State: 'pos' or 'history'
+  const [activeTab, setActiveTab] = useState(window.location.hash === '#historial' ? 'history' : 'pos');
+
+  // History Filters
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyStartDate, setHistoryStartDate] = useState('');
+  const [historyEndDate, setHistoryEndDate] = useState('');
+  const [historyBranch, setHistoryBranch] = useState('ALL');
+  const [historyMetodo, setHistoryMetodo] = useState('ALL');
+  const [showHistoryFilters, setShowHistoryFilters] = useState(false);
+
+  const filteredSalesHistory = useMemo(() => {
+    return salesHistory.filter(sale => {
+      if (historySearch) {
+        const term = historySearch.toLowerCase();
+        const matchSearch = (sale.clienteNombre || '').toLowerCase().includes(term) ||
+          (sale.numeroComprobante || '').toLowerCase().includes(term) ||
+          (sale.vendedorNombre || '').toLowerCase().includes(term);
+        if (!matchSearch) return false;
+      }
+      if (historyBranch !== 'ALL' && sale.sucursal_id !== historyBranch) return false;
+      if (historyMetodo !== 'ALL' && sale.metodoPago !== historyMetodo) return false;
+      if (historyStartDate && new Date(sale.fecha) < new Date(historyStartDate)) return false;
+      if (historyEndDate) {
+        const end = new Date(historyEndDate);
+        end.setHours(23, 59, 59, 999);
+        if (new Date(sale.fecha) > end) return false;
+      }
+      return true;
+    });
+  }, [salesHistory, historySearch, historyBranch, historyMetodo, historyStartDate, historyEndDate]);
 
   const userRole = sessionStorage.getItem('user_role');
   const userSucursalId = sessionStorage.getItem('user_sucursal_id');
@@ -30,6 +62,16 @@ export default function SalesPage() {
   useEffect(() => {
     fetchSucursales();
     fetchSalesHistory();
+
+    const handleHashChange = () => {
+      if (window.location.hash === '#historial') {
+        setActiveTab('history');
+      } else {
+        setActiveTab('pos');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   useEffect(() => {
@@ -192,235 +234,392 @@ export default function SalesPage() {
     <div className="full-width-container animate-fadein space-y-6">
       <div className="page-header-bar">
         <div>
-          <h1>Punto de Venta (POS)</h1>
-          <p>Facturación directa, búsqueda de productos y emisión de comprobantes de venta.</p>
+          <h1>Facturación e Historial de Ventas</h1>
+          <p>Registra nuevos comprobantes en el POS o consulta el historial de ventas del negocio.</p>
         </div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      
-      {/* Left Column: POS / Terminal */}
-      <div className="lg:col-span-7 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-6 min-h-[680px]">
-        <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-          <div>
-            <h3 className="text-lg font-bold text-slate-800">
-              Terminal de Venta
-            </h3>
-            <p className="text-sm text-slate-500 mt-1">
-              {isBranchLocked ? `Sucursal: ${userSucursalName || 'Asignada'}. Añade productos al carrito.` : 'Selecciona la sucursal y añade productos al carrito.'}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <select 
-              value={selectedBranch} 
-              onChange={e => { setSelectedBranch(e.target.value); setCart([]); }}
-              disabled={isBranchLocked}
-              className={`py-2 px-4 border rounded-xl text-sm font-bold transition-all shadow-sm ${
-                isBranchLocked 
-                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed' 
-                  : 'bg-slate-50 border-slate-200 text-slate-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500'
-              }`}
-            >
-              <option value="" disabled>-- Seleccione Sucursal --</option>
-              {sucursales.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </div>
-        </div>
-
-        {/* Search Input */}
-        <div className="relative">
-          <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-indigo-500">
-            <Search size={20} />
-          </span>
-          <input 
-            type="text" 
-            placeholder="Buscar producto por nombre o SKU..." 
-            value={searchProduct}
-            onChange={e => setSearchProduct(e.target.value)}
-            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-base font-medium focus:bg-white transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm"
-            disabled={!selectedBranch}
-          />
-        </div>
-
-        {/* Product Grid */}
-        <div className="flex-1 overflow-y-auto max-h-[460px] pr-2 custom-scrollbar">
-          {filteredStock.length === 0 ? (
-            <div className="text-center py-20 bg-slate-50 border border-slate-200 border-dashed rounded-2xl text-slate-500 font-semibold text-sm">
-              {selectedBranch ? 'No se encontraron productos disponibles en esta sucursal.' : 'Por favor, selecciona una sucursal para cargar el inventario.'}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {filteredStock.map(s => (
-                <div 
-                  key={s.id} 
-                  onClick={() => addToCart(s)}
-                  className="bg-white border border-slate-200 hover:border-indigo-400 rounded-xl p-4 cursor-pointer transition-colors flex flex-col justify-between min-h-[130px]"
-                >
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs text-slate-500 uppercase">{s.producto?.sku}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase ${
-                        s.cantidadTotal <= 5 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {s.cantidadTotal} Disp.
-                      </span>
-                    </div>
-                    <strong className="text-sm font-semibold text-slate-800 block line-clamp-2">{s.producto?.name}</strong>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-lg font-bold text-slate-900">Bs {Number(s.producto?.precioVenta || 0).toFixed(2)}</span>
-                    <div className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
-                      <Plus size={16} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Right Column: Cart & Billing & History */}
-      <div className="lg:col-span-5 flex flex-col gap-6">
         
-        {/* Cart Form */}
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-6">
-          <div className="flex justify-between items-center pb-4 border-b border-slate-200">
-            <h3 className="text-lg font-bold text-slate-800">
-              Resumen de Venta
-            </h3>
-            {cart.length > 0 && (
-              <button 
-                onClick={() => setCart([])} 
-                className="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 py-1.5 px-3 rounded-lg font-bold uppercase tracking-wider transition-colors"
-              >
-                Vaciar Carrito
-              </button>
-            )}
-          </div>
-
-          {/* Client Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="form-group">
-              <label htmlFor="client-name" className="text-xs font-bold text-slate-600 uppercase tracking-wider">Cliente</label>
-              <input 
-                id="client-name"
-                type="text" 
-                value={clienteNombre} 
-                onChange={e => setClienteNombre(e.target.value)} 
-                className="w-full py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-              />
+        {/* Basic Clean Tabs */}
+        <div className="flex bg-slate-100 p-1 rounded-xl gap-1 border border-slate-200">
+          <button
+            onClick={() => { setActiveTab('pos'); window.location.hash = 'pos'; }}
+            className={`py-2 px-4 rounded-lg text-sm font-bold transition-all ${
+              activeTab === 'pos'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 bg-transparent'
+            }`}
+          >
+            Terminal POS (Nueva Venta)
+          </button>
+          <button
+            onClick={() => { setActiveTab('history'); window.location.hash = 'historial'; }}
+            className={`py-2 px-4 rounded-lg text-sm font-bold transition-all ${
+              activeTab === 'history'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 bg-transparent'
+            }`}
+          >
+            Historial de Ventas
+          </button>
+        </div>
+      </div>
+      
+      {activeTab === 'pos' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Left Column: POS / Terminal */}
+        <div className="lg:col-span-7 bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-6 min-h-[680px]">
+          <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">
+                Terminal de Venta
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                {isBranchLocked ? `Sucursal: ${userSucursalName || 'Asignada'}. Añade productos al carrito.` : 'Selecciona la sucursal y añade productos al carrito.'}
+              </p>
             </div>
-            <div className="form-group">
-              <label htmlFor="client-doc" className="text-xs font-bold text-slate-600 uppercase tracking-wider">NIT / CI (Opc.)</label>
-              <input 
-                id="client-doc"
-                type="text" 
-                value={clienteDocumento} 
-                onChange={e => setClienteDocumento(e.target.value)} 
-                placeholder="Ej. 1234567" 
-                className="w-full py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
-            <div className="form-group">
-              <label htmlFor="metodo-pago" className="text-xs font-bold text-slate-600 uppercase tracking-wider">Método de Pago</label>
+            <div className="flex items-center gap-2">
               <select 
-                id="metodo-pago"
-                value={metodoPago} 
-                onChange={e => setMetodoPago(e.target.value)} 
-                className="w-full py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                value={selectedBranch} 
+                onChange={e => { setSelectedBranch(e.target.value); setCart([]); }}
+                disabled={isBranchLocked}
+                className={`py-2 px-4 border rounded-xl text-sm font-bold transition-all shadow-sm ${
+                  isBranchLocked 
+                    ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed' 
+                    : 'bg-slate-50 border-slate-200 text-slate-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500'
+                }`}
               >
-                <option value="Efectivo">Efectivo</option>
-                <option value="QR">QR</option>
-                <option value="Tarjeta">Tarjeta</option>
-                <option value="Transferencia">Transferencia</option>
+                <option value="" disabled>-- Seleccione Sucursal --</option>
+                {sucursales.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
-            <div className="form-group">
-              <label htmlFor="monto-recibido" className="text-xs font-bold text-slate-600 uppercase tracking-wider">Monto Recibido</label>
-              <input 
-                id="monto-recibido"
-                type="number" 
-                min="0"
-                step="0.01"
-                value={montoRecibido} 
-                onChange={e => setMontoRecibido(e.target.value)} 
-                placeholder={`Mín. Bs ${cartTotal.toFixed(2)}`} 
-                className="w-full py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-              />
-            </div>
           </div>
-          {montoRecibido && Number(montoRecibido) >= cartTotal && cartTotal > 0 && (
-            <div className="mt-2 text-right text-sm font-bold text-emerald-600 bg-emerald-50 py-2 px-4 rounded-lg flex justify-between">
-              <span>Cambio / Vuelto:</span>
-              <span>Bs {(Number(montoRecibido) - cartTotal).toFixed(2)}</span>
-            </div>
-          )}
 
-          <div className="h-px bg-slate-100" />
+          {/* Search Input */}
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-indigo-500">
+              <Search size={20} />
+            </span>
+            <input 
+              type="text" 
+              placeholder="Buscar producto por nombre o SKU..." 
+              value={searchProduct}
+              onChange={e => setSearchProduct(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-base font-medium focus:bg-white transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm"
+              disabled={!selectedBranch}
+            />
+          </div>
 
-          {/* Cart Items List */}
-          <div className="overflow-y-auto max-h-[300px] pr-2 min-h-[150px] custom-scrollbar">
-            {cart.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center py-10 opacity-60">
-                <p className="text-slate-500 text-sm">No hay artículos en el carrito.<br/>Añade productos de la terminal.</p>
+          {/* Product Grid */}
+          <div className="flex-1 overflow-y-auto max-h-[460px] pr-2 custom-scrollbar">
+            {filteredStock.length === 0 ? (
+              <div className="text-center py-20 bg-slate-50 border border-slate-200 border-dashed rounded-2xl text-slate-500 font-semibold text-sm">
+                {selectedBranch ? 'No se encontraron productos disponibles en esta sucursal.' : 'Por favor, selecciona una sucursal para cargar el inventario.'}
               </div>
             ) : (
-              <div className="space-y-3">
-                {cart.map(item => (
-                  <div key={item.producto_id} className="flex justify-between items-center py-3 px-4 bg-white border border-slate-200 rounded-xl gap-3">
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold text-slate-800 truncate">{item.name}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">Bs {item.precioUnitario.toFixed(2)} c/u</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {filteredStock.map(s => (
+                  <div 
+                    key={s.id} 
+                    onClick={() => addToCart(s)}
+                    className="bg-white border border-slate-200 hover:border-indigo-400 rounded-xl p-4 cursor-pointer transition-colors flex flex-col justify-between min-h-[130px]"
+                  >
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs text-slate-500 uppercase">{s.producto?.sku}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase ${
+                          s.cantidadTotal <= 5 ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {s.cantidadTotal} Disp.
+                        </span>
+                      </div>
+                      <strong className="text-sm font-semibold text-slate-800 block line-clamp-2">{s.producto?.name}</strong>
                     </div>
-                    <div className="flex items-center gap-4 flex-shrink-0">
-                      <input 
-                        type="number" 
-                        min="1" 
-                        max={item.maxStock} 
-                        value={item.cantidad} 
-                        onChange={e => updateCartQty(item.producto_id, parseInt(e.target.value) || 1)}
-                        className="w-16 text-center py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400"
-                      />
-                      <span className="text-sm font-bold text-slate-800 w-20 text-right">
-                        Bs {(item.cantidad * item.precioUnitario).toFixed(2)}
-                      </span>
-                      <button 
-                        onClick={() => removeFromCart(item.producto_id)} 
-                        className="text-red-500 hover:text-red-700 p-1.5 bg-transparent"
-                        title="Eliminar"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-lg font-bold text-slate-900">Bs {Number(s.producto?.precioVenta || 0).toFixed(2)}</span>
+                      <div className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                        <Plus size={16} />
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
-
-          {/* Total Section */}
-          <div className="flex justify-between items-center py-4 border-t border-slate-200">
-            <span className="text-base font-bold text-slate-600">Monto Total</span>
-            <span className="text-xl font-bold">Bs {cartTotal.toFixed(2)}</span>
-          </div>
-
-          <button 
-            onClick={handleRegisterSale}
-            disabled={saving || cart.length === 0}
-            className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition-colors disabled:opacity-50"
-          >
-            {saving ? 'Registrando...' : 'Confirmar Venta y Cobrar'}
-          </button>
         </div>
 
+        {/* Right Column: Cart & Billing */}
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          
+          {/* Cart Form */}
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-6">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-200">
+              <h3 className="text-lg font-bold text-slate-800">
+                Resumen de Venta
+              </h3>
+              {cart.length > 0 && (
+                <button 
+                  onClick={() => setCart([])} 
+                  className="text-[11px] bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 py-1.5 px-3 rounded-lg font-bold uppercase tracking-wider transition-colors"
+                >
+                  Vaciar Carrito
+                </button>
+              )}
+            </div>
 
+            {/* Client Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="form-group">
+                <label htmlFor="client-name" className="text-xs font-bold text-slate-600 uppercase tracking-wider">Cliente</label>
+                <input 
+                  id="client-name"
+                  type="text" 
+                  value={clienteNombre} 
+                  onChange={e => setClienteNombre(e.target.value)} 
+                  className="w-full py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="client-doc" className="text-xs font-bold text-slate-600 uppercase tracking-wider">NIT / CI (Opc.)</label>
+                <input 
+                  id="client-doc"
+                  type="text" 
+                  value={clienteDocumento} 
+                  onChange={e => setClienteDocumento(e.target.value)} 
+                  placeholder="Ej. 1234567" 
+                  className="w-full py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                />
+              </div>
+            </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">
+              <div className="form-group">
+                <label htmlFor="metodo-pago" className="text-xs font-bold text-slate-600 uppercase tracking-wider">Método de Pago</label>
+                <select 
+                  id="metodo-pago"
+                  value={metodoPago} 
+                  onChange={e => setMetodoPago(e.target.value)} 
+                  className="w-full py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                >
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="QR">QR</option>
+                  <option value="Tarjeta">Tarjeta</option>
+                  <option value="Transferencia">Transferencia</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="monto-recibido" className="text-xs font-bold text-slate-600 uppercase tracking-wider">Monto Recibido</label>
+                <input 
+                  id="monto-recibido"
+                  type="number" 
+                  min="0"
+                  step="0.01"
+                  value={montoRecibido} 
+                  onChange={e => setMontoRecibido(e.target.value)} 
+                  placeholder={`Mín. Bs ${cartTotal.toFixed(2)}`} 
+                  className="w-full py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                />
+              </div>
+            </div>
+            {montoRecibido && Number(montoRecibido) >= cartTotal && cartTotal > 0 && (
+              <div className="mt-2 text-right text-sm font-bold text-emerald-600 bg-emerald-50 py-2 px-4 rounded-lg flex justify-between">
+                <span>Cambio / Vuelto:</span>
+                <span>Bs {(Number(montoRecibido) - cartTotal).toFixed(2)}</span>
+              </div>
+            )}
+
+            <div className="h-px bg-slate-100" />
+
+            {/* Cart Items List */}
+            <div className="overflow-y-auto max-h-[300px] pr-2 min-h-[150px] custom-scrollbar">
+              {cart.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-10 opacity-60">
+                  <p className="text-slate-500 text-sm">No hay artículos en el carrito.<br/>Añade productos de la terminal.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {cart.map(item => (
+                    <div key={item.producto_id} className="flex justify-between items-center py-3 px-4 bg-white border border-slate-200 rounded-xl gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-slate-800 truncate">{item.name}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">Bs {item.precioUnitario.toFixed(2)} c/u</div>
+                      </div>
+                      <div className="flex items-center gap-4 flex-shrink-0">
+                        <input 
+                          type="number" 
+                          min="1" 
+                          max={item.maxStock} 
+                          value={item.cantidad} 
+                          onChange={e => updateCartQty(item.producto_id, parseInt(e.target.value) || 1)}
+                          className="w-16 text-center py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400"
+                        />
+                        <span className="text-sm font-bold text-slate-800 w-20 text-right">
+                          Bs {(item.cantidad * item.precioUnitario).toFixed(2)}
+                        </span>
+                        <button 
+                          onClick={() => removeFromCart(item.producto_id)} 
+                          className="text-red-500 hover:text-red-700 p-1.5 bg-transparent"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Total Section */}
+            <div className="flex justify-between items-center py-4 border-t border-slate-200">
+              <span className="text-base font-bold text-slate-600">Monto Total</span>
+              <span className="text-xl font-bold">Bs {cartTotal.toFixed(2)}</span>
+            </div>
+
+            <button 
+              onClick={handleRegisterSale}
+              disabled={saving || cart.length === 0}
+              className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition-colors disabled:opacity-50"
+            >
+              {saving ? 'Registrando...' : 'Confirmar Venta y Cobrar'}
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+      ) : (
+        /* History Tab */
+        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
+          <div className="pb-4 border-b border-slate-100 flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-bold text-slate-800 m-0">Historial de Ventas</h3>
+              <p className="text-sm text-slate-500 mt-1">Lista completa de comprobantes emitidos por el negocio.</p>
+            </div>
+            <button
+              onClick={() => setShowHistoryFilters(!showHistoryFilters)}
+              className={`py-2 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm border ${
+                showHistoryFilters ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              <Filter size={16} />
+              <span>{showHistoryFilters ? 'Ocultar' : 'Filtrar'}</span>
+            </button>
+          </div>
+
+          {/* Filters */}
+          {showHistoryFilters && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 animate-fadeIn">
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><Search size={16} /></span>
+                <input
+                  type="text"
+                  placeholder="Buscar cliente, comprobante..."
+                  value={historySearch}
+                  onChange={e => setHistorySearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400"
+                />
+              </div>
+              <input
+                type="date"
+                value={historyStartDate}
+                onChange={e => setHistoryStartDate(e.target.value)}
+                className="w-full py-2 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400"
+                placeholder="Desde"
+              />
+              <input
+                type="date"
+                value={historyEndDate}
+                onChange={e => setHistoryEndDate(e.target.value)}
+                className="w-full py-2 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400"
+                placeholder="Hasta"
+              />
+              <select
+                value={historyBranch}
+                onChange={e => setHistoryBranch(e.target.value)}
+                className="w-full py-2 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400"
+              >
+                <option value="ALL">Todas las sucursales</option>
+                {sucursales.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+              <select
+                value={historyMetodo}
+                onChange={e => setHistoryMetodo(e.target.value)}
+                className="w-full py-2 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-400"
+              >
+                <option value="ALL">Todos los métodos</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="QR">QR</option>
+                <option value="Tarjeta">Tarjeta</option>
+                <option value="Transferencia">Transferencia</option>
+              </select>
+            </div>
+          )}
+          
+          <div className="table-premium-wrapper">
+            <div className="overflow-x-auto">
+              <table className="table-premium">
+                <thead>
+                  <tr>
+                    <th style={{ width: '16%' }}>Nro Comprobante</th>
+                    <th style={{ width: '12%' }}>Fecha</th>
+                    <th style={{ width: '18%' }}>Cliente</th>
+                    <th style={{ width: '12%' }}>Vendedor</th>
+                    <th style={{ width: '12%' }}>Sucursal</th>
+                    <th style={{ width: '10%' }}>Método Pago</th>
+                    <th className="text-right" style={{ width: '12%' }}>Total</th>
+                    <th className="text-center" style={{ width: '8%' }}>PDF</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredSalesHistory.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="text-center py-12 text-slate-400 font-medium">
+                        {salesHistory.length === 0 ? 'Aún no se han registrado ventas en el sistema.' : 'No se encontraron ventas con los filtros seleccionados.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSalesHistory.map(sale => (
+                      <tr key={sale.id}>
+                        <td className="font-mono text-xs font-bold text-slate-800 whitespace-nowrap">
+                          {sale.numeroComprobante || `V-${sale.id.slice(0, 8)}`}
+                        </td>
+                        <td className="text-slate-600 text-xs whitespace-nowrap">
+                          {new Date(sale.fecha).toLocaleDateString()} {new Date(sale.fecha).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                        </td>
+                        <td className="font-semibold text-slate-900 text-sm">
+                          {sale.clienteNombre} <span className="text-slate-400 font-normal text-xs">({sale.clienteDocumento || 'S/D'})</span>
+                        </td>
+                        <td className="text-slate-700 text-sm whitespace-nowrap">
+                          {sale.vendedorNombre || 'Sistema'}
+                        </td>
+                        <td className="text-slate-700 text-sm whitespace-nowrap">
+                          {sale.sucursal?.name || 'Sucursal'}
+                        </td>
+                        <td className="whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
+                            {sale.metodoPago}
+                          </span>
+                        </td>
+                        <td className="text-right font-bold text-slate-900 text-sm whitespace-nowrap">
+                          Bs {Number(sale.total || 0).toFixed(2)}
+                        </td>
+                        <td className="text-center">
+                          <button
+                            onClick={() => downloadPdf(sale.id, sale.numeroComprobante)}
+                            disabled={downloading === sale.id}
+                            className="btn-premium-icon"
+                            title="Descargar PDF"
+                          >
+                            <Download size={15} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -57,6 +57,7 @@ function NavItem({ to, icon: Icon, label, active, isOpen }) {
 function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
   const location = useLocation();
   const tenantName = sessionStorage.getItem('tenant_name') || 'Mi Empresa';
+  const tenantDomain = sessionStorage.getItem('tenant_domain') || tenantName.toLowerCase().replace(/\s+/g, '-');
   const userName   = sessionStorage.getItem('user_name')   || 'Usuario';
   const userRole   = sessionStorage.getItem('user_role')   || 'VENDEDOR';
   
@@ -146,6 +147,8 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
         </div>
         <nav className={`flex flex-col gap-2 mt-2 w-full ${!isOpen ? 'items-center' : ''}`}>
 
+          <NavItem to="/" icon={LayoutDashboard} label="Resumen" active={p === '/'} isOpen={isOpen} />
+
           {hasPerm('catalogo.ver') && (
             <NavItem to="/providers"   icon={Users}      label="Proveedores"        active={p === '/providers'} isOpen={isOpen} />
           )}
@@ -190,8 +193,18 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
         </nav>
       </div>
 
-      {/* ── Logout ── */}
-      <div className={`p-5 w-full border-t border-white/10 flex justify-center`}>
+      {/* ── Tienda Online & Logout ── */}
+      <div className={`p-5 w-full border-t border-white/10 flex flex-col gap-3 items-center`}>
+        <a 
+          href={`/tienda/${tenantDomain}`}
+          target="_blank" 
+          rel="noopener noreferrer"
+          className={`flex items-center justify-center gap-3 h-12 rounded-xl text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 font-bold transition-all duration-200 ${isOpen ? 'w-full px-4' : 'w-12 px-0'}`}
+          title={!isOpen ? 'Ir a Tienda Online' : undefined}
+        >
+          <Store size={20} strokeWidth={2.5} />
+          {isOpen && <span>Tienda Online</span>}
+        </a>
         <button
           onClick={handleLogout}
           className={`bg-transparent flex items-center justify-center gap-3 h-12 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 hover:shadow-md border border-transparent font-bold transition-all duration-200 ${isOpen ? 'w-full px-4' : 'w-12 px-0'}`}

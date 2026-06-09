@@ -164,6 +164,7 @@ export class AuthService {
         role: user.role,
         tenant_id: user.tenant_id,
         tenant_name: user.tenant?.name || 'Administración Global',
+        tenant_domain: user.tenant?.domain || null,
         tenant_logoUrl: user.tenant?.logoUrl || null,
         sucursal_id: user.sucursal_id || null,
         sucursal_name: user.sucursal?.name || null,
