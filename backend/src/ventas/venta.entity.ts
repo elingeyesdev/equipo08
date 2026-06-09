@@ -45,6 +45,18 @@ export class Venta {
   @Column('decimal', { precision: 12, scale: 2, default: 0 })
   utilidadTotal: number;
 
+  @Column({ default: 'Efectivo' })
+  metodoPago: string;
+
+  @Column('decimal', { precision: 12, scale: 2, default: 0 })
+  montoRecibido: number;
+
+  @Column('decimal', { precision: 12, scale: 2, default: 0 })
+  cambio: number;
+
+  @Column({ nullable: true })
+  vendedorNombre: string;
+
   @ManyToOne(() => Sucursal)
   @JoinColumn({ name: 'sucursal_id' })
   sucursal: Sucursal;
