@@ -19,7 +19,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly mailService: MailService,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async register(dto: RegisterDto): Promise<{ message: string; tenant_id: string }> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -80,7 +80,7 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<{ access_token: string; user: any }> {
     // 1. Intentar buscar en la nueva tabla de usuarios
-    let user = await this.dataSource.getRepository(User).findOne({ 
+    let user = await this.dataSource.getRepository(User).findOne({
       where: { email: dto.email },
       relations: ['tenant', 'sucursal']
     });
@@ -141,9 +141,9 @@ export class AuthService {
       }
     }
 
-    const payload = { 
-      sub: user.id, 
-      tenantId: user.tenant_id, 
+    const payload = {
+      sub: user.id,
+      tenantId: user.tenant_id,
       role: user.role,
       tenantName: user.tenant?.name || 'Administración Global',
       sucursal_id: user.sucursal_id

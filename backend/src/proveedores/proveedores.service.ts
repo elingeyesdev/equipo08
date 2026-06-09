@@ -9,7 +9,7 @@ export class ProveedoresService implements OnModuleInit {
   constructor(
     @InjectRepository(Proveedor)
     private readonly proveRep: Repository<Proveedor>,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     const globals = [
@@ -43,7 +43,7 @@ export class ProveedoresService implements OnModuleInit {
       if (!/^\d{8,12}$/.test(dto.taxId)) {
         throw new BadRequestException('El NIT o RUT debe contener únicamente entre 8 y 12 números, sin letras ni símbolos.');
       }
-      
+
       const existingTax = await this.proveRep.findOne({
         where: { tenant_id, taxId: dto.taxId, ...(excludeId ? { id: Not(excludeId) } : {}) }
       });
@@ -64,10 +64,10 @@ export class ProveedoresService implements OnModuleInit {
 
   async create(tenant_id: string, dto: CreateProveedorDto): Promise<Proveedor> {
     if (!dto.taxId) throw new BadRequestException('NIT es obligatorio para agregar un proveedor.');
-    
+
     // 1. Buscar si ya existe en el directorio global
     let globalProv = await this.proveRep.findOne({ where: { tenant_id: 'GLOBAL', taxId: dto.taxId } });
-    
+
     if (!globalProv) {
       // Si no existe globalmente, lo creamos para que otras tiendas puedan reutilizarlo
       if (!dto.name) throw new BadRequestException('El nombre del proveedor es obligatorio para registrar un NIT nuevo.');
@@ -101,7 +101,7 @@ export class ProveedoresService implements OnModuleInit {
   async update(tenant_id: string, id: string, dto: Partial<CreateProveedorDto>): Promise<Proveedor> {
     const proveedor = await this.proveRep.findOne({ where: { id, tenant_id } });
     if (!proveedor) throw new NotFoundException('Proveedor no encontrado');
-    
+
     await this.validateProveedor(tenant_id, dto, id);
 
     // Copy the updated properties

@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -39,7 +41,6 @@ public class HomeFragment extends Fragment {
 
     // Header Views
     private TextView tvWelcomeTitle;
-    private TextView tvWelcomeSub;
 
     // Metric Views
     private TextView tvMetricSales;
@@ -80,7 +81,6 @@ public class HomeFragment extends Fragment {
         scrollDashboardContent = view.findViewById(R.id.scrollDashboardContent);
 
         tvWelcomeTitle = view.findViewById(R.id.tvWelcomeTitle);
-        tvWelcomeSub = view.findViewById(R.id.tvWelcomeSub);
 
         tvMetricSales = view.findViewById(R.id.tvMetricSales);
         tvMetricRevenue = view.findViewById(R.id.tvMetricRevenue);
@@ -98,12 +98,11 @@ public class HomeFragment extends Fragment {
 
         // Setup RecyclerView
         rvRecentSales.setLayoutManager(new LinearLayoutManager(getContext()));
-        recentSalesAdapter = new RecentSalesAdapter(recentSalesList);
+        recentSalesAdapter = new RecentSalesAdapter(recentSalesList, venta -> showComprobanteDialog(venta));
         rvRecentSales.setAdapter(recentSalesAdapter);
 
         // Welcome Texts
-        tvWelcomeTitle.setText("Bienvenido a " + sessionManager.getTenantName());
-        tvWelcomeSub.setText("Usuario: " + sessionManager.getUserName() + " (" + sessionManager.getRole() + ")");
+        tvWelcomeTitle.setText("Resumen de Tienda");
 
         // Apply role security
         applyRoleSecurity();
@@ -246,12 +245,178 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    private void showComprobanteDialog(Venta venta) {
+        if (getContext() == null) return;
+
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_comprobante, null);
+        TextView tvNro = dialogView.findViewById(R.id.tvComprobanteNro);
+        TextView tvFecha = dialogView.findViewById(R.id.tvComprobanteFecha);
+        TextView tvSuc = dialogView.findViewById(R.id.tvComprobanteSucursal);
+        TextView tvCli = dialogView.findViewById(R.id.tvComprobanteCliente);
+        TextView tvDoc = dialogView.findViewById(R.id.tvComprobanteDocumento);
+        LinearLayout llDetalleContainer = dialogView.findViewById(R.id.llComprobanteDetalleContainer);
+        TextView tvTotal = dialogView.findViewById(R.id.tvComprobanteTotal);
+        Button btnCerrar = dialogView.findViewById(R.id.btnCerrarComprobante);
+        Button btnDescargar = dialogView.findViewById(R.id.btnDescargarComprobante);
+
+        // Fill headers
+        tvNro.setText("Comprobante Nro: " + (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "N/A"));
+        
+        // Date formatting: Parse UTC to local timezone beautifully (AM/PM format)
+        String formattedDate = "N/A";
+        String dateStr = venta.getFecha();
+        if (dateStr != null) {
+            try {
+                java.text.SimpleDateFormat utcFormat;
+                if (dateStr.contains(".")) {
+                    utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
+                } else {
+                    utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US);
+                }
+                utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                java.util.Date date = utcFormat.parse(dateStr);
+                
+                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm a", java.util.Locale.US);
+                localFormat.setTimeZone(java.util.TimeZone.getDefault());
+                formattedDate = localFormat.format(date);
+            } catch (Exception e) {
+                if (dateStr.contains("T")) {
+                    formattedDate = dateStr.replace("T", " ");
+                    if (formattedDate.length() > 19) {
+                        formattedDate = formattedDate.substring(0, 19);
+                    }
+                } else {
+                    formattedDate = dateStr;
+                }
+            }
+        }
+        tvFecha.setText("Fecha: " + formattedDate);
+
+        // Branch name
+        String sucursalName = "Principal";
+        if (venta.getSucursal() != null && venta.getSucursal().getName() != null) {
+            sucursalName = venta.getSucursal().getName();
+        }
+        tvSuc.setText("Sucursal: " + sucursalName);
+        tvCli.setText("Nombre/Razón Social: " + (venta.getClienteNombre() != null ? venta.getClienteNombre() : "Cliente Casual"));
+        tvDoc.setText("NIT/CI: " + (venta.getClienteDocumento() != null ? venta.getClienteDocumento() : "N/A"));
+        tvTotal.setText(String.format("Bs %.2f", venta.getTotal()));
+
+        // Add dynamic items lines
+        if (venta.getDetalle() != null) {
+            llDetalleContainer.removeAllViews();
+            float density = getResources().getDisplayMetrics().density;
+            for (com.example.template.network.models.DetalleItem item : venta.getDetalle()) {
+                LinearLayout row = new LinearLayout(getContext());
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                row.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ));
+                row.setPadding(0, (int)(8 * density), 0, (int)(8 * density));
+
+                // Cant. (width: 40dp)
+                TextView tvCant = new TextView(getContext());
+                LinearLayout.LayoutParams lpCant = new LinearLayout.LayoutParams((int)(40 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
+                tvCant.setLayoutParams(lpCant);
+                tvCant.setText(String.valueOf(item.getCantidad()));
+                tvCant.setTextColor(android.graphics.Color.parseColor("#475569"));
+                tvCant.setTextSize(11f);
+
+                // Descripción (width: 0dp, weight: 1)
+                TextView tvDesc = new TextView(getContext());
+                LinearLayout.LayoutParams lpDesc = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+                tvDesc.setLayoutParams(lpDesc);
+                tvDesc.setText("[" + (item.getSku() != null ? item.getSku() : "N/A") + "] " + (item.getName() != null ? item.getName() : "Producto"));
+                tvDesc.setTextColor(android.graphics.Color.parseColor("#475569"));
+                tvDesc.setTextSize(11f);
+
+                // P. Unit (width: 70dp)
+                TextView tvUnit = new TextView(getContext());
+                LinearLayout.LayoutParams lpUnit = new LinearLayout.LayoutParams((int)(70 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
+                tvUnit.setLayoutParams(lpUnit);
+                tvUnit.setText(String.format(java.util.Locale.US, "%.2f", item.getPrecioUnitario()));
+                tvUnit.setTextColor(android.graphics.Color.parseColor("#475569"));
+                tvUnit.setTextSize(11f);
+                tvUnit.setGravity(android.view.Gravity.END);
+
+                // Subtotal (width: 80dp)
+                TextView tvSub = new TextView(getContext());
+                LinearLayout.LayoutParams lpSub = new LinearLayout.LayoutParams((int)(80 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
+                tvSub.setLayoutParams(lpSub);
+                tvSub.setText(String.format(java.util.Locale.US, "%.2f", item.getSubtotal()));
+                tvSub.setTextColor(android.graphics.Color.parseColor("#475569"));
+                tvSub.setTextSize(11f);
+                tvSub.setGravity(android.view.Gravity.END);
+
+                row.addView(tvCant);
+                row.addView(tvDesc);
+                row.addView(tvUnit);
+                row.addView(tvSub);
+
+                llDetalleContainer.addView(row);
+            }
+        }
+
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(getContext())
+                .setView(dialogView)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        btnCerrar.setOnClickListener(v -> dialog.dismiss());
+        btnDescargar.setOnClickListener(v -> {
+            try {
+                String baseUrl = ApiClient.getClient(getContext()).baseUrl().toString();
+                String url = baseUrl + "ventas/" + venta.getId() + "/pdf";
+
+                android.app.DownloadManager.Request downloadRequest = new android.app.DownloadManager.Request(android.net.Uri.parse(url));
+                downloadRequest.setTitle("Comprobante " + (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "Venta"));
+                downloadRequest.setDescription("Descargando PDF de la factura...");
+                downloadRequest.setNotificationVisibility(android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                
+                String filename = (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "comprobante_" + venta.getId()) + ".pdf";
+                downloadRequest.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, filename);
+
+                // Add token headers
+                com.example.template.utils.SessionManager sessionManager = new com.example.template.utils.SessionManager(getContext());
+                String token = sessionManager.getToken();
+                if (token != null) {
+                    downloadRequest.addRequestHeader("Authorization", "Bearer " + token);
+                }
+                String tenantId = sessionManager.getTenantId();
+                if (tenantId != null) {
+                    downloadRequest.addRequestHeader("x-tenant-id", tenantId);
+                }
+
+                android.app.DownloadManager manager = (android.app.DownloadManager) getContext().getSystemService(android.content.Context.DOWNLOAD_SERVICE);
+                if (manager != null) {
+                    manager.enqueue(downloadRequest);
+                    Toast.makeText(getContext(), "Descargando factura en la carpeta de Descargas...", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getContext(), "Error: Servicio de descargas no disponible", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Error al iniciar descarga: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.show();
+    }
+
     // --- RECENT SALES LIST RECYCLER ADAPTER ---
     private static class RecentSalesAdapter extends RecyclerView.Adapter<RecentSalesAdapter.ViewHolder> {
         private List<Venta> list;
+        private OnSaleClickListener listener;
 
-        public RecentSalesAdapter(List<Venta> list) {
+        public interface OnSaleClickListener {
+            void onSaleClick(Venta venta);
+        }
+
+        public RecentSalesAdapter(List<Venta> list, OnSaleClickListener listener) {
             this.list = list;
+            this.listener = listener;
         }
 
         @NonNull
@@ -296,6 +461,12 @@ public class HomeFragment extends Fragment {
                 }
             }
             holder.tvSaleDate.setText(formattedDate);
+            
+            holder.itemView.setOnClickListener(view -> {
+                if (listener != null) {
+                    listener.onSaleClick(v);
+                }
+            });
         }
 
         @Override

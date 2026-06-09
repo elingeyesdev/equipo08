@@ -210,18 +210,18 @@ export default function PublicCatalogPage() {
                  className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden flex flex-col group cursor-pointer transition-all hover:shadow-md"
                  onClick={() => setSelectedProduct(p)}
                >
-                 <div className="aspect-square relative bg-[var(--bg)] overflow-hidden">
-                   {p.imagen_url ? (
-                     <img 
-                       src={p.imagen_url} 
-                       alt={p.name} 
-                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                     />
-                   ) : (
-                     <div className="w-full h-full flex items-center justify-center bg-[var(--bg)]">
-                       <Tag size={32} className="text-[var(--txt-muted)]" />
-                     </div>
-                   )}
+                  <div className="relative bg-[var(--bg)] overflow-hidden w-full">
+                    {p.imagen_url ? (
+                      <img 
+                        src={p.imagen_url} 
+                        alt={p.name} 
+                        className="w-full h-auto transition-transform duration-500 group-hover:scale-105" 
+                      />
+                    ) : (
+                      <div className="w-full aspect-square flex items-center justify-center bg-[var(--bg)]">
+                        <Tag size={32} className="text-[var(--txt-muted)]" />
+                      </div>
+                    )}
                    <div className="absolute top-3 left-3">
                      <span className="bg-[var(--bg-card)]/80 backdrop-blur border border-[var(--border)] px-2 py-1 rounded-md text-[10px] font-bold shadow-sm uppercase tracking-wider">
                        {p.category || 'Otros'}
@@ -290,9 +290,9 @@ export default function PublicCatalogPage() {
                 <X size={18} />
               </button>
 
-              <div className="md:w-1/2 bg-[var(--bg)] relative min-h-[300px]">
+              <div className="md:w-1/2 bg-[var(--bg)] flex items-center justify-center overflow-hidden min-h-[300px] relative">
                 {selectedProduct.imagen_url ? (
-                  <img src={selectedProduct.imagen_url} alt={selectedProduct.name} className="w-full h-full object-cover absolute inset-0" />
+                  <img src={selectedProduct.imagen_url} alt={selectedProduct.name} className="w-full h-auto" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center absolute inset-0">
                      <Tag size={48} className="text-[var(--txt-muted)]" />

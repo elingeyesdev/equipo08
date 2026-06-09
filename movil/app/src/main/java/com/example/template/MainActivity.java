@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("OmniMall - " + sessionManager.getTenantName());
+        toolbar.setTitle(sessionManager.getTenantName());
         toolbar.inflateMenu(R.menu.toolbar_menu);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_logout) {
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void updateToolbarTitle(String title) {
         if (toolbar != null) {
-            toolbar.setTitle("OmniMall - " + title);
+            toolbar.setTitle(title);
         }
     }
 }

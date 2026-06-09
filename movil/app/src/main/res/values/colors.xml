@@ -9,7 +9,7 @@
     <color name="primary_hover">#334155</color>
     <color name="danger_color">#914e4e</color>
     <color name="border_color">#cbd5e1</color>
-    <color name="accent_blue">#2563EB</color>
+    <color name="accent_blue">#0284c7</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>
