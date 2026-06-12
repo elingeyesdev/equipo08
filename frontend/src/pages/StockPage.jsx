@@ -3,6 +3,8 @@ import api from '../api';
 import { useToast } from '../components/ToastContext';
 import { Archive, MapPin, ClipboardList, AlertTriangle, Save, X, TrendingDown, Search, Printer, ArrowRightLeft } from 'lucide-react';
 
+let lastAlertedCount = 0;
+
 export default function StockPage() {
   const [stock, setStock] = useState([]);
   const [sucursales, setSucursales] = useState([]);
@@ -10,6 +12,7 @@ export default function StockPage() {
   const [selectedBranch, setSelectedBranch] = useState('ALL');
   const [searchProduct, setSearchProduct] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [alertsCount, setAlertsCount] = useState(0);
   
   // Transfer Form State
   const [transferItem, setTransferItem] = useState(null);
@@ -44,6 +47,13 @@ export default function StockPage() {
       setStock(resStock.data);
       setSucursales(resSuc.data);
       setAjustes(resAj.data);
+      
+      const alerts = resStock.data.filter(s => s.cantidadTotal < (s.producto?.stockMinimo || 10));
+      if (alerts.length > 0 && alerts.length > lastAlertedCount) {
+        toast.info(`Atención: Hay ${alerts.length} producto(s) por debajo del stock mínimo.`);
+      }
+      lastAlertedCount = alerts.length;
+      setAlertsCount(alerts.length);
     }).catch(err => {
       console.error(err);
       toast.error('Error al cargar datos del inventario');
@@ -214,18 +224,6 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* Alertas Automáticas Banner */}
-      {!transferItem && alertasStock.length > 0 && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm">
-          <div className="bg-red-100 p-2 rounded-full text-red-600">
-             <AlertTriangle size={18} strokeWidth={2.5} />
-          </div>
-          <div>
-             <h4 className="font-bold text-red-900 text-sm m-0">Alertas de Inventario Bajo ({alertasStock.length})</h4>
-             <p className="text-red-700 text-xs mt-0.5 m-0 font-medium">Hay productos que se encuentran por debajo del stock mínimo configurado. Recomendamos generar reposiciones.</p>
-          </div>
-        </div>
-      )}
 
       {/* Transfer Inline Form */}
       {transferItem && (
@@ -370,7 +368,7 @@ export default function StockPage() {
                            <span className="text-base font-semibold text-slate-700">{s.sucursal?.name}</span>
                         </td>
                         <td className="text-right">
-                           <strong className={`text-xl ${isAlerta ? 'text-rose-600 font-black' : 'text-slate-900 font-black'}`}>{s.cantidadTotal}</strong>
+                           <strong className="text-xl text-slate-900 font-black">{s.cantidadTotal}</strong>
                            <div className="text-sm text-slate-500 font-bold mt-1">Min: {s.producto?.stockMinimo || 10}</div>
                         </td>
                         <td className="text-right text-slate-600 text-base font-mono font-bold">Bs {costoPromedio.toFixed(2)}</td>

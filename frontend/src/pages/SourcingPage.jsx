@@ -410,8 +410,8 @@ export default function SourcingPage() {
                           <span className="text-xs text-slate-400 font-mono mt-0.5 block">SKU: {h.producto?.sku}</span>
                         </td>
                         <td className="text-xs text-slate-600 font-medium">{h.proveedor?.name || '---'}</td>
-                        <td className="text-right">
-                          <span className="inline-block bg-emerald-100 text-emerald-700 font-extrabold text-base px-3 py-1 rounded-lg border border-emerald-200 shadow-sm">+ {h.cantidad} U</span>
+                        <td className="text-right text-slate-800 font-semibold">
+                          {h.cantidad}
                         </td>
                         <td className="text-right text-sm text-slate-500 font-mono font-bold">Bs {costoSnap.toFixed(2)}</td>
                         <td className="text-right text-lg font-black text-indigo-700 font-mono">Bs {inversionTotal.toFixed(2)}</td>

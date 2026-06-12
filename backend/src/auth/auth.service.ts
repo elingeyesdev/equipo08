@@ -43,7 +43,11 @@ export class AuthService {
         name: dto.name,
         domain: dto.domain,
         email: dto.email,
-        password: hashedPassword, // Mantener por compatibilidad legacy por ahora
+        password: hashedPassword,
+        phone: dto.phone,
+        ubicacion: dto.ubicacion,
+        nit: dto.nit,
+        razonSocial: dto.razonSocial,
       });
 
       const savedTenant = await queryRunner.manager.save(newTenant);

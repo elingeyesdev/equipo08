@@ -822,6 +822,14 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
   text-align: left;
 }
 
+.table-premium th.text-right {
+  text-align: right;
+}
+
+.table-premium th.text-center {
+  text-align: center;
+}
+
 .table-premium tbody tr {
   background-color: var(--bg-card);
   transition: background-color 0.15s ease;
@@ -849,10 +857,7 @@ table td .w-12.h-12, .table-premium td .w-12.h-12 {
   height: 2rem !important;
   border-radius: 4px !important;
 }
-/* Simplify SKUs and inline tags */
-table td .bg-slate-100, .table-premium td .bg-slate-100 {
-  display: none !important; /* El usuario pidió quitar el SKU en todos lados */
-}
+/* Removed aggressive hide rule */
 /* Standardize Badges and Spans inside ALL tables (Sin recuadros, sin pastillas) */
 table td .badge, .table-premium td .badge,
 table td span[class*="bg-"], .table-premium td span[class*="bg-"] {
@@ -863,17 +868,14 @@ table td span[class*="bg-"], .table-premium td span[class*="bg-"] {
 }
 
 /* FORZAR UNIFORMIDAD EXTREMA: Un solo color, un solo tipo de letra, sin negritas extremas ni colores */
-table td, table td * {
-  color: var(--txt-primary) !important;
+table td {
+  color: var(--txt-secondary) !important;
   font-family: 'Source Sans 3', sans-serif !important;
   font-weight: 500 !important;
   letter-spacing: normal !important;
 }
 
-/* Ocultar todos los SKUs (identificados por span.font-mono) */
-table td span.font-mono {
-  display: none !important;
-}
+/* Removed aggressive hide rule */
 
 /* Reduce font sizes that are too big */
 table td .text-base, .table-premium td .text-base {

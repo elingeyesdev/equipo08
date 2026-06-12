@@ -14,6 +14,12 @@ export default function PublicCatalogPage() {
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [selectedProduct, setSelectedProduct] = useState(null);
 
+  const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `http://localhost:3000${url}`;
+  };
+
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -213,7 +219,7 @@ export default function PublicCatalogPage() {
                  <div className="aspect-square relative bg-[var(--bg)] overflow-hidden">
                    {p.imagen_url ? (
                      <img 
-                       src={p.imagen_url} 
+                       src={getImageUrl(p.imagen_url)} 
                        alt={p.name} 
                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                      />
@@ -292,7 +298,7 @@ export default function PublicCatalogPage() {
 
               <div className="md:w-1/2 bg-[var(--bg)] relative min-h-[300px]">
                 {selectedProduct.imagen_url ? (
-                  <img src={selectedProduct.imagen_url} alt={selectedProduct.name} className="w-full h-full object-cover absolute inset-0" />
+                  <img src={getImageUrl(selectedProduct.imagen_url)} alt={selectedProduct.name} className="w-full h-full object-cover absolute inset-0" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center absolute inset-0">
                      <Tag size={48} className="text-[var(--txt-muted)]" />
@@ -415,7 +421,7 @@ export default function PublicCatalogPage() {
                     <div key={item.id} className="bg-[var(--bg)] p-3 rounded-xl border border-[var(--border)] flex gap-4 items-center">
                       <div className="w-14 h-14 bg-[var(--bg-card)] rounded-lg overflow-hidden flex-shrink-0 border border-[var(--border)]">
                         {item.imagen_url ? (
-                          <img src={item.imagen_url} alt={item.name} className="w-full h-full object-cover" />
+                          <img src={getImageUrl(item.imagen_url)} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center"><Tag size={16} className="text-[var(--txt-muted)]"/></div>
                         )}

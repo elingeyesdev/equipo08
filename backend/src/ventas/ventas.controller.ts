@@ -30,6 +30,13 @@ export class VentasController {
     return this.ventasService.getDashboardKpis(tenant_id);
   }
 
+  @Get('siguiente-numero/:sucursalId')
+  @RequirePermission('ventas.crear')
+  async getSiguienteNumero(@TenantId() tenant_id: string, @Param('sucursalId') sucursalId: string) {
+    const nextNumber = await this.ventasService.getSiguienteNumero(tenant_id, sucursalId);
+    return { nextNumber };
+  }
+
   @Get(':id')
   @RequirePermission('ventas.ver')
   async findOne(@Param('id') id: string, @TenantId() tenant_id: string) {

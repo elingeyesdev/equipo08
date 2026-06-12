@@ -13,4 +13,9 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'La contraseña es obligatoria' })
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   password: string;
+
+  phone?: string;
+  ubicacion?: string;
+  nit?: string;
+  razonSocial?: string;
 }

@@ -18,11 +18,12 @@ import AdminConsolePage from './pages/AdminConsolePage';
 import SettingsPage from './pages/SettingsPage';
 import PublicCatalogPage from './pages/PublicCatalogPage';
 import DashboardPage from './pages/DashboardPage';
+import PosPage from './pages/PosPage';
 import { ToastProvider } from './components/ToastContext';
 import {
   Users, Package, ShoppingCart, LogOut, Tag, Archive,
   Store, ShieldCheck, UserPlus, BarChart2, Receipt, LayoutDashboard,
-  Menu, ChevronLeft, Settings as SettingsIcon, ShieldAlert, Sun, Moon
+  Menu, ChevronLeft, Settings as SettingsIcon, ShieldAlert, Sun, Moon, MonitorSmartphone
 } from 'lucide-react';
 import './index.css';
 
@@ -163,7 +164,17 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
           )}
 
           {hasPerm('ventas.ver') && (
-            <NavItem to="/sales" icon={Receipt} label="Facturación / POS" active={p === '/sales'} isOpen={isOpen} />
+            <>
+              <NavItem to="/sales" icon={Receipt} label="Ventas" active={p === '/sales'} isOpen={isOpen} />
+              <Link
+                to="/pos"
+                className={`nav-link text-indigo-400 hover:text-indigo-300 ${!isOpen ? 'justify-center px-0' : ''}`}
+                title={!isOpen ? 'Terminal POS' : undefined}
+              >
+                <MonitorSmartphone size={22} strokeWidth={2} className="flex-shrink-0" />
+                {isOpen && <span className="font-semibold text-[1.05rem] tracking-tight">Terminal POS</span>}
+              </Link>
+            </>
           )}
 
           {hasPerm('inventario.ver') && (
@@ -319,28 +330,33 @@ function App() {
                 <Route path="*"         element={<Navigate to="/" replace />} />
               </Routes>
             ) : (
-              <div className="app-layout">
-                <Sidebar setAuthToken={setAuthToken} permissions={permissions} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-                <div className={`main-content transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative`}>
-                  <AnimatePresence mode="wait">
-                    <Routes location={location} key={location.pathname}>
-                      <Route path="/"              element={<PageTransition><DashboardPage     key={authToken} /></PageTransition>} />
-                      <Route path="/providers"     element={<PageTransition><ProvidersPage     key={authToken} /></PageTransition>} />
-                      <Route path="/sucursales"    element={<PageTransition><SucursalesPage    key={authToken} /></PageTransition>} />
-                      <Route path="/products"      element={<PageTransition><ProductsPage      key={authToken} /></PageTransition>} />
-                      <Route path="/sourcing"      element={<PageTransition><SourcingPage      key={authToken} /></PageTransition>} />
-                      <Route path="/sales"         element={<PageTransition><SalesPage         key={authToken} /></PageTransition>} />
-                      <Route path="/stock"         element={<PageTransition><StockPage         key={authToken} /></PageTransition>} />
-                      <Route path="/audit-reports" element={<PageTransition><AuditReportsPage  key={authToken} /></PageTransition>} />
-                      <Route path="/users"         element={<PageTransition><UsersPage         key={authToken} /></PageTransition>} />
-                      <Route path="/permissions"   element={<PageTransition><PermissionsPage   key={authToken} /></PageTransition>} />
-                      <Route path="/settings"      element={<PageTransition><SettingsPage      key={authToken} /></PageTransition>} />
-                      <Route path="/admin-console" element={<PageTransition><AdminConsolePage  key={authToken} /></PageTransition>} />
-                      <Route path="*"              element={<Navigate to="/" replace />} />
-                    </Routes>
-                  </AnimatePresence>
-                </div>
-              </div>
+              <Routes>
+                <Route path="/pos" element={<PosPage key={authToken} />} />
+                <Route path="/*" element={
+                  <div className="app-layout">
+                    <Sidebar setAuthToken={setAuthToken} permissions={permissions} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+                    <div className={`main-content transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative`}>
+                      <AnimatePresence mode="wait">
+                        <Routes location={location} key={location.pathname}>
+                          <Route path="/"              element={<PageTransition><DashboardPage     key={authToken} /></PageTransition>} />
+                          <Route path="/providers"     element={<PageTransition><ProvidersPage     key={authToken} /></PageTransition>} />
+                          <Route path="/sucursales"    element={<PageTransition><SucursalesPage    key={authToken} /></PageTransition>} />
+                          <Route path="/products"      element={<PageTransition><ProductsPage      key={authToken} /></PageTransition>} />
+                          <Route path="/sourcing"      element={<PageTransition><SourcingPage      key={authToken} /></PageTransition>} />
+                          <Route path="/sales"         element={<PageTransition><SalesPage         key={authToken} /></PageTransition>} />
+                          <Route path="/stock"         element={<PageTransition><StockPage         key={authToken} /></PageTransition>} />
+                          <Route path="/audit-reports" element={<PageTransition><AuditReportsPage  key={authToken} /></PageTransition>} />
+                          <Route path="/users"         element={<PageTransition><UsersPage         key={authToken} /></PageTransition>} />
+                          <Route path="/permissions"   element={<PageTransition><PermissionsPage   key={authToken} /></PageTransition>} />
+                          <Route path="/settings"      element={<PageTransition><SettingsPage      key={authToken} /></PageTransition>} />
+                          <Route path="/admin-console" element={<PageTransition><AdminConsolePage  key={authToken} /></PageTransition>} />
+                          <Route path="*"              element={<Navigate to="/" replace />} />
+                        </Routes>
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                } />
+              </Routes>
             )
           } />
         </Routes>
