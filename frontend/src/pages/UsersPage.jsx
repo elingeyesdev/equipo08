@@ -331,12 +331,7 @@ export default function UsersPage() {
                   filteredUsers.map(user => (
                     <tr key={user.id}>
                       <td>
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center font-bold text-indigo-700 text-xs uppercase">
-                            {user.name.charAt(0)}
-                          </div>
-                          <span className="font-semibold text-slate-800 text-sm">{user.name}</span>
-                        </div>
+                        <span className="font-semibold text-slate-800 text-sm">{user.name}</span>
                       </td>
                       <td className="text-slate-650 text-xs">{user.email}</td>
                       <td>
