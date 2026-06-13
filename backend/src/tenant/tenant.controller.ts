@@ -20,7 +20,7 @@ export class TenantController {
   @Roles(UserRole.OWNER)
   async updateProfile(
     @TenantId() tenantId: string,
-    @Body() data: { name?: string; phone?: string; logoUrl?: string; brandColor?: string }
+    @Body() data: { name?: string; phone?: string; logoUrl?: string; bannerUrl?: string; brandColor?: string }
   ) {
     return this.tenantService.updateProfile(tenantId, data);
   }

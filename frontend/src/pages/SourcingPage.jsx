@@ -133,7 +133,7 @@ export default function SourcingPage() {
       {/* Page Header */}
       <div className="page-header-bar">
         <div>
-          <h1>Entradas Operativas (Sourcing)</h1>
+          <h1>Lotes (Entradas de Stock)</h1>
           <p>Registra las entradas físicas de cajas o unidades al inventario principal.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -309,9 +309,9 @@ export default function SourcingPage() {
             />
           </div>
           <div className="w-full md:w-auto flex justify-end mt-2 md:mt-0">
-             <button onClick={() => { setFilterProducto('ALL'); setFilterSucursal('ALL'); setFilterDateStart(''); setFilterDateEnd(''); setFilterExpiryStart(''); setFilterExpiryEnd(''); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider transition-colors mb-2">
+             <span role="button" onClick={() => { setFilterProducto('ALL'); setFilterSucursal('ALL'); setFilterDateStart(''); setFilterDateEnd(''); setFilterExpiryStart(''); setFilterExpiryEnd(''); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer mb-2">
                Limpiar Filtros
-             </button>
+             </span>
           </div>
         </div>
       )}
@@ -376,45 +376,29 @@ export default function SourcingPage() {
                     const inversionTotal = costoSnap * h.cantidad;
                     return (
                       <tr key={h.id}>
-                        <td className="font-mono text-xs text-slate-400">
+                        <td className="text-sm text-slate-800">
                           #{h.id.split('-')[0]}
-                          {h.fechaElaboracion && (
-                            <span className="block mt-1 text-xs font-bold text-emerald-600">
-                              Elab: {h.fechaElaboracion}
-                            </span>
-                          )}
                           {h.fechaVencimiento && (
-                            <span className="block mt-1 text-xs font-bold text-rose-500">
+                            <span className="block mt-1 text-[11px] text-rose-500">
                               Vence: {h.fechaVencimiento}
                             </span>
                           )}
                         </td>
-                        <td className="text-xs text-slate-500 whitespace-nowrap">
+                        <td className="text-sm text-slate-800 whitespace-nowrap">
                           {new Date(h.fechaIngreso).toLocaleDateString()} {new Date(h.fechaIngreso).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </td>
-                        <td className="font-medium text-slate-800">
-                          {h.producto?.name || '---'}
-                          {(h.producto?.attributes && Object.keys(h.producto.attributes).length > 0) ? (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {Object.entries(h.producto.attributes).map(([key, val]) => val ? (
-                                <span key={key} className="text-[10px] text-slate-500 font-semibold border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-50">
-                                  {key}: {val}
-                                </span>
-                              ) : null)}
-                            </div>
-                          ) : h.producto?.description ? (
-                            <div className="text-xs text-slate-500 font-semibold mt-0.5 flex items-center gap-1">
-                              Var: {h.producto.description}
-                            </div>
-                          ) : null}
-                          <span className="text-xs text-slate-400 font-mono mt-0.5 block">SKU: {h.producto?.sku}</span>
+                        <td className="text-sm text-slate-800">
+                          <div>{h.producto?.name || '---'}</div>
+                          {h.producto?.sku && (
+                            <span className="text-xs text-slate-400 mt-0.5 block">SKU: {h.producto.sku}</span>
+                          )}
                         </td>
-                        <td className="text-xs text-slate-600 font-medium">{h.proveedor?.name || '---'}</td>
-                        <td className="text-right">
-                          <span className="inline-block bg-emerald-100 text-emerald-700 font-extrabold text-base px-3 py-1 rounded-lg border border-emerald-200 shadow-sm">+ {h.cantidad} U</span>
+                        <td className="text-sm text-slate-800">{h.proveedor?.name || '---'}</td>
+                        <td className="text-right text-sm text-slate-800">
+                          {h.cantidad}
                         </td>
-                        <td className="text-right text-sm text-slate-500 font-mono font-bold">Bs {costoSnap.toFixed(2)}</td>
-                        <td className="text-right text-lg font-black text-indigo-700 font-mono">Bs {inversionTotal.toFixed(2)}</td>
+                        <td className="text-right text-sm text-slate-800">Bs {costoSnap.toFixed(2)}</td>
+                        <td className="text-right text-sm text-slate-800">Bs {inversionTotal.toFixed(2)}</td>
                         <td className="text-center">
                           <div className="flex items-center justify-center gap-1.5">
                             {hasPermission('sourcing_editar') && (

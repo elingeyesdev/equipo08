@@ -175,17 +175,15 @@ export default function DashboardPage() {
 
       {/* CHARTS SECTION */}
       <div className="mb-8">
-        
-        {/* Gráfico Principal */}
-        <div className="bg-[#2c3136] border border-[#3a3f44] rounded-xl overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-[#3a3f44] flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Valor de Ventas</h2>
-            <div className="flex gap-4 items-center">
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs text-slate-400 font-bold">Ingresos</span></div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-400"></div><span className="text-xs text-slate-400 font-bold">Utilidad</span></div>
+        <div className="pb-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xs font-semibold tracking-widest uppercase text-slate-500">Desempeño Semanal</h2>
+            <div className="flex gap-5">
+              <div className="flex items-center gap-1.5"><div className="w-4 h-0.5 rounded-full" style={{background:'#4a9eed'}}></div><span className="text-xs text-slate-500">Ingresos</span></div>
+              <div className="flex items-center gap-1.5"><div className="w-4 h-0.5 rounded-full" style={{background:'#26a69a'}}></div><span className="text-xs text-slate-500">Utilidad</span></div>
             </div>
           </div>
-          <div className="p-6 h-64 w-full">
+          <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={(() => {
@@ -201,29 +199,31 @@ export default function DashboardPage() {
                   }
                   return weeklyData;
                 })()}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                margin={{ top: 8, right: 4, left: -20, bottom: 0 }}
               >
                 <defs>
                   <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    <stop offset="0%"   stopColor="#4a9eed" stopOpacity={0.3}/>
+                    <stop offset="100%" stopColor="#4a9eed" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="colorUtil" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#34d399" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#34d399" stopOpacity={0}/>
+                    <stop offset="0%"   stopColor="#26a69a" stopOpacity={0.4}/>
+                    <stop offset="100%" stopColor="#26a69a" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#3a3f44" vertical={false} />
-                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#fff' }} />
-                <Area type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
-                <Area type="monotone" dataKey="util" stroke="#34d399" strokeWidth={3} fillOpacity={1} fill="url(#colorUtil)" />
+                <CartesianGrid stroke="var(--border)" strokeOpacity={0.5} vertical={false} strokeDasharray="0" />
+                <XAxis dataKey="name" tick={{fill:'var(--txt-secondary)', fontSize:11}} tickLine={false} axisLine={false} />
+                <YAxis tick={{fill:'var(--txt-secondary)', fontSize:11}} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '12px', color: 'var(--txt-primary)' }}
+                  cursor={{ stroke: 'var(--border)', strokeWidth: 1 }}
+                />
+                <Area type="monotone" dataKey="util"  stroke="#26a69a" strokeWidth={2} fillOpacity={1} fill="url(#colorUtil)"  dot={false} />
+                <Area type="monotone" dataKey="total" stroke="#4a9eed" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
-
       </div>
 
     </div>

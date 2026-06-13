@@ -177,10 +177,13 @@ const styles = `
     border-bottom: 1px solid #e0e0e0;
   }
   .lp-empowering-inner {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 32px;
-    text-align: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
   }
   .lp-empowering h2 {
     font-size: 28px;
@@ -660,6 +663,12 @@ export default function LandingPage() {
       <style>{styles}</style>
       <div className="lp">
 
+        {/* OVERHEADER */}
+        <div className="lp-overheader">
+          <a href="#ayuda">Ayuda</a>
+          <span className="lp-overheader-sep">|</span>
+          <Link to="/login">Iniciar Sesión</Link>
+        </div>
 
         {/* NAV */}
         <nav className="lp-nav">
@@ -677,6 +686,7 @@ export default function LandingPage() {
             </Link>
             <div className="lp-nav-links">
               <a href="#herramientas">Características</a>
+              <a href="#precios">Precios</a>
               <a href="#ayuda">Ayuda</a>
             </div>
             <div className="lp-nav-actions">
@@ -710,9 +720,25 @@ export default function LandingPage() {
         {/* EMPOWERING */}
         <section className="lp-empowering">
           <div className="lp-empowering-inner">
-            <h2>Potenciando negocios en Bolivia con nuestro sistema POS</h2>
-            <p>Cientos de comercios en Bolivia ya gestionan sus ventas e inventario con BolClick.</p>
-            <p>Diseñado para tiendas, abarrotes, ferreterías, farmacias y negocios de todo tipo.</p>
+            <div>
+              <h2>Potenciando negocios en Bolivia con nuestro sistema POS</h2>
+              <p>Cientos de comercios en Bolivia ya gestionan sus ventas e inventario con BolClick.</p>
+              <p>Diseñado para tiendas, abarrotes, ferreterías, farmacias y negocios de todo tipo.</p>
+            </div>
+            <div className="lp-emp-imgs">
+              {[
+                { bg: '#e3f2fd', color: '#1565c0', label: 'Abarrotes' },
+                { bg: '#f3e5f5', color: '#6a1b9a', label: 'Farmacia' },
+                { bg: '#e8f5e9', color: '#2e7d32', label: 'Ferretería' },
+              ].map(c => (
+                <div key={c.label} className="lp-emp-img">
+                  <div className="lp-emp-img-inner" style={{ background: c.bg }}>
+                    <div className="lp-emp-img-box" style={{ background: c.color, opacity: 0.15, borderRadius: 8 }} />
+                    <span style={{ fontSize: 13, color: c.color, fontWeight: 600 }}>{c.label}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -720,7 +746,7 @@ export default function LandingPage() {
         <section style={{ background: '#fff', borderBottom: '1px solid #e0e0e0' }} id="herramientas">
 
           {/* 1 POS imagen izq texto der */}
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 80, alignItems: 'center' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
             <img src="/feat-pos.png" alt="Punto de Venta BolClick" style={{ width: '100%', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }} />
             <div className="lp-tool-text">
               <h3>Punto de Venta</h3>
@@ -736,7 +762,7 @@ export default function LandingPage() {
 
           {/* 2 INVENTARIO texto izq imagen der */}
           <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
-            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 80, alignItems: 'center' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
               <div className="lp-tool-text">
                 <h3>Gestión de Inventario</h3>
                 <p>Nunca te quedes sin existencias. Seguimiento en tiempo real de cada producto en cada sucursal.</p>
@@ -752,7 +778,7 @@ export default function LandingPage() {
           </div>
 
           {/* 3 ANÁLISIS imagen izq texto der */}
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 80, alignItems: 'center' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
             <img src="/feat-analytics.png" alt="Análisis de Ventas BolClick" style={{ width: '100%', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }} />
             <div className="lp-tool-text">
               <h3>Análisis de Ventas</h3>
@@ -768,12 +794,12 @@ export default function LandingPage() {
 
           {/* 4 PERSONAL texto izq imagen der */}
           <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
-            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: 60, alignItems: 'center' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
               <div className="lp-tool-text">
                 <h3>Gestión del Personal</h3>
                 <p>Administra tu equipo con roles diferenciados. Cada empleado accede solo a lo que necesita.</p>
                 <ul className="lp-tool-list">
-                  <li>Roles: Administrador, Supervisor, Vendedor</li>
+                  <li>Roles: Dueño, Supervisor, Vendedor</li>
                   <li>Acceso por sucursal y módulo</li>
                   <li>Registro de ventas por empleado</li>
                   <li>Control de acceso seguro</li>
@@ -784,8 +810,41 @@ export default function LandingPage() {
           </div>
 
           {/* 5 MULTISUCURSAL imagen izq texto der */}
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 80, alignItems: 'center' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
             <img src="/feat-multistore.png" alt="Sucursales BolClick" style={{ width: '100%', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }} />
+            <div className="lp-tool-text">
+              <h3>Gestiona Múltiples Sucursales</h3>
+              <p>Haz crecer tu negocio de una tienda a varias, todo controlado desde una sola cuenta.</p>
+              <ul className="lp-tool-list">
+                <li>Todas las sucursales desde una cuenta</li>
+                <li>Stock centralizado o independiente</li>
+                <li>Transferencias de mercadería entre tiendas</li>
+                <li>Reportes comparativos por sucursal</li>
+              </ul>
+            </div>
+          </div>
+
+        </section>
+
+                {[['Carlos M.','Dueño','Bs 4.200'],['Ana L.','Vendedora','Bs 2.850'],['Pedro S.','Vendedor','Bs 1.430']].map(([n,r,s]) => (
+                  <div key={n} style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', padding:'8px 12px', background:'#f9f9f9', border:'1px solid #e0e0e0', borderRadius:4, fontSize:13 }}>
+                    <span style={{fontWeight:500}}>{n}</span><span style={{color:'#888',textAlign:'center'}}>{r}</span><span style={{textAlign:'right',fontWeight:600}}>{s}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* MULTISUCURSAL */}
+          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }}>
+            <div style={{ background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: 8, padding: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Mis sucursales</div>
+              {[['Sucursal Central','Bs 4.200'],['Sucursal Norte','Bs 2.100'],['Sucursal Sur','Bs 1.800']].map(([n,s]) => (
+                <div key={n} style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr', padding:'8px 12px', background:'#fff', border:'1px solid #e0e0e0', borderRadius:4, fontSize:13 }}>
+                  <span style={{fontWeight:500}}>{n}</span><span style={{color:'#4caf50',textAlign:'center'}}>Activa</span><span style={{textAlign:'right',fontWeight:600}}>{s}</span>
+                </div>
+              ))}
+            </div>
             <div className="lp-tool-text">
               <h3>Gestiona Múltiples Sucursales</h3>
               <p>Haz crecer tu negocio de una tienda a varias, todo desde una sola cuenta.</p>
@@ -855,6 +914,7 @@ export default function LandingPage() {
             </Link>
             <div className="lp-footer-links">
               <a href="#herramientas">Características</a>
+              <a href="#precios">Precios</a>
               <Link to="/login">Iniciar Sesión</Link>
               <Link to="/register">Registrarse</Link>
             </div>

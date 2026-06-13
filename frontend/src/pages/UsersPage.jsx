@@ -17,7 +17,8 @@ export default function UsersPage() {
     email: '',
     password: '',
     role: 'VENDEDOR',
-    sucursal_id: ''
+    sucursal_id: '',
+    isActive: true
   });
 
   // Filters State
@@ -54,7 +55,8 @@ export default function UsersPage() {
       email: user.email,
       password: '', // Password stays empty unless intentionally reset
       role: user.role,
-      sucursal_id: user.sucursal_id || ''
+      sucursal_id: user.sucursal_id || '',
+      isActive: user.isActive ?? true
     });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -63,7 +65,7 @@ export default function UsersPage() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingId(null);
-    setUserForm({ name: '', email: '', password: '', role: 'VENDEDOR', sucursal_id: '' });
+    setUserForm({ name: '', email: '', password: '', role: 'VENDEDOR', sucursal_id: '', isActive: true });
   };
 
   const handleSubmit = async (e) => {
@@ -207,7 +209,7 @@ export default function UsersPage() {
                 >
                   <option value="VENDEDOR">Vendedor operativo</option>
                   <option value="SUPERVISOR">Supervisor administrativo</option>
-                  {userForm.role === 'OWNER' && <option value="OWNER">Dueño (Original)</option>}
+                  {userForm.role === 'OWNER' && <option value="OWNER">Administrador</option>}
                 </select>
               </div>
 
@@ -224,6 +226,20 @@ export default function UsersPage() {
                   ))}
                 </select>
               </div>
+
+              {editingId && userForm.role !== 'OWNER' && editingId !== sessionStorage.getItem('user_id') && (
+                <div className="form-group">
+                  <label htmlFor="usr-status">Estado de Acceso</label>
+                  <select 
+                    id="usr-status"
+                    value={userForm.isActive ? 'true' : 'false'} 
+                    onChange={e => setUserForm({...userForm, isActive: e.target.value === 'true'})}
+                  >
+                    <option value="true">Activo</option>
+                    <option value="false">Inactivo (Sin Acceso)</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="form-actions pt-4 border-t border-slate-100 mt-6 flex justify-end gap-3">
@@ -256,7 +272,7 @@ export default function UsersPage() {
               className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
             >
               <option value="ALL">-- Todos los roles --</option>
-              <option value="OWNER">Owner</option>
+              <option value="OWNER">Administrador</option>
               <option value="SUPERVISOR">Supervisor</option>
               <option value="VENDEDOR">Vendedor</option>
             </select>
@@ -273,12 +289,13 @@ export default function UsersPage() {
             </select>
           </div>
           <div className="w-full md:w-auto flex justify-end">
-            <button
+            <span 
+              role="button"
               onClick={() => { setFilterRole('ALL'); setFilterSucursal('ALL'); }}
-              className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider mt-2 md:mt-0 transition-colors"
+              className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider mt-2 md:mt-0 transition-colors cursor-pointer"
             >
               Limpiar Filtros
-            </button>
+            </span>
           </div>
         </div>
       )}
@@ -323,8 +340,8 @@ export default function UsersPage() {
                       </td>
                       <td className="text-slate-650 text-xs">{user.email}</td>
                       <td>
-                        <span className={`badge badge-${user.role.toLowerCase()}`}>
-                          {user.role}
+                        <span className="badge badge-neutral">
+                          {user.role === 'OWNER' ? 'Administrador' : user.role}
                         </span>
                       </td>
                       <td>

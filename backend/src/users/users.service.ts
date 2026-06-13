@@ -56,12 +56,22 @@ export class UsersService {
     await this.userRep.remove(user);
   }
 
-  async update(tenant_id: string, id: string, dto: Partial<CreateUserDto>): Promise<User> {
+  async update(tenant_id: string, id: string, dto: Partial<CreateUserDto>, requesterId?: string): Promise<User> {
     const user = await this.findOne(tenant_id, id);
 
     // Proteccion: No se puede cambiar el rol del Owner original
     if (user.role === UserRole.OWNER && dto.role && dto.role !== UserRole.OWNER) {
       throw new BadRequestException('No se puede degradar el perfil del Dueño de la tienda.');
+    }
+
+    // Proteccion: No se puede desactivar al Owner original
+    if (user.role === UserRole.OWNER && dto.isActive === false) {
+      throw new BadRequestException('No se puede desactivar la cuenta del Administrador principal (Dueño).');
+    }
+
+    // Proteccion: Un usuario no puede desactivar su propia cuenta
+    if (id === requesterId && dto.isActive === false) {
+      throw new BadRequestException('No puedes desactivar tu propia cuenta de acceso.');
     }
 
     if (dto.password && dto.password.trim() !== '') {

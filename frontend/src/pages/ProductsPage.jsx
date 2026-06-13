@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
-import { PackageSearch, Plus, X, Loader2, Edit2, Trash2, AlertTriangle, Tag, Search } from 'lucide-react';
+import api, { getBackendUrl } from '../api';
+import { PackageSearch, Plus, X, Loader2, Edit2, Trash2, AlertTriangle, Tag, Search, Copy } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -27,6 +27,64 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('ALL');
   const toast = useToast();
+
+  const [uploading, setUploading] = useState(false);
+
+  const getImageUrl = (url) => {
+    return getBackendUrl(url);
+  };
+
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 800;
+          canvas.height = 600;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 800, 600);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+                type: 'image/webp',
+                lastModified: Date.now()
+              });
+              resolve(compressedFile);
+            } else {
+              reject(new Error("Image compression failed"));
+            }
+          }, 'image/webp', 0.7);
+        };
+        img.onerror = (err) => reject(err);
+      };
+      reader.onerror = (err) => reject(err);
+    });
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const compressed = await compressImage(file);
+      const fData = new FormData();
+      fData.append('file', compressed);
+      
+      const { data } = await api.post('/productos/upload', fData);
+      
+      setFormData(prev => ({ ...prev, imagen_url: data.url }));
+      toast.success('Imagen comprimida (800x600 WebP 70%) y cargada con éxito');
+    } catch (err) {
+      toast.error('Error al procesar/subir la imagen');
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const userRole = sessionStorage.getItem('user_role');
   const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
@@ -70,6 +128,31 @@ export default function ProductsPage() {
       attributes: p.attributes || {}
     });
     setShowForm(true);
+  };
+
+  const handleCloneVariant = (p) => {
+    setEditingId(null);
+    setFormData({ 
+      name: p.name, 
+      sku: '', 
+      proveedor_id: p.proveedor_id || '', 
+      category: p.category || 'Otros',
+      precioCosto: p.precioCosto || '',
+      precioVenta: p.precioVenta || '',
+      description: '',
+      stockMinimo: p.stockMinimo,
+      imagen_url: p.imagen_url || '',
+      attributes: p.attributes || {}
+    });
+    setShowForm(true);
+    setTimeout(() => {
+      const formEl = document.getElementById('prod-form-top');
+      if (formEl) {
+        formEl.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const handleDelete = (id) => {
@@ -162,10 +245,14 @@ export default function ProductsPage() {
 
       {/* Expandable Form Section */}
       {showForm && (
-        <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
+        <div id="prod-form-top" className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
           <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-6">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider m-0">
-              {editingId ? 'Editar Artículo de Catálogo' : 'Añadir Nuevo Artículo'}
+              {editingId 
+                ? 'Editar Artículo de Catálogo' 
+                : formData.name 
+                  ? `Crear Variante de: ${formData.name}` 
+                  : 'Añadir Nuevo Artículo'}
             </h3>
             <button 
               type="button" 
@@ -248,15 +335,40 @@ export default function ProductsPage() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="prod-img">URL de Imagen (Opcional)</label>
+               <div className="form-group flex flex-col gap-1">
+                <label>Imagen del Producto (Opcional)</label>
                 <input 
-                  id="prod-img"
-                  type="url" 
-                  value={formData.imagen_url} 
-                  onChange={e => setFormData({...formData, imagen_url: e.target.value})} 
-                  placeholder="https://ejemplo.com/imagen.jpg" 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleFileChange} 
+                  className="hidden" 
+                  id="file-upload" 
+                  disabled={uploading}
                 />
+                <div className="flex gap-3 items-center mt-1">
+                  {formData.imagen_url && (
+                    <img 
+                      src={getImageUrl(formData.imagen_url)} 
+                      alt="Preview" 
+                      className="w-10 h-10 object-cover rounded-lg border border-slate-200" 
+                    />
+                  )}
+                  <label 
+                    htmlFor="file-upload" 
+                    className={`cursor-pointer py-1.5 px-3 border border-slate-200 text-[10px] font-bold text-slate-700 dark:text-slate-300 rounded-lg flex items-center gap-1.5 transition-colors bg-slate-50 dark:bg-slate-800 ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                  >
+                    {uploading ? 'Procesando...' : 'Subir desde Equipo'}
+                  </label>
+                  {formData.imagen_url && (
+                    <button 
+                      type="button" 
+                      onClick={() => setFormData({...formData, imagen_url: ''})} 
+                      className="text-[10px] text-red-500 font-bold hover:underline"
+                    >
+                      Quitar Imagen
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="form-group">
@@ -371,9 +483,9 @@ export default function ProductsPage() {
             </select>
           </div>
           <div className="w-full md:w-auto flex justify-end mt-2 md:mt-0">
-             <button onClick={() => { setSearchQuery(''); setFilterCategory('ALL'); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider transition-colors mb-2">
+             <span role="button" onClick={() => { setSearchQuery(''); setFilterCategory('ALL'); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer mb-2">
                Limpiar Filtros
-             </button>
+             </span>
           </div>
         </div>
       )}
@@ -393,7 +505,7 @@ export default function ProductsPage() {
                   <th style={{ width: '25%' }}>Artículo</th>
                   <th style={{ width: '15%' }}>Categoría</th>
                   <th style={{ width: '20%' }}>Proveedor Habitual</th>
-                  <th className="text-right" style={{ width: '12%' }}>Stock Mínimo</th>
+                  <th className="text-right" style={{ width: '12%' }}>Margen Utilidad</th>
                   <th className="text-right" style={{ width: '10%' }}>Precio Costo</th>
                   <th className="text-right" style={{ width: '10%' }}>Precio Venta</th>
                   <th className="text-center" style={{ width: '8%' }}>Acciones</th>
@@ -424,50 +536,53 @@ export default function ProductsPage() {
                   return filtered.map(p => (
                     <tr key={p.id}>
                       <td>
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                            {p.imagen_url ? (
-                              <img src={p.imagen_url} alt={p.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <PackageSearch size={20} className="text-slate-400" />
-                            )}
-                          </div>
-                          <div className="flex flex-col items-start gap-1">
-                            <span className="font-bold text-slate-900 text-base leading-tight">{p.name}</span>
-                            {p.attributes && Object.keys(p.attributes).length > 0 ? (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {Object.entries(p.attributes).map(([key, val]) => val ? (
-                                  <span key={key} className="text-[10px] text-slate-500 font-semibold border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-50">
-                                    {key}: {val}
-                                  </span>
-                                ) : null)}
-                              </div>
-                            ) : p.description ? (
-                              <span className="text-xs text-slate-500 font-semibold truncate max-w-[150px]">Var: {p.description}</span>
-                            ) : null}
-                            <span className="font-mono text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-md uppercase tracking-wider">
-                              SKU: {p.sku}
-                            </span>
-                          </div>
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="text-sm text-slate-800">{p.name}</span>
+                          {p.attributes && Object.keys(p.attributes).length > 0 ? (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {Object.entries(p.attributes).map(([key, val]) => val ? (
+                                <span key={key} className="text-[10px] text-slate-400 font-semibold border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-50">
+                                  {key}: {val}
+                                </span>
+                              ) : null)}
+                            </div>
+                          ) : p.description ? (
+                            <span className="text-xs text-slate-400 truncate max-w-[150px]">Var: {p.description}</span>
+                          ) : null}
                         </div>
                       </td>
-                      <td>
-                        <span className="badge info text-xs font-bold uppercase tracking-wider">{p.category || 'Otros'}</span>
+                      <td className="text-sm text-slate-800">
+                        {p.category || 'Otros'}
                       </td>
-                      <td className="text-sm font-semibold text-slate-700">
+                      <td className="text-sm text-slate-800">
                         {p.proveedor?.name || 'Huérfano'}
                       </td>
-                      <td className="text-right text-sm font-extrabold text-rose-600">
-                        {p.stockMinimo || 0} U.
+                      <td className="text-right text-sm text-slate-800">
+                        {(() => {
+                          const c = Number(p.precioCosto) || 0;
+                          const v = Number(p.precioVenta) || 0;
+                          const profit = v - c;
+                          const pct = v > 0 ? (profit / v) * 100 : 0;
+                          return `${pct.toFixed(0)}%`;
+                        })()}
                       </td>
-                      <td className="text-right font-mono text-sm text-slate-600 font-bold">
+                      <td className="text-right text-sm text-slate-800">
                         Bs {Number(p.precioCosto).toFixed(2)}
                       </td>
-                      <td className="text-right font-mono text-base text-slate-950 font-black">
+                      <td className="text-right text-sm text-slate-800">
                         Bs {Number(p.precioVenta).toFixed(2)}
                       </td>
                       <td className="text-center">
                         <div className="flex items-center justify-center gap-1.5">
+                          {hasPermission('catalogo_crear') && (
+                            <button 
+                              onClick={() => handleCloneVariant(p)} 
+                              className="btn-premium-icon text-indigo-600 dark:text-indigo-400"
+                              title="Agregar Variante"
+                            >
+                              <Copy size={15} />
+                            </button>
+                          )}
                           {hasPermission('catalogo_editar') && (
                             <button 
                               onClick={() => handleEdit(p)} 

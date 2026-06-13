@@ -3,6 +3,8 @@ import api from '../api';
 import { useToast } from '../components/ToastContext';
 import { Archive, MapPin, ClipboardList, AlertTriangle, Save, X, TrendingDown, Search, Printer, ArrowRightLeft } from 'lucide-react';
 
+let lastAlertedCount = 0;
+
 export default function StockPage() {
   const [stock, setStock] = useState([]);
   const [sucursales, setSucursales] = useState([]);
@@ -10,6 +12,7 @@ export default function StockPage() {
   const [selectedBranch, setSelectedBranch] = useState('ALL');
   const [searchProduct, setSearchProduct] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [alertsCount, setAlertsCount] = useState(0);
   
   // Transfer Form State
   const [transferItem, setTransferItem] = useState(null);
@@ -44,6 +47,13 @@ export default function StockPage() {
       setStock(resStock.data);
       setSucursales(resSuc.data);
       setAjustes(resAj.data);
+      
+      const alerts = resStock.data.filter(s => s.cantidadTotal < (s.producto?.stockMinimo || 10));
+      if (alerts.length > 0 && alerts.length > lastAlertedCount) {
+        toast.info(`Atención: Hay ${alerts.length} producto(s) por debajo del stock mínimo.`);
+      }
+      lastAlertedCount = alerts.length;
+      setAlertsCount(alerts.length);
     }).catch(err => {
       console.error(err);
       toast.error('Error al cargar datos del inventario');
@@ -207,25 +217,13 @@ export default function StockPage() {
              </select>
           </div>
           <div className="w-full md:w-auto flex justify-end">
-             <button onClick={() => { setSearchProduct(''); setSelectedBranch('ALL'); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider mt-2 md:mt-0 transition-colors">
-               Limpiar Filtros
-             </button>
+              <span role="button" onClick={() => { setSearchProduct(''); setSelectedBranch('ALL'); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider mt-2 md:mt-0 transition-colors cursor-pointer">
+                Limpiar Filtros
+              </span>
           </div>
         </div>
       )}
 
-      {/* Alertas Automáticas Banner */}
-      {!transferItem && alertasStock.length > 0 && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-sm">
-          <div className="bg-red-100 p-2 rounded-full text-red-600">
-             <AlertTriangle size={18} strokeWidth={2.5} />
-          </div>
-          <div>
-             <h4 className="font-bold text-red-900 text-sm m-0">Alertas de Inventario Bajo ({alertasStock.length})</h4>
-             <p className="text-red-700 text-xs mt-0.5 m-0 font-medium">Hay productos que se encuentran por debajo del stock mínimo configurado. Recomendamos generar reposiciones.</p>
-          </div>
-        </div>
-      )}
 
       {/* Transfer Inline Form */}
       {transferItem && (
@@ -302,26 +300,23 @@ export default function StockPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:-translate-y-1">
             <div>
-              <span className="text-slate-500 font-semibold uppercase tracking-wider text-[10px] block">Valuación Activa (Costo Promedio)</span>
-              <span className="text-2xl font-black text-slate-900 mt-1 block">
+              <span className="font-bold uppercase tracking-wider text-[10px] text-slate-500 block">Valuación Activa (Costo Promedio)</span>
+              <span className="text-2xl font-semibold text-slate-800 mt-1 block">
                 Bs. {totalValuation.toFixed(2)}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-650">
-              <Archive size={20} />
-            </div>
           </div>
 
-          <div className="bg-red-50 border border-red-200 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:-translate-y-1">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:-translate-y-1">
             <div>
-              <span className="text-red-700 font-bold uppercase tracking-wider text-[10px] block">Pérdida por Desajuste Acumulado</span>
-              <span className="text-2xl font-black text-red-900 mt-1 block drop-shadow-sm">
+              <span className="font-bold uppercase tracking-wider text-[10px] text-slate-500 block">Pérdida por Desajuste Acumulado</span>
+              <span className="text-2xl font-semibold text-slate-800 mt-1 block">
                 Bs. {historicalLossValue.toFixed(2)}
               </span>
             </div>
             <a 
               href="/audit-reports"
-              className="py-2 px-4 rounded-lg border border-red-200 bg-white text-red-700 hover:text-red-800 hover:bg-red-50 font-bold text-sm shadow-sm transition-colors"
+              className="py-2 px-4 rounded-lg font-bold text-sm border border-slate-200 text-slate-700 bg-white shadow-sm transition-colors hover:bg-slate-50"
             >
               <span>Ver Auditorías</span>
             </a>
@@ -340,7 +335,7 @@ export default function StockPage() {
                   <th style={{ width: '25%' }}>Producto</th>
                   <th style={{ width: '15%' }}>Ubicación</th>
                   <th className="text-right" style={{ width: '12%' }}>Stock Físico</th>
-                  <th className="text-right" style={{ width: '15%' }}>Costo Unitario Promedio</th>
+                  <th className="text-right" style={{ width: '15%' }}>Costo Promedio</th>
                   <th className="text-right" style={{ width: '10%' }}>Valuación Total</th>
                   <th className="text-center" style={{ width: '8%' }}>Acciones</th>
                 </tr>
@@ -359,22 +354,18 @@ export default function StockPage() {
                     const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
                     return (
                       <tr key={s.id} className={isAlerta ? 'bg-rose-50/10' : ''}>
-                        <td>
-                          <div className="flex items-center gap-2">
-                            {isAlerta && <AlertTriangle size={14} className="text-rose-500" title="Bajo el stock mínimo" />}
-                            <span className="font-mono text-xs font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md uppercase tracking-wider">{s.producto?.sku}</span>
-                          </div>
+                        <td className="text-sm text-slate-800">
+                          {s.producto?.sku}
                         </td>
-                        <td className="font-bold text-slate-900 text-lg">{s.producto?.name}</td>
-                        <td>
-                           <span className="text-base font-semibold text-slate-700">{s.sucursal?.name}</span>
+                        <td className="text-sm text-slate-800 font-medium">{s.producto?.name}</td>
+                        <td className="text-sm text-slate-800">
+                           {s.sucursal?.name}
                         </td>
-                        <td className="text-right">
-                           <strong className={`text-xl ${isAlerta ? 'text-rose-600 font-black' : 'text-slate-900 font-black'}`}>{s.cantidadTotal}</strong>
-                           <div className="text-sm text-slate-500 font-bold mt-1">Min: {s.producto?.stockMinimo || 10}</div>
+                        <td className="text-right text-sm text-slate-800">
+                           {s.cantidadTotal}
                         </td>
-                        <td className="text-right text-slate-600 text-base font-mono font-bold">Bs {costoPromedio.toFixed(2)}</td>
-                        <td className="text-right font-black text-indigo-700 font-mono text-xl">Bs {valuation.toFixed(2)}</td>
+                        <td className="text-right text-sm text-slate-800">Bs {costoPromedio.toFixed(2)}</td>
+                        <td className="text-right text-sm text-slate-800">Bs {valuation.toFixed(2)}</td>
                           <td className="text-center">
                                 <button 
                                    onClick={() => handleOpenTransfer(s)}

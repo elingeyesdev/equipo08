@@ -1,14 +1,33 @@
-import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ProductosService } from './productos.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { TenantId } from '../tenant/tenant-id.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { RequirePermission } from '../auth/decorators/permissions.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+// @ts-ignore
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @ApiTags('Productos')
 @Controller('productos')
 export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
+
+  @Post('upload')
+  @RequirePermission('catalogo.crear')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req: any, file: any, cb: any) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+      }
+    })
+  }))
+  uploadFile(@UploadedFile() file: any) {
+    return { url: `/uploads/${file.filename}` };
+  }
 
   @Post()
   @RequirePermission('catalogo.crear')

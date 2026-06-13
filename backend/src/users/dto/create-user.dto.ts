@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsEnum, MinLength, Matches, IsOptional, IsUUID } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsEnum, MinLength, Matches, IsOptional, IsUUID, IsBoolean } from 'class-validator';
 import { UserRole } from '../user.entity';
 
 export class CreateUserDto {
@@ -19,4 +19,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsUUID('all', { message: 'ID de sucursal no válido' })
   sucursal_id?: string;
+
+  @IsOptional()
+  @IsBoolean({ message: 'El estado debe ser un valor booleano' })
+  isActive?: boolean;
 }

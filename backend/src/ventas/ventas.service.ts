@@ -27,6 +27,13 @@ export class VentasService {
     }
   }
 
+  async getSiguienteNumero(tenant_id: string, sucursalId: string): Promise<string> {
+    const count = await this.ventaRep.count({
+      where: { tenant_id, sucursal_id: sucursalId }
+    });
+    return (count + 1).toString().padStart(6, '0');
+  }
+
   async create(dto: CreateVentaDto, tenant_id: string): Promise<Venta> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -48,14 +55,12 @@ export class VentasService {
           throw new BadRequestException(`Stock insuficiente para ${producto.name}. Disponible: ${stock ? stock.cantidadTotal : 0}`);
         }
 
-        const stockDisponible = stock.cantidadTotal;
-
         const precioUnitario = Number(producto.precioVenta);
         const subtotal = precioUnitario * item.cantidad;
         total += subtotal;
 
-        // Calculate cost proportion to reduce inventory value accurately
-        const avgCost = stockDisponible > 0 ? (Number(stock.valorAdquisicion || 0) / stockDisponible) : 0;
+        // Calculate average cost or use standard cost
+        const avgCost = Number(producto.precioCosto);
         const proportionalCost = avgCost * item.cantidad;
         
         costoTotal += proportionalCost;
@@ -76,8 +81,13 @@ export class VentasService {
         });
       }
 
+      const count = await queryRunner.manager.count(Venta, {
+        where: { tenant_id, sucursal_id: dto.sucursal_id }
+      });
+      const nextNum = (count + 1).toString().padStart(6, '0');
+      const numeroComprobante = `FAC-${nextNum}`;
+
       const utilidadTotal = total - costoTotal;
-      const numeroComprobante = `FAC-${Date.now()}`;
 
       const venta = queryRunner.manager.create(Venta, {
         tenant_id,
@@ -193,7 +203,7 @@ export class VentasService {
       
       venta.detalle.forEach(item => {
         doc.text(item.cantidad.toString(), 50, currentY);
-        doc.text(`[${item.sku}] ${item.name}`, 100, currentY, { width: 240 });
+        doc.text(`${item.name}`, 100, currentY, { width: 240 });
         doc.text(item.precioUnitario.toFixed(2), 350, currentY, { width: 90, align: 'right' });
         doc.text(item.subtotal.toFixed(2), 450, currentY, { width: 90, align: 'right' });
         currentY += 20;

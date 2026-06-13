@@ -243,9 +243,9 @@ export default function ProvidersPage() {
                 ) : (
                   providers.map(p => (
                     <tr key={p.id}>
-                      <td className="font-semibold text-slate-800">{p.name}</td>
-                      <td className="font-mono text-xs text-slate-600">{p.taxId || '-'}</td>
-                      <td className="text-slate-500 text-xs">{p.contactEmail || '-'}</td>
+                      <td className="text-sm text-slate-800">{p.name}</td>
+                      <td className="text-sm text-slate-800">{p.taxId || '-'}</td>
+                      <td className="text-sm text-slate-800">{p.contactEmail || '-'}</td>
                       {hasPermission('proveedores_eliminar') && (
                         <td className="text-center">
                           <button 

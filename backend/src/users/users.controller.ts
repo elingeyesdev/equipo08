@@ -64,8 +64,9 @@ export class UsersController {
   update(
     @TenantId() tenant_id: string, 
     @Param('id') id: string, 
-    @Body() dto: Partial<CreateUserDto>
+    @Body() dto: Partial<CreateUserDto>,
+    @Req() req: any
   ) {
-    return this.usersService.update(tenant_id, id, dto);
+    return this.usersService.update(tenant_id, id, dto, req.user.userId);
   }
 }

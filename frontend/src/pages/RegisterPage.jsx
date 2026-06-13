@@ -10,6 +10,10 @@ export default function RegisterPage() {
   const [domain, setDomain] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [ubicacion, setUbicacion] = useState('');
+  const [nit, setNit] = useState('');
+  const [razonSocial, setRazonSocial] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
@@ -19,7 +23,16 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await api.post('/auth/register', { name, domain, email, password });
+      await api.post('/auth/register', { 
+        name, 
+        domain, 
+        email, 
+        password,
+        phone,
+        ubicacion,
+        nit,
+        razonSocial
+      });
       toast.success('Cuenta comercial creada con éxito. Ya puedes iniciar sesión.');
       navigate('/login');
     } catch (err) {
@@ -30,7 +43,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans" style={{ colorScheme: 'light', background: '#f8fafc', color: '#0f172a' }}>
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -81,6 +94,56 @@ export default function RegisterPage() {
                   className="w-full bg-white border border-slate-300 rounded-lg py-2.5 pl-10 pr-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors font-medium"
                 />
               </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Razón Social</label>
+              <input 
+                type="text" 
+                value={razonSocial} 
+                onChange={e => setRazonSocial(e.target.value)} 
+                required 
+                placeholder="Ej. Tienda Alpha S.R.L."
+                className="w-full bg-white border border-slate-300 rounded-lg py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors font-medium text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">NIT</label>
+              <input 
+                type="text" 
+                value={nit} 
+                onChange={e => setNit(e.target.value)} 
+                required 
+                placeholder="Ej. 1234567019"
+                className="w-full bg-white border border-slate-300 rounded-lg py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors font-medium text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Teléfono de Contacto</label>
+              <input 
+                type="tel" 
+                value={phone} 
+                onChange={e => setPhone(e.target.value)} 
+                required 
+                placeholder="Ej. 70001234"
+                className="w-full bg-white border border-slate-300 rounded-lg py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors font-medium text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Ubicación / Dirección</label>
+              <input 
+                type="text" 
+                value={ubicacion} 
+                onChange={e => setUbicacion(e.target.value)} 
+                required 
+                placeholder="Ej. Calle Principal #123"
+                className="w-full bg-white border border-slate-300 rounded-lg py-2.5 px-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors font-medium text-sm"
+              />
             </div>
           </div>
           

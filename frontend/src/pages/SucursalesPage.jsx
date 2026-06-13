@@ -4,6 +4,7 @@ import { Store, Plus, X, Loader2, Edit2, Trash2, Clock, Phone, MapPin } from 'lu
 import { useToast } from '../components/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 import DoomEasterEgg from '../components/DoomEasterEgg';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SucursalesPage() {
   const [sucursales, setSucursales] = useState([]);
@@ -14,6 +15,7 @@ export default function SucursalesPage() {
   const [formData, setFormData] = useState({ name: '', address: '', phone: '', horarios: '', isActive: true });
   const [horariosData, setHorariosData] = useState([]);
   const [showDoom, setShowDoom] = useState(false);
+  const [viewingHorarios, setViewingHorarios] = useState(null);
   const toast = useToast();
   
   const DAYS_OF_WEEK = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -343,42 +345,33 @@ export default function SucursalesPage() {
                   sucursales.map(s => (
                     <tr key={s.id}>
                       <td>
-                        <div className="font-bold text-slate-800 text-sm">
+                        <div className="text-sm text-slate-800 font-medium">
                           {s.name}
                         </div>
-                        <div className="text-[10px] text-slate-455 font-bold uppercase tracking-wider mt-0.5">{tenantName}</div>
+                        <div className="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">{tenantName}</div>
                       </td>
-                      <td className="text-slate-500 text-xs">{s.address || '---'}</td>
+                      <td className="text-sm text-slate-800">{s.address || '---'}</td>
                       <td>
                         <div className="flex flex-col gap-1.5">
-                          {s.phone ? (
-                            <span className="text-xs text-slate-700 flex items-center gap-1">
-                              <Phone size={10} className="text-slate-400" /> {s.phone}
-                            </span>
-                          ) : null}
-                          {s.horarios && (
-                            <div className="flex flex-col gap-1">
-                              {(() => {
-                                  try {
-                                    const parsed = JSON.parse(s.horarios);
-                                    return parsed.map((h, i) => (
-                                      <span key={i} className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded-md flex items-center gap-1 w-fit">
-                                        <Clock size={10} />
-                                        <span>{h.days.length === 7 ? 'Todos los días' : h.days.map(d=>d.slice(0,3)).join(', ')}: {h.start} - {h.end}</span>
-                                      </span>
-                                    ));
-                                  } catch(e) {
-                                    return <span className="text-[10px] text-slate-400">🕒 {s.horarios}</span>;
-                                  }
-                              })()}
+                          {s.phone && (
+                            <div className="flex items-center gap-1.5 text-sm text-slate-800 font-medium">
+                              <Phone size={14} className="text-slate-400 shrink-0" />
+                              <span>{s.phone}</span>
                             </div>
+                          )}
+                          {s.horarios && (
+                            <button
+                              onClick={() => setViewingHorarios(s)}
+                              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 px-2 py-1 rounded-md transition-colors w-max"
+                            >
+                              <Clock size={13} />
+                              <span>Ver horarios</span>
+                            </button>
                           )}
                         </div>
                       </td>
-                      <td className="text-center">
-                        <span className={`badge ${s.isActive ? 'success' : 'error'}`}>
-                          {s.isActive ? 'Activa' : 'Inactiva'}
-                        </span>
+                      <td className="text-center text-sm text-slate-800">
+                        {s.isActive ? 'Activa' : 'Inactiva'}
                       </td>
                       {hasPermission('sucursales_editar') && (
                         <td className="text-center">
@@ -418,6 +411,75 @@ export default function SucursalesPage() {
         onConfirm={proceedDelete}
         onCancel={() => setConfirmDelete(null)}
       />
+
+      {/* Modal para ver Horarios */}
+      <AnimatePresence>
+        {viewingHorarios && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setViewingHorarios(null)}
+              className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800 p-6 z-10 text-slate-800 dark:text-slate-100"
+            >
+              <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Clock className="text-indigo-600 dark:text-indigo-400" size={20} />
+                  <h3 className="font-bold text-sm uppercase tracking-wide">Horarios de Atención</h3>
+                </div>
+                <button
+                  onClick={() => setViewingHorarios(null)}
+                  className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Sucursal / Almacén</div>
+                <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{viewingHorarios.name}</div>
+              </div>
+
+              <div className="space-y-2.5">
+                {(() => {
+                  try {
+                    const parsed = JSON.parse(viewingHorarios.horarios);
+                    if (!parsed || parsed.length === 0) {
+                      return <p className="text-xs text-slate-500 italic">No hay horarios registrados.</p>;
+                    }
+                    return parsed.map((h, i) => (
+                      <div key={i} className="flex flex-col gap-1 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/50">
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                          {h.days.length === 7 ? 'Todos los días' : h.days.join(', ')}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-505 dark:text-slate-400 flex items-center gap-1.5">
+                          <Clock size={12} className="opacity-60" /> {h.start} a {h.end}
+                        </span>
+                      </div>
+                    ));
+                  } catch (e) {
+                    return <p className="text-xs text-slate-500">{viewingHorarios.horarios}</p>;
+                  }
+                })()}
+              </div>
+
+              <button
+                onClick={() => setViewingHorarios(null)}
+                className="w-full mt-6 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shadow-sm"
+              >
+                Entendido
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {showDoom && <DoomEasterEgg onClose={() => setShowDoom(false)} />}
     </div>

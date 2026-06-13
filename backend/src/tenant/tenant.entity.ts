@@ -35,7 +35,19 @@ export class Tenant {
   phone: string;
 
   @Column({ nullable: true })
+  ubicacion: string;
+
+  @Column({ nullable: true })
+  nit: string;
+
+  @Column({ nullable: true })
+  razonSocial: string;
+
+  @Column({ nullable: true })
   logoUrl: string;
+
+  @Column({ nullable: true })
+  bannerUrl: string;
 
   @Column({ nullable: true })
   brandColor: string;
