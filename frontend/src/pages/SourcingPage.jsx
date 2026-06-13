@@ -271,9 +271,10 @@ export default function SourcingPage() {
                             setProductSearchQuery('');
                             setLoteForm({ ...loteForm, producto_id: '', proveedor_id: '' });
                           }}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors border-none p-0 cursor-pointer"
+                          title="Limpiar"
                         >
-                          <X size={14} />
+                          <X size={12} />
                         </button>
                       )}
                     </div>
