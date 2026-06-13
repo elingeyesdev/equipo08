@@ -283,11 +283,11 @@ export default function AuditReportsPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4">
         {/* Loss Card */}
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm border-l-4 border-l-red-500">
-          <span className="text-xs font-bold text-red-700 uppercase tracking-wide">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm border-l-4 border-l-red-500">
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
             Pérdida Total Estimada
           </span>
-          <p className="text-3xl font-black text-red-600 mt-1">
+          <p className="text-3xl font-semibold text-slate-800 mt-1">
             Bs {totalFilteredLoss.toFixed(2)}
           </p>
         </div>
@@ -297,7 +297,7 @@ export default function AuditReportsPage() {
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
             Ajustes Encontrados
           </span>
-          <p className="text-3xl font-black text-slate-900 mt-1">
+          <p className="text-3xl font-semibold text-slate-800 mt-1">
             {filteredAjustes.length}
           </p>
         </div>
@@ -397,7 +397,7 @@ export default function AuditReportsPage() {
                 <th style={{ width: '30%' }}>Producto</th>
                 <th style={{ width: '20%' }}>Sucursal</th>
                 <th style={{ width: '15%' }}>Operador</th>
-                <th className="text-center" style={{ width: '8%' }}>Delta</th>
+                <th className="text-center" style={{ width: '8%' }}>Pérdida</th>
                 <th className="text-center" style={{ width: '12%' }}>Categoría</th>
                 <th className="text-right" style={{ width: '10%' }}>Déficit Est.</th>
               </tr>
@@ -423,47 +423,36 @@ export default function AuditReportsPage() {
                   const fallbackStock = stock.find(s => s.producto_id === a.producto_id)?.cantidadTotal || 0;
                   const sistemaReal = a.cantidad_sistema !== null && a.cantidad_sistema !== undefined ? cantSistema : fallbackStock;
                   const deltaVal = cantFisica - sistemaReal;
-
                   return (
                     <tr key={a.id}>
-                      <td className="text-sm text-slate-700 font-semibold whitespace-nowrap">
+                      <td className="text-sm text-slate-800 whitespace-nowrap">
                         {new Date(a.fecha).toLocaleDateString('es-MX', {
                           day: '2-digit',
                           month: 'short',
                           year: 'numeric'
                         })}
                       </td>
-                      <td className="font-bold text-slate-900 text-lg">
-                        {getProductName(a)}
+                      <td className="text-sm text-slate-800">
+                        <div>{getProductName(a)}</div>
                         {getProductSku(a) && (
-                          <span className="block font-mono text-xs text-slate-500 font-bold uppercase tracking-wider mt-1 bg-slate-100 inline-block px-2 py-0.5 rounded">SKU: {getProductSku(a)}</span>
+                          <span className="block text-xs text-slate-400 mt-1">SKU: {getProductSku(a)}</span>
                         )}
                       </td>
-                      <td className="text-base text-slate-800 font-bold">
+                      <td className="text-sm text-slate-800">
                         {a.sucursal?.name || a.sucursal_nombre || a.sucursal_id || 'Sucursal Desconocida'}
                       </td>
-                      <td className="text-base text-slate-800 font-semibold">
+                      <td className="text-sm text-slate-800">
                         {a.usuario?.name || a.usuario_nombre || a.usuario_id || 'Operador Desconocido'}
                       </td>
-                      <td className="text-center">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-lg border shadow-sm font-extrabold text-base ${
-                            deltaVal < 0
-                              ? 'bg-rose-100 text-rose-700 border-rose-200'
-                              : deltaVal > 0
-                              ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
-                          }`}
-                        >
+                      <td className="text-center text-sm text-slate-800">
+                        <span>
                           {deltaVal > 0 ? `+${deltaVal}` : deltaVal}
                         </span>
                       </td>
-                      <td className="text-center">
-                        <span className="badge neutral text-sm font-semibold px-3 py-1">
-                          {formatMotivo(a.motivo)}
-                        </span>
+                      <td className="text-center text-sm text-slate-800">
+                        {formatMotivo(a.motivo)}
                       </td>
-                      <td className="text-right font-black text-rose-600 font-mono text-lg">
+                      <td className="text-right text-sm text-slate-800">
                         Bs {Number(a.valor_perdido || 0).toFixed(2)}
                       </td>
                     </tr>

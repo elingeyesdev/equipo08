@@ -473,7 +473,7 @@ export default function PosPage() {
                     <div className="flex-1 flex flex-col justify-center min-w-0">
                       <div className="flex justify-between items-start mb-1">
                         <h4 className="text-sm font-bold text-slate-800 dark:text-white truncate pr-2 leading-tight">{item.name}</h4>
-                        <span className="text-sm font-black text-slate-900 dark:text-white">Bs {item.precioUnitario.toFixed(2)}</span>
+                        <span className="text-sm font-black text-slate-900 dark:text-white whitespace-nowrap shrink-0">Bs {item.precioUnitario.toFixed(2)}</span>
                       </div>
                       <div className="text-[11px] text-slate-400 mb-3 flex flex-col gap-0.5">
                         <span>SKU: {item.sku}</span>

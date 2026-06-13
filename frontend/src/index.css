@@ -111,6 +111,18 @@
   color: #fff !important;
 }
 
+/* ─── FORCE LIGHT MODE (Login / Register) ───────────────────────────── */
+[style*="color-scheme: light"] .bg-white { background-color: #ffffff !important; }
+[style*="color-scheme: light"] .bg-slate-50 { background-color: #f8fafc !important; }
+[style*="color-scheme: light"] .text-slate-900,
+[style*="color-scheme: light"] .text-slate-800 { color: #0f172a !important; }
+[style*="color-scheme: light"] .text-slate-700 { color: #334155 !important; }
+[style*="color-scheme: light"] .text-slate-600 { color: #475569 !important; }
+[style*="color-scheme: light"] .text-slate-500 { color: #64748b !important; }
+[style*="color-scheme: light"] .border-slate-200 { border-color: #e2e8f0 !important; }
+[style*="color-scheme: light"] .border-slate-300 { border-color: #cbd5e1 !important; }
+[style*="color-scheme: light"] .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important; }
+
 /* ─── BASE ───────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 

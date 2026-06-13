@@ -43,6 +43,7 @@ export class CatalogService {
           category: prod.category,
           precioVenta: prod.precioVenta,
           imagen_url: prod.imagen_url,
+          attributes: prod.attributes,
           stockTotal,
         };
       })
@@ -54,6 +55,7 @@ export class CatalogService {
         name: tenant.name,
         domain: tenant.domain,
         logoUrl: tenant.logoUrl,
+        bannerUrl: tenant.bannerUrl,
         brandColor: tenant.brandColor,
         phone: tenant.phone,
       },

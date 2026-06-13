@@ -183,27 +183,25 @@ export default function SalesPage() {
                 ) : (
                   filteredSalesHistory.map(sale => (
                     <tr key={sale.id}>
-                      <td className="font-mono text-xs font-bold text-slate-800 whitespace-nowrap">
+                      <td className="text-sm text-slate-800 whitespace-nowrap">
                         {sale.numeroComprobante || `V-${sale.id.slice(0, 8)}`}
                       </td>
-                      <td className="text-slate-600 text-xs whitespace-nowrap">
+                      <td className="text-sm text-slate-800 whitespace-nowrap">
                         {new Date(sale.fecha).toLocaleDateString()} {new Date(sale.fecha).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                       </td>
-                      <td className="font-semibold text-slate-900 text-sm">
-                        {sale.clienteNombre} <span className="text-slate-400 font-normal text-xs">({sale.clienteDocumento || 'S/D'})</span>
+                      <td className="text-sm text-slate-800">
+                        {sale.clienteNombre} <span className="text-slate-400 text-xs">({sale.clienteDocumento || 'S/D'})</span>
                       </td>
-                      <td className="text-slate-700 text-sm whitespace-nowrap">
+                      <td className="text-sm text-slate-800 whitespace-nowrap">
                         {sale.vendedorNombre || 'Sistema'}
                       </td>
-                      <td className="text-slate-700 text-sm whitespace-nowrap">
+                      <td className="text-sm text-slate-800 whitespace-nowrap">
                         {sale.sucursal?.name || 'Sucursal'}
                       </td>
-                      <td className="whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
-                          {sale.metodoPago || 'Efectivo'}
-                        </span>
+                      <td className="text-sm text-slate-800 whitespace-nowrap">
+                        {sale.metodoPago || 'Efectivo'}
                       </td>
-                      <td className="text-right font-bold text-slate-900 text-sm whitespace-nowrap">
+                      <td className="text-right text-sm text-slate-800 whitespace-nowrap">
                         Bs {Number(sale.total || 0).toFixed(2)}
                       </td>
                       <td className="text-center">

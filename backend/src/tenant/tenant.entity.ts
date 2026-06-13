@@ -47,6 +47,9 @@ export class Tenant {
   logoUrl: string;
 
   @Column({ nullable: true })
+  bannerUrl: string;
+
+  @Column({ nullable: true })
   brandColor: string;
 
   @Column({ default: true })

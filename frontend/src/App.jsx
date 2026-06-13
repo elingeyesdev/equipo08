@@ -132,7 +132,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
           {/* User chip */}
           <div className={`flex items-center gap-3 ${isOpen ? 'px-4 py-3' : 'justify-center py-3 px-0'} rounded-2xl bg-black/10 border border-white/10 backdrop-blur-md shadow-inner`}>
             {logoUrl ? (
-              <img src={logoUrl} alt="Logo" className="w-10 h-10 rounded-xl object-cover bg-white flex-shrink-0" />
+              <img src={logoUrl.startsWith('http') ? logoUrl : `http://localhost:3000${logoUrl}`} alt="Logo" className="w-10 h-10 rounded-xl object-cover bg-white flex-shrink-0" />
             ) : (
               <div className="w-10 h-10 rounded-xl text-[13px] bg-slate-100 text-slate-900 font-black flex items-center justify-center flex-shrink-0">
                 {initials}
@@ -160,7 +160,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
             <NavItem to="/products"    icon={Tag}        label="Catálogo"           active={p === '/products'} isOpen={isOpen} />
           )}
           {hasPerm('sourcing.ver') && (
-            <NavItem to="/sourcing"    icon={ShoppingCart} label="Sourcing"         active={p === '/sourcing'} isOpen={isOpen} />
+            <NavItem to="/sourcing"    icon={ShoppingCart} label="Lotes"            active={p === '/sourcing'} isOpen={isOpen} />
           )}
 
           {hasPerm('ventas.ver') && (

@@ -338,15 +338,7 @@ export default function ProductsPage() {
               </div>
 
                <div className="form-group flex flex-col gap-1">
-                <label htmlFor="prod-img">Imagen del Producto (Opcional)</label>
-                <input 
-                  id="prod-img"
-                  type="text" 
-                  value={formData.imagen_url} 
-                  onChange={e => setFormData({...formData, imagen_url: e.target.value})} 
-                  placeholder="Pegar URL o subir archivo desde equipo" 
-                  className="w-full text-xs"
-                />
+                <label>Imagen del Producto (Opcional)</label>
                 <input 
                   type="file" 
                   accept="image/*" 
@@ -493,9 +485,9 @@ export default function ProductsPage() {
             </select>
           </div>
           <div className="w-full md:w-auto flex justify-end mt-2 md:mt-0">
-             <button onClick={() => { setSearchQuery(''); setFilterCategory('ALL'); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider transition-colors mb-2">
+             <span role="button" onClick={() => { setSearchQuery(''); setFilterCategory('ALL'); }} className="text-slate-400 hover:text-rose-600 text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer mb-2">
                Limpiar Filtros
-             </button>
+             </span>
           </div>
         </div>
       )}
@@ -546,32 +538,28 @@ export default function ProductsPage() {
                   return filtered.map(p => (
                     <tr key={p.id}>
                       <td>
-                        <div className="flex items-center gap-3">
-
-                          <div className="flex flex-col items-start gap-1">
-                            <span className="font-bold text-slate-900 text-base leading-tight">{p.name}</span>
-                            {p.attributes && Object.keys(p.attributes).length > 0 ? (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {Object.entries(p.attributes).map(([key, val]) => val ? (
-                                  <span key={key} className="text-[10px] text-slate-500 font-semibold border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-50">
-                                    {key}: {val}
-                                  </span>
-                                ) : null)}
-                              </div>
-                            ) : p.description ? (
-                              <span className="text-xs text-slate-500 font-semibold truncate max-w-[150px]">Var: {p.description}</span>
-                            ) : null}
-
-                          </div>
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="text-sm text-slate-800">{p.name}</span>
+                          {p.attributes && Object.keys(p.attributes).length > 0 ? (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {Object.entries(p.attributes).map(([key, val]) => val ? (
+                                <span key={key} className="text-[10px] text-slate-400 font-semibold border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-50">
+                                  {key}: {val}
+                                </span>
+                              ) : null)}
+                            </div>
+                          ) : p.description ? (
+                            <span className="text-xs text-slate-400 truncate max-w-[150px]">Var: {p.description}</span>
+                          ) : null}
                         </div>
                       </td>
-                      <td>
-                        <span className="badge info text-xs font-bold uppercase tracking-wider">{p.category || 'Otros'}</span>
+                      <td className="text-sm text-slate-800">
+                        {p.category || 'Otros'}
                       </td>
-                      <td className="text-sm font-semibold text-slate-700">
+                      <td className="text-sm text-slate-800">
                         {p.proveedor?.name || 'Huérfano'}
                       </td>
-                      <td className="text-right text-sm text-slate-700">
+                      <td className="text-right text-sm text-slate-800">
                         {(() => {
                           const c = Number(p.precioCosto) || 0;
                           const v = Number(p.precioVenta) || 0;
@@ -580,10 +568,10 @@ export default function ProductsPage() {
                           return `${pct.toFixed(0)}%`;
                         })()}
                       </td>
-                      <td className="text-right font-mono text-sm text-slate-600 font-bold">
+                      <td className="text-right text-sm text-slate-800">
                         Bs {Number(p.precioCosto).toFixed(2)}
                       </td>
-                      <td className="text-right font-mono text-base text-slate-950 font-black">
+                      <td className="text-right text-sm text-slate-800">
                         Bs {Number(p.precioVenta).toFixed(2)}
                       </td>
                       <td className="text-center">
