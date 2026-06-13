@@ -22,6 +22,13 @@ export default function SourcingPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [loteForm, setLoteForm] = useState({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
   const toast = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Reset page to 1 when any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterProducto, filterSucursal, filterDateStart, filterDateEnd, filterExpiryStart, filterExpiryEnd]);
 
   const userRole = sessionStorage.getItem('user_role');
   const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
@@ -94,7 +101,6 @@ export default function SourcingPage() {
   const handleCreateLote = async (e) => {
     e.preventDefault();
 
-    // Validacion cruzada frontend
     const selectedProd = products.find(p => p.id === loteForm.producto_id);
     if (selectedProd && loteForm.proveedor_id !== selectedProd.proveedor_id) {
        return toast.error('El proveedor seleccionado no coincide con el proveedor oficial del producto en el catálogo.');
@@ -127,10 +133,32 @@ export default function SourcingPage() {
   const selectedProductObj = products.find(p => p.id === loteForm.producto_id);
   const showExpirationDate = selectedProductObj && ['Abarrotes y Alimentos', 'Bebidas'].includes(selectedProductObj.category);
 
+  // Compute filtered items for pagination calculation
+  const filteredHistorial = historial.filter(h => {
+    if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
+    if (filterSucursal !== 'ALL' && h.sucursal_id !== filterSucursal) return false;
+    
+    if (filterDateStart) {
+      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
+      if (rowDate < filterDateStart) return false;
+    }
+    if (filterDateEnd) {
+      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
+      if (rowDate > filterDateEnd) return false;
+    }
+
+    if (filterExpiryStart && h.fechaVencimiento && h.fechaVencimiento < filterExpiryStart) return false;
+    if (filterExpiryEnd && h.fechaVencimiento && h.fechaVencimiento > filterExpiryEnd) return false;
+    if ((filterExpiryStart || filterExpiryEnd) && !h.fechaVencimiento) return false;
+    return true;
+  });
+
+  const totalPages = Math.ceil(filteredHistorial.length / itemsPerPage);
+  const paginatedHistorial = filteredHistorial.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <div className="full-width-container animate-fadein space-y-8">
 
-      {/* Page Header */}
       <div className="page-header-bar">
         <div>
           <h1>Lotes (Entradas de Stock)</h1>
@@ -158,7 +186,6 @@ export default function SourcingPage() {
         </div>
       </div>
 
-      {/* Add / Edit Form */}
       {showForm && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
           <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-6">
@@ -247,7 +274,6 @@ export default function SourcingPage() {
         </div>
       )}
 
-      {/* Filter Drawer */}
       {showFilters && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row flex-wrap items-end md:items-center gap-4 animate-fadeIn">
           <div className="flex-1 min-w-[150px]">
@@ -316,7 +342,6 @@ export default function SourcingPage() {
         </div>
       )}
 
-      {/* Table Section */}
       <div className="table-premium-wrapper">
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -339,27 +364,7 @@ export default function SourcingPage() {
               </thead>
               <tbody>
                 {(() => {
-                  const filtered = historial.filter(h => {
-                    if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
-                    if (filterSucursal !== 'ALL' && h.sucursal_id !== filterSucursal) return false;
-                    
-                    // Filtrar por Fecha de Ingreso (fechaIngreso)
-                    if (filterDateStart) {
-                      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
-                      if (rowDate < filterDateStart) return false;
-                    }
-                    if (filterDateEnd) {
-                      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
-                      if (rowDate > filterDateEnd) return false;
-                    }
-
-                    // Filtrar por Fecha de Vencimiento
-                    if (filterExpiryStart && h.fechaVencimiento && h.fechaVencimiento < filterExpiryStart) return false;
-                    if (filterExpiryEnd && h.fechaVencimiento && h.fechaVencimiento > filterExpiryEnd) return false;
-                    if ((filterExpiryStart || filterExpiryEnd) && !h.fechaVencimiento) return false;
-                    return true;
-                  });
-                  if (filtered.length === 0) return (
+                  if (paginatedHistorial.length === 0) return (
                     <tr>
                       <td colSpan="8">
                         <div className="empty-state">
@@ -371,7 +376,7 @@ export default function SourcingPage() {
                       </td>
                     </tr>
                   );
-                  return filtered.map(h => {
+                  return paginatedHistorial.map(h => {
                     const costoSnap = Number(h.costoUnitarioSnapshot || 0);
                     const inversionTotal = costoSnap * h.cantidad;
                     return (
@@ -419,6 +424,42 @@ export default function SourcingPage() {
                 })()}
               </tbody>
             </table>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 border-t border-slate-100">
+                <span className="text-xs text-slate-500">
+                  Mostrando página {currentPage} de {totalPages} ({filteredHistorial.length} lotes en total)
+                </span>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    Anterior
+                  </button>
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`w-8 h-8 text-xs font-bold rounded-lg transition-all ${
+                        currentPage === i + 1
+                          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-650/15'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
