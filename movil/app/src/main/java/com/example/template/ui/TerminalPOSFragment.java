@@ -1,12 +1,10 @@
 package com.example.template.ui;
 
 import android.app.AlertDialog;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ImageView;
+import com.example.template.utils.ImageLoader;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,40 +39,46 @@ import com.example.template.network.models.VentaItem;
 import com.example.template.network.models.VentaRequest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SalesFragment extends Fragment {
-
-    // Tab buttons & containers
-    private Button btnTabPOS, btnTabHistory;
-    private LinearLayout llTabPOS, llTabHistory;
+public class TerminalPOSFragment extends Fragment {
 
     // Terminal POS Views
     private Spinner spinnerBranch;
-    private EditText etSearch;
     private RecyclerView rvProducts;
     private SalesProductAdapter productAdapter;
+
+    // Categories Filters
+    private LinearLayout llCategoriesContainer;
+    private String selectedCategory = "Todos";
+    private final String[] categories = {
+        "Todos", "Abarrotes y Alimentos", "Bebidas", "Ropa y Moda", "Zapatos y Calzado",
+        "Belleza y Cuidado Personal", "Joyería y Relojes", "Juguetes y Niños",
+        "Hogar y Decoración", "Electrónica y Tecnología", "Ferretería y Construcción",
+        "Deportes y Aire Libre", "Entretenimiento y Ocio", "Otros"
+    };
 
     // Cart / Billing Views
     private CardView cvCartPanel;
     private TextView tvCartCount, tvCartTotal;
-    private Button btnToggleCart, btnCheckout;
+    private Button btnToggleCart, btnCheckout, btnTicket;
     private LinearLayout llCartDetails;
-    private EditText etClienteNombre, etClienteDoc;
     private RecyclerView rvCartItems;
     private CartAdapter cartAdapter;
 
-    // History Views
-    private RecyclerView rvSalesHistory;
-    private SalesHistoryAdapter historyAdapter;
+    // Subtabs Views
+    private Button btnCartTabNew, btnCartTabHistory;
+    private LinearLayout llCartTabNewContent, llCartTabHistoryContent;
+    private RecyclerView rvSavedTickets;
+    private TextView tvEmptyTickets;
+    private SavedTicketsAdapter savedTicketsAdapter;
 
-    // SwipeRefreshLayouts
-    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshProducts, swipeRefreshHistory;
+    // SwipeRefreshLayout
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshProducts;
 
     // API
     private ApiService apiService;
@@ -81,39 +87,24 @@ public class SalesFragment extends Fragment {
     private List<Sucursal> sucursalesList = new ArrayList<>();
     private List<Stock> allStockList = new ArrayList<>();
     private List<Stock> filteredStockList = new ArrayList<>();
-    private List<Venta> salesHistoryList = new ArrayList<>();
-    private List<Venta> allSalesHistoryList = new ArrayList<>();
-    
-    // History Filters
-    private Button btnToggleHistoryFilters;
-    private CardView cardHistoryFilters;
-    private EditText etSearchHistory;
-    private Button btnDateFromHistory, btnDateToHistory, btnClearHistoryFilters;
-    private Spinner spinnerBranchHistory, spinnerPaymentHistory;
-    private java.util.Calendar historyCalFrom = null, historyCalTo = null;
-    private java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.US);
-
     
     // Cart products list in memory
     private List<CartProduct> cartProducts = new ArrayList<>();
     private boolean isCartExpanded = false;
 
+    // Ticket list queue in memory
+    private static List<SavedTicket> savedTicketsList = new ArrayList<>();
+    private static int ticketCounter = 11; // Matches the screenshots
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sales, container, false);
+        View view = inflater.inflate(R.layout.fragment_terminal_pos, container, false);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
-        // Bind tabs
-        btnTabPOS = view.findViewById(R.id.btnTabPOS);
-        btnTabHistory = view.findViewById(R.id.btnTabHistory);
-        llTabPOS = view.findViewById(R.id.llTabPOS);
-        llTabHistory = view.findViewById(R.id.llTabHistory);
-
         // Bind POS
         spinnerBranch = view.findViewById(R.id.spinnerBranch);
-        etSearch = view.findViewById(R.id.etSearch);
         rvProducts = view.findViewById(R.id.rvProducts);
 
         // Bind Cart
@@ -122,65 +113,126 @@ public class SalesFragment extends Fragment {
         tvCartTotal = view.findViewById(R.id.tvCartTotal);
         btnToggleCart = view.findViewById(R.id.btnToggleCart);
         llCartDetails = view.findViewById(R.id.llCartDetails);
-        etClienteNombre = view.findViewById(R.id.etClienteNombre);
-        etClienteDoc = view.findViewById(R.id.etClienteDoc);
         rvCartItems = view.findViewById(R.id.rvCartItems);
         btnCheckout = view.findViewById(R.id.btnCheckout);
+        btnTicket = view.findViewById(R.id.btnTicket);
 
-        // Bind History
-        rvSalesHistory = view.findViewById(R.id.rvSalesHistory);
-        btnToggleHistoryFilters = view.findViewById(R.id.btnToggleHistoryFilters);
-        cardHistoryFilters = view.findViewById(R.id.cardHistoryFilters);
-        etSearchHistory = view.findViewById(R.id.etSearchHistory);
-        btnDateFromHistory = view.findViewById(R.id.btnDateFromHistory);
-        btnDateToHistory = view.findViewById(R.id.btnDateToHistory);
-        btnClearHistoryFilters = view.findViewById(R.id.btnClearHistoryFilters);
-        spinnerBranchHistory = view.findViewById(R.id.spinnerBranchHistory);
-        spinnerPaymentHistory = view.findViewById(R.id.spinnerPaymentHistory);
+        // Bind Subtabs
+        btnCartTabNew = view.findViewById(R.id.btnCartTabNew);
+        btnCartTabHistory = view.findViewById(R.id.btnCartTabHistory);
+        llCartTabNewContent = view.findViewById(R.id.llCartTabNewContent);
+        llCartTabHistoryContent = view.findViewById(R.id.llCartTabHistoryContent);
+        rvSavedTickets = view.findViewById(R.id.rvSavedTickets);
+        tvEmptyTickets = view.findViewById(R.id.tvEmptyTickets);
 
-        // Bind SwipeRefreshLayouts
+        // Bind SwipeRefreshLayout
         swipeRefreshProducts = view.findViewById(R.id.swipeRefreshProducts);
-        swipeRefreshHistory = view.findViewById(R.id.swipeRefreshHistory);
 
-        // Setup SwipeRefreshLayouts
+        // Setup SwipeRefreshLayout
         swipeRefreshProducts.setOnRefreshListener(() -> loadStock());
-        swipeRefreshHistory.setOnRefreshListener(() -> loadSalesHistory());
 
-        setupTabs();
+        loadTicketsFromPrefs();
+        setupCartDetailsToggle();
         setupRecyclerViews();
         setupSearchAndFilters();
+        setupCategoryFilters(view);
+        setupSubtabs();
 
         loadSucursales();
         loadStock();
 
-        if (getArguments() != null && getArguments().getBoolean("openHistoryTab", false)) {
-            btnTabHistory.performClick();
-        }
-
         return view;
     }
 
-    private void setupTabs() {
-        btnTabPOS.setOnClickListener(v -> {
-            llTabPOS.setVisibility(View.VISIBLE);
-            llTabHistory.setVisibility(View.GONE);
-            btnTabPOS.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a")));
-            btnTabPOS.setTextColor(Color.WHITE);
-            btnTabHistory.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
-            btnTabHistory.setTextColor(Color.parseColor("#475569"));
-        });
+    private void setupCategoryFilters(View view) {
+        llCategoriesContainer = view.findViewById(R.id.llCategoriesContainer);
+        if (llCategoriesContainer == null) return;
 
-        btnTabHistory.setOnClickListener(v -> {
-            llTabPOS.setVisibility(View.GONE);
-            llTabHistory.setVisibility(View.VISIBLE);
-            btnTabHistory.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a")));
-            btnTabHistory.setTextColor(Color.WHITE);
-            btnTabPOS.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
-            btnTabPOS.setTextColor(Color.parseColor("#475569"));
-            loadSalesHistory();
-        });
+        llCategoriesContainer.removeAllViews();
+        for (String cat : categories) {
+            TextView tv = new TextView(getContext());
+            tv.setText(cat);
+            tv.setTextSize(13f);
+            tv.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+            tv.setGravity(android.view.Gravity.CENTER);
+            
+            // Set padding
+            float density = getResources().getDisplayMetrics().density;
+            int hp = (int) (16 * density);
+            int vp = (int) (10 * density);
+            tv.setPadding(hp, vp, hp, vp);
 
-        // Toggle cart expand/collapse
+            // Set margins
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            int m = (int) (4 * density);
+            lp.setMargins(m, 0, m, 0);
+            tv.setLayoutParams(lp);
+
+            tv.setTag(cat);
+            updateCategoryStyle(tv, cat.equals(selectedCategory));
+
+            tv.setOnClickListener(v -> {
+                selectedCategory = cat;
+                for (int i = 0; i < llCategoriesContainer.getChildCount(); i++) {
+                    View child = llCategoriesContainer.getChildAt(i);
+                    if (child instanceof TextView) {
+                        updateCategoryStyle((TextView) child, child.getTag().equals(selectedCategory));
+                    }
+                }
+                filterCatalog();
+            });
+
+            llCategoriesContainer.addView(tv);
+        }
+    }
+
+    private void updateCategoryStyle(TextView tv, boolean isSelected) {
+        float density = getResources().getDisplayMetrics().density;
+        android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+        gd.setCornerRadius(8 * density);
+        
+        if (isSelected) {
+            gd.setColor(Color.parseColor("#0f172a")); // Dark Slate selected
+            gd.setStroke((int) (1.5 * density), Color.parseColor("#0f172a"));
+            tv.setTextColor(Color.WHITE);
+        } else {
+            gd.setColor(Color.WHITE);
+            gd.setStroke((int) (1.5 * density), Color.parseColor("#cbd5e1")); // Light grey border
+            tv.setTextColor(Color.parseColor("#475569"));
+        }
+        tv.setBackground(gd);
+    }
+
+    private void saveTicketsToPrefs() {
+        if (getContext() == null) return;
+        android.content.SharedPreferences prefs = getContext().getSharedPreferences("pos_prefs", android.content.Context.MODE_PRIVATE);
+        String json = new com.google.gson.Gson().toJson(savedTicketsList);
+        prefs.edit().putString("saved_tickets", json).putInt("ticket_counter", ticketCounter).apply();
+    }
+
+    private void loadTicketsFromPrefs() {
+        if (getContext() == null) return;
+        android.content.SharedPreferences prefs = getContext().getSharedPreferences("pos_prefs", android.content.Context.MODE_PRIVATE);
+        ticketCounter = prefs.getInt("ticket_counter", 11);
+        String json = prefs.getString("saved_tickets", null);
+        if (json != null) {
+            try {
+                java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<ArrayList<SavedTicket>>(){}.getType();
+                List<SavedTicket> loaded = new com.google.gson.Gson().fromJson(json, type);
+                if (loaded != null) {
+                    savedTicketsList.clear();
+                    savedTicketsList.addAll(loaded);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void setupCartDetailsToggle() {
         btnToggleCart.setOnClickListener(v -> {
             isCartExpanded = !isCartExpanded;
             if (isCartExpanded) {
@@ -188,13 +240,209 @@ public class SalesFragment extends Fragment {
                 btnToggleCart.setText("Ocultar");
             } else {
                 llCartDetails.setVisibility(View.GONE);
-                btnToggleCart.setText("Ver Detalles");
+                btnToggleCart.setText("Ver detalles");
             }
         });
 
-        etClienteNombre.setText("Cliente Casual");
+        btnCheckout.setOnClickListener(v -> showConfirmarPagoDialog());
+        btnTicket.setOnClickListener(v -> handleSaveAsTicket());
+    }
 
-        btnCheckout.setOnClickListener(v -> handleCheckout());
+    private void setupSubtabs() {
+        btnCartTabNew.setOnClickListener(v -> {
+            llCartTabNewContent.setVisibility(View.VISIBLE);
+            llCartTabHistoryContent.setVisibility(View.GONE);
+            btnCartTabNew.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+            btnCartTabNew.setTextColor(Color.WHITE);
+            btnCartTabHistory.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+            btnCartTabHistory.setTextColor(Color.parseColor("#94a3b8"));
+        });
+
+        btnCartTabHistory.setOnClickListener(v -> {
+            llCartTabNewContent.setVisibility(View.GONE);
+            llCartTabHistoryContent.setVisibility(View.VISIBLE);
+            btnCartTabHistory.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+            btnCartTabHistory.setTextColor(Color.WHITE);
+            btnCartTabNew.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+            btnCartTabNew.setTextColor(Color.parseColor("#94a3b8"));
+            updateSavedTicketsListVisibility();
+        });
+    }
+
+    private void updateSavedTicketsListVisibility() {
+        if (savedTicketsList.isEmpty()) {
+            rvSavedTickets.setVisibility(View.GONE);
+            tvEmptyTickets.setVisibility(View.VISIBLE);
+        } else {
+            rvSavedTickets.setVisibility(View.VISIBLE);
+            tvEmptyTickets.setVisibility(View.GONE);
+        }
+        savedTicketsAdapter.notifyDataSetChanged();
+    }
+
+    private void handleSaveAsTicket() {
+        if (cartProducts.isEmpty()) {
+            Toast.makeText(getContext(), "El carrito está vacío", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String ticketId = "Orden #0000" + (ticketCounter++);
+        String timeStr = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.US).format(new java.util.Date());
+
+        double total = 0;
+        int itemsCount = 0;
+        for (CartProduct cp : cartProducts) {
+            total += cp.getCantidad() * cp.getPrecioUnitario();
+            itemsCount += cp.getCantidad();
+        }
+
+        // Deep copy items
+        List<CartProduct> itemsCopy = new ArrayList<>();
+        for (CartProduct cp : cartProducts) {
+            itemsCopy.add(new CartProduct(
+                cp.getProductoId(),
+                cp.getName(),
+                cp.getSku(),
+                cp.getPrecioUnitario(),
+                cp.getCantidad(),
+                cp.getMaxStock()
+            ));
+        }
+
+        SavedTicket ticket = new SavedTicket(ticketId, timeStr, itemsCopy, total, itemsCount);
+        savedTicketsList.add(ticket);
+        saveTicketsToPrefs();
+
+        Toast.makeText(getContext(), "Pedido guardado como ticket: " + ticketId, Toast.LENGTH_LONG).show();
+
+        // Clear cart
+        cartProducts.clear();
+        updateCartTotals();
+        cartAdapter.notifyDataSetChanged();
+
+        // Switch to Tickets Tab to display newly queued ticket
+        btnCartTabHistory.performClick();
+    }
+
+    private void showConfirmarPagoDialog() {
+        if (getContext() == null) return;
+
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_confirmar_pago, null);
+        EditText etDialogClienteNombre = dialogView.findViewById(R.id.etDialogClienteNombre);
+        EditText etDialogClienteDoc = dialogView.findViewById(R.id.etDialogClienteDoc);
+        Spinner spinnerDialogPaymentMethod = dialogView.findViewById(R.id.spinnerDialogPaymentMethod);
+        EditText etDialogMontoRecibido = dialogView.findViewById(R.id.etDialogMontoRecibido);
+        TextView tvDialogTotalPagar = dialogView.findViewById(R.id.tvDialogTotalPagar);
+        Button btnDialogConfirmVenta = dialogView.findViewById(R.id.btnDialogConfirmVenta);
+        ImageButton btnDialogClose = dialogView.findViewById(R.id.btnDialogClose);
+
+        // Pre-fill values
+        etDialogClienteNombre.setText("Cliente Casual");
+        
+        double total = 0;
+        for (CartProduct cp : cartProducts) {
+            total += cp.getCantidad() * cp.getPrecioUnitario();
+        }
+        final double finalTotal = total;
+        String formattedTotal = String.format(java.util.Locale.US, "Bs %.2f", finalTotal);
+        
+        tvDialogTotalPagar.setText(formattedTotal);
+        etDialogMontoRecibido.setText(String.format(java.util.Locale.US, "%.2f", finalTotal));
+        btnDialogConfirmVenta.setText("Confirmar venta • " + formattedTotal);
+
+        // Populate Payment Method Spinner
+        String[] paymentMethods = {"Efectivo", "QR", "Transferencia", "Tarjeta"};
+        ArrayAdapter<String> pmAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, paymentMethods);
+        pmAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDialogPaymentMethod.setAdapter(pmAdapter);
+
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setView(dialogView)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        btnDialogClose.setOnClickListener(v -> dialog.dismiss());
+
+        btnDialogConfirmVenta.setOnClickListener(v -> {
+            String clientName = etDialogClienteNombre.getText().toString().trim();
+            String clientDoc = etDialogClienteDoc.getText().toString().trim();
+            String paymentMethod = spinnerDialogPaymentMethod.getSelectedItem().toString();
+
+            if (clientName.isEmpty()) {
+                Toast.makeText(getContext(), "Por favor ingresa el nombre del cliente", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            btnDialogConfirmVenta.setEnabled(false);
+            btnDialogConfirmVenta.setText("Procesando...");
+
+            handleCheckoutFromDialog(clientName, clientDoc, paymentMethod.toUpperCase(), dialog, btnDialogConfirmVenta);
+        });
+
+        dialog.show();
+    }
+
+    private void handleCheckoutFromDialog(String clientName, String clientDoc, String paymentMethod, AlertDialog paymentDialog, Button confirmButton) {
+        if (spinnerBranch.getSelectedItemPosition() < 0 || sucursalesList.isEmpty()) {
+            Toast.makeText(getContext(), "Selecciona una sucursal", Toast.LENGTH_SHORT).show();
+            confirmButton.setEnabled(true);
+            return;
+        }
+
+        Sucursal selectedBranch = sucursalesList.get(spinnerBranch.getSelectedItemPosition());
+
+        List<VentaItem> items = new ArrayList<>();
+        for (CartProduct cp : cartProducts) {
+            items.add(new VentaItem(cp.getProductoId(), cp.getCantidad()));
+        }
+
+        VentaRequest request = new VentaRequest(
+            selectedBranch.getId(),
+            clientName,
+            clientDoc.isEmpty() ? null : clientDoc,
+            paymentMethod,
+            items
+        );
+
+        apiService.createVenta(request).enqueue(new Callback<Venta>() {
+            @Override
+            public void onResponse(Call<Venta> call, Response<Venta> response) {
+                if (paymentDialog != null) paymentDialog.dismiss();
+
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(getContext(), "¡Venta registrada exitosamente!", Toast.LENGTH_LONG).show();
+                    
+                    // Show receipt dialog
+                    Venta savedVenta = response.body();
+                    showComprobanteDialog(savedVenta);
+
+                    // Reset cart
+                    cartProducts.clear();
+                    updateCartTotals();
+                    cartAdapter.notifyDataSetChanged();
+                    
+                    // Collapse cart
+                    isCartExpanded = false;
+                    llCartDetails.setVisibility(View.GONE);
+                    btnToggleCart.setText("Ver detalles");
+
+                    // Reload inventories
+                    loadStock();
+                } else {
+                    Toast.makeText(getContext(), "Error al procesar la venta en el servidor", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Venta> call, Throwable t) {
+                confirmButton.setEnabled(true);
+                confirmButton.setText("Confirmar venta");
+                Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupRecyclerViews() {
@@ -221,26 +469,48 @@ public class SalesFragment extends Fragment {
         });
         rvCartItems.setAdapter(cartAdapter);
 
-        // History items: Linear layout
-        rvSalesHistory.setLayoutManager(new LinearLayoutManager(getContext()));
-        historyAdapter = new SalesHistoryAdapter(salesHistoryList, sucursalesList, venta -> showComprobanteDialog(venta));
-        rvSalesHistory.setAdapter(historyAdapter);
-    }
-
-    private void setupSearchAndFilters() {
-        etSearch.addTextChangedListener(new TextWatcher() {
+        // Saved Tickets items: Linear layout
+        rvSavedTickets.setLayoutManager(new LinearLayoutManager(getContext()));
+        savedTicketsAdapter = new SavedTicketsAdapter(savedTicketsList, new SavedTicketsAdapter.SavedTicketActionListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onLoadTicket(SavedTicket ticket) {
+                // Load ticket copy to active cart products
+                cartProducts.clear();
+                for (CartProduct cp : ticket.getItems()) {
+                    cartProducts.add(new CartProduct(
+                        cp.getProductoId(),
+                        cp.getName(),
+                        cp.getSku(),
+                        cp.getPrecioUnitario(),
+                        cp.getCantidad(),
+                        cp.getMaxStock()
+                    ));
+                }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterCatalog();
+                // Remove from queue
+                savedTicketsList.remove(ticket);
+                saveTicketsToPrefs();
+
+                // Update UI elements
+                updateCartTotals();
+                cartAdapter.notifyDataSetChanged();
+                btnCartTabNew.performClick();
+                Toast.makeText(getContext(), "Ticket " + ticket.getId() + " cargado al carrito", Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void onDeleteTicket(SavedTicket ticket) {
+                savedTicketsList.remove(ticket);
+                saveTicketsToPrefs();
+                updateCartTotals();
+                updateSavedTicketsListVisibility();
+                Toast.makeText(getContext(), "Ticket eliminado", Toast.LENGTH_SHORT).show();
+            }
         });
+        rvSavedTickets.setAdapter(savedTicketsAdapter);
+    }
 
+    private void setupSearchAndFilters() {
         spinnerBranch.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -253,39 +523,6 @@ public class SalesFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-        etSearchHistory.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { filterSalesHistory(); }
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        btnToggleHistoryFilters.setOnClickListener(v -> {
-            if (cardHistoryFilters.getVisibility() == View.VISIBLE) {
-                cardHistoryFilters.setVisibility(View.GONE);
-                btnToggleHistoryFilters.setText("Filtrar Ventas (Mostrar)");
-            } else {
-                cardHistoryFilters.setVisibility(View.VISIBLE);
-                btnToggleHistoryFilters.setText("Filtrar Ventas (Ocultar)");
-            }
-        });
-        btnToggleHistoryFilters.setText("Filtrar Ventas (Mostrar)");
-
-        btnDateFromHistory.setOnClickListener(v -> showHistoryDatePicker(true));
-        btnDateToHistory.setOnClickListener(v -> showHistoryDatePicker(false));
-        btnClearHistoryFilters.setOnClickListener(v -> clearHistoryFilters());
-
-        AdapterView.OnItemSelectedListener historyFilterListener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { filterSalesHistory(); }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        };
-        spinnerBranchHistory.setOnItemSelectedListener(historyFilterListener);
-        spinnerPaymentHistory.setOnItemSelectedListener(historyFilterListener);
     }
 
     private void loadSucursales() {
@@ -294,7 +531,6 @@ public class SalesFragment extends Fragment {
             public void onResponse(Call<List<Sucursal>> call, Response<List<Sucursal>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     sucursalesList.clear();
-                    // Filter only active branches
                     for (Sucursal s : response.body()) {
                         if (s.isActive()) {
                             sucursalesList.add(s);
@@ -322,23 +558,6 @@ public class SalesFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, options);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerBranch.setAdapter(adapter);
-
-        List<String> historyBranchOptions = new ArrayList<>();
-        historyBranchOptions.add("Cualquier Sucursal");
-        historyBranchOptions.addAll(options);
-        ArrayAdapter<String> historyBranchAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, historyBranchOptions);
-        historyBranchAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerBranchHistory.setAdapter(historyBranchAdapter);
-
-        List<String> paymentOptions = new ArrayList<>();
-        paymentOptions.add("Cualquier Método");
-        paymentOptions.add("EFECTIVO");
-        paymentOptions.add("QR");
-        paymentOptions.add("TRANSFERENCIA");
-        paymentOptions.add("TARJETA");
-        ArrayAdapter<String> paymentAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, paymentOptions);
-        paymentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPaymentHistory.setAdapter(paymentAdapter);
     }
 
     private void loadStock() {
@@ -360,108 +579,6 @@ public class SalesFragment extends Fragment {
         });
     }
 
-    private void loadSalesHistory() {
-        apiService.getVentas().enqueue(new Callback<List<Venta>>() {
-            @Override
-            public void onResponse(Call<List<Venta>> call, Response<List<Venta>> response) {
-                if (swipeRefreshHistory != null) swipeRefreshHistory.setRefreshing(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    allSalesHistoryList.clear();
-                    allSalesHistoryList.addAll(response.body());
-                    filterSalesHistory();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Venta>> call, Throwable t) {
-                if (swipeRefreshHistory != null) swipeRefreshHistory.setRefreshing(false);
-                if(getContext() != null) Toast.makeText(getContext(), "Error al cargar historial", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void clearHistoryFilters() {
-        historyCalFrom = null;
-        historyCalTo = null;
-        btnDateFromHistory.setText("Desde");
-        btnDateToHistory.setText("Hasta");
-        spinnerBranchHistory.setSelection(0);
-        spinnerPaymentHistory.setSelection(0);
-        etSearchHistory.setText("");
-        filterSalesHistory();
-    }
-
-    private void showHistoryDatePicker(boolean isFrom) {
-        java.util.Calendar c = java.util.Calendar.getInstance();
-        if (isFrom && historyCalFrom != null) c = historyCalFrom;
-        else if (!isFrom && historyCalTo != null) c = historyCalTo;
-
-        android.app.DatePickerDialog dpd = new android.app.DatePickerDialog(getContext(), (view, year, month, dayOfMonth) -> {
-            java.util.Calendar selected = java.util.Calendar.getInstance();
-            selected.set(year, month, dayOfMonth, 0, 0, 0);
-            if (isFrom) {
-                historyCalFrom = selected;
-                btnDateFromHistory.setText(dateFormat.format(historyCalFrom.getTime()));
-            } else {
-                historyCalTo = selected;
-                historyCalTo.set(java.util.Calendar.HOUR_OF_DAY, 23);
-                historyCalTo.set(java.util.Calendar.MINUTE, 59);
-                historyCalTo.set(java.util.Calendar.SECOND, 59);
-                btnDateToHistory.setText(dateFormat.format(historyCalTo.getTime()));
-            }
-            filterSalesHistory();
-        }, c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH));
-        dpd.show();
-    }
-
-    private void filterSalesHistory() {
-        salesHistoryList.clear();
-        String query = etSearchHistory.getText().toString().toLowerCase().trim();
-        String selBranch = spinnerBranchHistory.getSelectedItem() != null ? spinnerBranchHistory.getSelectedItem().toString() : "Cualquier Sucursal";
-        String selPayment = spinnerPaymentHistory.getSelectedItem() != null ? spinnerPaymentHistory.getSelectedItem().toString() : "Cualquier Método";
-
-        java.text.SimpleDateFormat utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
-        utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-
-        for (Venta v : allSalesHistoryList) {
-            boolean matches = true;
-
-            if (!query.isEmpty()) {
-                String cliente = v.getClienteNombre() != null ? v.getClienteNombre().toLowerCase() : "";
-                String doc = v.getClienteDocumento() != null ? v.getClienteDocumento().toLowerCase() : "";
-                if (!cliente.contains(query) && !doc.contains(query)) {
-                    matches = false;
-                }
-            }
-
-            if (!"Cualquier Sucursal".equals(selBranch)) {
-                String branchName = v.getSucursal() != null ? v.getSucursal().getName() : "";
-                if (!selBranch.equals(branchName)) matches = false;
-            }
-
-            if (!"Cualquier Método".equals(selPayment)) {
-                if (v.getMetodoPago() == null || !v.getMetodoPago().equalsIgnoreCase(selPayment)) {
-                    matches = false;
-                }
-            }
-
-            if (historyCalFrom != null || historyCalTo != null) {
-                if (v.getFecha() != null) {
-                    try {
-                        java.util.Date d = utcFormat.parse(v.getFecha());
-                        if (historyCalFrom != null && d.before(historyCalFrom.getTime())) matches = false;
-                        if (historyCalTo != null && d.after(historyCalTo.getTime())) matches = false;
-                    } catch (Exception e) {}
-                }
-            }
-
-            if (matches) {
-                salesHistoryList.add(v);
-            }
-        }
-        historyAdapter.notifyDataSetChanged();
-    }
-
     private void filterCatalog() {
         filteredStockList.clear();
         if (spinnerBranch.getSelectedItemPosition() < 0 || sucursalesList.isEmpty()) {
@@ -470,15 +587,13 @@ public class SalesFragment extends Fragment {
         }
 
         Sucursal selectedBranch = sucursalesList.get(spinnerBranch.getSelectedItemPosition());
-        String query = etSearch.getText().toString().toLowerCase().trim();
 
         for (Stock s : allStockList) {
             if (s.getSucursalId() != null && s.getSucursalId().equals(selectedBranch.getId()) && s.getCantidadTotal() > 0) {
                 boolean matches = true;
-                if (!query.isEmpty() && s.getProducto() != null) {
-                    String name = s.getProducto().getName() != null ? s.getProducto().getName().toLowerCase() : "";
-                    String sku = s.getProducto().getSku() != null ? s.getProducto().getSku().toLowerCase() : "";
-                    if (!name.contains(query) && !sku.contains(query)) {
+                if (!"Todos".equals(selectedCategory) && s.getProducto() != null) {
+                    String category = s.getProducto().getCategory();
+                    if (category == null || !category.equalsIgnoreCase(selectedCategory)) {
                         matches = false;
                     }
                 }
@@ -493,7 +608,6 @@ public class SalesFragment extends Fragment {
     private void addToCart(Stock item) {
         if (item.getProducto() == null) return;
 
-        // Check if already in cart
         CartProduct existing = null;
         for (CartProduct cp : cartProducts) {
             if (cp.getProductoId().equals(item.getProductoId())) {
@@ -535,88 +649,15 @@ public class SalesFragment extends Fragment {
 
         if (totalItems == 0) {
             tvCartCount.setText("Carrito vacío");
-            cvCartPanel.setVisibility(View.GONE);
         } else {
-            tvCartCount.setText(totalItems + " art. en carrito");
-            cvCartPanel.setVisibility(View.VISIBLE);
+            tvCartCount.setText(totalItems + " prod. en carrito");
         }
+        cvCartPanel.setVisibility(View.VISIBLE);
         tvCartTotal.setText(String.format("Bs %.2f", total));
-    }
 
-    private void handleCheckout() {
-        if (spinnerBranch.getSelectedItemPosition() < 0 || sucursalesList.isEmpty()) {
-            Toast.makeText(getContext(), "Selecciona una sucursal", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (cartProducts.isEmpty()) {
-            Toast.makeText(getContext(), "El carrito está vacío", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String clienteNombre = etClienteNombre.getText().toString().trim();
-        if (clienteNombre.isEmpty()) {
-            Toast.makeText(getContext(), "Ingresa el nombre del cliente", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String clienteDoc = etClienteDoc.getText().toString().trim();
-        Sucursal selectedBranch = sucursalesList.get(spinnerBranch.getSelectedItemPosition());
-
-        List<VentaItem> items = new ArrayList<>();
-        for (CartProduct cp : cartProducts) {
-            items.add(new VentaItem(cp.getProductoId(), cp.getCantidad()));
-        }
-
-        VentaRequest request = new VentaRequest(
-            selectedBranch.getId(),
-            clienteNombre,
-            clienteDoc.isEmpty() ? null : clienteDoc,
-            items
-        );
-
-        btnCheckout.setEnabled(false);
-        btnCheckout.setText("Procesando cobro...");
-
-        apiService.createVenta(request).enqueue(new Callback<Venta>() {
-            @Override
-            public void onResponse(Call<Venta> call, Response<Venta> response) {
-                btnCheckout.setEnabled(true);
-                btnCheckout.setText("Cobrar y Emitir Comprobante");
-
-                if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(getContext(), "¡Venta registrada exitosamente!", Toast.LENGTH_LONG).show();
-                    
-                    // Show receipt dialog
-                    Venta savedVenta = response.body();
-                    showComprobanteDialog(savedVenta);
-
-                    // Reset cart
-                    cartProducts.clear();
-                    updateCartTotals();
-                    cartAdapter.notifyDataSetChanged();
-                    etClienteNombre.setText("Cliente Casual");
-                    etClienteDoc.setText("");
-                    
-                    // Collapse cart
-                    isCartExpanded = false;
-                    llCartDetails.setVisibility(View.GONE);
-                    btnToggleCart.setText("Ver Detalles");
-
-                    // Reload inventories
-                    loadStock();
-                } else {
-                    Toast.makeText(getContext(), "Error al procesar la venta en el servidor", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Venta> call, Throwable t) {
-                btnCheckout.setEnabled(true);
-                btnCheckout.setText("Cobrar y Emitir Comprobante");
-                Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Update subtabs text count dynamically
+        btnCartTabNew.setText("Nueva orden (" + totalItems + ")");
+        btnCartTabHistory.setText("Tickets (" + savedTicketsList.size() + ")");
     }
 
     private void showComprobanteDialog(Venta venta) {
@@ -636,7 +677,6 @@ public class SalesFragment extends Fragment {
         // Fill headers
         tvNro.setText("Comprobante Nro: " + (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "N/A"));
         
-        // Date formatting: Parse UTC to local timezone beautifully (AM/PM format)
         String formattedDate = "N/A";
         String dateStr = venta.getFecha();
         if (dateStr != null) {
@@ -650,23 +690,34 @@ public class SalesFragment extends Fragment {
                 utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
                 java.util.Date date = utcFormat.parse(dateStr);
                 
-                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm a", java.util.Locale.US);
+                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm a", java.util.Locale.US);
                 localFormat.setTimeZone(java.util.TimeZone.getDefault());
                 formattedDate = localFormat.format(date);
             } catch (Exception e) {
-                if (dateStr.contains("T")) {
-                    formattedDate = dateStr.replace("T", " ");
-                    if (formattedDate.length() > 19) {
-                        formattedDate = formattedDate.substring(0, 19);
+                try {
+                    String clean = dateStr.replace("T", " ");
+                    if (clean.length() >= 10) {
+                        String datePart = clean.substring(0, 10);
+                        String timePart = clean.substring(10);
+                        if (timePart.contains(".")) {
+                            timePart = timePart.substring(0, timePart.indexOf("."));
+                        }
+                        String[] parts = datePart.split("-");
+                        if (parts.length == 3) {
+                            formattedDate = parts[2] + "/" + parts[1] + "/" + parts[0] + timePart;
+                        } else {
+                            formattedDate = clean;
+                        }
+                    } else {
+                        formattedDate = clean;
                     }
-                } else {
+                } catch (Exception ex) {
                     formattedDate = dateStr;
                 }
             }
         }
         tvFecha.setText("Fecha: " + formattedDate);
 
-        // Branch name lookup fallback if relation is not populated by POST response
         String sucursalName = "Principal";
         if (venta.getSucursal() != null && venta.getSucursal().getName() != null) {
             sucursalName = venta.getSucursal().getName();
@@ -683,7 +734,6 @@ public class SalesFragment extends Fragment {
         tvDoc.setText("NIT/CI: " + (venta.getClienteDocumento() != null ? venta.getClienteDocumento() : "N/A"));
         tvTotal.setText(String.format("Bs %.2f", venta.getTotal()));
 
-        // Add dynamic items lines
         if (venta.getDetalle() != null) {
             llDetalleContainer.removeAllViews();
             float density = getResources().getDisplayMetrics().density;
@@ -696,7 +746,6 @@ public class SalesFragment extends Fragment {
                 ));
                 row.setPadding(0, (int)(8 * density), 0, (int)(8 * density));
 
-                // Cant. (width: 40dp)
                 TextView tvCant = new TextView(getContext());
                 LinearLayout.LayoutParams lpCant = new LinearLayout.LayoutParams((int)(40 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
                 tvCant.setLayoutParams(lpCant);
@@ -704,7 +753,6 @@ public class SalesFragment extends Fragment {
                 tvCant.setTextColor(Color.parseColor("#475569"));
                 tvCant.setTextSize(11f);
 
-                // Descripción (width: 0dp, weight: 1)
                 TextView tvDesc = new TextView(getContext());
                 LinearLayout.LayoutParams lpDesc = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
                 tvDesc.setLayoutParams(lpDesc);
@@ -712,7 +760,6 @@ public class SalesFragment extends Fragment {
                 tvDesc.setTextColor(Color.parseColor("#475569"));
                 tvDesc.setTextSize(11f);
 
-                // P. Unit (width: 70dp)
                 TextView tvUnit = new TextView(getContext());
                 LinearLayout.LayoutParams lpUnit = new LinearLayout.LayoutParams((int)(70 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
                 tvUnit.setLayoutParams(lpUnit);
@@ -721,7 +768,6 @@ public class SalesFragment extends Fragment {
                 tvUnit.setTextSize(11f);
                 tvUnit.setGravity(android.view.Gravity.END);
 
-                // Subtotal (width: 80dp)
                 TextView tvSub = new TextView(getContext());
                 LinearLayout.LayoutParams lpSub = new LinearLayout.LayoutParams((int)(80 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
                 tvSub.setLayoutParams(lpSub);
@@ -761,7 +807,6 @@ public class SalesFragment extends Fragment {
                 String filename = (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "comprobante_" + venta.getId()) + ".pdf";
                 downloadRequest.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, filename);
 
-                // Add token headers
                 com.example.template.utils.SessionManager sessionManager = new com.example.template.utils.SessionManager(getContext());
                 String token = sessionManager.getToken();
                 if (token != null) {
@@ -784,6 +829,92 @@ public class SalesFragment extends Fragment {
             }
         });
         dialog.show();
+    }
+
+    // --- INNER CLASS REPRESENTING A SAVED TICKET / SUSPENDED ORDER ---
+    private static class SavedTicket {
+        private String id;
+        private String timestamp;
+        private List<CartProduct> items;
+        private double totalAmount;
+        private int totalItemsCount;
+
+        public SavedTicket(String id, String timestamp, List<CartProduct> items, double totalAmount, int totalItemsCount) {
+            this.id = id;
+            this.timestamp = timestamp;
+            this.items = items;
+            this.totalAmount = totalAmount;
+            this.totalItemsCount = totalItemsCount;
+        }
+
+        public String getId() { return id; }
+        public String getTimestamp() { return timestamp; }
+        public List<CartProduct> getItems() { return items; }
+        public double getTotalAmount() { return totalAmount; }
+        public int getTotalItemsCount() { return totalItemsCount; }
+    }
+
+    // --- RECYCLER ADAPTER FOR SAVED TICKETS ---
+    private static class SavedTicketsAdapter extends RecyclerView.Adapter<SavedTicketsAdapter.ViewHolder> {
+        private List<SavedTicket> list;
+        private SavedTicketActionListener listener;
+
+        public interface SavedTicketActionListener {
+            void onLoadTicket(SavedTicket ticket);
+            void onDeleteTicket(SavedTicket ticket);
+        }
+
+        public SavedTicketsAdapter(List<SavedTicket> list, SavedTicketActionListener listener) {
+            this.list = list;
+            this.listener = listener;
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_saved_ticket, parent, false);
+            return new ViewHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            SavedTicket ticket = list.get(position);
+            holder.tvTicketId.setText(ticket.getId());
+            holder.tvTicketTime.setText(ticket.getTimestamp());
+            holder.tvTicketSummary.setText(ticket.getTotalItemsCount() + " items • " + String.format(java.util.Locale.US, "Bs %.2f", ticket.getTotalAmount()));
+
+            holder.btnLoadTicket.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onLoadTicket(ticket);
+                }
+            });
+
+            holder.btnDeleteTicket.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeleteTicket(ticket);
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return list == null ? 0 : list.size();
+        }
+
+        public static class ViewHolder extends RecyclerView.ViewHolder {
+            TextView tvTicketId, tvTicketTime, tvTicketSummary;
+            Button btnLoadTicket;
+            ImageButton btnDeleteTicket;
+
+            public ViewHolder(@NonNull View itemView) {
+                super(itemView);
+                tvTicketId = itemView.findViewById(R.id.tvTicketId);
+                tvTicketTime = itemView.findViewById(R.id.tvTicketTime);
+                tvTicketSummary = itemView.findViewById(R.id.tvTicketSummary);
+                btnLoadTicket = itemView.findViewById(R.id.btnLoadTicket);
+                btnDeleteTicket = itemView.findViewById(R.id.btnDeleteTicket);
+            }
+        }
     }
 
     // --- INNER CLASS REPRESENTING CART PRODUCT DRAFT ---
@@ -840,6 +971,15 @@ public class SalesFragment extends Fragment {
             holder.tvSku.setText(s.getProducto() != null ? s.getProducto().getSku() : "N/A");
             holder.tvNombre.setText(s.getProducto() != null ? s.getProducto().getName() : "N/A");
             
+            if (s.getProducto() != null && s.getProducto().getImagenUrl() != null && !s.getProducto().getImagenUrl().trim().isEmpty()) {
+                holder.ivProductImage.setPadding(0, 0, 0, 0);
+                ImageLoader.loadImage(s.getProducto().getImagenUrl(), holder.ivProductImage);
+            } else {
+                holder.ivProductImage.setImageResource(R.drawable.ic_product_placeholder);
+                int pad = (int) (8 * holder.itemView.getResources().getDisplayMetrics().density);
+                holder.ivProductImage.setPadding(pad, pad, pad, pad);
+            }
+
             double precio = s.getProducto() != null ? s.getProducto().getPrecioVenta() : 0.0;
             holder.tvPrecio.setText(String.format("Bs %.2f", precio));
             holder.tvStockBadge.setText(s.getCantidadTotal() + " DISP.");
@@ -864,6 +1004,8 @@ public class SalesFragment extends Fragment {
         public static class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvSku, tvNombre, tvPrecio, tvStockBadge;
             ImageButton btnAddToCart;
+            View cvProductImageContainer;
+            ImageView ivProductImage;
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -872,6 +1014,8 @@ public class SalesFragment extends Fragment {
                 tvPrecio = itemView.findViewById(R.id.tvPrecio);
                 tvStockBadge = itemView.findViewById(R.id.tvStockBadge);
                 btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
+                cvProductImageContainer = itemView.findViewById(R.id.cvProductImageContainer);
+                ivProductImage = itemView.findViewById(R.id.ivProductImage);
             }
         }
     }
@@ -962,104 +1106,6 @@ public class SalesFragment extends Fragment {
         super.onResume();
         if (getActivity() != null) {
             getActivity().getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-        }
-    }
-
-    // --- RECENT SALES HISTORY RECYCLER ADAPTER ---
-    private static class SalesHistoryAdapter extends RecyclerView.Adapter<SalesHistoryAdapter.ViewHolder> {
-        private List<Venta> list;
-        private List<com.example.template.network.models.Sucursal> sucursalesList;
-        private OnSaleClickListener listener;
-
-        public interface OnSaleClickListener {
-            void onSaleClick(Venta venta);
-        }
-
-        public SalesHistoryAdapter(List<Venta> list, List<com.example.template.network.models.Sucursal> sucursalesList, OnSaleClickListener listener) {
-            this.list = list;
-            this.sucursalesList = sucursalesList;
-            this.listener = listener;
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sales_history, parent, false);
-            return new ViewHolder(v);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Venta v = list.get(position);
-            holder.tvComprobante.setText(v.getNumeroComprobante() != null ? v.getNumeroComprobante() : "N/A");
-            
-            String label = (v.getClienteNombre() != null ? v.getClienteNombre() : "Cliente Casual");
-            String sucursalName = null;
-            if (v.getSucursal() != null && v.getSucursal().getName() != null) {
-                sucursalName = v.getSucursal().getName();
-            } else if (v.getSucursalId() != null && sucursalesList != null) {
-                for (com.example.template.network.models.Sucursal s : sucursalesList) {
-                    if (v.getSucursalId().equals(s.getId())) {
-                        sucursalName = s.getName();
-                        break;
-                    }
-                }
-            }
-            if (sucursalName != null) {
-                label += " (" + sucursalName + ")";
-            }
-            holder.tvCliente.setText(label);
-            
-            String formattedDate = "N/A";
-            String dateStr = v.getFecha();
-            if (dateStr != null) {
-                try {
-                    java.text.SimpleDateFormat utcFormat;
-                    if (dateStr.contains(".")) {
-                        utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US);
-                    } else {
-                        utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US);
-                    }
-                    utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
-                    java.util.Date date = utcFormat.parse(dateStr);
-                    
-                    java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm a", java.util.Locale.US);
-                    localFormat.setTimeZone(java.util.TimeZone.getDefault());
-                    formattedDate = localFormat.format(date);
-                } catch (Exception e) {
-                    if (dateStr.contains("T")) {
-                        formattedDate = dateStr.replace("T", " ").substring(0, 16);
-                    } else {
-                        formattedDate = dateStr;
-                    }
-                }
-            }
-            holder.tvFecha.setText(formattedDate);
-            
-            holder.tvTotal.setText(String.format("Bs %.2f", v.getTotal()));
-
-            holder.itemView.setOnClickListener(click -> {
-                if (listener != null) {
-                    listener.onSaleClick(v);
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return list == null ? 0 : list.size();
-        }
-
-        public static class ViewHolder extends RecyclerView.ViewHolder {
-            TextView tvComprobante, tvCliente, tvFecha, tvTotal;
-
-            public ViewHolder(@NonNull View itemView) {
-                super(itemView);
-                tvComprobante = itemView.findViewById(R.id.tvComprobante);
-                tvCliente = itemView.findViewById(R.id.tvCliente);
-                tvFecha = itemView.findViewById(R.id.tvFecha);
-                tvTotal = itemView.findViewById(R.id.tvTotal);
-            }
         }
     }
 }

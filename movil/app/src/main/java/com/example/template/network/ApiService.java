@@ -117,4 +117,8 @@ public interface ApiService {
 
     @retrofit2.http.PATCH("tenant/profile")
     Call<com.example.template.network.models.TenantProfile> updateTenantProfile(@Body com.example.template.network.models.TenantProfile profile);
+
+    @retrofit2.http.Multipart
+    @POST("productos/upload")
+    Call<com.example.template.network.models.UploadResponse> uploadFile(@retrofit2.http.Part okhttp3.MultipartBody.Part file);
 }

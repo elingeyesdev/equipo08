@@ -120,7 +120,7 @@ public class EmpleadosFragment extends Fragment {
             etEmail.setText("");
             etPassword.setText("");
             spinnerSucursal.setSelection(0);
-            btnGuardar.setText("Confirmar Alta de Personal");
+            btnGuardar.setText("Confirmar alta de personal");
         }
         
         isFormVisible = !isFormVisible || fromEdit;
@@ -140,7 +140,7 @@ public class EmpleadosFragment extends Fragment {
         etNombre.setText(empleado.getNombreCompleto());
         etEmail.setText(empleado.getCorreo());
         etPassword.setText(""); // Keep empty for security
-        btnGuardar.setText("Actualizar Empleado");
+        btnGuardar.setText("Actualizar empleado");
         
         // Select Role
         if (empleado.getRol() != null) {

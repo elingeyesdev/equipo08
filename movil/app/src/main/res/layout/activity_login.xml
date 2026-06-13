@@ -25,7 +25,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Iniciar Sesión"
+                android:text="Iniciar sesión"
                 android:textAlignment="center"
                 android:textColor="@color/primary_color"
                 android:textSize="24sp"
@@ -44,7 +44,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Correo Electrónico"
+                android:text="Correo electrónico"
                 android:textColor="@color/primary_color"
                 android:textStyle="bold"
                 android:textSize="14sp"
@@ -101,7 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:backgroundTint="@color/primary_color"
-                android:text="Ingresar al Sistema"
+                android:text="Ingresar al sistema"
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 android:textAllCaps="false"

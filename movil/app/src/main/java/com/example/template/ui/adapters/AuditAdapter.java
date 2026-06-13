@@ -43,11 +43,37 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
                 utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
                 java.util.Date date = utcFormat.parse(a.getFecha());
                 
-                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.US);
+                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.US);
                 localFormat.setTimeZone(java.util.TimeZone.getDefault());
                 formattedDate = localFormat.format(date);
             } catch (Exception e) {
-                formattedDate = a.getFecha().replace("T", " ").substring(0, 16);
+                try {
+                    java.text.SimpleDateFormat utcFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US);
+                    utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                    java.util.Date date = utcFormat.parse(a.getFecha());
+                    
+                    java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.US);
+                    localFormat.setTimeZone(java.util.TimeZone.getDefault());
+                    formattedDate = localFormat.format(date);
+                } catch (Exception ex) {
+                    try {
+                        String clean = a.getFecha().replace("T", " ");
+                        if (clean.length() >= 16) {
+                            String datePart = clean.substring(0, 10);
+                            String timePart = clean.substring(11, 16);
+                            String[] parts = datePart.split("-");
+                            if (parts.length == 3) {
+                                formattedDate = parts[2] + "/" + parts[1] + "/" + parts[0] + " " + timePart;
+                            } else {
+                                formattedDate = clean.substring(0, 16);
+                            }
+                        } else {
+                            formattedDate = clean;
+                        }
+                    } catch (Exception ex2) {
+                        formattedDate = a.getFecha();
+                    }
+                }
             }
         }
         holder.tvDate.setText(formattedDate);
@@ -66,7 +92,7 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
             holder.tvDelta.setBackgroundColor(Color.parseColor("#f1f5f9"));
         } else {
             holder.tvDelta.setText(deltaVal + " U");
-            holder.tvDelta.setTextColor(Color.parseColor("#0d9488"));
+            holder.tvDelta.setTextColor(Color.parseColor("#4f46e5"));
             holder.tvDelta.setBackgroundColor(Color.parseColor("#F5EEF8"));
         }
 

@@ -116,7 +116,7 @@ public class SourcingFragment extends Fragment {
             isFiltersVisible = !isFiltersVisible;
             if (isFiltersVisible) {
                 cardFilter.setVisibility(View.VISIBLE);
-                btnToggleFilters.setText("Ocultar Filtros");
+                btnToggleFilters.setText("Ocultar filtros");
                 btnToggleFilters.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488")));
             } else {
                 cardFilter.setVisibility(View.GONE);
@@ -257,7 +257,7 @@ public class SourcingFragment extends Fragment {
                         spinnerSucursal.setAdapter(sucAdapter);
 
                         List<String> filterOptions = new ArrayList<>();
-                        filterOptions.add("Todas las Sucursales");
+                        filterOptions.add("Todas las sucursales");
                         for (Sucursal s : sucursalesList) {
                             filterOptions.add(s.getName());
                         }

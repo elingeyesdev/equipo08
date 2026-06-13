@@ -135,9 +135,14 @@ public class PermisosFragment extends Fragment {
             headerLayout.setPadding(16, 24, 16, 24);
             headerLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
             
-            // Categoria Title
+            // Categoria Title (only first letter capitalized, keep proper acronyms)
             TextView tvCat = new TextView(getContext());
-            tvCat.setText(cat);
+            String catDisplay = cat;
+            if (catDisplay != null && catDisplay.length() > 0) {
+                catDisplay = catDisplay.substring(0, 1).toUpperCase() + catDisplay.substring(1).toLowerCase();
+                catDisplay = catDisplay.replace("(pos)", "(POS)");
+            }
+            tvCat.setText(catDisplay);
             tvCat.setTypeface(null, android.graphics.Typeface.BOLD);
             tvCat.setTextColor(android.graphics.Color.parseColor("#0f172a"));
             tvCat.setTextSize(14f);
@@ -147,10 +152,13 @@ public class PermisosFragment extends Fragment {
             tvCat.setLayoutParams(tvCatParams);
             headerLayout.addView(tvCat);
 
-            // Toggle Icon (Chevron)
+            // Toggle Icon (Modern Chevron)
             android.widget.ImageView iconChevron = new android.widget.ImageView(getContext());
-            iconChevron.setImageResource(android.R.drawable.arrow_down_float);
+            iconChevron.setImageResource(R.drawable.ic_chevron_down);
             iconChevron.setColorFilter(android.graphics.Color.parseColor("#0f172a"));
+            // Set size ofchevron to be neat
+            int iconSize = (int) (20 * getResources().getDisplayMetrics().density);
+            iconChevron.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
             headerLayout.addView(iconChevron);
 
             catContainer.addView(headerLayout);
@@ -165,14 +173,14 @@ public class PermisosFragment extends Fragment {
             listContainer.setPadding(16, 0, 16, 16);
             listContainer.setVisibility(View.GONE);
 
-            // Toggle logic
+            // Toggle logic using rotation
             headerLayout.setOnClickListener(v -> {
                 if (listContainer.getVisibility() == View.VISIBLE) {
                     listContainer.setVisibility(View.GONE);
-                    iconChevron.setImageResource(android.R.drawable.arrow_down_float);
+                    iconChevron.animate().rotation(0).setDuration(200).start();
                 } else {
                     listContainer.setVisibility(View.VISIBLE);
-                    iconChevron.setImageResource(android.R.drawable.arrow_up_float);
+                    iconChevron.animate().rotation(180).setDuration(200).start();
                 }
             });
 
@@ -189,8 +197,14 @@ public class PermisosFragment extends Fragment {
                     ));
                     row.setPadding(0, 16, 0, 16);
 
+                    // Permission Title (only first letter capitalized, keep proper acronyms)
                     TextView tvPermiso = new TextView(getContext());
-                    tvPermiso.setText(p);
+                    String pDisplay = p;
+                    if (pDisplay != null && pDisplay.length() > 0) {
+                        pDisplay = pDisplay.substring(0, 1).toUpperCase() + pDisplay.substring(1).toLowerCase();
+                        pDisplay = pDisplay.replace("pos", "POS");
+                    }
+                    tvPermiso.setText(pDisplay);
                     tvPermiso.setTextColor(android.graphics.Color.parseColor("#0f172a"));
                     tvPermiso.setTextSize(12f);
                     LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
@@ -200,6 +214,28 @@ public class PermisosFragment extends Fragment {
                     row.addView(tvPermiso);
 
                     Switch sw = new Switch(getContext());
+                    if (switchesMap == supervisorSwitches) {
+                        int activeColor = android.graphics.Color.parseColor("#5981DF");
+                        int inactiveColor = android.graphics.Color.parseColor("#94a3b8");
+                        
+                        int[][] states = new int[][] {
+                            new int[] { android.R.attr.state_checked },
+                            new int[] { -android.R.attr.state_checked }
+                        };
+                        
+                        int[] thumbColors = new int[] {
+                            activeColor,
+                            inactiveColor
+                        };
+                        
+                        int[] trackColors = new int[] {
+                            android.graphics.Color.argb(76, android.graphics.Color.red(activeColor), android.graphics.Color.green(activeColor), android.graphics.Color.blue(activeColor)),
+                            android.graphics.Color.argb(76, android.graphics.Color.red(inactiveColor), android.graphics.Color.green(inactiveColor), android.graphics.Color.blue(inactiveColor))
+                        };
+                        
+                        sw.setThumbTintList(new android.content.res.ColorStateList(states, thumbColors));
+                        sw.setTrackTintList(new android.content.res.ColorStateList(states, trackColors));
+                    }
                     switchesMap.put(p, sw);
                     row.addView(sw);
 

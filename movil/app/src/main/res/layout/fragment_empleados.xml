@@ -17,27 +17,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Gestión de Nómina y Personal"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#2b3b55" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Administra el organigrama de tu tienda y asigna sucursales."
-                    android:textColor="#5a6a85"
-                    android:layout_marginBottom="12dp" />
-            </LinearLayout>
+            <!-- Forms and List Area -->
 
             <!-- CARD Form -->
             <androidx.cardview.widget.CardView
@@ -59,7 +39,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Procesar Alta de Nuevo Empleado"
+                        android:text="Procesar alta de nuevo empleado"
                         android:textStyle="bold"
                         android:textColor="#2b3b55"
                         android:layout_marginBottom="16dp"/>
@@ -76,7 +56,7 @@
                             android:id="@+id/etNombre"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Nombre Completo *"
+                            android:hint="Nombre completo *"
                             android:textColor="@color/primary_color" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -92,7 +72,7 @@
                             android:id="@+id/etEmail"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Correo Electrónico (Acceso) *"
+                            android:hint="Correo electrónico (acceso) *"
                             android:inputType="textEmailAddress"
                             android:textColor="@color/primary_color" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -110,7 +90,7 @@
                             android:id="@+id/etPassword"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Contraseña Provisoria *"
+                            android:hint="Contraseña provisoria *"
                             android:inputType="textPassword"
                             android:textColor="@color/primary_color" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -118,7 +98,7 @@
                     <TextView 
                         android:layout_width="wrap_content" 
                         android:layout_height="wrap_content" 
-                        android:text="Rol de Sistema *" 
+                        android:text="Rol de sistema *" 
                         android:textColor="#5a6a85"
                         android:layout_marginBottom="4dp"/>
                     
@@ -132,7 +112,7 @@
                     <TextView 
                         android:layout_width="wrap_content" 
                         android:layout_height="wrap_content" 
-                        android:text="Sucursal / Centro de Trabajo *" 
+                        android:text="Sucursal / centro de trabajo *" 
                         android:textColor="#5a6a85"
                         android:layout_marginBottom="4dp"/>
                     
@@ -148,9 +128,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         app:cornerRadius="8dp"
-                        android:backgroundTint="#1d4ed8"
+                        android:backgroundTint="@color/profit_color"
                         android:textColor="#ffffff"
-                        android:text="Confirmar Alta de Personal" />
+                        android:text="Confirmar alta de personal" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

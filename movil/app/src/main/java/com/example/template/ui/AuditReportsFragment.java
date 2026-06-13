@@ -105,10 +105,10 @@ public class AuditReportsFragment extends Fragment {
             isFilterVisible = !isFilterVisible;
             if (isFilterVisible) {
                 cardFilters.setVisibility(View.VISIBLE);
-                btnToggleFilter.setText("Ocultar Filtros");
+                btnToggleFilter.setText("Ocultar filtros");
             } else {
                 cardFilters.setVisibility(View.GONE);
-                btnToggleFilter.setText("Filtrar Reporte");
+                btnToggleFilter.setText("Filtrar reporte");
             }
         });
 
@@ -136,7 +136,7 @@ public class AuditReportsFragment extends Fragment {
         });
 
         String[] motivos = {"ERROR_REGISTRO", "DANO_MERMA", "ROBO_O_PERDIDA", "CADUCIDAD"};
-        String[] motivosLabels = {"Error de Registro", "Dañado / Defectuoso", "Pérdida / Robo", "Producto Vencido"};
+        String[] motivosLabels = {"Error de registro", "Dañado / defectuoso", "Pérdida / robo", "Producto vencido"};
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, motivosLabels);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMotivoAudit.setAdapter(spinnerAdapter);
@@ -407,14 +407,14 @@ public class AuditReportsFragment extends Fragment {
     private void populateSpinners() {
         if (getContext() == null) return;
         List<String> operators = new ArrayList<>();
-        operators.add("Cualquier Operador");
+        operators.add("Cualquier operador");
         List<String> roles = new ArrayList<>();
-        roles.add("Cualquier Rol");
+        roles.add("Cualquier rol");
         List<String> motives = new ArrayList<>();
-        motives.add("Cualquier Motivo");
-        motives.add("Error de Registro");
-        motives.add("Artículo Dañado / Extraviado");
-        motives.add("Robo / No Habido");
+        motives.add("Cualquier motivo");
+        motives.add("Error de registro");
+        motives.add("Artículo dañado / extraviado");
+        motives.add("Robo / no habido");
         motives.add("Vencido");
 
         for (Ajuste a : allAjustes) {
@@ -442,8 +442,8 @@ public class AuditReportsFragment extends Fragment {
         if (allAjustes == null || allAjustes.isEmpty()) return;
         
         List<Ajuste> filtered = new ArrayList<>();
-        String selOp = spinnerOperator.getSelectedItem() != null ? spinnerOperator.getSelectedItem().toString() : "Cualquier Operador";
-        String selMot = spinnerCategory.getSelectedItem() != null ? spinnerCategory.getSelectedItem().toString() : "Cualquier Motivo";
+        String selOp = spinnerOperator.getSelectedItem() != null ? spinnerOperator.getSelectedItem().toString() : "Cualquier operador";
+        String selMot = spinnerCategory.getSelectedItem() != null ? spinnerCategory.getSelectedItem().toString() : "Cualquier motivo";
 
         SimpleDateFormat utcFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         utcFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -461,23 +461,23 @@ public class AuditReportsFragment extends Fragment {
                 }
             }
 
-            if (!"Cualquier Operador".equals(selOp)) {
+            if (!"Cualquier operador".equals(selOp)) {
                 String op = a.getUsuario() != null ? a.getUsuario().getNombreCompleto() : "Operador";
                 if (!selOp.equals(op)) matches = false;
             }
             
-            String selRol = spinnerRole.getSelectedItem() != null ? spinnerRole.getSelectedItem().toString() : "Cualquier Rol";
-            if (!"Cualquier Rol".equals(selRol)) {
+            String selRol = spinnerRole.getSelectedItem() != null ? spinnerRole.getSelectedItem().toString() : "Cualquier rol";
+            if (!"Cualquier rol".equals(selRol)) {
                 String rol = a.getUsuario() != null ? a.getUsuario().getRol() : null;
                 if (rol == null || !selRol.equals(rol)) matches = false;
             }
 
-            if (!"Cualquier Motivo".equals(selMot)) {
+            if (!"Cualquier motivo".equals(selMot)) {
                 String m = a.getMotivo();
                 String desc = m != null ? m : "";
-                if ("ERROR_REGISTRO".equals(m)) desc = "Error de Registro";
-                else if ("DANO_MERMA".equals(m)) desc = "Artículo Dañado / Extraviado";
-                else if ("ROBO_O_PERDIDA".equals(m)) desc = "Robo / No Habido";
+                if ("ERROR_REGISTRO".equals(m)) desc = "Error de registro";
+                else if ("DANO_MERMA".equals(m)) desc = "Artículo dañado / extraviado";
+                else if ("ROBO_O_PERDIDA".equals(m)) desc = "Robo / no habido";
                 else if ("CADUCIDAD".equals(m)) desc = "Vencido";
                 
                 if (!selMot.equals(desc)) matches = false;

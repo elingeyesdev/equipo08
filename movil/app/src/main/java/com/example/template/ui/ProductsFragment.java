@@ -41,7 +41,7 @@ public class ProductsFragment extends Fragment {
     private Button btnGuardar;
     private CardView cardForm;
     private AutoCompleteTextView etName;
-    private EditText etSku, etPrecioCoste, etPrecioVenta, etDescription, etStockMinimo, etImagenUrl;
+    private EditText etSku, etPrecioCoste, etPrecioVenta, etDescription, etStockMinimo;
     private TextView tvMargen;
     private Spinner spinnerProveedor, spinnerCategoria;
     private RecyclerView recyclerView;
@@ -54,6 +54,12 @@ public class ProductsFragment extends Fragment {
 
     private com.google.android.material.textfield.TextInputLayout tilDescription;
     private android.widget.LinearLayout llAttributesContainer;
+
+    private android.widget.ImageView ivProductPreview;
+    private Button btnSelectProductImage;
+    private TextView tvImageStatus, tvRemoveProductImage;
+    private String uploadedImageUrl = null;
+    private static final int PICK_IMAGE_REQUEST = 2001;
 
     private static final java.util.Map<String, String[][]> CATEGORY_ATTRIBUTES = new java.util.HashMap<>();
     static {
@@ -82,8 +88,23 @@ public class ProductsFragment extends Fragment {
         spinnerProveedor = view.findViewById(R.id.spinnerProveedor);
         spinnerCategoria = view.findViewById(R.id.spinnerCategoria);
         etStockMinimo = view.findViewById(R.id.etStockMinimo);
-        etImagenUrl = view.findViewById(R.id.etImagenUrl);
+        ivProductPreview = view.findViewById(R.id.ivProductPreview);
+        btnSelectProductImage = view.findViewById(R.id.btnSelectProductImage);
+        tvImageStatus = view.findViewById(R.id.tvImageStatus);
+        tvRemoveProductImage = view.findViewById(R.id.tvRemoveProductImage);
         recyclerView = view.findViewById(R.id.recyclerView);
+
+        btnSelectProductImage.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        });
+
+        tvRemoveProductImage.setOnClickListener(v -> {
+            uploadedImageUrl = null;
+            ivProductPreview.setVisibility(View.GONE);
+            tvImageStatus.setText("No se ha seleccionado imagen");
+            tvRemoveProductImage.setVisibility(View.GONE);
+        });
 
         tilDescription = view.findViewById(R.id.tilDescription);
         llAttributesContainer = view.findViewById(R.id.llAttributesContainer);
@@ -171,8 +192,12 @@ public class ProductsFragment extends Fragment {
     private void toggleForm(boolean fromEdit) {
         if (!fromEdit) {
             editingProducto = null;
-            etName.setText("", false); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText(""); etStockMinimo.setText(""); etImagenUrl.setText("");
-            btnGuardar.setText("Nuevo Artículo");
+            etName.setText("", false); etDescription.setText(""); etSku.setText(""); etPrecioCoste.setText(""); etPrecioVenta.setText(""); etStockMinimo.setText("");
+            uploadedImageUrl = null;
+            ivProductPreview.setVisibility(View.GONE);
+            tvImageStatus.setText("No se ha seleccionado imagen");
+            tvRemoveProductImage.setVisibility(View.GONE);
+            btnGuardar.setText("Nuevo artículo");
             if (llAttributesContainer != null) llAttributesContainer.removeAllViews();
             if (tilDescription != null) tilDescription.setVisibility(View.VISIBLE);
         }
@@ -197,8 +222,20 @@ public class ProductsFragment extends Fragment {
         etPrecioCoste.setText(String.valueOf(producto.getPrecioCosto()));
         etPrecioVenta.setText(String.valueOf(producto.getPrecioVenta()));
         etStockMinimo.setText(String.valueOf(producto.getStockMinimo()));
-        etImagenUrl.setText(producto.getImagenUrl() != null ? producto.getImagenUrl() : "");
-        btnGuardar.setText("Actualizar Artículo");
+        
+        uploadedImageUrl = producto.getImagenUrl();
+        if (uploadedImageUrl != null && !uploadedImageUrl.trim().isEmpty()) {
+            ivProductPreview.setVisibility(View.VISIBLE);
+            com.example.template.utils.ImageLoader.loadImage(uploadedImageUrl, ivProductPreview);
+            tvImageStatus.setText("Imagen cargada");
+            tvRemoveProductImage.setVisibility(View.VISIBLE);
+        } else {
+            ivProductPreview.setVisibility(View.GONE);
+            tvImageStatus.setText("No se ha seleccionado imagen");
+            tvRemoveProductImage.setVisibility(View.GONE);
+        }
+        
+        btnGuardar.setText("Actualizar artículo");
         
         // Categoria
         if (producto.getCategory() != null) {
@@ -324,11 +361,10 @@ public class ProductsFragment extends Fragment {
 
         String stockMinimoStr = etStockMinimo.getText().toString().trim();
         int stockMinimo = stockMinimoStr.isEmpty() ? 10 : Integer.parseInt(stockMinimoStr);
-        String imagenUrl = etImagenUrl.getText().toString().trim();
 
         Producto request = new Producto(name, sku, cat, coste, venta, selectedProv.getId(), desc.isEmpty() ? null : desc);
         request.setStockMinimo(stockMinimo);
-        request.setImagenUrl(imagenUrl.isEmpty() ? null : imagenUrl);
+        request.setImagenUrl(uploadedImageUrl);
 
         java.util.Map<String, String> attributes = new java.util.HashMap<>();
         String[][] attrs = CATEGORY_ATTRIBUTES.get(cat);
@@ -445,6 +481,56 @@ public class ProductsFragment extends Fragment {
             if (tilDescription != null) tilDescription.setVisibility(View.VISIBLE);
             llAttributesContainer.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == android.app.Activity.RESULT_OK && data != null && data.getData() != null) {
+            android.net.Uri imageUri = data.getData();
+            uploadImage(imageUri);
+        }
+    }
+
+    private void uploadImage(android.net.Uri imageUri) {
+        if (getContext() == null) return;
+        tvImageStatus.setText("Subiendo imagen...");
+        btnSelectProductImage.setEnabled(false);
+
+        okhttp3.MultipartBody.Part body = com.example.template.utils.FileUtils.getMultipartBody(getContext(), imageUri, "file");
+        if (body == null) {
+            tvImageStatus.setText("Error al procesar archivo");
+            btnSelectProductImage.setEnabled(true);
+            return;
+        }
+
+        apiService.uploadFile(body).enqueue(new Callback<com.example.template.network.models.UploadResponse>() {
+            @Override
+            public void onResponse(Call<com.example.template.network.models.UploadResponse> call, Response<com.example.template.network.models.UploadResponse> response) {
+                btnSelectProductImage.setEnabled(true);
+                if (isAdded()) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        uploadedImageUrl = response.body().getUrl();
+                        tvImageStatus.setText("Imagen subida con éxito");
+                        tvRemoveProductImage.setVisibility(View.VISIBLE);
+                        ivProductPreview.setVisibility(View.VISIBLE);
+                        com.example.template.utils.ImageLoader.loadImage(uploadedImageUrl, ivProductPreview);
+                    } else {
+                        tvImageStatus.setText("Error al subir imagen");
+                        Toast.makeText(getContext(), "Error del servidor al cargar archivo", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<com.example.template.network.models.UploadResponse> call, Throwable t) {
+                btnSelectProductImage.setEnabled(true);
+                if (isAdded()) {
+                    tvImageStatus.setText("Error de conexión");
+                    Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     @Override

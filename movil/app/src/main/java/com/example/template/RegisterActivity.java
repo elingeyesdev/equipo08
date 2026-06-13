@@ -20,7 +20,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText etName, etDomain, etEmail, etPassword;
+    private EditText etName, etDomain, etEmail, etPassword, etRazonSocial, etNit, etPhone, etUbicacion;
     private Button btnRegister;
     private TextView tvLogin;
     private SessionManager sessionManager;
@@ -38,6 +38,10 @@ public class RegisterActivity extends AppCompatActivity {
         etDomain = findViewById(R.id.etDomain);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        etRazonSocial = findViewById(R.id.etRazonSocial);
+        etNit = findViewById(R.id.etNit);
+        etPhone = findViewById(R.id.etPhone);
+        etUbicacion = findViewById(R.id.etUbicacion);
         btnRegister = findViewById(R.id.btnRegister);
         tvLogin = findViewById(R.id.tvLogin);
 
@@ -74,8 +78,13 @@ public class RegisterActivity extends AppCompatActivity {
                 .replaceAll("^-+|-+$", "");
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
+        String razonSocial = etRazonSocial.getText().toString().trim();
+        String nit = etNit.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
+        String ubicacion = etUbicacion.getText().toString().trim();
 
-        if (name.isEmpty() || domain.isEmpty() || email.isEmpty() || password.isEmpty()) {
+        if (name.isEmpty() || domain.isEmpty() || email.isEmpty() || password.isEmpty() ||
+                razonSocial.isEmpty() || nit.isEmpty() || phone.isEmpty() || ubicacion.isEmpty()) {
             Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -83,12 +92,12 @@ public class RegisterActivity extends AppCompatActivity {
         btnRegister.setEnabled(false);
         btnRegister.setText("Creando tienda...");
 
-        RegisterRequest request = new RegisterRequest(name, domain, email, password);
+        RegisterRequest request = new RegisterRequest(name, domain, email, password, phone, ubicacion, nit, razonSocial);
         apiService.register(request).enqueue(new Callback<AuthResponse>() {
             @Override
             public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 btnRegister.setEnabled(true);
-                btnRegister.setText("Comenzar a usar OmniMall");
+                btnRegister.setText("Comenzar a usar BolClick");
 
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(RegisterActivity.this, "Cuenta creada exitosamente. Inicia sesión.", Toast.LENGTH_LONG).show();
@@ -108,7 +117,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<AuthResponse> call, Throwable t) {
                 btnRegister.setEnabled(true);
-                btnRegister.setText("Comenzar a usar OmniMall");
+                btnRegister.setText("Comenzar a usar BolClick");
                 Toast.makeText(RegisterActivity.this, "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

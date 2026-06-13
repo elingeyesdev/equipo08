@@ -20,19 +20,23 @@
     <item
         android:id="@+id/nav_sourcing"
         android:icon="@drawable/ic_sourcing"
-        android:title="Lotes (Sourcing)" />
+        android:title="Sourcing" />
     <item
         android:id="@+id/nav_stock"
         android:icon="@drawable/ic_stock"
         android:title="Inventario" />
     <item
-        android:id="@+id/nav_sales"
+        android:id="@+id/nav_pos"
         android:icon="@drawable/ic_sales"
-        android:title="Punto de Venta (POS)" />
+        android:title="Terminal POS" />
+    <item
+        android:id="@+id/nav_sales_history"
+        android:icon="@drawable/ic_ventas"
+        android:title="Ventas" />
     <item
         android:id="@+id/nav_audit_reports"
         android:icon="@drawable/ic_audit"
-        android:title="Reportes de Auditoría" />
+        android:title="Reportes de auditoría" />
         
     <item android:id="@+id/nav_admin_group" android:title="Administración">
         <menu>

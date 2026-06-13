@@ -15,8 +15,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     // Configura aquí la URL de tu API en HTTPS (ngrok)
-    // private static final String BASE_URL = "https://bolclick-backend.onrender.com/api/"; // Producción Render
-    private static final String BASE_URL = "https://runner-affair-gratitude.ngrok-free.dev/api/"; // Desarrollo local
+     private static final String BASE_URL = "https://bolclick-backend.onrender.com/api/"; // Producción Render
+    //private static final String BASE_URL = "https://runner-affair-gratitude.ngrok-free.dev/api/"; // Desarrollo local
 
 
     // Activa esto (true) en desarrollo para omitir la validación de certificados SSL de ngrok

@@ -6,12 +6,14 @@ public class VentaRequest {
     private String sucursal_id;
     private String clienteNombre;
     private String clienteDocumento;
+    private String metodoPago;
     private List<VentaItem> items;
 
-    public VentaRequest(String sucursal_id, String clienteNombre, String clienteDocumento, List<VentaItem> items) {
+    public VentaRequest(String sucursal_id, String clienteNombre, String clienteDocumento, String metodoPago, List<VentaItem> items) {
         this.sucursal_id = sucursal_id;
         this.clienteNombre = clienteNombre;
         this.clienteDocumento = clienteDocumento;
+        this.metodoPago = metodoPago;
         this.items = items;
     }
 
@@ -23,6 +25,9 @@ public class VentaRequest {
 
     public String getClienteDocumento() { return clienteDocumento; }
     public void setClienteDocumento(String clienteDocumento) { this.clienteDocumento = clienteDocumento; }
+
+    public String getMetodoPago() { return metodoPago; }
+    public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }
 
     public List<VentaItem> getItems() { return items; }
     public void setItems(List<VentaItem> items) { this.items = items; }

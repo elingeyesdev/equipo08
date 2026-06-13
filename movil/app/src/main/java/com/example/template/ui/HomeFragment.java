@@ -104,7 +104,7 @@ public class HomeFragment extends Fragment {
         rvRecentSales.setAdapter(recentSalesAdapter);
 
         // Welcome Texts
-        tvWelcomeTitle.setText("Resumen de Tienda");
+        tvWelcomeTitle.setText("Resumen de tienda");
 
         // Apply role security
         applyRoleSecurity();
@@ -289,16 +289,28 @@ public class HomeFragment extends Fragment {
                 utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
                 java.util.Date date = utcFormat.parse(dateStr);
                 
-                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm a", java.util.Locale.US);
+                java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm a", java.util.Locale.US);
                 localFormat.setTimeZone(java.util.TimeZone.getDefault());
                 formattedDate = localFormat.format(date);
             } catch (Exception e) {
-                if (dateStr.contains("T")) {
-                    formattedDate = dateStr.replace("T", " ");
-                    if (formattedDate.length() > 19) {
-                        formattedDate = formattedDate.substring(0, 19);
+                try {
+                    String clean = dateStr.replace("T", " ");
+                    if (clean.length() >= 10) {
+                        String datePart = clean.substring(0, 10);
+                        String timePart = clean.substring(10);
+                        if (timePart.contains(".")) {
+                            timePart = timePart.substring(0, timePart.indexOf("."));
+                        }
+                        String[] parts = datePart.split("-");
+                        if (parts.length == 3) {
+                            formattedDate = parts[2] + "/" + parts[1] + "/" + parts[0] + timePart;
+                        } else {
+                            formattedDate = clean;
+                        }
+                    } else {
+                        formattedDate = clean;
                     }
-                } else {
+                } catch (Exception ex) {
                     formattedDate = dateStr;
                 }
             }
@@ -459,16 +471,28 @@ public class HomeFragment extends Fragment {
                     utcFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
                     java.util.Date date = utcFormat.parse(dateStr);
 
-                    java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm a", java.util.Locale.US);
+                    java.text.SimpleDateFormat localFormat = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm a", java.util.Locale.US);
                     localFormat.setTimeZone(java.util.TimeZone.getDefault());
                     formattedDate = localFormat.format(date);
                 } catch (Exception e) {
-                    if (dateStr.contains("T")) {
-                        formattedDate = dateStr.replace("T", " ");
-                        if (formattedDate.length() > 16) {
-                            formattedDate = formattedDate.substring(0, 16);
+                    try {
+                        String clean = dateStr.replace("T", " ");
+                        if (clean.length() >= 10) {
+                            String datePart = clean.substring(0, 10);
+                            String timePart = clean.substring(10);
+                            if (timePart.contains(".")) {
+                                timePart = timePart.substring(0, timePart.indexOf("."));
+                            }
+                            String[] parts = datePart.split("-");
+                            if (parts.length == 3) {
+                                formattedDate = parts[2] + "/" + parts[1] + "/" + parts[0] + timePart;
+                            } else {
+                                formattedDate = clean;
+                            }
+                        } else {
+                            formattedDate = clean;
                         }
-                    } else {
+                    } catch (Exception ex) {
                         formattedDate = dateStr;
                     }
                 }

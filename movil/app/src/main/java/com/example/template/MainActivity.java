@@ -25,7 +25,8 @@ import com.example.template.ui.AuditReportsFragment;
 import com.example.template.ui.SucursalesFragment;
 import com.example.template.ui.EmpleadosFragment;
 import com.example.template.ui.PermisosFragment;
-import com.example.template.ui.SalesFragment;
+import com.example.template.ui.TerminalPOSFragment;
+import com.example.template.ui.VentasFragment;
 import com.example.template.ui.SettingsFragment;
 import com.example.template.utils.SessionManager;
 import com.example.template.network.models.TenantProfile;
@@ -103,7 +104,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         android.widget.ImageView navLogo = headerView.findViewById(R.id.nav_header_logo);
         if (navTenantName != null) navTenantName.setText(sessionManager.getTenantName());
         if (navUsername != null) navUsername.setText(sessionManager.getUserName());
-        if (navRole != null) navRole.setText(sessionManager.getRole());
+        if (navRole != null) {
+            String roleText = sessionManager.getRole();
+            if ("OWNER".equalsIgnoreCase(roleText)) {
+                roleText = "Administrador";
+            }
+            navRole.setText(roleText);
+        }
         if (navLogo != null && sessionManager.getLogoUrl() != null) {
             com.example.template.utils.ImageLoader.loadCircularImage(sessionManager.getLogoUrl(), navLogo);
         }
@@ -169,7 +176,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             menu.findItem(R.id.nav_sucursales).setVisible(pr.isSucursalesVer());
                             menu.findItem(R.id.nav_sourcing).setVisible(pr.isSourcingVer());
                             menu.findItem(R.id.nav_stock).setVisible(pr.isInventarioVer());
-                            menu.findItem(R.id.nav_sales).setVisible(pr.isVentasVer());
+                            menu.findItem(R.id.nav_pos).setVisible(pr.isVentasVer());
+                            menu.findItem(R.id.nav_sales_history).setVisible(pr.isVentasVer());
                             menu.findItem(R.id.nav_audit_reports).setVisible(pr.isInventarioVer());
                             menu.findItem(R.id.nav_empleados).setVisible(pr.isUsuariosVer());
                             break;
@@ -199,8 +207,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new SourcingFragment();
         } else if (itemId == R.id.nav_stock) {
             selectedFragment = new StockFragment();
-        } else if (itemId == R.id.nav_sales) {
-            selectedFragment = new SalesFragment();
+        } else if (itemId == R.id.nav_pos) {
+            selectedFragment = new TerminalPOSFragment();
+        } else if (itemId == R.id.nav_sales_history) {
+            selectedFragment = new VentasFragment();
         } else if (itemId == R.id.nav_audit_reports) {
             selectedFragment = new AuditReportsFragment();
         } else if (itemId == R.id.nav_sucursales) {
@@ -274,20 +284,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void navigateToSalesHistory() {
         uncheckAllMenuItems(navigationView.getMenu());
-        MenuItem salesItem = navigationView.getMenu().findItem(R.id.nav_sales);
+        MenuItem salesItem = navigationView.getMenu().findItem(R.id.nav_sales_history);
         if (salesItem != null) {
             salesItem.setChecked(true);
             updateToolbarTitle(salesItem.getTitle().toString());
         } else {
-            navigationView.setCheckedItem(R.id.nav_sales);
-            updateToolbarTitle("Punto de Venta (POS)");
+            navigationView.setCheckedItem(R.id.nav_sales_history);
+            updateToolbarTitle("Ventas");
         }
-        SalesFragment salesFragment = new SalesFragment();
-        Bundle args = new Bundle();
-        args.putBoolean("openHistoryTab", true);
-        salesFragment.setArguments(args);
+        VentasFragment historyFragment = new VentasFragment();
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, salesFragment)
+                .replace(R.id.fragment_container, historyFragment)
                 .commit();
     }
 

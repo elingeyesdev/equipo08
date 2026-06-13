@@ -38,7 +38,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="SUPERVISOR"
+                        android:text="Supervisor"
                         android:textStyle="bold"
                         android:textColor="#5981DF"
                         android:textSize="16sp"
@@ -53,7 +53,7 @@
                         android:backgroundTint="#5981DF"
                         android:textColor="#ffffff"
                         android:textSize="12sp"
-                        android:text="Aplicar Perfil" />
+                        android:text="Aplicar perfil" />
                 </RelativeLayout>
 
                 <!-- Container for toggles -->
@@ -88,7 +88,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="VENDEDOR"
+                        android:text="Vendedor"
                         android:textStyle="bold"
                         android:textColor="@color/profit_color"
                         android:textSize="16sp"
@@ -103,7 +103,7 @@
                         android:backgroundTint="@color/accent_color"
                         android:textColor="#ffffff"
                         android:textSize="12sp"
-                        android:text="Aplicar Perfil" />
+                        android:text="Aplicar perfil" />
                 </RelativeLayout>
 
                 <!-- Container for toggles -->

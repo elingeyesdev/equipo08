@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#1e293b"
+    android:background="@color/white"
     android:padding="20dp">
 
     <!-- Header -->
@@ -26,8 +26,8 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Mi Pedido"
-            android:textColor="#FFFFFF"
+            android:text="Mi pedido"
+            android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -37,7 +37,7 @@
             android:layout_height="32dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="@color/profit_color" />
+            app:tint="@color/text_secondary" />
 
     </LinearLayout>
 
@@ -48,7 +48,7 @@
         android:layout_height="120dp"
         android:gravity="center"
         android:text="Tu carrito está vacío."
-        android:textColor="@color/profit_color"
+        android:textColor="@color/text_secondary"
         android:textSize="14sp"
         android:visibility="gone" />
 
@@ -66,9 +66,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#1e293b"
+        android:background="@color/bg_dark"
         android:padding="16dp"
-        android:backgroundTint="#1e293b"
+        android:backgroundTint="@color/bg_dark"
         android:layout_marginTop="8dp">
 
         <LinearLayout
@@ -83,7 +83,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Total estimado"
-                android:textColor="@color/profit_color"
+                android:textColor="@color/text_secondary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -92,7 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Bs 0.00"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/text_primary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -103,8 +103,8 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:backgroundTint="@color/profit_color"
-            android:text="CONFIRMAR POR WHATSAPP"
-            android:textColor="#FFFFFF"
+            android:text="Confirmar por WhatsApp"
+            android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
             app:cornerRadius="12dp" />
@@ -114,7 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="Serás redirigido a WhatsApp para enviar el detalle de tu pedido."
-            android:textColor="#475569"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp"
             android:gravity="center" />
 

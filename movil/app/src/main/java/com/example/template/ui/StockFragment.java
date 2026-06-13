@@ -106,7 +106,7 @@ public class StockFragment extends Fragment {
             isFilterVisible = !isFilterVisible;
             if (isFilterVisible) {
                 cardFilter.setVisibility(View.VISIBLE);
-                btnToggleFilter.setText("Ocultar Filtros");
+                btnToggleFilter.setText("Ocultar filtros");
                 btnToggleFilter.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
             } else {
                 cardFilter.setVisibility(View.GONE);
@@ -142,7 +142,7 @@ public class StockFragment extends Fragment {
         if (getContext() == null) return;
 
         List<String> spinnerOptions = new ArrayList<>();
-        spinnerOptions.add("Consolidado Total (Todas las Sucursales)");
+        spinnerOptions.add("Consolidado total (todas las sucursales)");
         for (Sucursal s : sucursalesList) {
             spinnerOptions.add("Sucursal: " + s.getName());
         }
@@ -262,7 +262,7 @@ public class StockFragment extends Fragment {
         if (llAlertBanner != null && tvAlertTitle != null) {
             if (alertCount > 0) {
                 llAlertBanner.setVisibility(View.VISIBLE);
-                tvAlertTitle.setText("Alertas de Inventario Bajo (" + alertCount + ")");
+                tvAlertTitle.setText("Alertas de inventario bajo (" + alertCount + ")");
             } else {
                 llAlertBanner.setVisibility(View.GONE);
             }
@@ -479,7 +479,7 @@ public class StockFragment extends Fragment {
         if (completed == total) {
             if (btnSimulateAlerts != null) {
                 btnSimulateAlerts.setEnabled(true);
-                btnSimulateAlerts.setText("Simular Escenario de Bajo Stock (E9)");
+                btnSimulateAlerts.setText("Simular escenario de bajo stock");
             }
 
             if (getContext() != null) {

@@ -38,7 +38,7 @@
                 android:textSize="26sp"
                 android:textStyle="bold"
                 android:letterSpacing="-0.02"
-                android:text="Resumen de Tienda" />
+                android:text="Resumen de tienda" />
 
             <!-- Metrics Section Title -->
             <TextView
@@ -93,7 +93,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Ventas Históricas"
+                                android:text="Ventas históricas"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -145,7 +145,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Ingresos Totales"
+                                android:text="Ingresos totales"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -197,7 +197,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Utilidad Bruta"
+                                android:text="Utilidad bruta"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -248,7 +248,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Stock Físico"
+                                android:text="Stock físico"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -308,7 +308,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Pérdidas Confirmadas"
+                                android:text="Pérdidas confirmadas"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />

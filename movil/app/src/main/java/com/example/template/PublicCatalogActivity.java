@@ -176,7 +176,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
                         storePhone = catalog.getTienda().getPhone();
                         storeDesc = "Dominio: " + catalog.getTienda().getDomain();
                         if (catalog.getTienda().getPhone() != null && !catalog.getTienda().getPhone().isEmpty()) {
-                            storeDesc += " • Tel: " + catalog.getTienda().getPhone();
+                            storeDesc += "\nTel: " + catalog.getTienda().getPhone();
                         }
                         
                         tvStoreName.setText(storeName);
@@ -250,14 +250,18 @@ public class PublicCatalogActivity extends AppCompatActivity {
             chip.setText(cat);
             chip.setCheckable(true);
             chip.setCheckedIconVisible(false);
-            chip.setTextColor(getResources().getColorStateList(android.R.color.white));
-            
-            // Colores estilo Tailwind
+            chip.setChipStrokeColorResource(R.color.border_color);
+            chip.setChipStrokeWidth(1f);
+
             if ("TODOS".equals(cat)) {
                 chip.setChecked(true);
-                chip.setChipBackgroundColorResource(android.R.color.holo_blue_dark);
+                chip.setChipBackgroundColorResource(R.color.primary_color);
+                chip.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, R.color.white));
+                chip.setChipStrokeColorResource(R.color.primary_color);
             } else {
-                chip.setChipBackgroundColorResource(android.R.color.darker_gray);
+                chip.setChecked(false);
+                chip.setChipBackgroundColorResource(R.color.white);
+                chip.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, R.color.text_secondary));
             }
 
             chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -267,10 +271,14 @@ public class PublicCatalogActivity extends AppCompatActivity {
                         Chip c = (Chip) cgCatalogCategories.getChildAt(i);
                         if (c != chip) {
                             c.setChecked(false);
-                            c.setChipBackgroundColorResource(android.R.color.darker_gray);
+                            c.setChipBackgroundColorResource(R.color.white);
+                            c.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, R.color.text_secondary));
+                            c.setChipStrokeColorResource(R.color.border_color);
                         }
                     }
-                    chip.setChipBackgroundColorResource(android.R.color.holo_blue_dark);
+                    chip.setChipBackgroundColorResource(R.color.primary_color);
+                    chip.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, R.color.white));
+                    chip.setChipStrokeColorResource(R.color.primary_color);
                     selectedCategory = cat;
                     filterProducts();
                 }
@@ -341,7 +349,20 @@ public class PublicCatalogActivity extends AppCompatActivity {
         }
         if (tvDetailPrice != null) tvDetailPrice.setText(String.format("Bs %.2f", product.getPrecioVenta()));
 
-        ImageLoader.loadImage(product.getImagenUrl(), ivDetailImage);
+        if (product.getImagenUrl() != null && !product.getImagenUrl().trim().isEmpty()) {
+            if (ivDetailImage != null) {
+                ivDetailImage.setPadding(0, 0, 0, 0);
+                ivDetailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                ImageLoader.loadImage(product.getImagenUrl(), ivDetailImage);
+            }
+        } else {
+            if (ivDetailImage != null) {
+                int padding = (int) (32 * ivDetailImage.getContext().getResources().getDisplayMetrics().density);
+                ivDetailImage.setPadding(padding, padding, padding, padding);
+                ivDetailImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                ivDetailImage.setImageResource(R.drawable.ic_product_placeholder);
+            }
+        }
 
         if (btnDetailAddToCart != null) {
             btnDetailAddToCart.setOnClickListener(v -> {

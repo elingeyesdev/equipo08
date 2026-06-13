@@ -61,7 +61,17 @@ public class CatalogProductAdapter extends RecyclerView.Adapter<CatalogProductAd
             holder.tvDesc.setVisibility(View.GONE);
         }
 
-        ImageLoader.loadImage(p.getImagenUrl(), holder.ivImage);
+        holder.cvImageContainer.setVisibility(View.VISIBLE);
+        if (p.getImagenUrl() != null && !p.getImagenUrl().trim().isEmpty()) {
+            holder.ivImage.setPadding(0, 0, 0, 0);
+            holder.ivImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            ImageLoader.loadImage(p.getImagenUrl(), holder.ivImage);
+        } else {
+            int padding = (int) (16 * holder.itemView.getContext().getResources().getDisplayMetrics().density);
+            holder.ivImage.setPadding(padding, padding, padding, padding);
+            holder.ivImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            holder.ivImage.setImageResource(R.drawable.ic_product_placeholder);
+        }
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -76,11 +86,13 @@ public class CatalogProductAdapter extends RecyclerView.Adapter<CatalogProductAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        View cvImageContainer;
         ImageView ivImage;
         TextView tvCategory, tvName, tvDesc, tvPrice;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            cvImageContainer = itemView.findViewById(R.id.cvImageContainer);
             ivImage = itemView.findViewById(R.id.ivProductImage);
             tvCategory = itemView.findViewById(R.id.tvProductCategory);
             tvName = itemView.findViewById(R.id.tvProductName);

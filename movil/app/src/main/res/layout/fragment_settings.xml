@@ -37,7 +37,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Perfil y Marca"
+                        android:text="Perfil y marca"
                         android:textStyle="bold"
                         android:textColor="#0f172a"
                         android:textSize="16sp"
@@ -56,7 +56,7 @@
                             android:id="@+id/etSettingsStoreName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Nombre de la Tienda *"
+                            android:hint="Nombre de la tienda *"
                             android:inputType="text"
                             android:textColor="#0f172a" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -74,34 +74,85 @@
                             android:id="@+id/etSettingsContactPhone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Teléfono de Contacto (WhatsApp)"
+                            android:hint="Teléfono de contacto (WhatsApp)"
                             android:inputType="phone"
                             android:textColor="#0f172a" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Logo URL -->
-                    <com.google.android.material.textfield.TextInputLayout
+                    <!-- Logo Upload Layout -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        app:boxBackgroundColor="#f1f5f9"
-                        app:boxCornerRadiusTopStart="8dp"
-                        app:boxCornerRadiusTopEnd="8dp"
-                        app:boxStrokeWidth="0dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etSettingsLogoUrl"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Logo de la empresa (opcional)"
+                            android:textColor="#5a6a85"
+                            android:textSize="12sp"
+                            android:layout_marginBottom="8dp"/>
+
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="URL del Logo"
-                            android:inputType="textUri"
-                            android:textColor="#0f172a" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <ImageView
+                                android:id="@+id/ivSettingsLogoPreview"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:scaleType="centerCrop"
+                                android:background="#f1f5f9"
+                                android:layout_marginEnd="12dp"
+                                android:visibility="gone" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btnSelectSettingsLogo"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Subir logo"
+                                    android:textSize="12sp"
+                                    app:backgroundTint="@color/profit_color"
+                                    android:textColor="@color/white"
+                                    app:cornerRadius="16dp" />
+
+                                <TextView
+                                    android:id="@+id/tvSettingsLogoStatus"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="No se ha seleccionado logo"
+                                    android:textSize="11sp"
+                                    android:textColor="#5a6a85"
+                                    android:layout_marginTop="4dp" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/tvRemoveSettingsLogo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Quitar"
+                                android:textColor="#2563eb"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:padding="8dp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <!-- Brand Color Selection -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Color de Marca"
+                        android:text="Color de marca"
                         android:textColor="@color/accent_color"
                         android:textSize="12sp"
                         android:textStyle="bold"
@@ -138,7 +189,7 @@
                                 android:id="@+id/etSettingsBrandColor"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Código Color (HEX) *"
+                                android:hint="Código color (HEX) *"
                                 android:inputType="text"
                                 android:textColor="#0f172a"
                                 android:maxLines="1" />
@@ -154,7 +205,7 @@
                         app:cornerRadius="8dp"
                         android:backgroundTint="#0f172a"
                         android:textColor="#ffffff"
-                        android:text="Guardar Cambios"
+                        android:text="Guardar cambios"
                         android:textStyle="bold" />
 
                 </LinearLayout>

@@ -17,7 +17,8 @@
         android:layout_gravity="bottom"
         android:layout_marginBottom="8dp"
         android:scaleType="centerInside"
-        android:src="@drawable/logo" />
+        android:src="@drawable/ic_logo_vector"
+        app:tint="@color/white" />
 
     <!-- User Information -->
     <LinearLayout

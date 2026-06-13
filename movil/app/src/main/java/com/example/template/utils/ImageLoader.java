@@ -18,7 +18,7 @@ public class ImageLoader {
 
     public static void loadImage(String url, ImageView imageView) {
         if (url == null || url.trim().isEmpty()) {
-            imageView.setImageResource(android.R.drawable.ic_menu_gallery);
+            imageView.setImageDrawable(null);
             return;
         }
         executor.execute(() -> {
@@ -38,18 +38,18 @@ public class ImageLoader {
                     if (bitmap != null) {
                         imageView.setImageBitmap(bitmap);
                     } else {
-                        imageView.setImageResource(android.R.drawable.ic_menu_gallery);
+                        imageView.setImageDrawable(null);
                     }
                 });
             } catch (Exception e) {
-                handler.post(() -> imageView.setImageResource(android.R.drawable.ic_menu_gallery));
+                handler.post(() -> imageView.setImageDrawable(null));
             }
         });
     }
 
     public static void loadCircularImage(String url, ImageView imageView) {
         if (url == null || url.trim().isEmpty()) {
-            imageView.setImageResource(android.R.drawable.ic_menu_gallery);
+            imageView.setImageDrawable(null);
             return;
         }
         executor.execute(() -> {
@@ -69,11 +69,11 @@ public class ImageLoader {
                         Bitmap circularBitmap = getCircularBitmap(bitmap);
                         imageView.setImageBitmap(circularBitmap);
                     } else {
-                        imageView.setImageResource(android.R.drawable.ic_menu_gallery);
+                        imageView.setImageDrawable(null);
                     }
                 });
             } catch (Exception e) {
-                handler.post(() -> imageView.setImageResource(android.R.drawable.ic_menu_gallery));
+                handler.post(() -> imageView.setImageDrawable(null));
             }
         });
     }
@@ -106,6 +106,17 @@ public class ImageLoader {
 
     private static String preprocessUrl(String url) {
         if (url == null) return null;
+        
+        // Si la URL es relativa y empieza con "/", le añadimos el host base del backend
+        if (url.startsWith("/")) {
+            String apiBase = ApiClient.getBaseUrl();
+            if (apiBase.endsWith("/api/")) {
+                apiBase = apiBase.substring(0, apiBase.length() - 5);
+            } else if (apiBase.endsWith("/api")) {
+                apiBase = apiBase.substring(0, apiBase.length() - 4);
+            }
+            return apiBase + url;
+        }
         
         // Si la URL apunta a localhost o entornos locales en la DB, la redirigimos al tunnel de ngrok actual
         if (url.contains("localhost:3000") || url.contains("127.0.0.1:3000") || url.contains("10.0.2.2:3000")) {

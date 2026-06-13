@@ -152,7 +152,7 @@ public class SucursalesFragment extends Fragment {
             etName.setText(""); etAddress.setText(""); etPhone.setText("");
             resetScheduleToDefault();
             spinnerStatus.setSelection(0);
-            btnGuardar.setText("Crear Sucursal Físicamente");
+            btnGuardar.setText("Crear sucursal físicamente");
         }
         
         isFormVisible = !isFormVisible || fromEdit;
@@ -200,7 +200,7 @@ public class SucursalesFragment extends Fragment {
         btnEndTime.setText(endTime);
 
         spinnerStatus.setSelection(sucursal.isActive() ? 0 : 1);
-        btnGuardar.setText("Actualizar Sucursal");
+        btnGuardar.setText("Actualizar sucursal");
         
         if (!isFormVisible) {
             toggleForm(true);

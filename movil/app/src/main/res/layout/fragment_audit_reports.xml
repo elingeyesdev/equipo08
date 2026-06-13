@@ -21,7 +21,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="Filtrar Reporte"
+                android:text="Filtrar reporte"
                 android:backgroundTint="@color/accent_color"
                 android:textColor="#ffffff" />
 
@@ -45,7 +45,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Nueva Auditoría"
+                    android:text="Nueva auditoría"
                     android:textColor="#0f172a"
                     android:textStyle="bold"
                     android:textSize="16sp"
@@ -113,7 +113,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cantidad de Unidades Perdidas"
+                    android:text="Cantidad de unidades perdidas"
                     android:layout_marginTop="8dp"
                     android:textColor="#334155"
                     android:textSize="12sp"
@@ -202,7 +202,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="16dp"
-                    android:text="Procesar Ajuste"
+                    android:text="Procesar ajuste"
                     android:backgroundTint="#0f172a"
                     android:textColor="#ffffff"
                     android:enabled="false"/>
@@ -225,7 +225,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Valuación de Déficit Total:"
+                    android:text="Valuación de déficit total:"
                     android:textColor="#5a6a85"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"/>
@@ -256,7 +256,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Incidencias Detectadas:"
+                    android:text="Incidencias detectadas:"
                     android:textColor="#5a6a85"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"/>
@@ -398,15 +398,15 @@
                         app:tint="#5a6a85" />
                 </RelativeLayout>
                     
-                <Button
-                    android:id="@+id/btnClearFilters"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="8dp"
-                    android:text="Limpiar"
-                    android:textSize="12sp"
-                    android:backgroundTint="@color/bg_dark"
-                    android:textColor="#2b3b55"/>
+                 <Button
+                     android:id="@+id/btnClearFilters"
+                     android:layout_width="wrap_content"
+                     android:layout_height="40dp"
+                     android:layout_marginTop="8dp"
+                     android:text="Limpiar"
+                     android:textSize="12sp"
+                     android:backgroundTint="@color/primary_color"
+                     android:textColor="#ffffff"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

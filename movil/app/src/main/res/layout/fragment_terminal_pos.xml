@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:padding="16dp">
+
+    <!-- Filter Panel -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/edit_text_bg"
+        android:padding="6dp"
+        android:layout_marginBottom="12dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@android:drawable/ic_menu_mylocation"
+            app:tint="@color/accent_color"
+            android:layout_marginEnd="8dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerBranch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null" />
+    </LinearLayout>
+
+    <!-- Category Filter Horizontal Scroll -->
+    <HorizontalScrollView
+        android:id="@+id/hsvCategories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginBottom="12dp">
+
+        <LinearLayout
+            android:id="@+id/llCategoriesContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="4dp" />
+    </HorizontalScrollView>
+
+    <!-- Products Catalog Grid with SwipeRefresh -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshProducts"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvProducts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="12dp" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Bottom Cart Panel -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvCartPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        android:backgroundTint="@android:color/white"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Cart Summary (Always visible) -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvCartCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Carrito vacío"
+                    android:textColor="#1e293b"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"/>
+
+                <TextView
+                    android:id="@+id/tvCartTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bs 0.00"
+                    android:textColor="@color/profit_color"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:layout_toStartOf="@+id/btnToggleCart"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="12dp"/>
+
+                <Button
+                    android:id="@+id/btnToggleCart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Ver detalles"
+                    android:textSize="10sp"
+                    android:backgroundTint="@color/primary_color"
+                    android:textColor="@color/white"
+                    android:layout_alignParentEnd="true"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:elevation="0dp"
+                    app:elevation="0dp"
+                    android:stateListAnimator="@null" />
+            </RelativeLayout>
+
+            <!-- Expandable Cart Details -->
+            <LinearLayout
+                android:id="@+id/llCartDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp"
+                android:visibility="gone">
+
+                <!-- Inner Segmented Tabs for Cart Details -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_tab_bar"
+                    android:padding="3dp"
+                    android:layout_marginBottom="12dp">
+
+                    <Button
+                        android:id="@+id/btnCartTabNew"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Nueva orden (0)"
+                        android:backgroundTint="@android:color/transparent"
+                        android:textColor="#ffffff"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:elevation="0dp"
+                        app:elevation="0dp"
+                        app:strokeWidth="0dp"
+                        android:stateListAnimator="@null"/>
+
+                    <Button
+                        android:id="@+id/btnCartTabHistory"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Tickets (0)"
+                        android:backgroundTint="@android:color/transparent"
+                        android:textColor="#94a3b8"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:elevation="0dp"
+                        app:elevation="0dp"
+                        app:strokeWidth="0dp"
+                        android:stateListAnimator="@null"/>
+                </LinearLayout>
+
+                <!-- TAB 1 CONTENT: Nueva Orden -->
+                <LinearLayout
+                    android:id="@+id/llCartTabNewContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <!-- Cart Products List -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvCartItems"
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@android:color/transparent"
+                        android:padding="4dp"/>
+
+                    <!-- Action Buttons Stacked: Ticket (top) & Cobrar (bottom) -->
+                    <Button
+                        android:id="@+id/btnTicket"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Ticket"
+                        android:backgroundTint="@color/primary_color"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <Button
+                        android:id="@+id/btnCheckout"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Cobrar"
+                        android:backgroundTint="@color/profit_color"
+                        android:textColor="#ffffff"
+                        android:textStyle="bold"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+
+                <!-- TAB 2 CONTENT: Historial (Saved Tickets) -->
+                <LinearLayout
+                    android:id="@+id/llCartTabHistoryContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <!-- Saved Tickets Recycler -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvSavedTickets"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:layout_marginBottom="4dp"
+                        android:background="@android:color/transparent"
+                        android:padding="4dp"/>
+
+                    <TextView
+                        android:id="@+id/tvEmptyTickets"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="No hay tickets en la fila"
+                        android:textColor="#94a3b8"
+                        android:textSize="13sp"
+                        android:layout_marginTop="16dp"
+                        android:visibility="gone"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

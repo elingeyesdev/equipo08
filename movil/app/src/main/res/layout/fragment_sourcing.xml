@@ -58,7 +58,7 @@
                         android:hint="Buscar por producto o SKU..."
                         android:background="@drawable/edit_text_bg"
                         android:padding="12dp"
-                        android:drawableStart="@android:drawable/ic_menu_search"
+                        android:drawableStart="@drawable/ic_search"
                         android:drawableTint="@color/primary_color"
                         android:drawablePadding="8dp"
                         android:textColor="@color/primary_color"
@@ -84,7 +84,7 @@
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_weight="1"
-                        android:hint="Venc. Desde"
+                        android:hint="Venc. desde"
                         android:focusable="false"
                         android:clickable="true"
                         android:inputType="none"
@@ -100,7 +100,7 @@
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_weight="1"
-                        android:hint="Venc. Hasta"
+                        android:hint="Venc. hasta"
                         android:focusable="false"
                         android:clickable="true"
                         android:inputType="none"
@@ -139,7 +139,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ingreso de Mercancía"
+                        android:text="Ingreso de mercancía"
                         android:textStyle="bold"
                         android:textColor="#2b3b55"
                         android:layout_marginBottom="16dp"/>
@@ -147,7 +147,7 @@
                     <TextView 
                         android:layout_width="wrap_content" 
                         android:layout_height="wrap_content" 
-                        android:text="Sucursal / Almacén de Destino *" 
+                        android:text="Sucursal / almacén de destino *" 
                         android:textColor="#5a6a85"
                         android:layout_marginBottom="4dp"/>
                     <Spinner
@@ -160,7 +160,7 @@
                     <TextView 
                         android:layout_width="wrap_content" 
                         android:layout_height="wrap_content" 
-                        android:text="Producto Entrante *" 
+                        android:text="Producto entrante *" 
                         android:textColor="#5a6a85"
                         android:layout_marginBottom="4dp"/>
                     <Spinner
@@ -195,7 +195,7 @@
                             android:id="@+id/etVolumen"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Volumen (Uds) *"
+                            android:hint="Volumen (uds) *"
                             android:inputType="number"
                             android:textColor="@color/primary_color" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -216,7 +216,7 @@
                             android:id="@+id/etFechaProduccion"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Fecha de Producción/Elaboración"
+                            android:hint="Fecha de producción/elaboración"
                             android:focusable="false"
                             android:clickable="true"
                             android:inputType="none"
@@ -239,7 +239,7 @@
                             android:id="@+id/etFechaVencimiento"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Fecha de Vencimiento"
+                            android:hint="Fecha de vencimiento"
                             android:focusable="false"
                             android:clickable="true"
                             android:inputType="none"
@@ -251,9 +251,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         app:cornerRadius="8dp"
-                        android:backgroundTint="#2563eb"
+                        android:backgroundTint="@color/primary_color"
                         android:textColor="#ffffff"
-                        android:text="Confirmar Ingreso en Inventario" />
+                        android:text="Confirmar ingreso en inventario" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

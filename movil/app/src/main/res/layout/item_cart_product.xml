@@ -6,8 +6,8 @@
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="1dp"
-    android:backgroundTint="@android:color/white">
+    app:cardElevation="0dp"
+    android:backgroundTint="@android:color/transparent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -53,7 +53,7 @@
                 android:id="@+id/btnMinus"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_media_previous"
+                android:src="@drawable/ic_remove"
                 android:background="?android:attr/selectableItemBackground"
                 app:tint="@color/accent_color"
                 android:padding="4dp"/>
@@ -73,7 +73,7 @@
                 android:id="@+id/btnPlus"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@android:drawable/ic_media_next"
+                android:src="@drawable/ic_add"
                 android:background="?android:attr/selectableItemBackground"
                 app:tint="@color/accent_color"
                 android:padding="4dp"/>
@@ -97,9 +97,9 @@
             android:id="@+id/btnDelete"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_delete"
+            android:src="@drawable/ic_delete"
             android:background="?android:attr/selectableItemBackground"
-            app:tint="@color/accent_color"
+            app:tint="#2563eb"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>

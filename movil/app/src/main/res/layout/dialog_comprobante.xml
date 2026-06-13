@@ -219,7 +219,7 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginBottom="8dp"
-        android:text="Descargar Factura"
+        android:text="Descargar factura"
         android:backgroundTint="@color/profit_color"
         android:textColor="#ffffff"
         android:textStyle="bold" />
