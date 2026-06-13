@@ -339,8 +339,7 @@ export default function StockPage() {
             <table className="table-premium">
               <thead>
                 <tr>
-                  <th style={{ width: '15%' }}>SKU</th>
-                  <th style={{ width: '25%' }}>Producto</th>
+                  <th style={{ width: '40%' }}>Producto</th>
                   <th style={{ width: '15%' }}>Ubicación</th>
                   <th className="text-right" style={{ width: '12%' }}>Stock Físico</th>
                   <th className="text-right" style={{ width: '15%' }}>Costo Promedio</th>
@@ -353,7 +352,7 @@ export default function StockPage() {
                   if (filteredStock.length === 0) {
                     return (
                       <tr>
-                        <td colSpan={hasPermission('inventario_crear') ? 7 : 6} className="text-center py-12 text-slate-400 font-medium">
+                        <td colSpan={6} className="text-center py-12 text-slate-400 font-medium">
                           No hay productos registrados en el inventario.
                         </td>
                       </tr>
@@ -381,10 +380,10 @@ export default function StockPage() {
                       const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
                       return (
                         <tr key={s.id} className={isAlerta ? 'bg-rose-50/10' : ''}>
-                          <td className="text-sm text-slate-800 font-mono">{s.producto?.sku}</td>
                           <td>
                             <div className="flex flex-col items-start gap-0.5">
-                              <span className="text-sm text-slate-800 font-medium">{s.producto?.name}</span>
+                              <span className="text-sm text-slate-800 font-semibold">{s.producto?.name}</span>
+                              <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">SKU: {s.producto?.sku}</span>
                               {s.producto?.attributes && Object.keys(s.producto.attributes).length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-0.5">
                                   {Object.entries(s.producto.attributes).map(([k, v]) => v ? (
@@ -419,7 +418,6 @@ export default function StockPage() {
                       return (
                         <React.Fragment key={key}>
                           <tr className={`bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500 ${hasAlert ? 'bg-rose-50/5' : ''}`}>
-                            <td className="text-sm text-slate-400 font-mono">-</td>
                             <td>
                               <div 
                                 role="button" 
@@ -448,7 +446,6 @@ export default function StockPage() {
                             const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
                             return (
                               <tr key={s.id} className={`bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200 ${isAlerta ? 'bg-rose-50/10' : ''}`}>
-                                <td className="pl-6 text-xs text-slate-400 font-mono">-</td>
                                 <td className="pl-8">
                                   <div className="flex items-center gap-2">
                                     <span className="text-slate-300 dark:text-slate-750 font-mono">└─</span>
