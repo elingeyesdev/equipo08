@@ -73,10 +73,10 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
         holder.tvMinStock.setText("Min: " + minStock);
         
         if (isAlerta) {
-            holder.tvStock.setTextColor(Color.parseColor("#dc2626"));
-            holder.cardView.setCardBackgroundColor(Color.parseColor("#FFF5F5"));
+            holder.tvStock.setTextColor(Color.parseColor("#0d9488"));
+            holder.cardView.setCardBackgroundColor(Color.parseColor("#F5EEF8"));
         } else {
-            holder.tvStock.setTextColor(Color.parseColor("#16a34a"));
+            holder.tvStock.setTextColor(Color.parseColor("#0d9488"));
             holder.cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
         }
 

@@ -11,21 +11,9 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Gestión de Permisos"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#2b3b55"
-            android:layout_marginBottom="4dp"/>
+        
             
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Define qué accesos tienen los diferentes roles dentro del sistema."
-            android:textColor="#5a6a85"
-            android:layout_marginBottom="16dp"/>
+        
 
         <!-- SUPERVISOR CARD -->
         <androidx.cardview.widget.CardView
@@ -52,7 +40,7 @@
                         android:layout_height="wrap_content"
                         android:text="SUPERVISOR"
                         android:textStyle="bold"
-                        android:textColor="#3b82f6"
+                        android:textColor="#5981DF"
                         android:textSize="16sp"
                         android:layout_centerVertical="true"
                         android:drawablePadding="8dp" />
@@ -62,7 +50,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:backgroundTint="#3b82f6"
+                        android:backgroundTint="#5981DF"
                         android:textColor="#ffffff"
                         android:textSize="12sp"
                         android:text="Aplicar Perfil" />
@@ -102,7 +90,7 @@
                         android:layout_height="wrap_content"
                         android:text="VENDEDOR"
                         android:textStyle="bold"
-                        android:textColor="#eab308"
+                        android:textColor="@color/profit_color"
                         android:textSize="16sp"
                         android:layout_centerVertical="true"
                         android:drawablePadding="8dp" />
@@ -112,7 +100,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:backgroundTint="#1d4ed8"
+                        android:backgroundTint="@color/accent_color"
                         android:textColor="#ffffff"
                         android:textSize="12sp"
                         android:text="Aplicar Perfil" />

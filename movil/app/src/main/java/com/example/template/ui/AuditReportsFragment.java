@@ -21,6 +21,7 @@ import com.example.template.ui.adapters.AuditAdapter;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.Button;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.widget.Spinner;
 import android.app.DatePickerDialog;
 import java.text.SimpleDateFormat;
@@ -63,7 +64,8 @@ public class AuditReportsFragment extends Fragment {
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
 
     // Audit Form Variables
-    private Button btnToggleAuditForm, btnSubmitAudit;
+    private FloatingActionButton btnToggleAuditForm;
+    private Button btnSubmitAudit;
     private androidx.cardview.widget.CardView cardAuditForm;
     private Spinner spinnerSucursalAudit, spinnerProductoAudit, spinnerMotivoAudit;
     private EditText etUnidadesPerdidas, etObservacionesAudit;
@@ -126,10 +128,10 @@ public class AuditReportsFragment extends Fragment {
             isAuditFormVisible = !isAuditFormVisible;
             if (isAuditFormVisible) {
                 cardAuditForm.setVisibility(View.VISIBLE);
-                btnToggleAuditForm.setText("Ocultar Formulario");
+                btnToggleAuditForm.setImageResource(R.drawable.ic_close);
             } else {
                 cardAuditForm.setVisibility(View.GONE);
-                btnToggleAuditForm.setText("Registrar Auditoría");
+                btnToggleAuditForm.setImageResource(R.drawable.ic_add);
             }
         });
 
@@ -295,7 +297,7 @@ public class AuditReportsFragment extends Fragment {
                         etObservacionesAudit.setText("");
                         cardAuditForm.setVisibility(View.GONE);
                         isAuditFormVisible = false;
-                        btnToggleAuditForm.setText("Registrar Auditoría");
+                        btnToggleAuditForm.setImageResource(R.drawable.ic_add);
                         loadAudits();
                         loadStock();
                     } else {
@@ -315,7 +317,7 @@ public class AuditReportsFragment extends Fragment {
         String cantStr = etUnidadesPerdidas.getText().toString().trim();
         if (cantStr.isEmpty() || filteredStockList.isEmpty() || spinnerProductoAudit.getSelectedItemPosition() < 0) {
             btnSubmitAudit.setEnabled(false);
-            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d1d5db")));
+            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
             llWarningAudit.setVisibility(View.GONE);
             return;
         }
@@ -328,7 +330,7 @@ public class AuditReportsFragment extends Fragment {
             llWarningAudit.setVisibility(View.VISIBLE);
             tvWarningAudit.setText("No puedes perder más de las unidades disponibles en sistema (" + sistema + ")");
             btnSubmitAudit.setEnabled(false);
-            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d1d5db")));
+            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
         } else {
             llWarningAudit.setVisibility(View.GONE);
             btnSubmitAudit.setEnabled(true);

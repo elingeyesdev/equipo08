@@ -18,6 +18,7 @@ public class TenantInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
         Request.Builder requestBuilder = original.newBuilder();
+        requestBuilder.addHeader("ngrok-skip-browser-warning", "true");
         
         String tenantId = sessionManager.getTenantId();
         if (tenantId != null) {

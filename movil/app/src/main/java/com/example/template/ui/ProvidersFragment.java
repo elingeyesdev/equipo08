@@ -21,6 +21,7 @@ import com.example.template.network.ApiClient;
 import com.example.template.network.ApiService;
 import com.example.template.network.models.Proveedor;
 import com.example.template.ui.adapters.ProveedorAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +32,15 @@ import retrofit2.Response;
 
 public class ProvidersFragment extends Fragment {
 
-    private Button btnToggleForm, btnGuardar, btnBuscarNit;
+    private FloatingActionButton btnToggleForm;
+    private Button btnGuardar, btnBuscarNit;
     private CardView cardForm;
     private EditText etRazonSocial, etNit, etEmail;
     private RecyclerView recyclerView;
     private ProveedorAdapter adapter;
     private ApiService apiService;
     private boolean isFormVisible = false;
+    private Proveedor editingProveedor = null;
 
     @Nullable
     @Override
@@ -55,12 +58,22 @@ public class ProvidersFragment extends Fragment {
         btnBuscarNit = view.findViewById(R.id.btnBuscarNit);
         
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new ProveedorAdapter(new ArrayList<>(), this::confirmDelete);
+        adapter = new ProveedorAdapter(new ArrayList<>(), new ProveedorAdapter.OnActionClickListener() {
+            @Override
+            public void onDeleteClick(Proveedor proveedor) {
+                confirmDelete(proveedor);
+            }
+
+            @Override
+            public void onEditClick(Proveedor proveedor) {
+                editProveedor(proveedor);
+            }
+        });
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
-        btnToggleForm.setOnClickListener(v -> toggleForm());
+        btnToggleForm.setOnClickListener(v -> toggleForm(false));
         btnGuardar.setOnClickListener(v -> saveProveedor());
         
         btnBuscarNit.setOnClickListener(v -> {
@@ -107,16 +120,34 @@ public class ProvidersFragment extends Fragment {
         return view;
     }
 
-    private void toggleForm() {
-        isFormVisible = !isFormVisible;
+    private void toggleForm(boolean fromEdit) {
+        if (!fromEdit) {
+            editingProveedor = null;
+            etRazonSocial.setText("");
+            etNit.setText("");
+            etEmail.setText("");
+            btnGuardar.setText("Anexar proveedor a mi tienda");
+        }
+        isFormVisible = !isFormVisible || fromEdit;
         if (isFormVisible) {
             cardForm.setVisibility(View.VISIBLE);
-            btnToggleForm.setText("X Cancelar");
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#64748b"))); // Gris
+            btnToggleForm.setImageResource(R.drawable.ic_close);
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488"))); // Gris/Verde
         } else {
             cardForm.setVisibility(View.GONE);
-            btnToggleForm.setText("Nuevo Proveedor");
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55"))); // Azul oscuro primario
+            btnToggleForm.setImageResource(R.drawable.ic_add);
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a"))); // Azul oscuro primario
+        }
+    }
+
+    private void editProveedor(Proveedor proveedor) {
+        editingProveedor = proveedor;
+        etRazonSocial.setText(proveedor.getName());
+        etNit.setText(proveedor.getTaxId());
+        etEmail.setText(proveedor.getContactEmail() != null ? proveedor.getContactEmail() : "");
+        btnGuardar.setText("Actualizar proveedor");
+        if (!isFormVisible) {
+            toggleForm(true);
         }
     }
 
@@ -142,34 +173,56 @@ public class ProvidersFragment extends Fragment {
         String email = etEmail.getText().toString().trim();
 
         if (nit.isEmpty()) {
-            etNit.setError("Primero busque el NIT");
+            etNit.setError("Ingrese un NIT");
             return;
         }
 
         if (name.isEmpty()) {
-            Toast.makeText(getContext(), "Asegúrese de buscar un proveedor válido", Toast.LENGTH_SHORT).show();
+            etRazonSocial.setError("Ingrese o busque una razón social válida");
             return;
         }
 
         Proveedor request = new Proveedor(name, email.isEmpty() ? null : email, nit);
-        apiService.createProveedor(request).enqueue(new Callback<Proveedor>() {
-            @Override
-            public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Proveedor guardado", Toast.LENGTH_SHORT).show();
-                    etRazonSocial.setText(""); etNit.setText(""); etEmail.setText("");
-                    toggleForm();
-                    loadProveedores(); // refresh
-                } else {
-                    Toast.makeText(getContext(), "Error al guardar (Verifique NIT)", Toast.LENGTH_SHORT).show();
+        if (editingProveedor != null) {
+            request.setId(editingProveedor.getId());
+            apiService.updateProveedor(editingProveedor.getId(), request).enqueue(new Callback<Proveedor>() {
+                @Override
+                public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Proveedor actualizado", Toast.LENGTH_SHORT).show();
+                        editingProveedor = null;
+                        toggleForm(false);
+                        loadProveedores();
+                    } else {
+                        Toast.makeText(getContext(), "Error al actualizar", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<Proveedor> call, Throwable t) {
-                Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<Proveedor> call, Throwable t) {
+                    Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            apiService.createProveedor(request).enqueue(new Callback<Proveedor>() {
+                @Override
+                public void onResponse(Call<Proveedor> call, Response<Proveedor> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Proveedor guardado", Toast.LENGTH_SHORT).show();
+                        editingProveedor = null;
+                        toggleForm(false);
+                        loadProveedores(); // refresh
+                    } else {
+                        Toast.makeText(getContext(), "Error al guardar (Verifique NIT)", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Proveedor> call, Throwable t) {
+                    Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void confirmDelete(Proveedor proveedor) {

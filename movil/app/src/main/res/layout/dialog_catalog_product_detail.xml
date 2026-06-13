@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#0C1929">
+    android:background="#1e293b">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:background="#0A1624"
+            android:background="#1e293b"
             android:src="@android:drawable/ic_menu_gallery" />
 
         <!-- Info Content Area -->
@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="CATEGORÍA"
-                android:textColor="#818CF8"
+                android:textColor="@color/accent_color"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -56,11 +56,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_circle_white"
-                android:backgroundTint="#1E293B"
+                android:backgroundTint="#1e293b"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
                 android:text="SKU: 123456"
-                android:textColor="#94A3B8"
+                android:textColor="@color/profit_color"
                 android:textSize="11sp"
                 android:fontFamily="monospace" />
 
@@ -68,7 +68,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="16dp"
-                android:background="#1E293B" />
+                android:background="#1e293b" />
 
             <!-- Description -->
             <TextView
@@ -86,7 +86,7 @@
                 android:layout_marginTop="8dp"
                 android:lineSpacingMultiplier="1.2"
                 android:text="Esta es la descripción detallada del producto. Contiene detalles sobre los materiales, tamaños y especificaciones disponibles."
-                android:textColor="#94A3B8"
+                android:textColor="#E2E8F0"
                 android:textSize="13sp" />
 
             <!-- Pricing Box -->
@@ -97,8 +97,8 @@
                 android:layout_marginBottom="20dp"
                 app:cardCornerRadius="16dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="#1E293B"
-                android:backgroundTint="#111C2E">
+                app:strokeColor="#1e293b"
+                android:backgroundTint="#1e293b">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -118,18 +118,18 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:text="Disponibilidad"
-                            android:textColor="#64748B"
+                            android:textColor="@color/accent_color"
                             android:textSize="13sp" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_circle_white"
-                            android:backgroundTint="#064E3B"
+                            android:backgroundTint="#1e293b"
                             android:paddingHorizontal="8dp"
                             android:paddingVertical="4dp"
                             android:text="Disponible"
-                            android:textColor="#34D399"
+                            android:textColor="@color/profit_color"
                             android:textSize="11sp"
                             android:textStyle="bold" />
 
@@ -146,7 +146,7 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:text="Precio Regular"
-                            android:textColor="#64748B"
+                            android:textColor="@color/accent_color"
                             android:textSize="13sp" />
 
                         <TextView
@@ -169,7 +169,7 @@
                 android:id="@+id/btnDetailAddToCart"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:backgroundTint="#10B981"
+                android:backgroundTint="@color/profit_color"
                 android:text="AÑADIR AL PEDIDO"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"

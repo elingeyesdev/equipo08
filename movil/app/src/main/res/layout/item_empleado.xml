@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Activo"
-            android:textColor="#166534"
+            android:textColor="@color/profit_color"
             android:textStyle="bold"
             android:textSize="11sp"
             android:textAllCaps="true"
@@ -32,7 +32,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Nombre Completo"
-            android:textColor="#2b3b55"
+            android:textColor="#0f172a"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/btnEdit"
@@ -46,7 +46,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="correo@ejemplo.com"
-            android:textColor="#5a6a85"
+            android:textColor="@color/primary_color"
             android:textSize="14sp"
             android:layout_marginTop="4dp"
             app:layout_constraintEnd_toStartOf="@+id/btnEdit"
@@ -71,7 +71,7 @@
                 android:layout_height="wrap_content"
                 android:text="VENDEDOR"
                 android:textColor="#ffffff"
-                android:background="#ffca28"
+                android:background="@drawable/bg_alert_green"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="2dp"
                 android:textStyle="bold"
@@ -84,7 +84,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Sucursal"
-                android:textColor="#5a6a85"
+                android:textColor="@color/primary_color"
                 android:textSize="14sp"
                 android:maxLines="1"
                 android:ellipsize="end"
@@ -98,12 +98,11 @@
             android:padding="6dp"
             android:scaleType="fitCenter"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_edit"
+            android:src="@drawable/ic_edit"
             android:contentDescription="Edit"
             android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btnDelete"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/btnDelete" />
 
         <ImageButton
             android:id="@+id/btnDelete"
@@ -115,8 +114,7 @@
             android:src="@drawable/ic_delete"
             android:contentDescription="Delete"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

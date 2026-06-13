@@ -139,7 +139,7 @@ public class PermisosFragment extends Fragment {
             TextView tvCat = new TextView(getContext());
             tvCat.setText(cat);
             tvCat.setTypeface(null, android.graphics.Typeface.BOLD);
-            tvCat.setTextColor(android.graphics.Color.parseColor("#374151"));
+            tvCat.setTextColor(android.graphics.Color.parseColor("#0f172a"));
             tvCat.setTextSize(14f);
             LinearLayout.LayoutParams tvCatParams = new LinearLayout.LayoutParams(
                     0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f
@@ -150,7 +150,7 @@ public class PermisosFragment extends Fragment {
             // Toggle Icon (Chevron)
             android.widget.ImageView iconChevron = new android.widget.ImageView(getContext());
             iconChevron.setImageResource(android.R.drawable.arrow_down_float);
-            iconChevron.setColorFilter(android.graphics.Color.parseColor("#9ca3af"));
+            iconChevron.setColorFilter(android.graphics.Color.parseColor("#0f172a"));
             headerLayout.addView(iconChevron);
 
             catContainer.addView(headerLayout);
@@ -191,7 +191,7 @@ public class PermisosFragment extends Fragment {
 
                     TextView tvPermiso = new TextView(getContext());
                     tvPermiso.setText(p);
-                    tvPermiso.setTextColor(android.graphics.Color.parseColor("#4b5563"));
+                    tvPermiso.setTextColor(android.graphics.Color.parseColor("#0f172a"));
                     tvPermiso.setTextSize(12f);
                     LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
                             0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f
@@ -211,7 +211,7 @@ public class PermisosFragment extends Fragment {
                         divider.setLayoutParams(new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT, 1
                         ));
-                        divider.setBackgroundColor(android.graphics.Color.parseColor("#f3f4f6"));
+                        divider.setBackgroundColor(android.graphics.Color.parseColor("#f1f5f9"));
                         listContainer.addView(divider);
                     }
                 }
@@ -225,7 +225,7 @@ public class PermisosFragment extends Fragment {
             outerDivider.setLayoutParams(new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, 2
             ));
-            outerDivider.setBackgroundColor(android.graphics.Color.parseColor("#e5e7eb"));
+            outerDivider.setBackgroundColor(android.graphics.Color.parseColor("#f1f5f9"));
             parent.addView(outerDivider);
         }
     }

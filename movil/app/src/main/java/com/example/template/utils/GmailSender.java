@@ -71,8 +71,8 @@ public class GmailSender {
                 writer.println("Content-Type: text/html; charset=UTF-8");
                 writer.println();
                 writer.println("<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px;\">");
-                writer.println("  <h2 style=\"color: #FF3D00; margin-bottom: 20px; font-size: 24px; font-weight: bold;\">¡Hola " + tenantName + "! 🚀</h2>");
-                writer.println("  <p style=\"font-size: 16px; line-height: 1.6; color: #1a202c; margin: 0;\">Tu cuenta comercial ha sido creada exitosamente. Hemos recibido tu solicitud para abrir un espacio en BolClick.</p>");
+                writer.println("  <h2 style=\"color: #0d9488; margin-bottom: 20px; font-size: 24px; font-weight: bold;\">¡Hola " + tenantName + "! 🚀</h2>");
+                writer.println("  <p style=\"font-size: 16px; line-height: 1.6; color: #1e293b; margin: 0;\">Tu cuenta comercial ha sido creada exitosamente. Hemos recibido tu solicitud para abrir un espacio en BolClick.</p>");
                 writer.println("</div>");
                 writer.println(".");
                 Log.d(TAG, "Final response: " + reader.readLine());

@@ -5,6 +5,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
     <!-- MAIN CONTENT -->
@@ -16,10 +17,11 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/bg_card"
+            android:layout_height="48dp"
+            android:background="@color/primary_color"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:title="OmniMall"
-            app:titleTextColor="@color/primary_color"
+            app:titleTextColor="@color/white"
             app:layout_constraintTop_toTopOf="parent" />
 
         <FrameLayout
@@ -37,9 +39,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/bg_card"
-        app:itemTextColor="@color/primary_color"
-        app:itemIconTint="@color/primary_color"
+        android:background="@color/primary_color"
+        app:itemTextColor="@color/nav_item_color"
+        app:itemIconTint="@color/nav_item_color"
         app:menu="@menu/drawer_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

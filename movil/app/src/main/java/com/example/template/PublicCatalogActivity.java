@@ -191,7 +191,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
                         if (catalog.getTienda().getLogoUrl() != null && !catalog.getTienda().getLogoUrl().isEmpty()) {
                             ivStoreLogo.setVisibility(View.VISIBLE);
                             tvStoreInitial.setVisibility(View.GONE);
-                            ImageLoader.loadImage(catalog.getTienda().getLogoUrl(), ivStoreLogo);
+                            ImageLoader.loadCircularImage(catalog.getTienda().getLogoUrl(), ivStoreLogo);
                         } else {
                             ivStoreLogo.setVisibility(View.GONE);
                             tvStoreInitial.setVisibility(View.VISIBLE);

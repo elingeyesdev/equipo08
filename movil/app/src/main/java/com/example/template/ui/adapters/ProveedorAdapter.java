@@ -15,15 +15,16 @@ import java.util.List;
 public class ProveedorAdapter extends RecyclerView.Adapter<ProveedorAdapter.ViewHolder> {
 
     private List<Proveedor> list;
-    private OnDeleteClickListener deleteListener;
+    private OnActionClickListener actionListener;
 
-    public interface OnDeleteClickListener {
+    public interface OnActionClickListener {
         void onDeleteClick(Proveedor proveedor);
+        void onEditClick(Proveedor proveedor);
     }
 
-    public ProveedorAdapter(List<Proveedor> list, OnDeleteClickListener listener) {
+    public ProveedorAdapter(List<Proveedor> list, OnActionClickListener listener) {
         this.list = list;
-        this.deleteListener = listener;
+        this.actionListener = listener;
     }
 
     public void updateData(List<Proveedor> newList) {
@@ -46,8 +47,14 @@ public class ProveedorAdapter extends RecyclerView.Adapter<ProveedorAdapter.View
         holder.tvEmail.setText(p.getContactEmail() != null && !p.getContactEmail().isEmpty() ? p.getContactEmail() : "Sin Email");
 
         holder.btnDelete.setOnClickListener(v -> {
-            if (deleteListener != null) {
-                deleteListener.onDeleteClick(p);
+            if (actionListener != null) {
+                actionListener.onDeleteClick(p);
+            }
+        });
+
+        holder.btnEdit.setOnClickListener(v -> {
+            if (actionListener != null) {
+                actionListener.onEditClick(p);
             }
         });
     }
@@ -59,13 +66,14 @@ public class ProveedorAdapter extends RecyclerView.Adapter<ProveedorAdapter.View
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvRazonSocial, tvNit, tvEmail;
-        ImageButton btnDelete;
+        ImageButton btnDelete, btnEdit;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvRazonSocial = itemView.findViewById(R.id.tvRazonSocial);
             tvNit = itemView.findViewById(R.id.tvNit);
             tvEmail = itemView.findViewById(R.id.tvEmail);
             btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnEdit = itemView.findViewById(R.id.btnEdit);
         }
     }
 }

@@ -62,12 +62,12 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
             holder.tvDelta.setBackgroundColor(Color.parseColor("#f1f5f9"));
         } else if (deltaVal > 0) {
             holder.tvDelta.setText("+" + deltaVal + " U");
-            holder.tvDelta.setTextColor(Color.parseColor("#166534"));
-            holder.tvDelta.setBackgroundColor(Color.parseColor("#dcfce3"));
+            holder.tvDelta.setTextColor(Color.parseColor("#0d9488"));
+            holder.tvDelta.setBackgroundColor(Color.parseColor("#f1f5f9"));
         } else {
             holder.tvDelta.setText(deltaVal + " U");
-            holder.tvDelta.setTextColor(Color.parseColor("#991b1b"));
-            holder.tvDelta.setBackgroundColor(Color.parseColor("#fee2e2"));
+            holder.tvDelta.setTextColor(Color.parseColor("#0d9488"));
+            holder.tvDelta.setBackgroundColor(Color.parseColor("#F5EEF8"));
         }
 
         String motivoStr = "Desconocido";

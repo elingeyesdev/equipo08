@@ -1,70 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="@color/bg_dark">
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="@color/bg_dark">
 
-        <!-- Header -->
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
-            <LinearLayout
-                android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <Button
+                android:id="@+id/btnToggleFilter"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_alignParentStart="true"
-                android:layout_toStartOf="@+id/llHeaderButtons"
-                android:layout_marginEnd="8dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Registro Analítico de Auditorías"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#2b3b55" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dashboard de histórico de ajustes."
-                    android:textColor="#5a6a85" />
-            </LinearLayout>
-            
-            <LinearLayout
-                android:id="@+id/llHeaderButtons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true">
-                
-                <Button
-                    android:id="@+id/btnToggleAuditForm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Registrar Auditoría"
-                    android:textSize="12sp"
-                    android:backgroundTint="#0f172a"
-                    android:textColor="#ffffff" />
-                    
-                <Button
-                    android:id="@+id/btnToggleFilter"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Filtrar Reporte"
-                    android:textSize="12sp"
-                    android:backgroundTint="#2563eb"
-                    android:textColor="#ffffff" />
-            </LinearLayout>
-        </RelativeLayout>
+                android:layout_marginBottom="16dp"
+                android:text="Filtrar Reporte"
+                android:backgroundTint="@color/accent_color"
+                android:textColor="#ffffff" />
 
         <!-- Audit Form Section -->
         <androidx.cardview.widget.CardView
@@ -114,7 +73,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@android:drawable/arrow_down_float"
+                        android:src="@drawable/ic_chevron_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="12dp"
@@ -144,7 +103,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@android:drawable/arrow_down_float"
+                        android:src="@drawable/ic_chevron_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="12dp"
@@ -168,7 +127,7 @@
                     android:background="@drawable/edit_text_bg"
                     android:paddingHorizontal="12dp"
                     android:layout_marginTop="4dp"
-                    android:textColor="#000000"
+                    android:textColor="@color/primary_color"
                     android:textColorHint="#64748b"/>
                     
                 <TextView
@@ -194,7 +153,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@android:drawable/arrow_down_float"
+                        android:src="@drawable/ic_chevron_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="12dp"
@@ -219,7 +178,7 @@
                     android:background="@drawable/edit_text_bg"
                     android:padding="12dp"
                     android:layout_marginTop="4dp"
-                    android:textColor="#000000"
+                    android:textColor="@color/primary_color"
                     android:textColorHint="#64748b"/>
                     
                 <LinearLayout
@@ -257,7 +216,7 @@
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="2dp"
-            android:backgroundTint="#fef2f2">
+            android:backgroundTint="#f1f5f9">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -267,7 +226,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Valuación de Déficit Total:"
-                    android:textColor="#991b1b"
+                    android:textColor="#5a6a85"
                     android:textStyle="bold"
                     android:layout_marginBottom="4dp"/>
                 <TextView
@@ -277,7 +236,7 @@
                     android:text="Bs. 0.00"
                     android:textSize="24sp"
                     android:textStyle="bold"
-                    android:textColor="#b91c1c"/>
+                    android:textColor="@color/loss_color"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -388,7 +347,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@android:drawable/arrow_down_float"
+                        android:src="@drawable/ic_chevron_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="12dp"
@@ -410,7 +369,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@android:drawable/arrow_down_float"
+                        android:src="@drawable/ic_chevron_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="12dp"
@@ -432,7 +391,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@android:drawable/arrow_down_float"
+                        android:src="@drawable/ic_chevron_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="12dp"
@@ -462,3 +421,15 @@
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnToggleAuditForm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="#0f172a"
+        app:tint="#ffffff"
+        android:contentDescription="Acción" />
+</FrameLayout>

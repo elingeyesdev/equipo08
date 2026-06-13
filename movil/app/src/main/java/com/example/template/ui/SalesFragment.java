@@ -164,7 +164,7 @@ public class SalesFragment extends Fragment {
         btnTabPOS.setOnClickListener(v -> {
             llTabPOS.setVisibility(View.VISIBLE);
             llTabHistory.setVisibility(View.GONE);
-            btnTabPOS.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
+            btnTabPOS.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a")));
             btnTabPOS.setTextColor(Color.WHITE);
             btnTabHistory.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
             btnTabHistory.setTextColor(Color.parseColor("#475569"));
@@ -173,7 +173,7 @@ public class SalesFragment extends Fragment {
         btnTabHistory.setOnClickListener(v -> {
             llTabPOS.setVisibility(View.GONE);
             llTabHistory.setVisibility(View.VISIBLE);
-            btnTabHistory.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
+            btnTabHistory.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a")));
             btnTabHistory.setTextColor(Color.WHITE);
             btnTabPOS.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
             btnTabPOS.setTextColor(Color.parseColor("#475569"));

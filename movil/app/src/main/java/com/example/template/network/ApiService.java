@@ -33,6 +33,9 @@ public interface ApiService {
     @POST("proveedores")
     Call<com.example.template.network.models.Proveedor> createProveedor(@Body com.example.template.network.models.Proveedor proveedor);
 
+    @retrofit2.http.PUT("proveedores/{id}")
+    Call<com.example.template.network.models.Proveedor> updateProveedor(@retrofit2.http.Path("id") String id, @Body com.example.template.network.models.Proveedor proveedor);
+
     @retrofit2.http.DELETE("proveedores/{id}")
     Call<Void> deleteProveedor(@retrofit2.http.Path("id") String id);
 

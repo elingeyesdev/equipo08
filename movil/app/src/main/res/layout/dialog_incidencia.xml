@@ -6,7 +6,7 @@
     android:layout_margin="16dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="8dp"
-    android:backgroundTint="#fffbeb">
+    android:backgroundTint="#f1f5f9">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,7 +26,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:text="⚠ Acta de Auditoría de Stock (Ajuste Físico)"
-                android:textColor="#b45309"
+                android:textColor="@color/accent_color"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -38,13 +38,13 @@
                 android:layout_centerVertical="true"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@android:drawable/ic_menu_close_clear_cancel"
-                android:tint="#b45309" />
+                android:tint="@color/accent_color" />
         </RelativeLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#fcd34d"
+            android:background="@color/profit_color"
             android:layout_marginBottom="16dp"/>
 
         <!-- Info Text -->
@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Estás auditando [Producto] en [Sucursal]. Actualmente el sistema registra [XX] unidades."
-            android:textColor="#92400e"
+            android:textColor="@color/accent_color"
             android:textSize="14sp"
             android:layout_marginBottom="20dp" />
 
@@ -75,7 +75,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Conteo Físico Real (Unidades) *"
-                    android:textColor="#92400e"
+                    android:textColor="@color/accent_color"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -88,7 +88,8 @@
                     android:hint="Ej: 9"
                     android:padding="12dp"
                     android:background="@drawable/edit_text_bg"
-                    android:backgroundTint="@android:color/white" />
+                    android:backgroundTint="@android:color/white"
+                    android:textColor="@color/primary_color" />
             </LinearLayout>
 
             <!-- Right Column: Motivo -->
@@ -103,7 +104,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Motivo Oficial (Obligatorio) *"
-                    android:textColor="#92400e"
+                    android:textColor="@color/accent_color"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -133,7 +134,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="⚠ Impacto Financiero Directo: La diferencia de 1 unidades resultará en una pérdida de valuación..."
-                android:textColor="#991b1b"
+                android:textColor="@color/accent_color"
                 android:textSize="13sp" />
         </LinearLayout>
 
@@ -141,7 +142,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Observaciones Cuantitativas (Opcional)"
-            android:textColor="#92400e"
+            android:textColor="@color/accent_color"
             android:textSize="13sp"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
@@ -158,7 +159,8 @@
             android:textSize="14sp"
             android:inputType="textMultiLine"
             android:minLines="3"
-            android:gravity="top|start" />
+            android:gravity="top|start"
+            android:textColor="@color/primary_color" />
 
         <!-- Buttons -->
         <LinearLayout
@@ -173,8 +175,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:text="Cancelar"
-                android:textColor="#b45309"
-                android:backgroundTint="#fffbeb"
+                android:textColor="@color/accent_color"
+                android:backgroundTint="#f1f5f9"
                 android:layout_marginEnd="12dp"
                 style="?android:attr/borderlessButtonStyle" />
 
@@ -184,7 +186,7 @@
                 android:layout_height="48dp"
                 android:text="Procesar Acta"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#d97706"
+                android:backgroundTint="#00C0E6"
                 android:paddingHorizontal="16dp" />
         </LinearLayout>
 

@@ -63,7 +63,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(sessionManager.getTenantName());
+        toolbar.setTitle("Inicio");
+        
+        // Force the system status bar color to match the header color (slate #0f172a)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_color));
+        }
+
         toolbar.inflateMenu(R.menu.toolbar_menu);
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_logout) {
@@ -91,13 +97,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (headerView == null) {
             headerView = navigationView.inflateHeaderView(R.layout.nav_header);
         }
+        android.widget.TextView navTenantName = headerView.findViewById(R.id.nav_header_tenant_name);
         android.widget.TextView navUsername = headerView.findViewById(R.id.nav_header_name);
         android.widget.TextView navRole = headerView.findViewById(R.id.nav_header_role);
         android.widget.ImageView navLogo = headerView.findViewById(R.id.nav_header_logo);
+        if (navTenantName != null) navTenantName.setText(sessionManager.getTenantName());
         if (navUsername != null) navUsername.setText(sessionManager.getUserName());
         if (navRole != null) navRole.setText(sessionManager.getRole());
         if (navLogo != null && sessionManager.getLogoUrl() != null) {
-            com.example.template.utils.ImageLoader.loadImage(sessionManager.getLogoUrl(), navLogo);
+            com.example.template.utils.ImageLoader.loadCircularImage(sessionManager.getLogoUrl(), navLogo);
         }
 
         // Fetch latest tenant profile to sync logo & tenant name
@@ -108,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     TenantProfile profile = response.body();
                     sessionManager.updateTenantName(profile.getName());
                     sessionManager.updateLogoUrl(profile.getLogoUrl());
-                    updateToolbarTitle(profile.getName());
                     updateNavHeaderLogo(profile.getLogoUrl());
+                    updateNavHeaderTenantName(profile.getName());
                 }
             }
 
@@ -214,6 +222,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, selectedFragment)
                     .commit();
+            uncheckAllMenuItems(navigationView.getMenu());
+            item.setChecked(true);
+            
+            // Set toolbar title dynamically to match screen name
+            String title = item.getTitle().toString();
+            if (itemId == R.id.nav_home) {
+                title = "Inicio";
+            }
+            updateToolbarTitle(title);
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);
@@ -240,13 +257,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (headerView != null) {
             android.widget.ImageView navLogo = headerView.findViewById(R.id.nav_header_logo);
             if (navLogo != null) {
-                com.example.template.utils.ImageLoader.loadImage(logoUrl, navLogo);
+                com.example.template.utils.ImageLoader.loadCircularImage(logoUrl, navLogo);
+            }
+        }
+    }
+
+    public void updateNavHeaderTenantName(String tenantName) {
+        android.view.View headerView = navigationView.getHeaderView(0);
+        if (headerView != null) {
+            android.widget.TextView navTenantName = headerView.findViewById(R.id.nav_header_tenant_name);
+            if (navTenantName != null) {
+                navTenantName.setText(tenantName);
             }
         }
     }
 
     public void navigateToSalesHistory() {
-        navigationView.setCheckedItem(R.id.nav_sales);
+        uncheckAllMenuItems(navigationView.getMenu());
+        MenuItem salesItem = navigationView.getMenu().findItem(R.id.nav_sales);
+        if (salesItem != null) {
+            salesItem.setChecked(true);
+            updateToolbarTitle(salesItem.getTitle().toString());
+        } else {
+            navigationView.setCheckedItem(R.id.nav_sales);
+            updateToolbarTitle("Punto de Venta (POS)");
+        }
         SalesFragment salesFragment = new SalesFragment();
         Bundle args = new Bundle();
         args.putBoolean("openHistoryTab", true);
@@ -254,5 +289,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, salesFragment)
                 .commit();
+    }
+
+    private void uncheckAllMenuItems(android.view.Menu menu) {
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            item.setChecked(false);
+            if (item.hasSubMenu()) {
+                uncheckAllMenuItems(item.getSubMenu());
+            }
+        }
     }
 }

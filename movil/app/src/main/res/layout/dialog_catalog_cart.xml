@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#0C1929"
+    android:background="#1e293b"
     android:padding="20dp">
 
     <!-- Header -->
@@ -19,7 +19,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@android:drawable/ic_input_add"
-            app:tint="#34D399" />
+            app:tint="@color/profit_color" />
 
         <TextView
             android:layout_width="0dp"
@@ -37,7 +37,7 @@
             android:layout_height="32dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="#94A3B8" />
+            app:tint="@color/profit_color" />
 
     </LinearLayout>
 
@@ -48,7 +48,7 @@
         android:layout_height="120dp"
         android:gravity="center"
         android:text="Tu carrito está vacío."
-        android:textColor="#94A3B8"
+        android:textColor="@color/profit_color"
         android:textSize="14sp"
         android:visibility="gone" />
 
@@ -66,9 +66,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#0A1624"
+        android:background="#1e293b"
         android:padding="16dp"
-        android:backgroundTint="#111C2E"
+        android:backgroundTint="#1e293b"
         android:layout_marginTop="8dp">
 
         <LinearLayout
@@ -83,7 +83,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Total estimado"
-                android:textColor="#94A3B8"
+                android:textColor="@color/profit_color"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -102,7 +102,7 @@
             android:id="@+id/btnCatalogCartConfirm"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:backgroundTint="#10B981"
+            android:backgroundTint="@color/profit_color"
             android:text="CONFIRMAR POR WHATSAPP"
             android:textColor="#FFFFFF"
             android:textSize="14sp"

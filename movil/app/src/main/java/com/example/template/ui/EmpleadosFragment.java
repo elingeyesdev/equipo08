@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -35,7 +36,8 @@ import retrofit2.Response;
 
 public class EmpleadosFragment extends Fragment {
 
-    private Button btnToggleForm, btnGuardar;
+    private FloatingActionButton btnToggleForm;
+    private Button btnGuardar;
     private CardView cardForm;
     private EditText etNombre, etEmail, etPassword;
     private Spinner spinnerRol, spinnerSucursal, spinnerFilterRol, spinnerFilterSucursal;
@@ -101,7 +103,7 @@ public class EmpleadosFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
-        sessionManager = new SessionManager(getContext());
+        sessionManager = new SessionManager(getContext  ());
 
         btnToggleForm.setOnClickListener(v -> toggleForm(false));
         btnGuardar.setOnClickListener(v -> saveEmpleado());
@@ -124,12 +126,12 @@ public class EmpleadosFragment extends Fragment {
         isFormVisible = !isFormVisible || fromEdit;
         if (isFormVisible) {
             cardForm.setVisibility(View.VISIBLE);
-            btnToggleForm.setText("X Cancelar");
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#64748b")));
+            btnToggleForm.setImageResource(R.drawable.ic_close);
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488")));
         } else {
             cardForm.setVisibility(View.GONE);
-            btnToggleForm.setText("Registrar Nuevo");
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1d4ed8")));
+            btnToggleForm.setImageResource(R.drawable.ic_add);
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488")));
         }
     }
 

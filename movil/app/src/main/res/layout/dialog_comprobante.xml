@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="COMPROBANTE DE VENTA"
-        android:textColor="#059669"
+        android:textColor="@color/profit_color"
         android:textSize="18sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -181,7 +181,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Bs 0.00"
-            android:textColor="#059669"
+            android:textColor="@color/profit_color"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginStart="8dp"/>
@@ -199,7 +199,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="¡Gracias por su compra!"
-            android:textColor="#64748b"
+            android:textColor="@color/accent_color"
             android:textSize="11sp"
             android:textStyle="bold"
             android:gravity="end"/>
@@ -209,7 +209,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Este documento es una representación digital de la venta."
-            android:textColor="#64748b"
+            android:textColor="@color/accent_color"
             android:textSize="10sp"
             android:gravity="end"/>
     </LinearLayout>
@@ -220,7 +220,7 @@
         android:layout_height="48dp"
         android:layout_marginBottom="8dp"
         android:text="Descargar Factura"
-        android:backgroundTint="#10b981"
+        android:backgroundTint="@color/profit_color"
         android:textColor="#ffffff"
         android:textStyle="bold" />
 

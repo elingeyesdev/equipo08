@@ -40,6 +40,16 @@ public class EmpleadosAdapter extends RecyclerView.Adapter<EmpleadosAdapter.View
         return new ViewHolder(v);
     }
 
+    private void setRoleBackgroundColor(TextView tv, String colorHex) {
+        android.graphics.drawable.Drawable background = tv.getBackground();
+        if (background instanceof android.graphics.drawable.GradientDrawable) {
+            android.graphics.drawable.GradientDrawable gradientDrawable = (android.graphics.drawable.GradientDrawable) background.mutate();
+            gradientDrawable.setColor(Color.parseColor(colorHex));
+        } else {
+            tv.setBackgroundColor(Color.parseColor(colorHex));
+        }
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Empleado e = list.get(position);
@@ -50,16 +60,18 @@ public class EmpleadosAdapter extends RecyclerView.Adapter<EmpleadosAdapter.View
         holder.tvRol.setText(rol);
         
         if ("OWNER".equals(rol)) {
-            holder.tvRol.setBackgroundColor(Color.parseColor("#f43f5e")); // Red/Pink
+            setRoleBackgroundColor(holder.tvRol, "#0f172a");
+            holder.tvRol.setTextColor(Color.parseColor("#eef2f6"));
             holder.btnEdit.setVisibility(View.INVISIBLE);
             holder.btnDelete.setVisibility(View.INVISIBLE);
         } else {
+            holder.tvRol.setTextColor(Color.WHITE);
             holder.btnEdit.setVisibility(View.VISIBLE);
             holder.btnDelete.setVisibility(View.VISIBLE);
             if ("SUPERVISOR".equals(rol)) {
-                holder.tvRol.setBackgroundColor(Color.parseColor("#3b82f6")); // Blue
+                setRoleBackgroundColor(holder.tvRol, "#5981DF"); // Blue
             } else {
-                holder.tvRol.setBackgroundColor(Color.parseColor("#eab308")); // Yellow
+                setRoleBackgroundColor(holder.tvRol, "#0d9488"); // Green
             }
         }
         
@@ -68,7 +80,7 @@ public class EmpleadosAdapter extends RecyclerView.Adapter<EmpleadosAdapter.View
         String estado = e.getEstado() != null ? e.getEstado() : "Activo";
         holder.tvEstado.setText(estado);
         if ("Activo".equalsIgnoreCase(estado)) {
-            holder.tvEstado.setTextColor(Color.parseColor("#166534")); // Green
+            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); // Green
         } else {
             holder.tvEstado.setTextColor(Color.parseColor("#475569")); // Gray
         }

@@ -33,7 +33,7 @@
                 android:id="@+id/tvWelcomeTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="4dp"
                 android:textColor="@color/text_primary"
                 android:textSize="26sp"
                 android:textStyle="bold"
@@ -131,7 +131,7 @@
                             android:layout_width="36dp"
                             android:layout_height="36dp"
                             android:src="@drawable/ic_sales"
-                            android:tint="#059669"
+                            android:tint="@color/profit_color"
                             android:background="@drawable/circle_bg_white_alpha"
                             android:padding="6dp" />
 
@@ -183,7 +183,7 @@
                             android:layout_width="36dp"
                             android:layout_height="36dp"
                             android:src="@drawable/ic_stock"
-                            android:tint="#059669"
+                            android:tint="@color/profit_color"
                             android:background="@drawable/circle_bg_white_alpha"
                             android:padding="6dp" />
 
@@ -206,7 +206,7 @@
                                 android:id="@+id/tvMetricProfit"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:textColor="#059669"
+                                android:textColor="@color/profit_color"
                                 android:textSize="20sp"
                                 android:textStyle="bold"
                                 tools:text="Bs 1,230.10" />

@@ -92,10 +92,10 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
         
         if (s.isActive()) {
             holder.tvEstado.setText("Operativa");
-            holder.tvEstado.setTextColor(Color.parseColor("#166534")); // Green
+            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); // Green
         } else {
             holder.tvEstado.setText("Cerrada");
-            holder.tvEstado.setTextColor(Color.parseColor("#991b1b")); // Red
+            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); // Red
         }
 
         if (canManage) {

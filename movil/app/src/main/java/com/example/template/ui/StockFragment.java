@@ -107,11 +107,11 @@ public class StockFragment extends Fragment {
             if (isFilterVisible) {
                 cardFilter.setVisibility(View.VISIBLE);
                 btnToggleFilter.setText("Ocultar Filtros");
-                btnToggleFilter.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#64748b")));
+                btnToggleFilter.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
             } else {
                 cardFilter.setVisibility(View.GONE);
                 btnToggleFilter.setText("Filtrar");
-                btnToggleFilter.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#2563eb")));
+                btnToggleFilter.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
             }
         });
 
@@ -344,7 +344,7 @@ public class StockFragment extends Fragment {
                 if (s.toString().isEmpty()) {
                     llWarningBox.setVisibility(View.GONE);
                     btnProcesar.setEnabled(false);
-                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d1d5db")));
+                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
                     return;
                 }
                 
@@ -353,11 +353,11 @@ public class StockFragment extends Fragment {
                 if (cantidad > stock.getCantidadTotal() || cantidad < 1) {
                     llWarningBox.setVisibility(View.VISIBLE);
                     btnProcesar.setEnabled(false);
-                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#d1d5db")));
+                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
                 } else {
                     llWarningBox.setVisibility(View.GONE);
                     btnProcesar.setEnabled(true);
-                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#2563eb")));
+                    btnProcesar.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
                 }
             }
         });

@@ -16,30 +16,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Title & Subtitle Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Ajustes del Negocio"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:textColor="#2b3b55" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Personaliza la información y apariencia de tu tienda."
-                    android:textColor="#5a6a85"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
+            
 
             <!-- Card Settings Form -->
             <androidx.cardview.widget.CardView
@@ -62,7 +39,7 @@
                         android:layout_height="wrap_content"
                         android:text="Perfil y Marca"
                         android:textStyle="bold"
-                        android:textColor="#2b3b55"
+                        android:textColor="#0f172a"
                         android:textSize="16sp"
                         android:layout_marginBottom="20dp"/>
 
@@ -81,7 +58,7 @@
                             android:layout_height="wrap_content"
                             android:hint="Nombre de la Tienda *"
                             android:inputType="text"
-                            android:textColor="#2b3b55" />
+                            android:textColor="#0f172a" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Contact Phone -->
@@ -99,7 +76,7 @@
                             android:layout_height="wrap_content"
                             android:hint="Teléfono de Contacto (WhatsApp)"
                             android:inputType="phone"
-                            android:textColor="#2b3b55" />
+                            android:textColor="#0f172a" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Logo URL -->
@@ -117,7 +94,7 @@
                             android:layout_height="wrap_content"
                             android:hint="URL del Logo"
                             android:inputType="textUri"
-                            android:textColor="#2b3b55" />
+                            android:textColor="#0f172a" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Brand Color Selection -->
@@ -125,7 +102,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Color de Marca"
-                        android:textColor="#5a6a85"
+                        android:textColor="@color/accent_color"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp"
@@ -145,7 +122,7 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:background="@drawable/bg_circle_white"
-                            android:backgroundTint="#184e77"
+                            android:backgroundTint="@color/accent_color"
                             android:layout_marginEnd="12dp" />
 
                         <!-- Brand Color Text Input -->
@@ -163,7 +140,7 @@
                                 android:layout_height="wrap_content"
                                 android:hint="Código Color (HEX) *"
                                 android:inputType="text"
-                                android:textColor="#2b3b55"
+                                android:textColor="#0f172a"
                                 android:maxLines="1" />
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -195,6 +172,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="gone"
-        android:indeterminateTint="#2563eb" />
+        android:indeterminateTint="@color/accent_color" />
 
 </FrameLayout>

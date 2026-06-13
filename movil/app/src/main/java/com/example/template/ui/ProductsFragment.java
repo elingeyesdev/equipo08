@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -36,7 +37,8 @@ import retrofit2.Response;
 
 public class ProductsFragment extends Fragment {
 
-    private Button btnToggleForm, btnGuardar;
+    private FloatingActionButton btnToggleForm;
+    private Button btnGuardar;
     private CardView cardForm;
     private AutoCompleteTextView etName;
     private EditText etSku, etPrecioCoste, etPrecioVenta, etDescription, etStockMinimo, etImagenUrl;
@@ -178,12 +180,12 @@ public class ProductsFragment extends Fragment {
         isFormVisible = !isFormVisible || fromEdit;
         if (isFormVisible) {
             cardForm.setVisibility(View.VISIBLE);
-            btnToggleForm.setText("X Cancelar");
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#64748b")));
+            btnToggleForm.setImageResource(R.drawable.ic_close);
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488")));
         } else {
             cardForm.setVisibility(View.GONE);
-            btnToggleForm.setText("Nuevo Artículo");
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
+            btnToggleForm.setImageResource(R.drawable.ic_add);
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a")));
         }
     }
 

@@ -71,7 +71,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="32dp"
         android:text="La plataforma SaaS definitiva para la gestión de sucursales, inventarios inteligentes y facturación."
-        android:textColor="#E0E7FF"
+        android:textColor="#F5EEF8"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -97,7 +97,7 @@
             app:cardCornerRadius="12dp"
             app:strokeWidth="1dp"
             app:strokeColor="#FFFFFF"
-            android:backgroundTint="#1D4ED8">
+            android:backgroundTint="@color/accent_color">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -115,7 +115,7 @@
                     android:background="@android:color/transparent"
                     android:hint="Dominio de tienda (ej: nike)"
                     android:textColor="#FFFFFF"
-                    android:textColorHint="#93C5FD"
+                    android:textColorHint="@color/profit_color"
                     android:textSize="14sp"
                     android:inputType="text"
                     android:maxLines="1" />

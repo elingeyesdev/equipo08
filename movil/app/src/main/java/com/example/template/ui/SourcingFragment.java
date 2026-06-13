@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -45,7 +46,8 @@ import retrofit2.Response;
 
 public class SourcingFragment extends Fragment {
 
-    private Button btnToggleForm, btnGuardar, btnToggleFilters;
+    private FloatingActionButton btnToggleForm;
+    private Button btnGuardar, btnToggleFilters;
     private CardView cardForm, cardFilter;
     private ScrollView scrollForm;
     private EditText etVolumen, etFechaVencimiento, etFechaProduccion, etSearch, etFilterDateFrom, etFilterDateTo;
@@ -115,11 +117,11 @@ public class SourcingFragment extends Fragment {
             if (isFiltersVisible) {
                 cardFilter.setVisibility(View.VISIBLE);
                 btnToggleFilters.setText("Ocultar Filtros");
-                btnToggleFilters.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#64748b")));
+                btnToggleFilters.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488")));
             } else {
                 cardFilter.setVisibility(View.GONE);
                 btnToggleFilters.setText("Filtros");
-                btnToggleFilters.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2563eb")));
+                btnToggleFilters.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488")));
             }
         });
 
@@ -137,14 +139,14 @@ public class SourcingFragment extends Fragment {
             scrollForm.setVisibility(View.VISIBLE);
             cardFilter.setVisibility(View.GONE);
             btnToggleFilters.setVisibility(View.GONE);
-            btnToggleForm.setText("X Cancelar");
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#64748b")));
+            btnToggleForm.setImageResource(R.drawable.ic_close);
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488")));
         } else {
             scrollForm.setVisibility(View.GONE);
             cardFilter.setVisibility(isFiltersVisible ? View.VISIBLE : View.GONE);
             btnToggleFilters.setVisibility(View.VISIBLE);
-            btnToggleForm.setText("Nuevo Ingreso");
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2b3b55")));
+            btnToggleForm.setImageResource(R.drawable.ic_add);
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a")));
             etVolumen.setText("");
             etFechaVencimiento.setText("");
             etFechaProduccion.setText("");

@@ -105,14 +105,14 @@ public class SettingsFragment extends Fragment {
 
                         String brandColor = profile.getBrandColor();
                         if (brandColor == null || brandColor.trim().isEmpty()) {
-                            brandColor = "#184e77"; // Default color
+                            brandColor = "#0d9488"; // Default color
                         }
                         etBrandColor.setText(brandColor);
 
                         try {
                             viewColorPreview.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(brandColor)));
                         } catch (Exception e) {
-                            viewColorPreview.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#184e77")));
+                            viewColorPreview.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488")));
                         }
                     } else {
                         Toast.makeText(getContext(), "Error al cargar los ajustes", Toast.LENGTH_SHORT).show();
@@ -143,7 +143,7 @@ public class SettingsFragment extends Fragment {
         }
 
         if (!brandColor.matches("^#[0-9a-fA-F]{6}$")) {
-            etBrandColor.setError("Color HEX inválido (ej: #184E77)");
+            etBrandColor.setError("Color HEX inválido (ej: #0d9488)");
             return;
         }
 
@@ -167,7 +167,6 @@ public class SettingsFragment extends Fragment {
                         session.updateTenantName(name);
                         session.updateLogoUrl(logoUrl);
                         if (getActivity() instanceof MainActivity) {
-                            ((MainActivity) getActivity()).updateToolbarTitle(name);
                             ((MainActivity) getActivity()).updateNavHeaderLogo(logoUrl);
                         }
 

@@ -12,43 +12,15 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header -->
-        <RelativeLayout
+        <!-- Filter Button -->
+        <Button
+            android:id="@+id/btnToggleFilter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
-            
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_alignParentStart="true"
-                android:layout_toStartOf="@+id/btnToggleFilter"
-                android:layout_marginEnd="8dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Inventario y Valuación"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="#2b3b55" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Operando bajo centros de costos segregados."
-                    android:textColor="#5a6a85" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/btnToggleFilter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:backgroundTint="#2563eb"
-                android:textColor="#ffffff"
-                android:text="Filtrar" />
-        </RelativeLayout>
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/accent_color"
+            android:textColor="#ffffff"
+            android:text="Filtrar" />
 
         <!-- Alert Banner -->
         <LinearLayout
@@ -56,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="@drawable/bg_warning_red"
+            android:background="@drawable/bg_alert_green"
             android:padding="12dp"
             android:layout_marginBottom="16dp"
             android:visibility="gone"
@@ -67,7 +39,7 @@
                 android:layout_height="28dp"
                 android:src="@android:drawable/ic_dialog_alert"
                 android:layout_marginEnd="12dp"
-                app:tint="#b91c1c" />
+                app:tint="@color/bg_dark" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -79,7 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Alertas de Inventario Bajo (0)"
-                    android:textColor="#991b1b"
+                    android:textColor="@color/bg_dark"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -87,7 +59,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Hay productos que se encuentran por debajo del stock mínimo configurado. Recomendamos generar reposiciones."
-                    android:textColor="#b91c1c"
+                    android:textColor="@color/bg_dark"
                     android:textSize="11sp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
@@ -153,7 +125,7 @@
                         android:padding="12dp"
                         android:drawableStart="@android:drawable/ic_menu_search"
                         android:drawablePadding="8dp"
-                        android:textColor="#000000"
+                        android:textColor="@color/primary_color"
                         android:textColorHint="#64748b"
                         android:inputType="text"
                         android:maxLines="1" />
@@ -165,7 +137,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Simular Escenario de Bajo Stock"
-                    android:backgroundTint="#f43f5e"
+                    android:backgroundTint="@color/primary_color"
                     android:textColor="#ffffff"
                     android:textSize="14sp"
                     android:textStyle="bold"
@@ -200,7 +172,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Valuación de Déficit Acumulado:"
-                    android:textColor="#991b1b"
+                    android:textColor="@color/loss_color"
                     android:textStyle="bold"
                     android:layout_marginTop="4dp" />
             </LinearLayout>
@@ -223,7 +195,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Bs. 0.00"
-                    android:textColor="#b91c1c"
+                    android:textColor="@color/loss_color"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:layout_marginTop="4dp" />
