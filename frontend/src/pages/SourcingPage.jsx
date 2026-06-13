@@ -21,7 +21,11 @@ export default function SourcingPage() {
   const [filterExpiryStart, setFilterExpiryStart] = useState('');
   const [filterExpiryEnd, setFilterExpiryEnd] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [loteForm, setLoteForm] = useState({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
+  const [loteForm, setLoteForm] = useState(() => {
+    const sId = sessionStorage.getItem('user_sucursal_id') || '';
+    const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
+    return { producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' };
+  });
   const toast = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -48,6 +52,7 @@ export default function SourcingPage() {
   }, [filterProducto, filterProveedor, filterSucursal, filterDateStart, filterDateEnd, filterExpiryStart, filterExpiryEnd]);
 
   const userRole = sessionStorage.getItem('user_role');
+  const userSucursalId = sessionStorage.getItem('user_sucursal_id');
   const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
   const tenantName = sessionStorage.getItem('tenant_name') || 'Sucursal';
 
@@ -80,7 +85,9 @@ export default function SourcingPage() {
   };
 
   const resetForm = () => {
-    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
+    const sId = sessionStorage.getItem('user_sucursal_id') || '';
+    const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
+    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
     setEditingId(null);
     setShowForm(false);
     setProductSearchQuery('');
@@ -230,9 +237,24 @@ export default function SourcingPage() {
             <div className="form-grid">
               <div className="form-group">
                 <label>Sucursal / Almacén de Destino *</label>
-                <select required value={loteForm.sucursal_id} onChange={e => setLoteForm({...loteForm, sucursal_id: e.target.value})} disabled={editingId ? true : false}>
+                <select 
+                  required 
+                  value={loteForm.sucursal_id} 
+                  onChange={e => setLoteForm({...loteForm, sucursal_id: e.target.value})} 
+                  disabled={editingId || (userRole !== 'OWNER' && !!userSucursalId) ? true : false}
+                >
                   <option value="">Seleccione sucursal...</option>
-                  {sucursales.filter(s => s.isActive).map(s => <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>)}
+                  {(() => {
+                    const activeBranches = sucursales.filter(s => s.isActive);
+                    if (userRole !== 'OWNER' && !!userSucursalId) {
+                      return activeBranches.filter(s => s.id === userSucursalId).map(s => (
+                        <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>
+                      ));
+                    }
+                    return activeBranches.map(s => (
+                      <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>
+                    ));
+                  })()}
                 </select>
               </div>
 
