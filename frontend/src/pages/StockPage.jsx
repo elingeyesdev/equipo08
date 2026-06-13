@@ -294,7 +294,7 @@ export default function StockPage() {
               <button 
                 type="submit" 
                 disabled={saving || !transferForm.to_sucursal_id || !transferForm.cantidad} 
-                className="btn-premium bg-slate-900 text-white hover:bg-black hover:shadow-lg hover:shadow-slate-900/20"
+                className="btn-premium btn-premium-indigo"
               >
                 Confirmar Traslado
               </button>
