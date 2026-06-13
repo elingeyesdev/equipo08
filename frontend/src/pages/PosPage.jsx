@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api, { getBackendUrl } from '../api';
 import { useToast } from '../components/ToastContext';
 import {
-  Minus, Plus, Trash2, Bell, Receipt, Calculator, Store, LayoutGrid, Sun, Moon, Tag
+  Minus, Plus, Trash2, Bell, Receipt, Calculator, Store, LayoutGrid, Sun, Moon, Tag, ArrowLeft
 } from 'lucide-react';
 
 export default function PosPage() {
@@ -305,9 +305,9 @@ export default function PosPage() {
       
       {/* LEFT SIDEBAR - Categories */}
       <div className="w-[110px] bg-white border-r border-slate-200 flex flex-col items-center py-6 shadow-sm z-10 flex-shrink-0 overflow-y-auto custom-scrollbar">
-        <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity">
+        <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity" title="Volver al panel principal">
           <div className="w-10 h-10 bg-slate-900 dark:bg-indigo-500 rounded-full mb-2 flex items-center justify-center text-white shadow-md">
-            <Store size={20} />
+            <ArrowLeft size={20} />
           </div>
           <span className="text-[11px] font-black tracking-tight text-slate-800 text-center px-1 truncate w-full">{tenantName}</span>
         </Link>
