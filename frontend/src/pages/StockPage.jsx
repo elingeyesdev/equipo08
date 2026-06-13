@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { useToast } from '../components/ToastContext';
-import { Archive, MapPin, ClipboardList, AlertTriangle, Save, X, TrendingDown, Search, Printer, ArrowRightLeft } from 'lucide-react';
+import { Archive, MapPin, ClipboardList, AlertTriangle, Save, X, TrendingDown, Search, Printer, ArrowRightLeft, ChevronRight, ChevronDown } from 'lucide-react';
 
 let lastAlertedCount = 0;
 
@@ -22,6 +22,14 @@ export default function StockPage() {
   });
 
   const [saving, setSaving] = useState(false);
+  const [expandedStock, setExpandedStock] = useState({});
+
+  const toggleExpandStock = (key) => {
+    setExpandedStock(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   const toast = useToast();
 
@@ -348,37 +356,138 @@ export default function StockPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredStock.map(s => {
-                    const isAlerta = s.cantidadTotal < (s.producto?.stockMinimo || 10);
-                    const valuation = Number(s.valorAdquisicion || 0);
-                    const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
-                    return (
-                      <tr key={s.id} className={isAlerta ? 'bg-rose-50/10' : ''}>
-                        <td className="text-sm text-slate-800">
-                          {s.producto?.sku}
-                        </td>
-                        <td className="text-sm text-slate-800 font-medium">{s.producto?.name}</td>
-                        <td className="text-sm text-slate-800">
-                           {s.sucursal?.name}
-                        </td>
-                        <td className="text-right text-sm text-slate-800">
-                           {s.cantidadTotal}
-                        </td>
-                        <td className="text-right text-sm text-slate-800">Bs {costoPromedio.toFixed(2)}</td>
-                        <td className="text-right text-sm text-slate-800">Bs {valuation.toFixed(2)}</td>
+                 {(() => {
+                  const groups = {};
+                  filteredStock.forEach(s => {
+                    const key = `${s.producto?.name}_${s.sucursal_id}`;
+                    if (!groups[key]) {
+                      groups[key] = [];
+                    }
+                    groups[key].push(s);
+                  });
+
+                  if (Object.keys(groups).length === 0) return (
+                    <tr>
+                      <td colSpan={7} className="text-center py-12 text-slate-400 font-medium">
+                        No hay productos registrados en el inventario.
+                      </td>
+                    </tr>
+                  );
+
+                  return Object.keys(groups).map(key => {
+                    const variants = groups[key];
+                    const isExpanded = !!expandedStock[key];
+                    
+                    if (variants.length === 1) {
+                      // Single stock item row (no variants)
+                      const s = variants[0];
+                      const isAlerta = s.cantidadTotal < (s.producto?.stockMinimo || 10);
+                      const valuation = Number(s.valorAdquisicion || 0);
+                      const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
+                      return (
+                        <tr key={s.id} className={isAlerta ? 'bg-rose-50/10' : ''}>
+                          <td className="text-sm text-slate-800 font-mono">{s.producto?.sku}</td>
+                          <td>
+                            <div className="flex flex-col items-start gap-0.5">
+                              <span className="text-sm text-slate-800 font-medium">{s.producto?.name}</span>
+                              {s.producto?.attributes && Object.keys(s.producto.attributes).length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                  {Object.entries(s.producto.attributes).map(([k, v]) => v ? (
+                                    <span key={k} className="text-[9px] text-slate-400 font-bold border border-slate-200 px-1 py-0.5 rounded uppercase tracking-wider bg-slate-50">
+                                      {k}: {v}
+                                    </span>
+                                  ) : null)}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="text-sm text-slate-850">{s.sucursal?.name}</td>
+                          <td className={`text-right text-sm font-semibold ${isAlerta ? 'text-rose-600 font-bold' : 'text-slate-800'}`}>{s.cantidadTotal}</td>
+                          <td className="text-right text-sm text-slate-800 font-mono">Bs {costoPromedio.toFixed(2)}</td>
+                          <td className="text-right text-sm text-slate-800 font-mono">Bs {valuation.toFixed(2)}</td>
                           <td className="text-center">
-                                <button 
-                                   onClick={() => handleOpenTransfer(s)}
-                                   className="btn-premium btn-premium-sm"
-                                   title="Trasladar a otra sucursal"
-                                >
-                                  <ArrowRightLeft size={14} />
-                                  <span>Trasladar</span>
-                                </button>
+                            <button onClick={() => handleOpenTransfer(s)} className="btn-premium btn-premium-sm" title="Trasladar a otra sucursal">
+                              <ArrowRightLeft size={14} />
+                              <span>Trasladar</span>
+                            </button>
                           </td>
                         </tr>
-                    );
-                  })
+                      );
+                    } else {
+                      // Multi-variant stock parent row
+                      const main = variants[0];
+                      const totalQty = variants.reduce((sum, v) => sum + (v.cantidadTotal || 0), 0);
+                      const totalValuation = variants.reduce((sum, v) => sum + (Number(v.valorAdquisicion) || 0), 0);
+                      const avgCostoPromedio = totalQty > 0 ? (totalValuation / totalQty) : 0;
+                      const hasAlert = variants.some(v => v.cantidadTotal < (v.producto?.stockMinimo || 10));
+
+                      return (
+                        <React.Fragment key={key}>
+                          <tr className={`bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500 ${hasAlert ? 'bg-rose-50/5' : ''}`}>
+                            <td className="text-sm text-slate-400 font-mono">-</td>
+                            <td>
+                              <div 
+                                role="button" 
+                                onClick={() => toggleExpandStock(key)} 
+                                className="flex items-center gap-2 cursor-pointer select-none"
+                              >
+                                <span className="text-slate-400 hover:text-indigo-600 transition-colors">
+                                  {isExpanded ? <ChevronDown size={16} strokeWidth={3} /> : <ChevronRight size={16} strokeWidth={3} />}
+                                </span>
+                                <div className="flex flex-col items-start gap-0.5">
+                                  <span className="text-sm font-bold text-slate-800">{main.producto?.name}</span>
+                                  <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">{variants.length} variantes</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="text-sm text-slate-800">{main.sucursal?.name}</td>
+                            <td className="text-right text-sm text-slate-850 font-bold">{totalQty}</td>
+                            <td className="text-right text-sm text-slate-850 font-mono">Bs {avgCostoPromedio.toFixed(2)}</td>
+                            <td className="text-right text-sm text-slate-850 font-mono">Bs {totalValuation.toFixed(2)}</td>
+                            <td className="text-center">-</td>
+                          </tr>
+
+                          {isExpanded && variants.map(s => {
+                            const isAlerta = s.cantidadTotal < (s.producto?.stockMinimo || 10);
+                            const valuation = Number(s.valorAdquisicion || 0);
+                            const costoPromedio = s.cantidadTotal > 0 ? (valuation / s.cantidadTotal) : 0;
+                            return (
+                              <tr key={s.id} className={`bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200 ${isAlerta ? 'bg-rose-50/10' : ''}`}>
+                                <td className="pl-6 text-xs text-slate-500 font-mono">{s.producto?.sku}</td>
+                                <td className="pl-8">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-slate-300 dark:text-slate-750 font-mono">└─</span>
+                                    <div className="flex flex-col items-start">
+                                      {s.producto?.attributes && Object.keys(s.producto.attributes).length > 0 ? (
+                                        <div className="flex flex-wrap gap-1 mt-0.5">
+                                          {Object.entries(s.producto.attributes).map(([k, v]) => v ? (
+                                            <span key={k} className="text-[9px] text-slate-500 font-bold border border-slate-200/80 px-1.5 py-0.5 rounded uppercase tracking-wider bg-white dark:bg-slate-850 shadow-sm">
+                                              {k}: {v}
+                                            </span>
+                                          ) : null)}
+                                        </div>
+                                      ) : <span className="text-xs text-slate-400 italic">Variante única</span>}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="text-xs text-slate-500">{s.sucursal?.name}</td>
+                                <td className={`text-right text-xs font-semibold ${isAlerta ? 'text-rose-600 font-bold font-mono' : 'text-slate-600 font-mono'}`}>{s.cantidadTotal}</td>
+                                <td className="text-right text-xs text-slate-600 font-mono">Bs {costoPromedio.toFixed(2)}</td>
+                                <td className="text-right text-xs text-slate-800 font-mono font-bold">Bs {valuation.toFixed(2)}</td>
+                                <td className="text-center">
+                                  <button onClick={() => handleOpenTransfer(s)} className="btn-premium btn-premium-sm" title="Trasladar a otra sucursal">
+                                    <ArrowRightLeft size={14} />
+                                    <span>Trasladar</span>
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </React.Fragment>
+                      );
+                    }
+                  });
+                })()}
                 )}
               </tbody>
             </table>
