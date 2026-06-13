@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api, { getBackendUrl } from '../api';
 import { useToast } from '../components/ToastContext';
 import {
-  Minus, Plus, Trash2, Bell, Receipt, Calculator, Store, LayoutGrid, Sun, Moon, Tag
+  Minus, Plus, Trash2, Bell, Receipt, Calculator, Store, LayoutGrid, Sun, Moon, Tag, ArrowLeft, ShoppingCart, Search, Loader2
 } from 'lucide-react';
 
 export default function PosPage() {
@@ -12,14 +12,28 @@ export default function PosPage() {
   const [stockInfo, setStockInfo] = useState([]);
   const [activeCategory, setActiveCategory] = useState('ALL');
   
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pos_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [itemToRemove, setItemToRemove] = useState(null);
   const [saving, setSaving] = useState(false);
   const [orderNumber, setOrderNumber] = useState('......');
   
   // Hold Orders State
   const [activeRightTab, setActiveRightTab] = useState('new');
-  const [holdOrders, setHoldOrders] = useState([]);
+  const [holdOrders, setHoldOrders] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pos_hold_orders');
+      return saved ? JSON.parse(saved).map(o => ({ ...o, timestamp: new Date(o.timestamp) })) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Checkout Modal State
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -27,9 +41,12 @@ export default function PosPage() {
   const [clienteDocumento, setClienteDocumento] = useState('');
   const [metodoPago, setMetodoPago] = useState('Efectivo');
   const [montoRecibido, setMontoRecibido] = useState('');
+  const [searchingClient, setSearchingClient] = useState(false);
   
   // Variant Selection State
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedAttributes, setSelectedAttributes] = useState({});
   
   // Theme state
   const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
@@ -41,6 +58,58 @@ export default function PosPage() {
   const userSucursalName = sessionStorage.getItem('user_sucursal_name');
   const tenantName = sessionStorage.getItem('tenant_name') || 'Mi Tienda';
   const isBranchLocked = userRole !== 'OWNER' && !!userSucursalId;
+
+  useEffect(() => {
+    localStorage.setItem('pos_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('pos_hold_orders', JSON.stringify(holdOrders));
+  }, [holdOrders]);
+
+  useEffect(() => {
+    if (selectedGroup) {
+      const firstVariant = selectedGroup.items[0];
+      setSelectedVariant(firstVariant);
+      setSelectedAttributes(firstVariant?.producto?.attributes || {});
+    } else {
+      setSelectedVariant(null);
+      setSelectedAttributes({});
+    }
+  }, [selectedGroup]);
+
+  const allAttributesGrouped = useMemo(() => {
+    if (!selectedGroup) return {};
+    const grouped = {};
+    selectedGroup.items.forEach(item => {
+      const attrs = item.producto?.attributes;
+      if (attrs) {
+        Object.entries(attrs).forEach(([key, val]) => {
+          if (!grouped[key]) grouped[key] = new Set();
+          if (val) grouped[key].add(val);
+        });
+      }
+    });
+    const result = {};
+    Object.entries(grouped).forEach(([key, set]) => {
+      result[key] = Array.from(set);
+    });
+    return result;
+  }, [selectedGroup]);
+
+  const handleSelectAttribute = (key, value) => {
+    const nextAttrs = { ...selectedAttributes, [key]: value };
+    let match = selectedGroup.items.find(item => 
+      Object.entries(nextAttrs).every(([k, v]) => item.producto?.attributes?.[k] === v)
+    );
+    if (!match) {
+      match = selectedGroup.items.find(item => item.producto?.attributes?.[key] === value);
+    }
+    if (match) {
+      setSelectedVariant(match);
+      setSelectedAttributes(match.producto?.attributes || {});
+    }
+  };
 
   useEffect(() => {
     fetchSucursales();
@@ -270,6 +339,11 @@ export default function PosPage() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
+    const receivedVal = Number(montoRecibido) || total;
+    if (receivedVal < total) {
+      toast.error('El monto recibido no puede ser menor al total a cobrar');
+      return;
+    }
     setSaving(true);
     try {
       const payload = {
@@ -300,14 +374,36 @@ export default function PosPage() {
     }
   };
 
+  const searchClient = async (doc) => {
+    const documentToSearch = doc || clienteDocumento;
+    if (!documentToSearch || documentToSearch.trim().length < 5) {
+      toast.error('Ingresa al menos 5 dígitos para buscar el cliente.');
+      return;
+    }
+    setSearchingClient(true);
+    try {
+      const res = await api.get(`/ventas/cliente/${documentToSearch.trim()}`);
+      if (res.data && res.data.clienteNombre) {
+        setClienteNombre(res.data.clienteNombre);
+        toast.success(`Cliente encontrado y autocompletado: ${res.data.clienteNombre}`);
+      } else {
+        toast.info('NIT/CI no registrado anteriormente.');
+      }
+    } catch (err) {
+      toast.info('NIT/CI no registrado anteriormente.');
+    } finally {
+      setSearchingClient(false);
+    }
+  };
+
   return (
     <div className="h-screen w-full flex bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
       
       {/* LEFT SIDEBAR - Categories */}
       <div className="w-[110px] bg-white border-r border-slate-200 flex flex-col items-center py-6 shadow-sm z-10 flex-shrink-0 overflow-y-auto custom-scrollbar">
-        <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity">
+        <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity" title="Volver al panel principal">
           <div className="w-10 h-10 bg-slate-900 dark:bg-indigo-500 rounded-full mb-2 flex items-center justify-center text-white shadow-md">
-            <Store size={20} />
+            <ArrowLeft size={20} />
           </div>
           <span className="text-[11px] font-black tracking-tight text-slate-800 text-center px-1 truncate w-full">{tenantName}</span>
         </Link>
@@ -398,7 +494,7 @@ export default function PosPage() {
                       <p className="text-[11px] text-slate-400 line-clamp-1 mb-auto leading-relaxed">{group.description}</p>
                     )}
                     <div className="mt-3 flex justify-between items-end">
-                      <span className="text-base font-black text-slate-900">
+                      <span className="text-base font-bold text-slate-800">
                         Bs {group.price.toFixed(2)}
                       </span>
                       <span className="text-[10px] font-bold text-slate-400 uppercase">
@@ -473,7 +569,7 @@ export default function PosPage() {
                     <div className="flex-1 flex flex-col justify-center min-w-0">
                       <div className="flex justify-between items-start mb-1">
                         <h4 className="text-sm font-bold text-slate-800 dark:text-white truncate pr-2 leading-tight">{item.name}</h4>
-                        <span className="text-sm font-black text-slate-900 dark:text-white whitespace-nowrap shrink-0">Bs {item.precioUnitario.toFixed(2)}</span>
+                        <span className="text-sm font-bold text-slate-800 dark:text-white whitespace-nowrap shrink-0">Bs {item.precioUnitario.toFixed(2)}</span>
                       </div>
                       <div className="text-[11px] text-slate-400 mb-3 flex flex-col gap-0.5">
                         <span>SKU: {item.sku}</span>
@@ -539,15 +635,11 @@ export default function PosPage() {
             </div>
             <div className="flex justify-between items-center mt-2 border-t border-slate-100 pt-3">
               <span className="text-slate-800 font-medium">Total a Cobrar</span>
-              <span className="text-xl font-black text-slate-900">Bs {total.toFixed(2)}</span>
+              <span className="text-xl font-bold text-slate-800">Bs {total.toFixed(2)}</span>
             </div>
           </div>
 
           <div className="flex gap-3 h-[52px]">
-            <div role="button" className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex flex-col items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-              <Bell size={18} className="mb-0.5" />
-              <span className="text-[10px] font-bold">Aviso</span>
-            </div>
             <div 
               role="button" 
               onClick={cart.length > 0 ? handleHoldOrder : undefined}
@@ -581,22 +673,34 @@ export default function PosPage() {
             </div>
             <div className="p-6 flex flex-col gap-5 overflow-y-auto max-h-[70vh] custom-scrollbar">
               <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">NIT / CI (Opcional)</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={clienteDocumento} 
+                    onChange={e => setClienteDocumento(e.target.value)} 
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchClient(); } }}
+                    placeholder="Ej. 1234567" 
+                    className="flex-1 py-2.5 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 text-slate-900 dark:text-white placeholder:text-slate-400"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => searchClient()} 
+                    disabled={searchingClient}
+                    className="px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    {searchingClient ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                    Buscar
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cliente</label>
                 <input 
                   type="text" 
                   value={clienteNombre} 
                   onChange={e => setClienteNombre(e.target.value)} 
                   className="w-full py-2.5 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 text-slate-900 dark:text-white"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">NIT / CI (Opcional)</label>
-                <input 
-                  type="text" 
-                  value={clienteDocumento} 
-                  onChange={e => setClienteDocumento(e.target.value)} 
-                  placeholder="Ej. 1234567" 
-                  className="w-full py-2.5 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -631,7 +735,7 @@ export default function PosPage() {
               <div className="mt-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col gap-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600 dark:text-slate-400">Total a Pagar</span>
-                  <span className="font-bold text-slate-900 dark:text-white">Bs {total.toFixed(2)}</span>
+                  <span className="font-bold text-slate-800 dark:text-white">Bs {total.toFixed(2)}</span>
                 </div>
                 {montoRecibido && Number(montoRecibido) > total && (
                   <div className="flex justify-between text-sm pt-2 border-t border-slate-200 dark:border-slate-700">
@@ -658,11 +762,17 @@ export default function PosPage() {
       {/* VARIANT SELECTOR MODAL OVERLAY */}
       {selectedGroup && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
-            {/* Hero Product Image */}
-            <div className="w-full h-44 bg-slate-100 relative">
-              <img src={selectedGroup.image} alt={selectedGroup.name} className="w-full h-full object-cover" />
-              <div className="absolute top-4 right-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex md:flex-row flex-col border border-slate-200 dark:border-slate-700 h-auto max-h-[90vh]">
+            {/* Left: Product Image */}
+            <div className="md:w-1/2 h-64 md:h-auto relative bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex items-center justify-center">
+              {(selectedVariant?.image || selectedGroup.image) ? (
+                <img src={selectedVariant?.image || selectedGroup.image} alt={selectedGroup.name} className="w-full h-full object-cover absolute inset-0" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center absolute inset-0">
+                  <Tag size={48} className="text-slate-400" />
+                </div>
+              )}
+              <div className="absolute top-4 right-4 md:hidden">
                 <div 
                   role="button" 
                   onClick={() => setSelectedGroup(null)} 
@@ -673,47 +783,121 @@ export default function PosPage() {
               </div>
             </div>
             
-            {/* Modal Body */}
-            <div className="p-5 flex flex-col gap-4">
-              <div>
-                <h2 className="text-lg font-black text-slate-950 dark:text-white leading-tight">{selectedGroup.name}</h2>
-                <p className="text-xs text-slate-500 font-semibold mt-0.5">Selecciona una variante para añadir</p>
+            {/* Right: Details & Selectors */}
+            <div className="md:w-1/2 p-6 flex flex-col overflow-y-auto relative h-full text-left">
+              {/* Close Button (Hidden on Mobile) */}
+              <div className="hidden md:flex justify-end absolute top-4 right-4 z-10">
+                <div 
+                  role="button" 
+                  onClick={() => setSelectedGroup(null)} 
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-white cursor-pointer transition-colors text-sm font-bold border border-slate-200 dark:border-slate-700"
+                >
+                  ✕
+                </div>
               </div>
-              
-              <div className="grid grid-cols-3 gap-2.5 max-h-[40vh] overflow-y-auto custom-scrollbar pr-0.5">
-                {selectedGroup.items.map(variant => {
-                  const variantLabel = getVariantLabel(variant);
-                  const hasStock = variant.cantidadTotal > 0;
-                  
-                  return (
-                    <div
-                      key={variant.producto_id}
-                      role="button"
-                      onClick={() => {
-                        if (hasStock) {
-                          addToCart(variant);
-                          setSelectedGroup(null);
-                        }
-                      }}
-                      className={`flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all h-20 text-center ${
-                        hasStock 
-                          ? 'border-slate-100 hover:border-slate-900 dark:border-slate-800 dark:hover:border-white bg-slate-50 dark:bg-slate-950 cursor-pointer' 
-                          : 'border-slate-100/50 bg-slate-50/20 opacity-40 cursor-not-allowed'
-                      }`}
-                    >
-                      <span className="text-xs font-black text-slate-900 dark:text-white uppercase truncate w-full px-1">
-                        {variantLabel || 'UNICA'}
+
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 block">
+                {selectedGroup.category || 'Otros'}
+              </span>
+              <h2 className="text-xl font-bold text-slate-850 dark:text-white mb-1 leading-tight pr-6">
+                {selectedGroup.name}
+              </h2>
+              <span className="font-mono text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded w-max mb-5 block">
+                SKU: {selectedVariant?.sku || selectedGroup.items[0]?.sku}
+              </span>
+
+              {/* Separated Attribute selectors */}
+              <div className="mb-5 flex flex-col gap-3.5">
+                {Object.keys(allAttributesGrouped).length > 0 ? (
+                  Object.entries(allAttributesGrouped).map(([key, values]) => (
+                    <div key={key}>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 block">
+                        {key}
                       </span>
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1">
-                        Bs {variant.price.toFixed(0)}
-                      </span>
-                      <span className={`text-[9px] font-bold uppercase mt-0.5 leading-none ${hasStock ? 'text-slate-400' : 'text-red-500'}`}>
-                        {hasStock ? `${variant.cantidadTotal} disp.` : 'Agotado'}
-                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {values.map(val => {
+                          const isSelected = selectedAttributes[key] === val;
+                          return (
+                            <div
+                              key={val}
+                              role="button"
+                              onClick={() => handleSelectAttribute(key, val)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border-2 transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-sm'
+                                  : 'bg-transparent border-slate-200 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-slate-700 dark:text-slate-300'
+                              }`}
+                            >
+                              {val}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  );
-                })}
+                  ))
+                ) : (
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 block">
+                      Selecciona una variante
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedGroup.items.map(variant => {
+                        const label = getVariantLabel(variant);
+                        const isSelected = selectedVariant?.producto_id === variant.producto_id;
+                        const hasStock = variant.cantidadTotal > 0;
+                        return (
+                          <div
+                            key={variant.producto_id}
+                            role="button"
+                            onClick={() => hasStock && setSelectedVariant(variant)}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border-2 transition-all cursor-pointer ${
+                              !hasStock ? 'opacity-40 cursor-not-allowed border-slate-100' :
+                              isSelected
+                                ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-sm'
+                                : 'bg-transparent border-slate-200 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-slate-700 dark:text-slate-300'
+                            }`}
+                          >
+                            {label || 'Única'}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Stock status info */}
+              {selectedVariant && (
+                <div className="mb-5 flex items-center justify-between text-xs font-bold uppercase">
+                  <span className="text-slate-400">Estado del Stock</span>
+                  <span className={selectedVariant.cantidadTotal > 0 ? 'text-emerald-500' : 'text-rose-500'}>
+                    {selectedVariant.cantidadTotal > 0 ? `${selectedVariant.cantidadTotal} unidades disp.` : 'Agotado'}
+                  </span>
+                </div>
+              )}
+
+              {/* Price Box */}
+              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-800 mb-5 flex justify-between items-center">
+                 <span className="text-xs font-semibold text-slate-400">Precio unitario</span>
+                 <span className="text-xl font-bold text-slate-800 dark:text-white">
+                   Bs {Number(selectedVariant?.price || selectedGroup.price).toFixed(2)}
+                 </span>
+              </div>
+
+              {/* Add to Cart Button */}
+              <button 
+                onClick={() => { 
+                  if (selectedVariant && selectedVariant.cantidadTotal > 0) {
+                    addToCart(selectedVariant); 
+                    setSelectedGroup(null); 
+                  } else {
+                    toast.error('No hay stock de la variante seleccionada');
+                  }
+                }}
+                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-sm text-sm"
+              >
+                <ShoppingCart size={16} /> Añadir al Pedido
+              </button>
             </div>
           </div>
         </div>
