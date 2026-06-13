@@ -276,7 +276,7 @@ export default function SourcingPage() {
                       )}
                     </div>
                     {showProductDropdown && (
-                      <div className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-[100] divide-y divide-slate-100 dark:divide-slate-800/60 animate-fadeIn">
+                      <div className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-[100] divide-y divide-slate-100 animate-fadeIn">
                         {(() => {
                           const query = productSearchQuery.toLowerCase().trim();
                           const filteredProducts = products.filter(p => {
@@ -288,7 +288,7 @@ export default function SourcingPage() {
                           });
 
                           if (filteredProducts.length === 0) {
-                            return <div className="p-4 text-xs text-slate-400 dark:text-slate-500 text-center font-medium">No se encontraron productos</div>;
+                            return <div className="p-4 text-xs text-slate-400 text-center font-medium">No se encontraron productos</div>;
                           }
 
                           return filteredProducts.map(p => {
@@ -302,15 +302,15 @@ export default function SourcingPage() {
                                   setProductSearchQuery(label);
                                   setShowProductDropdown(false);
                                 }}
-                                className="w-full text-left px-4 py-3 text-xs text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-indigo-600 dark:hover:text-white transition-all block whitespace-nowrap overflow-hidden text-ellipsis border-none"
+                                className="w-full text-left px-4 py-3 text-xs text-slate-800 hover:bg-slate-50 hover:text-indigo-600 transition-all block whitespace-nowrap overflow-hidden text-ellipsis border-none bg-white"
                               >
-                                <span className="font-semibold">{p.name}</span>
+                                <span className="font-semibold text-slate-800">{p.name}</span>
                                 {p.attributes && Object.keys(p.attributes).length > 0 && (
-                                  <span className="text-slate-500 dark:text-slate-400 font-medium ml-1">
+                                  <span className="text-slate-500 font-medium ml-1">
                                     ({Object.values(p.attributes).join(' | ')})
                                   </span>
                                 )}
-                                {p.sku && <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">SKU: {p.sku}</span>}
+                                {p.sku && <span className="block text-[10px] text-slate-400 font-mono mt-0.5">SKU: {p.sku}</span>}
                               </button>
                             );
                           });
