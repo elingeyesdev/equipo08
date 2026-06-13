@@ -7,6 +7,10 @@ import {
 } from 'lucide-react';
 
 export default function PosPage() {
+  const tenantId = sessionStorage.getItem('tenant_id') || 'global';
+  const cartKey = `pos_cart_${tenantId}`;
+  const holdKey = `pos_hold_orders_${tenantId}`;
+
   const [sucursales, setSucursales] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState('');
   const [stockInfo, setStockInfo] = useState([]);
@@ -14,7 +18,7 @@ export default function PosPage() {
   
   const [cart, setCart] = useState(() => {
     try {
-      const saved = localStorage.getItem('pos_cart');
+      const saved = localStorage.getItem(cartKey);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -28,7 +32,7 @@ export default function PosPage() {
   const [activeRightTab, setActiveRightTab] = useState('new');
   const [holdOrders, setHoldOrders] = useState(() => {
     try {
-      const saved = localStorage.getItem('pos_hold_orders');
+      const saved = localStorage.getItem(holdKey);
       return saved ? JSON.parse(saved).map(o => ({ ...o, timestamp: new Date(o.timestamp) })) : [];
     } catch {
       return [];
@@ -60,12 +64,13 @@ export default function PosPage() {
   const isBranchLocked = userRole !== 'OWNER' && !!userSucursalId;
 
   useEffect(() => {
-    localStorage.setItem('pos_cart', JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+  }, [cart, cartKey]);
 
   useEffect(() => {
-    localStorage.setItem('pos_hold_orders', JSON.stringify(holdOrders));
-  }, [holdOrders]);
+    localStorage.setItem(holdKey, JSON.stringify(holdOrders));
+  }, [holdOrders, holdKey]);
+
 
   useEffect(() => {
     if (selectedGroup) {
