@@ -631,6 +631,16 @@ export default function ProductsPage() {
                       const minVenta = Math.min(...variants.map(v => Number(v.precioVenta) || 0));
                       const maxVenta = Math.max(...variants.map(v => Number(v.precioVenta) || 0));
 
+                      const margins = variants.map(v => {
+                        const c = Number(v.precioCosto) || 0;
+                        const vt = Number(v.precioVenta) || 0;
+                        const profit = vt - c;
+                        return vt > 0 ? (profit / vt) * 100 : 0;
+                      });
+                      const minMargin = Math.min(...margins);
+                      const maxMargin = Math.max(...margins);
+                      const displayMargin = minMargin === maxMargin ? `${minMargin.toFixed(0)}%` : `${minMargin.toFixed(0)}% - ${maxMargin.toFixed(0)}%`;
+
                       const displayCosto = minCosto === maxCosto ? `Bs ${minCosto.toFixed(2)}` : `Bs ${minCosto.toFixed(0)} - Bs ${maxCosto.toFixed(0)}`;
                       const displayVenta = minVenta === maxVenta ? `Bs ${minVenta.toFixed(2)}` : `Bs ${minVenta.toFixed(0)} - Bs ${maxVenta.toFixed(0)}`;
 
@@ -654,7 +664,7 @@ export default function ProductsPage() {
                             </td>
                             <td className="text-sm text-slate-800">{main.category || 'Otros'}</td>
                             <td className="text-sm text-slate-800">{main.proveedor?.name || 'Huérfano'}</td>
-                            <td className="text-right text-sm text-slate-800">-</td>
+                            <td className="text-right text-sm text-slate-800">{displayMargin}</td>
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayCosto}</td>
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayVenta}</td>
                             <td className="text-center">
