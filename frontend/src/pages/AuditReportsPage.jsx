@@ -271,7 +271,7 @@ export default function AuditReportsPage() {
               <button 
                 type="submit" 
                 disabled={saving} 
-                className="btn-premium bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-bold rounded-xl shadow-md border-none"
+                className="py-2.5 px-5 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-bold rounded-xl shadow-md transition-all text-sm border-none"
               >
                 Confirmar Ajuste Físico
               </button>
