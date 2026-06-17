@@ -755,7 +755,7 @@ export default function PosPage() {
               <div 
                 role="button"
                 onClick={!saving ? handleCheckout : undefined}
-                className={`w-full py-3.5 rounded-xl flex items-center justify-center font-bold transition-all shadow-md ${saving ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed opacity-70' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'}`}
+                className={`w-full py-3.5 rounded-xl flex items-center justify-center font-bold transition-all shadow-md ${saving ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed opacity-70' : 'bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 cursor-pointer'}`}
               >
                 {saving ? 'Procesando...' : `Confirmar Venta • Bs ${total.toFixed(2)}`}
               </div>
