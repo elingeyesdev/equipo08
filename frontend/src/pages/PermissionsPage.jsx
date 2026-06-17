@@ -151,11 +151,7 @@ export default function PermissionsPage() {
           <button
             onClick={() => handleSave(roleName)}
             disabled={isRoleSaving}
-            className={`py-2 px-5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-md ${
-              roleName === 'SUPERVISOR' 
-                ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/25 hover:shadow-indigo-600/35'
-                : 'bg-teal-600 hover:bg-teal-750 text-white shadow-teal-600/25 hover:shadow-teal-600/35'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            className="py-2 px-5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
           >
             {isRoleSaving ? (
               <Loader2 size={14} className="animate-spin" />
