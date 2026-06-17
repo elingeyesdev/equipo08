@@ -179,19 +179,6 @@ export default function StockPage() {
             >
               <Search size={18} /> {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
             </button>
-            <button onClick={() => window.print()} className="py-2 px-4 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all shadow-sm bg-white/20 hover:bg-white/30 text-white">
-              <Printer size={16} /> Imprimir
-            </button>
-            {hasPermission('inventario_editar') && (
-              <button 
-                onClick={handleSimularBajoStock} 
-                disabled={saving}
-                className="py-2 px-4 rounded-xl text-xs font-bold bg-rose-500 hover:bg-rose-600 text-white flex items-center gap-2 shadow-sm shadow-rose-500/20 transition-all"
-                title="Genera un ajuste para colocar 2 productos bajo su umbral mínimo"
-              >
-                Simular Baja
-              </button>
-            )}
           </div>
       </div>
 
@@ -294,7 +281,7 @@ export default function StockPage() {
               <button 
                 type="submit" 
                 disabled={saving || !transferForm.to_sucursal_id || !transferForm.cantidad} 
-                className="btn-premium bg-slate-900 text-white hover:bg-black hover:shadow-lg hover:shadow-slate-900/20"
+                className="btn-premium btn-premium-indigo"
               >
                 Confirmar Traslado
               </button>

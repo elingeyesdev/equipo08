@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { ShoppingCart, Plus, X, Loader2, Edit2, Trash2, Package, Search } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
@@ -14,16 +14,45 @@ export default function SourcingPage() {
   const [editingId, setEditingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [filterProducto, setFilterProducto] = useState('ALL');
+  const [filterProveedor, setFilterProveedor] = useState('ALL');
   const [filterSucursal, setFilterSucursal] = useState('ALL');
   const [filterDateStart, setFilterDateStart] = useState('');
   const [filterDateEnd, setFilterDateEnd] = useState('');
   const [filterExpiryStart, setFilterExpiryStart] = useState('');
   const [filterExpiryEnd, setFilterExpiryEnd] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [loteForm, setLoteForm] = useState({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
+  const [loteForm, setLoteForm] = useState(() => {
+    const sId = sessionStorage.getItem('user_sucursal_id') || '';
+    const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
+    return { producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' };
+  });
   const toast = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [productSearchQuery, setProductSearchQuery] = useState('');
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowProductDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Reset page to 1 when any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterProducto, filterProveedor, filterSucursal, filterDateStart, filterDateEnd, filterExpiryStart, filterExpiryEnd]);
 
   const userRole = sessionStorage.getItem('user_role');
+  const userSucursalId = sessionStorage.getItem('user_sucursal_id');
   const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
   const tenantName = sessionStorage.getItem('tenant_name') || 'Sucursal';
 
@@ -56,9 +85,13 @@ export default function SourcingPage() {
   };
 
   const resetForm = () => {
-    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
+    const sId = sessionStorage.getItem('user_sucursal_id') || '';
+    const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
+    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
     setEditingId(null);
     setShowForm(false);
+    setProductSearchQuery('');
+    setShowProductDropdown(false);
   };
 
   const handleEdit = (h) => {
@@ -71,6 +104,11 @@ export default function SourcingPage() {
       fechaElaboracion: h.fechaElaboracion || '',
       fechaVencimiento: h.fechaVencimiento || ''
     });
+    const p = products.find(prod => prod.id === h.producto_id);
+    if (p) {
+      const label = `${p.name} ${p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''}`;
+      setProductSearchQuery(label);
+    }
     setShowForm(true);
   };
 
@@ -94,7 +132,6 @@ export default function SourcingPage() {
   const handleCreateLote = async (e) => {
     e.preventDefault();
 
-    // Validacion cruzada frontend
     const selectedProd = products.find(p => p.id === loteForm.producto_id);
     if (selectedProd && loteForm.proveedor_id !== selectedProd.proveedor_id) {
        return toast.error('El proveedor seleccionado no coincide con el proveedor oficial del producto en el catálogo.');
@@ -127,10 +164,33 @@ export default function SourcingPage() {
   const selectedProductObj = products.find(p => p.id === loteForm.producto_id);
   const showExpirationDate = selectedProductObj && ['Abarrotes y Alimentos', 'Bebidas'].includes(selectedProductObj.category);
 
+  // Compute filtered items for pagination calculation
+  const filteredHistorial = historial.filter(h => {
+    if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
+    if (filterProveedor !== 'ALL' && h.proveedor_id !== filterProveedor) return false;
+    if (filterSucursal !== 'ALL' && h.sucursal_id !== filterSucursal) return false;
+    
+    if (filterDateStart) {
+      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
+      if (rowDate < filterDateStart) return false;
+    }
+    if (filterDateEnd) {
+      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
+      if (rowDate > filterDateEnd) return false;
+    }
+
+    if (filterExpiryStart && h.fechaVencimiento && h.fechaVencimiento < filterExpiryStart) return false;
+    if (filterExpiryEnd && h.fechaVencimiento && h.fechaVencimiento > filterExpiryEnd) return false;
+    if ((filterExpiryStart || filterExpiryEnd) && !h.fechaVencimiento) return false;
+    return true;
+  });
+
+  const totalPages = Math.ceil(filteredHistorial.length / itemsPerPage);
+  const paginatedHistorial = filteredHistorial.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <div className="full-width-container animate-fadein space-y-8">
 
-      {/* Page Header */}
       <div className="page-header-bar">
         <div>
           <h1>Lotes (Entradas de Stock)</h1>
@@ -158,7 +218,6 @@ export default function SourcingPage() {
         </div>
       </div>
 
-      {/* Add / Edit Form */}
       {showForm && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
           <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-6">
@@ -178,21 +237,107 @@ export default function SourcingPage() {
             <div className="form-grid">
               <div className="form-group">
                 <label>Sucursal / Almacén de Destino *</label>
-                <select required value={loteForm.sucursal_id} onChange={e => setLoteForm({...loteForm, sucursal_id: e.target.value})} disabled={editingId ? true : false}>
+                <select 
+                  required 
+                  value={loteForm.sucursal_id} 
+                  onChange={e => setLoteForm({...loteForm, sucursal_id: e.target.value})} 
+                  disabled={editingId || (userRole !== 'OWNER' && !!userSucursalId) ? true : false}
+                >
                   <option value="">Seleccione sucursal...</option>
-                  {sucursales.filter(s => s.isActive).map(s => <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>)}
+                  {(() => {
+                    const activeBranches = sucursales.filter(s => s.isActive);
+                    if (userRole !== 'OWNER' && !!userSucursalId) {
+                      return activeBranches.filter(s => s.id === userSucursalId).map(s => (
+                        <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>
+                      ));
+                    }
+                    return activeBranches.map(s => (
+                      <option key={s.id} value={s.id}>{tenantName} ({s.name})</option>
+                    ));
+                  })()}
                 </select>
               </div>
 
-              <div className="form-group">
+              <div className="form-group relative" ref={dropdownRef}>
                 <label>Producto Entrante *</label>
-                <select required value={loteForm.producto_id} onChange={e => {
-                  const selectedProd = products.find(p => p.id === e.target.value);
-                  setLoteForm({...loteForm, producto_id: e.target.value, proveedor_id: selectedProd ? selectedProd.proveedor_id : ''});
-                }} disabled={editingId ? true : false}>
-                  <option value="">Seleccione artículo...</option>
-                  {products.map(p => <option key={p.id} value={p.id}>{p.name} {p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''} </option>)}
-                </select>
+                {editingId ? (
+                  <input
+                    type="text"
+                    disabled
+                    className="bg-slate-100 text-slate-500 cursor-not-allowed border-slate-200"
+                    value={(() => {
+                      const p = products.find(prod => prod.id === loteForm.producto_id);
+                      if (!p) return '';
+                      return `${p.name} ${p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''}`;
+                    })()}
+                  />
+                ) : (
+                  <>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        placeholder="Buscar producto por nombre, talla, color o SKU..."
+                        value={productSearchQuery}
+                        onChange={e => {
+                          setProductSearchQuery(e.target.value);
+                          setShowProductDropdown(true);
+                        }}
+                        onFocus={() => setShowProductDropdown(true)}
+                        className="w-full pr-10"
+                      />
+                      {productSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setProductSearchQuery('');
+                            setLoteForm({ ...loteForm, producto_id: '', proveedor_id: '' });
+                          }}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors border-none p-0 cursor-pointer"
+                          title="Limpiar"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+                    {showProductDropdown && (
+                      <div className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-[100] divide-y divide-slate-100 animate-fadeIn">
+                        {(() => {
+                          const query = productSearchQuery.toLowerCase().trim();
+                          const filteredProducts = products.filter(p => {
+                            const name = (p.name || '').toLowerCase();
+                            const sku = (p.sku || '').toLowerCase();
+                            const desc = (p.description || '').toLowerCase();
+                            const attrs = p.attributes ? Object.values(p.attributes).map(v => String(v).toLowerCase()).join(' ') : '';
+                            return name.includes(query) || sku.includes(query) || desc.includes(query) || attrs.includes(query);
+                          });
+
+                          if (filteredProducts.length === 0) {
+                            return <div className="p-4 text-xs text-slate-400 text-center font-medium">No se encontraron productos</div>;
+                          }
+
+                          return filteredProducts.map(p => {
+                            const label = `${p.name} ${p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''}`;
+                            return (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => {
+                                  setLoteForm({ ...loteForm, producto_id: p.id, proveedor_id: p.proveedor_id || '' });
+                                  setProductSearchQuery(label);
+                                  setShowProductDropdown(false);
+                                }}
+                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors block border-none bg-white font-sans"
+                              >
+                                {label}
+                              </button>
+                            );
+                          });
+                        })()}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
               <div className="form-group">
@@ -247,7 +392,6 @@ export default function SourcingPage() {
         </div>
       )}
 
-      {/* Filter Drawer */}
       {showFilters && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row flex-wrap items-end md:items-center gap-4 animate-fadeIn">
           <div className="flex-1 min-w-[150px]">
@@ -259,6 +403,17 @@ export default function SourcingPage() {
             >
               <option value="ALL">-- Todos los productos --</option>
               {products.map(p => <option key={p.id} value={p.id}>{p.name} {p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''} </option>)}
+            </select>
+          </div>
+          <div className="flex-1 min-w-[150px]">
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Filtrar Proveedor</label>
+            <select
+              value={filterProveedor}
+              onChange={e => setFilterProveedor(e.target.value)}
+              className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+            >
+              <option value="ALL">-- Todos los proveedores --</option>
+              {providers.map(prov => <option key={prov.id} value={prov.id}>{prov.name}</option>)}
             </select>
           </div>
           <div className="flex-1 min-w-[150px]">
@@ -316,7 +471,6 @@ export default function SourcingPage() {
         </div>
       )}
 
-      {/* Table Section */}
       <div className="table-premium-wrapper">
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -339,27 +493,7 @@ export default function SourcingPage() {
               </thead>
               <tbody>
                 {(() => {
-                  const filtered = historial.filter(h => {
-                    if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
-                    if (filterSucursal !== 'ALL' && h.sucursal_id !== filterSucursal) return false;
-                    
-                    // Filtrar por Fecha de Ingreso (fechaIngreso)
-                    if (filterDateStart) {
-                      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
-                      if (rowDate < filterDateStart) return false;
-                    }
-                    if (filterDateEnd) {
-                      const rowDate = new Date(h.fechaIngreso).toISOString().split('T')[0];
-                      if (rowDate > filterDateEnd) return false;
-                    }
-
-                    // Filtrar por Fecha de Vencimiento
-                    if (filterExpiryStart && h.fechaVencimiento && h.fechaVencimiento < filterExpiryStart) return false;
-                    if (filterExpiryEnd && h.fechaVencimiento && h.fechaVencimiento > filterExpiryEnd) return false;
-                    if ((filterExpiryStart || filterExpiryEnd) && !h.fechaVencimiento) return false;
-                    return true;
-                  });
-                  if (filtered.length === 0) return (
+                  if (paginatedHistorial.length === 0) return (
                     <tr>
                       <td colSpan="8">
                         <div className="empty-state">
@@ -371,7 +505,7 @@ export default function SourcingPage() {
                       </td>
                     </tr>
                   );
-                  return filtered.map(h => {
+                  return paginatedHistorial.map(h => {
                     const costoSnap = Number(h.costoUnitarioSnapshot || 0);
                     const inversionTotal = costoSnap * h.cantidad;
                     return (
@@ -419,6 +553,42 @@ export default function SourcingPage() {
                 })()}
               </tbody>
             </table>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 border-t border-slate-100">
+                <span className="text-xs text-slate-500">
+                  Mostrando página {currentPage} de {totalPages} ({filteredHistorial.length} lotes en total)
+                </span>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    Anterior
+                  </button>
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`w-8 h-8 text-xs font-bold rounded-lg transition-all ${
+                        currentPage === i + 1
+                          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-650/15'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

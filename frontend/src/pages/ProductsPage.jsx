@@ -371,7 +371,7 @@ export default function ProductsPage() {
                     <button 
                       type="button" 
                       onClick={() => setFormData({...formData, imagen_url: ''})} 
-                      className="text-[10px] text-red-500 font-bold hover:underline"
+                      className="text-xs text-red-500 font-bold hover:underline bg-transparent border-none p-0 cursor-pointer h-auto"
                     >
                       Quitar Imagen
                     </button>

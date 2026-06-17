@@ -247,10 +247,11 @@ export class VentasService {
 
   async findClientByDocument(documento: string, tenant_id: string): Promise<any> {
     const venta = await this.ventaRep.findOne({
-      where: { tenant_id, clienteDocumento: documento },
+      where: { clienteDocumento: documento },
       order: { fecha: 'DESC' }
     });
     if (!venta) return null;
+
     return { clienteNombre: venta.clienteNombre };
   }
 }

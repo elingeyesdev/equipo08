@@ -4,6 +4,7 @@ import { Sucursal } from '../sucursales/sucursal.entity';
 @Entity('ventas')
 @Index(['tenant_id'])
 @Index(['tenant_id', 'sucursal_id'])
+@Index(['tenant_id', 'numeroComprobante'], { unique: true })
 export class Venta {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -14,8 +15,9 @@ export class Venta {
   @Column()
   sucursal_id: string;
 
-  @Column({ unique: true })
+  @Column()
   numeroComprobante: string;
+
 
   @Column()
   clienteNombre: string;

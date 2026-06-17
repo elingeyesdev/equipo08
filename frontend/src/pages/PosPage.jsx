@@ -7,6 +7,10 @@ import {
 } from 'lucide-react';
 
 export default function PosPage() {
+  const tenantId = sessionStorage.getItem('tenant_id') || 'global';
+  const cartKey = `pos_cart_${tenantId}`;
+  const holdKey = `pos_hold_orders_${tenantId}`;
+
   const [sucursales, setSucursales] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState('');
   const [stockInfo, setStockInfo] = useState([]);
@@ -14,7 +18,7 @@ export default function PosPage() {
   
   const [cart, setCart] = useState(() => {
     try {
-      const saved = localStorage.getItem('pos_cart');
+      const saved = localStorage.getItem(cartKey);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -28,7 +32,7 @@ export default function PosPage() {
   const [activeRightTab, setActiveRightTab] = useState('new');
   const [holdOrders, setHoldOrders] = useState(() => {
     try {
-      const saved = localStorage.getItem('pos_hold_orders');
+      const saved = localStorage.getItem(holdKey);
       return saved ? JSON.parse(saved).map(o => ({ ...o, timestamp: new Date(o.timestamp) })) : [];
     } catch {
       return [];
@@ -60,12 +64,13 @@ export default function PosPage() {
   const isBranchLocked = userRole !== 'OWNER' && !!userSucursalId;
 
   useEffect(() => {
-    localStorage.setItem('pos_cart', JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+  }, [cart, cartKey]);
 
   useEffect(() => {
-    localStorage.setItem('pos_hold_orders', JSON.stringify(holdOrders));
-  }, [holdOrders]);
+    localStorage.setItem(holdKey, JSON.stringify(holdOrders));
+  }, [holdOrders, holdKey]);
+
 
   useEffect(() => {
     if (selectedGroup) {
@@ -817,6 +822,21 @@ export default function PosPage() {
                       <div className="flex flex-wrap gap-2">
                         {values.map(val => {
                           const isSelected = selectedAttributes[key] === val;
+                          
+                          // Check if there is any variant in selectedGroup that has this attribute value
+                          // AND matches the other selected attributes, AND has stock > 0.
+                          const hasStock = selectedGroup.items.some(item => {
+                            const attrs = item.producto?.attributes || {};
+                            if (attrs[key] !== val) return false;
+                            
+                            // Check other selected attributes
+                            for (const [k, v] of Object.entries(selectedAttributes)) {
+                              if (k === key) continue; // ignore current attribute key
+                              if (attrs[k] !== v) return false;
+                            }
+                            return item.cantidadTotal > 0;
+                          });
+
                           return (
                             <div
                               key={val}
@@ -825,7 +845,9 @@ export default function PosPage() {
                               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border-2 transition-all cursor-pointer ${
                                 isSelected
                                   ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-sm'
-                                  : 'bg-transparent border-slate-200 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-slate-700 dark:text-slate-300'
+                                  : !hasStock
+                                    ? 'bg-slate-100 border-slate-200 text-slate-400 dark:bg-slate-800/40 dark:border-slate-800 dark:text-slate-500 opacity-60'
+                                    : 'bg-transparent border-slate-200 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-slate-700 dark:text-slate-300'
                               }`}
                             >
                               {val}

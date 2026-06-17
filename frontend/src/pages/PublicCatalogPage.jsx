@@ -489,6 +489,23 @@ export default function PublicCatalogPage() {
                           <div className="flex flex-wrap gap-2">
                             {values.map(val => {
                               const isSelected = selectedAttributes[key] === val;
+
+                              // Check if there is any variant in selectedProduct that has this attribute value
+                              // AND matches the other selected attributes, AND has stock > 0.
+                              // In PublicCatalogPage, stock is usually in 'stock' or 'cantidadTotal'. Let's check both 'stock' and 'cantidadTotal'.
+                              const hasStock = selectedProduct.items.some(item => {
+                                const attrs = item.attributes || {};
+                                if (attrs[key] !== val) return false;
+
+                                // Check other selected attributes
+                                for (const [k, v] of Object.entries(selectedAttributes)) {
+                                  if (k === key) continue; // ignore current attribute key
+                                  if (attrs[k] !== v) return false;
+                                }
+                                const stockVal = item.stock !== undefined ? item.stock : (item.cantidadTotal !== undefined ? item.cantidadTotal : 0);
+                                return stockVal > 0;
+                              });
+
                               return (
                                 <div
                                   key={val}
@@ -497,7 +514,9 @@ export default function PublicCatalogPage() {
                                   className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border-2 transition-all cursor-pointer ${
                                     isSelected
                                       ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-sm'
-                                      : 'bg-transparent border-slate-200 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-slate-700 dark:text-slate-300'
+                                      : !hasStock
+                                        ? 'bg-slate-100 border-slate-200 text-slate-400 dark:bg-slate-800/40 dark:border-slate-800 dark:text-slate-500 opacity-60'
+                                        : 'bg-transparent border-slate-200 hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-slate-700 dark:text-slate-300'
                                   }`}
                                 >
                                   {val}
@@ -693,7 +712,7 @@ export default function PublicCatalogPage() {
                     <span className="text-[var(--txt-secondary)] font-semibold text-sm">Total estimado</span>
                     <span className="text-xl font-black">Bs {cartTotal.toFixed(2)}</span>
                   </div>
-                  <button onClick={sendWhatsApp} className="w-full bg-[var(--txt-primary)] text-[var(--bg-card)] font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-sm">
+                  <button onClick={sendWhatsApp} className="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-sm border-none cursor-pointer">
                     <Send size={18} /> Confirmar por WhatsApp
                   </button>
                 </div>
