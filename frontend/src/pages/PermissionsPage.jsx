@@ -151,7 +151,7 @@ export default function PermissionsPage() {
           <button
             onClick={() => handleSave(roleName)}
             disabled={isRoleSaving}
-            className="py-2 px-5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs"
+            className="py-2 px-5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
           >
             {isRoleSaving ? (
               <Loader2 size={14} className="animate-spin" />
