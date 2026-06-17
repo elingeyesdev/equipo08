@@ -21,6 +21,32 @@ public class ImageLoader {
             imageView.setImageDrawable(null);
             return;
         }
+
+        if (url.startsWith("data:image/") || url.startsWith("data:")) {
+            executor.execute(() -> {
+                int base64CommaIndex = url.indexOf("base64,");
+                if (base64CommaIndex != -1) {
+                    String base64Data = url.substring(base64CommaIndex + 7);
+                    try {
+                        byte[] decodedString = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                        handler.post(() -> {
+                            if (bitmap != null) {
+                                imageView.setImageBitmap(bitmap);
+                            } else {
+                                imageView.setImageDrawable(null);
+                            }
+                        });
+                    } catch (Exception e) {
+                        handler.post(() -> imageView.setImageDrawable(null));
+                    }
+                } else {
+                    handler.post(() -> imageView.setImageDrawable(null));
+                }
+            });
+            return;
+        }
+
         executor.execute(() -> {
             try {
                 String processedUrl = preprocessUrl(url);
@@ -52,6 +78,33 @@ public class ImageLoader {
             imageView.setImageDrawable(null);
             return;
         }
+
+        if (url.startsWith("data:image/") || url.startsWith("data:")) {
+            executor.execute(() -> {
+                int base64CommaIndex = url.indexOf("base64,");
+                if (base64CommaIndex != -1) {
+                    String base64Data = url.substring(base64CommaIndex + 7);
+                    try {
+                        byte[] decodedString = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                        handler.post(() -> {
+                            if (bitmap != null) {
+                                Bitmap circularBitmap = getCircularBitmap(bitmap);
+                                imageView.setImageBitmap(circularBitmap);
+                            } else {
+                                imageView.setImageDrawable(null);
+                            }
+                        });
+                    } catch (Exception e) {
+                        handler.post(() -> imageView.setImageDrawable(null));
+                    }
+                } else {
+                    handler.post(() -> imageView.setImageDrawable(null));
+                }
+            });
+            return;
+        }
+
         executor.execute(() -> {
             try {
                 String processedUrl = preprocessUrl(url);

@@ -111,8 +111,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             navRole.setText(roleText);
         }
-        if (navLogo != null && sessionManager.getLogoUrl() != null) {
-            com.example.template.utils.ImageLoader.loadCircularImage(sessionManager.getLogoUrl(), navLogo);
+        if (navLogo != null) {
+            String logoUrl = sessionManager.getLogoUrl();
+            if (logoUrl != null && !logoUrl.trim().isEmpty()) {
+                navLogo.setImageTintList(null);
+                com.example.template.utils.ImageLoader.loadCircularImage(logoUrl, navLogo);
+            } else {
+                navLogo.setImageResource(R.drawable.ic_logo_vector);
+                navLogo.setImageTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE));
+            }
         }
 
         // Fetch latest tenant profile to sync logo & tenant name
@@ -267,7 +274,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (headerView != null) {
             android.widget.ImageView navLogo = headerView.findViewById(R.id.nav_header_logo);
             if (navLogo != null) {
-                com.example.template.utils.ImageLoader.loadCircularImage(logoUrl, navLogo);
+                if (logoUrl != null && !logoUrl.trim().isEmpty()) {
+                    navLogo.setImageTintList(null);
+                    com.example.template.utils.ImageLoader.loadCircularImage(logoUrl, navLogo);
+                } else {
+                    navLogo.setImageResource(R.drawable.ic_logo_vector);
+                    navLogo.setImageTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE));
+                }
             }
         }
     }
