@@ -162,7 +162,12 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       mockUserRep = {
         findOne: jest.fn(),
       };
-      strategy = new JwtStrategy(mockUserRep);
+      const mockDataSource = {
+        getRepository: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue(null),
+        }),
+      };
+      strategy = new JwtStrategy(mockUserRep, mockDataSource as any);
     });
 
     // PRUEBA 5: Verificación de Usuario Activo
@@ -180,8 +185,16 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       mockUserRep.findOne.mockResolvedValue({
         id: 'user-1',
         isActive: true,
-        tenant: { id: 't-1', status: TenantStatus.SUSPENDED },
+        tenant_id: 't-1',
       });
+
+      // Mock DataSource para devolver tenant suspendido
+      const mockDataSource = {
+        getRepository: jest.fn().mockReturnValue({
+          findOne: jest.fn().mockResolvedValue({ id: 't-1', status: TenantStatus.SUSPENDED }),
+        }),
+      };
+      strategy = new JwtStrategy(mockUserRep, mockDataSource as any);
 
       const payload = { sub: 'user-1', tenantId: 't-1', role: 'VENDEDOR' };
       await expect(strategy.validate(payload)).rejects.toThrow(
@@ -195,7 +208,6 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
         id: 'user-1',
         isActive: true,
         sucursal_id: 'branch-actual',
-        tenant: { id: 't-1', status: TenantStatus.APPROVED },
       });
 
       const payload = {
@@ -216,7 +228,6 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
         isActive: true,
         sucursal_id: 'branch-1',
         sucursal: { id: 'branch-1', isActive: false },
-        tenant: { id: 't-1', status: TenantStatus.APPROVED },
       });
 
       const payload = {
@@ -266,13 +277,18 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
         id: 'u-1',
         isActive: true,
         password: 'hashed-password',
-        tenant: { id: 't-1', status: TenantStatus.PENDING, isActive: true },
+        tenant_id: 't-1',
+        role: 'VENDEDOR',
       };
+      const mockTenantPending = { id: 't-1', status: TenantStatus.PENDING, isActive: true };
 
       // Mock de bcrypt.compare simulando contraseña correcta
       require('bcrypt').compare = jest.fn().mockResolvedValue(true);
 
-      mockDataSource.getRepository().findOne.mockResolvedValue(mockUser);
+      const mockFindOne = jest.fn()
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(mockTenantPending);
+      mockDataSource.getRepository.mockReturnValue({ findOne: mockFindOne });
 
       const loginDto = { email: 'admin@tienda.com', password: 'password123' };
       await expect(authService.login(loginDto)).rejects.toThrow(
@@ -286,13 +302,14 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
         id: 'u-1',
         isActive: true,
         password: 'hashed-password',
-        tenant: { id: 't-1', status: TenantStatus.APPROVED, isActive: true },
+        tenant_id: 't-1',
+        role: 'VENDEDOR',
       };
 
       // Mock de bcrypt.compare simulando contraseña incorrecta
       require('bcrypt').compare = jest.fn().mockResolvedValue(false);
 
-      mockDataSource.getRepository().findOne.mockResolvedValue(mockUser);
+      mockDataSource.getRepository.mockReturnValue({ findOne: jest.fn().mockResolvedValue(mockUser) });
 
       const loginDto = { email: 'admin@tienda.com', password: 'wrongpassword' };
       await expect(authService.login(loginDto)).rejects.toThrow(

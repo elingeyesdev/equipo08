@@ -99,7 +99,7 @@ export class AuthService {
     // 1. Intentar buscar en la nueva tabla de usuarios
     let user = await this.dataSource.getRepository(User).findOne({
       where: { email: dto.email },
-      relations: ['tenant', 'sucursal'],
+      relations: ['sucursal'],
     });
 
     if (!user) {
@@ -127,7 +127,6 @@ export class AuthService {
         password: legacyTenant.password,
         role: UserRole.OWNER,
         tenant_id: legacyTenant.id,
-        tenant: legacyTenant,
       });
       await this.dataSource.getRepository(User).save(user);
 
@@ -145,20 +144,26 @@ export class AuthService {
       throw new UnauthorizedException('La cuenta de usuario está inactiva');
     }
 
+    // Cargar tenant manualmente (ya no es una relación FK)
+    let tenant: Tenant | null = null;
+    if (user.tenant_id) {
+      tenant = await this.dataSource.getRepository(Tenant).findOne({ where: { id: user.tenant_id } });
+    }
+
     // Permitir login a SUPER_ADMIN independientemente del tenant
     if (user.role !== UserRole.SUPER_ADMIN) {
-      if (!user.tenant) {
+      if (!tenant) {
         throw new UnauthorizedException('Usuario sin tienda asignada');
       }
-      if (!user.tenant.isActive) {
+      if (!tenant.isActive) {
         throw new UnauthorizedException('La tienda está inactiva');
       }
-      if (user.tenant.status === TenantStatus.PENDING) {
+      if (tenant.status === TenantStatus.PENDING) {
         throw new UnauthorizedException('PENDING_APPROVAL');
       }
-      if (user.tenant.status !== TenantStatus.APPROVED) {
+      if (tenant.status !== TenantStatus.APPROVED) {
         throw new UnauthorizedException(
-          `La tienda no está aprobada (Estado: ${user.tenant.status})`,
+          `La tienda no está aprobada (Estado: ${tenant.status})`,
         );
       }
     }
@@ -167,7 +172,7 @@ export class AuthService {
       sub: user.id,
       tenantId: user.tenant_id,
       role: user.role,
-      tenantName: user.tenant?.name || 'Administración Global',
+      tenantName: tenant?.name || 'Administración Global',
       sucursal_id: user.sucursal_id,
     };
 
@@ -191,9 +196,9 @@ export class AuthService {
         email: user.email,
         role: user.role,
         tenant_id: user.tenant_id,
-        tenant_name: user.tenant?.name || 'Administración Global',
-        tenant_domain: user.tenant?.domain || null,
-        tenant_logoUrl: user.tenant?.logoUrl || null,
+        tenant_name: tenant?.name || 'Administración Global',
+        tenant_domain: tenant?.domain || null,
+        tenant_logoUrl: tenant?.logoUrl || null,
         sucursal_id: user.sucursal_id || null,
         sucursal_name: user.sucursal?.name || null,
         permissions: userPermissions,

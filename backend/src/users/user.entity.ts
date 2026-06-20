@@ -8,7 +8,6 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { Tenant } from '../tenant/tenant.entity';
 import { Sucursal } from '../sucursales/sucursal.entity';
 
 export enum UserRole {
@@ -49,9 +48,6 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenant_id' })
-  tenant: Tenant;
 
   @ManyToOne(() => Sucursal, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'sucursal_id' })

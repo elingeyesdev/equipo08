@@ -3,10 +3,7 @@ import {
   Column,
   PrimaryGeneratedColumn,
   Index,
-  ManyToOne,
-  JoinColumn,
 } from 'typeorm';
-import { Tenant } from '../tenant/tenant.entity';
 
 @Entity('role_permissions')
 @Index(['tenant_id', 'role'], { unique: true })
@@ -83,7 +80,4 @@ export class RolePermissions {
   @Column({ default: false })
   ventas_eliminar: boolean;
 
-  @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenant_id' })
-  tenant: Tenant;
 }

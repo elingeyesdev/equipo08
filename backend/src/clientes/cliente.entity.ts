@@ -5,11 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
-  ManyToOne,
-  JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Tenant } from '../tenant/tenant.entity';
 import { Venta } from '../ventas/venta.entity';
 
 @Entity('clientes')
@@ -36,9 +33,6 @@ export class Cliente {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenant_id' })
-  tenant: Tenant;
 
   @OneToMany(() => Venta, (venta) => venta.cliente)
   ventas: Venta[];

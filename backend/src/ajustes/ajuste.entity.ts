@@ -6,7 +6,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Tenant } from '../tenant/tenant.entity';
 import { Sucursal } from '../sucursales/sucursal.entity';
 import { Producto } from '../productos/producto.entity';
 import { User } from '../users/user.entity';
@@ -57,9 +56,6 @@ export class AjusteInventario {
   @CreateDateColumn()
   fecha: Date;
 
-  @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenant_id' })
-  tenant: Tenant;
 
   @ManyToOne(() => Sucursal)
   @JoinColumn({ name: 'sucursal_id' })
