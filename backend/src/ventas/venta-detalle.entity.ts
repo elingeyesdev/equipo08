@@ -6,6 +6,7 @@ import {
   Index,
   ManyToOne,
   JoinColumn,
+  AfterLoad,
 } from 'typeorm';
 import { Venta } from './venta.entity';
 import { Producto } from '../productos/producto.entity';
@@ -41,23 +42,27 @@ export class VentaDetalle {
   @Column('decimal', { precision: 12, scale: 2, default: 0 })
   costoUnitarioSnapshot: number;
 
-  @Column('decimal', { precision: 12, scale: 2, default: 0 })
   subtotal: number;
 
-  @Column('decimal', { precision: 12, scale: 2, default: 0 })
   costoSubtotal: number;
 
-  @Column('decimal', { precision: 12, scale: 2, default: 0 })
   utilidadSubtotal: number;
 
   @ManyToOne(() => Venta, (venta) => venta.detalles, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'venta_id' })
   venta: Venta;
 
-  @ManyToOne(() => Producto)
+  @ManyToOne(() => Producto, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'producto_id' })
   producto: Producto;
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @AfterLoad()
+  calculateSubtotals() {
+    this.subtotal = Number(this.cantidad || 0) * Number(this.precioUnitarioSnapshot || 0);
+    this.costoSubtotal = Number(this.cantidad || 0) * Number(this.costoUnitarioSnapshot || 0);
+    this.utilidadSubtotal = Number(this.subtotal || 0) - Number(this.costoSubtotal || 0);
+  }
 }

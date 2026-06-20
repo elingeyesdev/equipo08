@@ -44,15 +44,15 @@ export class LoteIngreso {
   @CreateDateColumn()
   fechaIngreso: Date;
 
-  @ManyToOne(() => Producto)
+  @ManyToOne(() => Producto, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'producto_id' })
   producto: Producto;
 
-  @ManyToOne(() => Proveedor)
+  @ManyToOne(() => Proveedor, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'proveedor_id' })
   proveedor: Proveedor;
 
-  @ManyToOne(() => Sucursal)
+  @ManyToOne(() => Sucursal, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'sucursal_id' })
   sucursal: Sucursal;
 }
