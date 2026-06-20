@@ -27,7 +27,7 @@ export class MovimientoInventario {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   tenant_id: string;
 
   @Column()
