@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { AjusteInventario } from './ajuste.entity';
 import { CreateAjusteDto } from './dto/create-ajuste.dto';
 import { StockService } from '../stock/stock.service';
-import { MovimientoInventarioTipo } from '../stock/movimiento-inventario.entity';
 
 @Injectable()
 export class AjustesService {
@@ -60,13 +59,6 @@ export class AjustesService {
       dto.producto_id,
       diferencia,
       -valor_perdido,
-      {
-        tipo: MovimientoInventarioTipo.AJUSTE,
-        referencia_tipo: 'AJUSTE_INVENTARIO',
-        referencia_id: guardado.id,
-        usuario_id,
-        observaciones: dto.observaciones || dto.motivo,
-      },
     );
 
     return guardado;

@@ -6,19 +6,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, EntityManager } from 'typeorm';
 import { Stock } from './stock.entity';
-import {
-  MovimientoInventario,
-  MovimientoInventarioTipo,
-} from './movimiento-inventario.entity';
-import { TransferenciaStock } from './transferencia-stock.entity';
-
-export type StockMovementContext = {
-  tipo: MovimientoInventarioTipo;
-  referencia_tipo?: string;
-  referencia_id?: string;
-  usuario_id?: string;
-  observaciones?: string;
-};
 
 @Injectable()
 export class StockService {
@@ -44,7 +31,6 @@ export class StockService {
     producto_id: string,
     cantidad: number,
     valorAdquisicionDelta: number = 0,
-    movement?: StockMovementContext,
   ): Promise<Stock> {
     return this.applyStockDelta(
       this.stockRep.manager,
@@ -53,7 +39,6 @@ export class StockService {
       producto_id,
       cantidad,
       valorAdquisicionDelta,
-      movement,
     );
   }
 
@@ -64,7 +49,6 @@ export class StockService {
     producto_id: string,
     cantidad: number,
     valorAdquisicionDelta: number = 0,
-    movement?: StockMovementContext,
   ): Promise<Stock> {
     const stockRep = manager.getRepository(Stock);
     let stock = await stockRep.findOne({
@@ -85,27 +69,7 @@ export class StockService {
         Number(stock.valorAdquisicion || 0) +
         Number(valorAdquisicionDelta || 0);
     }
-    const savedStock = await stockRep.save(stock);
-
-    if (movement) {
-      await this.createMovimiento(manager, {
-        tenant_id,
-        sucursal_id,
-        producto_id,
-        stock_id: savedStock.id,
-        tipo: movement.tipo,
-        cantidad_delta: Number(cantidad || 0),
-        valor_delta: Number(valorAdquisicionDelta || 0),
-        stock_resultante: savedStock.cantidadTotal,
-        valor_resultante: savedStock.valorAdquisicion,
-        referencia_tipo: movement.referencia_tipo,
-        referencia_id: movement.referencia_id,
-        usuario_id: movement.usuario_id,
-        observaciones: movement.observaciones,
-      });
-    }
-
-    return savedStock;
+    return stockRep.save(stock);
   }
 
   async getStockByTenant(tenant_id: string): Promise<Stock[]> {
@@ -187,49 +151,6 @@ export class StockService {
       }
       await queryRunner.manager.save(Stock, targetStock);
 
-      const transferencia = queryRunner.manager.create(TransferenciaStock, {
-        tenant_id,
-        from_sucursal_id,
-        to_sucursal_id,
-        producto_id,
-        from_stock_id: sourceStock.id,
-        to_stock_id: targetStock.id,
-        cantidad,
-        valorTransferido: transferredValue,
-      });
-      const savedTransferencia = await queryRunner.manager.save(
-        TransferenciaStock,
-        transferencia,
-      );
-
-      await this.createMovimiento(queryRunner.manager, {
-        tenant_id,
-        sucursal_id: from_sucursal_id,
-        producto_id,
-        stock_id: sourceStock.id,
-        tipo: MovimientoInventarioTipo.TRANSFERENCIA_SALIDA,
-        cantidad_delta: -cantidad,
-        valor_delta: -transferredValue,
-        stock_resultante: sourceStock.cantidadTotal,
-        valor_resultante: sourceStock.valorAdquisicion,
-        referencia_tipo: 'TRANSFERENCIA_STOCK',
-        referencia_id: savedTransferencia?.id,
-      });
-
-      await this.createMovimiento(queryRunner.manager, {
-        tenant_id,
-        sucursal_id: to_sucursal_id,
-        producto_id,
-        stock_id: targetStock.id,
-        tipo: MovimientoInventarioTipo.TRANSFERENCIA_ENTRADA,
-        cantidad_delta: cantidad,
-        valor_delta: transferredValue,
-        stock_resultante: targetStock.cantidadTotal,
-        valor_resultante: targetStock.valorAdquisicion,
-        referencia_tipo: 'TRANSFERENCIA_STOCK',
-        referencia_id: savedTransferencia?.id,
-      });
-
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -237,27 +158,5 @@ export class StockService {
     } finally {
       await queryRunner.release();
     }
-  }
-
-  private async createMovimiento(
-    manager: EntityManager,
-    data: {
-      tenant_id: string;
-      sucursal_id: string;
-      producto_id: string;
-      stock_id?: string;
-      tipo: MovimientoInventarioTipo;
-      cantidad_delta: number;
-      valor_delta: number;
-      stock_resultante?: number;
-      valor_resultante?: number;
-      referencia_tipo?: string;
-      referencia_id?: string;
-      usuario_id?: string;
-      observaciones?: string;
-    },
-  ): Promise<void> {
-    const movimiento = manager.create(MovimientoInventario, data);
-    await manager.save(MovimientoInventario, movimiento);
   }
 }

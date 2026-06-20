@@ -2,12 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StockService } from './stock.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Stock } from './stock.entity';
-import { MovimientoInventario } from './movimiento-inventario.entity';
-import { TransferenciaStock } from './transferencia-stock.entity';
 import { DataSource } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
 
-describe('StockService (Prueba Unitaria Compleja)', () => {
+describe('StockService (Prueba Unitaria)', () => {
   let service: StockService;
   let stockRepositoryMock: any;
   let dataSourceMock: any;
@@ -131,32 +129,8 @@ describe('StockService (Prueba Unitaria Compleja)', () => {
       expect(targetStock.cantidadTotal).toBe(7);
       expect(targetStock.valorAdquisicion).toBe(70); // 20 + 50 = 70
 
-      // Guardados en la transacción: origen, destino, cabecera de transferencia y dos movimientos.
-      expect(managerMock.save).toHaveBeenCalledTimes(5);
-      expect(managerMock.save).toHaveBeenCalledWith(
-        TransferenciaStock,
-        expect.objectContaining({
-          tenant_id: 'tenant-1',
-          from_sucursal_id: 'sucursal-A',
-          to_sucursal_id: 'sucursal-B',
-          producto_id: 'prod-1',
-          cantidad: 5,
-        }),
-      );
-      expect(managerMock.save).toHaveBeenCalledWith(
-        MovimientoInventario,
-        expect.objectContaining({
-          sucursal_id: 'sucursal-A',
-          cantidad_delta: -5,
-        }),
-      );
-      expect(managerMock.save).toHaveBeenCalledWith(
-        MovimientoInventario,
-        expect.objectContaining({
-          sucursal_id: 'sucursal-B',
-          cantidad_delta: 5,
-        }),
-      );
+      // Guardados en la transacción: origen, destino (2 guardados)
+      expect(managerMock.save).toHaveBeenCalledTimes(2);
       expect(queryRunnerMock.commitTransaction).toHaveBeenCalled();
       expect(queryRunnerMock.release).toHaveBeenCalled();
     });

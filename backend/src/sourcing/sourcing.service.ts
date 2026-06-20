@@ -10,7 +10,6 @@ import { CreateLoteIngresoDto } from './dto/create-lote.dto';
 import { Producto } from '../productos/producto.entity';
 import { Sucursal } from '../sucursales/sucursal.entity';
 import { StockService } from '../stock/stock.service';
-import { MovimientoInventarioTipo } from '../stock/movimiento-inventario.entity';
 
 @Injectable()
 export class SourcingService {
@@ -66,12 +65,6 @@ export class SourcingService {
         dto.producto_id,
         Number(dto.cantidad || 0),
         Number(dto.cantidad || 0) * costoUnitario,
-        {
-          tipo: MovimientoInventarioTipo.INGRESO,
-          referencia_tipo: 'LOTE_INGRESO',
-          referencia_id: loteGuardado.id,
-          observaciones: 'Ingreso de lote',
-        },
       );
 
       await queryRunner.commitTransaction();
@@ -155,12 +148,6 @@ export class SourcingService {
           loteGuardado.producto_id,
           Number(loteGuardado.cantidad || 0) - previous.cantidad,
           currentValue - previous.valor,
-          {
-            tipo: MovimientoInventarioTipo.CORRECCION,
-            referencia_tipo: 'LOTE_INGRESO',
-            referencia_id: loteGuardado.id,
-            observaciones: 'Actualizacion de lote',
-          },
         );
       } else {
         await this.stockService.applyStockDelta(
@@ -170,12 +157,6 @@ export class SourcingService {
           previous.producto_id,
           -previous.cantidad,
           -previous.valor,
-          {
-            tipo: MovimientoInventarioTipo.CORRECCION,
-            referencia_tipo: 'LOTE_INGRESO',
-            referencia_id: loteGuardado.id,
-            observaciones: 'Reversion por cambio de lote',
-          },
         );
 
         await this.stockService.applyStockDelta(
@@ -185,12 +166,6 @@ export class SourcingService {
           loteGuardado.producto_id,
           Number(loteGuardado.cantidad || 0),
           currentValue,
-          {
-            tipo: MovimientoInventarioTipo.CORRECCION,
-            referencia_tipo: 'LOTE_INGRESO',
-            referencia_id: loteGuardado.id,
-            observaciones: 'Aplicacion por cambio de lote',
-          },
         );
       }
 
@@ -226,12 +201,6 @@ export class SourcingService {
         lote.producto_id,
         -Number(lote.cantidad || 0),
         -valorLote,
-        {
-          tipo: MovimientoInventarioTipo.CORRECCION,
-          referencia_tipo: 'LOTE_INGRESO',
-          referencia_id: id,
-          observaciones: 'Eliminacion de lote',
-        },
       );
 
       await queryRunner.commitTransaction();

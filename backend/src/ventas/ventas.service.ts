@@ -12,10 +12,6 @@ import { StockService } from '../stock/stock.service';
 import { Stock } from '../stock/stock.entity';
 import { Producto } from '../productos/producto.entity';
 import { Cliente } from '../clientes/cliente.entity';
-import {
-  MovimientoInventario,
-  MovimientoInventarioTipo,
-} from '../stock/movimiento-inventario.entity';
 import PDFDocument = require('pdfkit');
 import * as fs from 'fs';
 import * as path from 'path';
@@ -185,23 +181,6 @@ export class VentasService {
           ventaDetalle,
         );
         savedDetalles.push(savedDetalle);
-
-        const movimiento = queryRunner.manager.create(MovimientoInventario, {
-          tenant_id,
-          sucursal_id: dto.sucursal_id,
-          producto_id: item.producto_id,
-          stock_id: item.stock_id,
-          usuario_id: vendedor_id,
-          tipo: MovimientoInventarioTipo.VENTA,
-          cantidad_delta: -item.cantidad,
-          valor_delta: -item.costoSubtotal,
-          stock_resultante: item.stockResultante,
-          valor_resultante: item.valorResultante,
-          referencia_tipo: 'VENTA_DETALLE',
-          referencia_id: savedDetalle.id,
-          observaciones: numeroComprobante,
-        });
-        await queryRunner.manager.save(MovimientoInventario, movimiento);
       }
 
       await queryRunner.commitTransaction();
