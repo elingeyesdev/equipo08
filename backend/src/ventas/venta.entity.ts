@@ -20,7 +20,6 @@ import { VentaDetalle } from './venta-detalle.entity';
 @Index(['tenant_id', 'sucursal_id', 'numeroComprobante'], { unique: true })
 @Check('total >= 0')
 @Check('costo_total >= 0')
-@Check('utilidad_total >= 0')
 export class Venta {
   @PrimaryGeneratedColumn('uuid')
   id: string;

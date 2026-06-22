@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
   AfterLoad,
+  Check,
 } from 'typeorm';
 import { Venta } from './venta.entity';
 import { Producto } from '../productos/producto.entity';
@@ -14,6 +15,7 @@ import { Producto } from '../productos/producto.entity';
 @Entity('venta_detalles')
 @Index(['tenant_id', 'venta_id'])
 @Index(['tenant_id', 'producto_id'])
+@Check('cantidad > 0')
 export class VentaDetalle {
   @PrimaryGeneratedColumn('uuid')
   id: string;

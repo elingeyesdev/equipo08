@@ -16,7 +16,7 @@ import { User } from '../users/user.entity';
 
 @Entity('lotes_ingreso')
 @Index(['tenant_id', 'id'])
-@Check('cantidad >= 0')
+@Check('cantidad > 0')
 @Check('costo_unitario >= 0')
 export class LoteIngreso {
   @PrimaryGeneratedColumn('uuid')
