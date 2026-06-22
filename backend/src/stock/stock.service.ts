@@ -72,40 +72,55 @@ export class StockService {
       where: { tenant_id, sucursal_id, producto_id },
     });
 
-    const costBefore = stock && stock.cantidadActual > 0
-      ? Number(stock.valorAdquisicion || 0) / stock.cantidadActual
-      : 0;
-
     const stockAnterior = stock ? Number(stock.cantidadActual || 0) : 0;
+    const costoPromedioAnterior = stock ? Number(stock.costoPromedio || 0) : 0;
+
+    let nuevoCostoPromedio = costoPromedioAnterior;
+    const deltaCantidad = Number(cantidad || 0);
 
     if (!stock) {
+      // Si no existe el stock, el costo promedio es el costo unitario de esta entrada
+      const initialCost = deltaCantidad > 0 ? Math.abs(Number(valorAdquisicionDelta)) / deltaCantidad : 0;
       stock = manager.create(Stock, {
         tenant_id,
         sucursal_id,
         producto_id,
-        cantidadActual: Number(cantidad || 0),
-        valorAdquisicion: Number(valorAdquisicionDelta || 0),
+        cantidadActual: deltaCantidad,
+        costoPromedio: initialCost,
       });
     } else {
-      stock.cantidadActual =
-        Number(stock.cantidadActual || 0) + Number(cantidad || 0);
-      stock.valorAdquisicion =
-        Number(stock.valorAdquisicion || 0) +
-        Number(valorAdquisicionDelta || 0);
+      const nuevaCantidad = stockAnterior + deltaCantidad;
+      if (nuevaCantidad < 0) {
+        throw new BadRequestException('El stock no puede quedar negativo');
+      }
+
+      // Si es una entrada de inventario (cantidad > 0), recalculamos el costo promedio ponderado
+      if (deltaCantidad > 0) {
+        const costoEntradaUnitario = Math.abs(Number(valorAdquisicionDelta)) / deltaCantidad;
+        const valorActualTotal = stockAnterior * costoPromedioAnterior;
+        const nuevoValorTotal = valorActualTotal + Math.abs(Number(valorAdquisicionDelta));
+        nuevoCostoPromedio = nuevaCantidad > 0 ? nuevoValorTotal / nuevaCantidad : 0;
+      } else {
+        // Si es una salida, el costo promedio se mantiene (se vende al costo promedio actual)
+        nuevoCostoPromedio = costoPromedioAnterior;
+      }
+
+      stock.cantidadActual = nuevaCantidad;
+      stock.costoPromedio = nuevoCostoPromedio;
     }
+
     const savedStock = await manager.save(Stock, stock);
     const stockResultante = savedStock ? savedStock.cantidadActual : stock.cantidadActual;
 
     // Registrar movimiento de inventario
-    const unitCost = costBefore || (cantidad !== 0 ? Math.abs(Number(valorAdquisicionDelta)) / Math.abs(cantidad) : 0);
     const movimiento = manager.create(MovimientoInventario, {
       tenant_id,
       stock_id: savedStock?.id || stock.id || 'mock-stock-id',
       tipo,
-      cantidad,
+      cantidadDelta: cantidad,
       stockAnterior,
       stockResultante,
-      costoUnitario: unitCost,
+      costoUnitario: nuevoCostoPromedio,
       motivo,
       usuario_id,
       referenciaTipo: referencia_tipo,
@@ -160,11 +175,7 @@ export class StockService {
       }
 
       // Calcular valor de la porción transferida
-      const avgCost =
-        sourceStock.cantidadActual > 0
-          ? Number(sourceStock.valorAdquisicion || 0) /
-            sourceStock.cantidadActual
-          : 0;
+      const avgCost = Number(sourceStock.costoPromedio || 0);
       const transferredValue = avgCost * cantidad;
 
       // Descontar de origen utilizando applyStockDelta para auditoría

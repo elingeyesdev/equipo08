@@ -32,8 +32,7 @@ export class AjustesService {
     );
     let avgCost = 0;
     if (stockActual && stockActual.cantidadActual > 0) {
-      avgCost =
-        Number(stockActual.valorAdquisicion) / stockActual.cantidadActual;
+      avgCost = Number(stockActual.costoPromedio);
     }
 
     const unitsLost = dto.cantidad_sistema - dto.cantidad_fisica;

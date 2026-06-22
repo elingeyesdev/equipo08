@@ -23,6 +23,7 @@ export class SourcingService {
   async registrarIngreso(
     tenant_id: string,
     dto: CreateLoteIngresoDto,
+    usuario_id?: string,
   ): Promise<LoteIngreso> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -54,7 +55,8 @@ export class SourcingService {
       const lote = queryRunner.manager.create(LoteIngreso, {
         ...dto,
         tenant_id,
-        costoUnitarioSnapshot: costoUnitario,
+        costoUnitario,
+        usuario_id,
       });
       const loteGuardado = await queryRunner.manager.save(lote);
 
@@ -68,7 +70,7 @@ export class SourcingService {
         'INGRESO',
         `Lote de ingreso ${loteGuardado.id}`,
         undefined,
-        undefined,
+        usuario_id,
         'COMPRA',
         loteGuardado.id,
       );
@@ -111,7 +113,7 @@ export class SourcingService {
         producto_id: lote.producto_id,
         cantidad: Number(lote.cantidad || 0),
         valor:
-          Number(lote.cantidad || 0) * Number(lote.costoUnitarioSnapshot || 0),
+          Number(lote.cantidad || 0) * Number(lote.costoUnitario || 0),
       };
 
       Object.assign(lote, dto);
@@ -137,11 +139,11 @@ export class SourcingService {
         );
       }
 
-      lote.costoUnitarioSnapshot = Number(producto.precioCosto || 0);
+      lote.costoUnitario = Number(producto.precioCosto || 0);
       const loteGuardado = await queryRunner.manager.save(lote);
       const currentValue =
         Number(loteGuardado.cantidad || 0) *
-        Number(loteGuardado.costoUnitarioSnapshot || 0);
+        Number(loteGuardado.costoUnitario || 0);
 
       if (
         previous.sucursal_id === loteGuardado.sucursal_id &&
@@ -215,7 +217,7 @@ export class SourcingService {
       if (!lote) throw new NotFoundException('Lote no encontrado');
 
       const valorLote =
-        Number(lote.cantidad || 0) * Number(lote.costoUnitarioSnapshot || 0);
+        Number(lote.cantidad || 0) * Number(lote.costoUnitario || 0);
       await queryRunner.manager.remove(lote);
 
       await this.stockService.applyStockDelta(

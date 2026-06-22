@@ -25,8 +25,8 @@ export class MovimientoInventario {
   @Column({ type: 'varchar' })
   tipo: string; // INGRESO, EGRESO, AJUSTE, DEVOLUCION, ANULACION, TRANSFERENCIA
 
-  @Column('int')
-  cantidad: number;
+  @Column('int', { name: 'cantidad_delta' })
+  cantidadDelta: number;
 
   @Column('int', { name: 'stock_anterior', default: 0 })
   stockAnterior: number;
@@ -52,7 +52,7 @@ export class MovimientoInventario {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @ManyToOne(() => Stock, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Stock, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'stock_id' })
   stock: Stock;
 

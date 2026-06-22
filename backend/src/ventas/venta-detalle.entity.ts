@@ -52,7 +52,7 @@ export class VentaDetalle {
   @JoinColumn({ name: 'venta_id' })
   venta: Venta;
 
-  @ManyToOne(() => Producto)
+  @ManyToOne(() => Producto, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'producto_id' })
   producto: Producto;
 

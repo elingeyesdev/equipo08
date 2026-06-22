@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Check,
 } from 'typeorm';
 import { Sucursal } from '../sucursales/sucursal.entity';
 import { Cliente } from '../clientes/cliente.entity';
@@ -16,7 +17,10 @@ import { VentaDetalle } from './venta-detalle.entity';
 @Entity('ventas')
 @Index(['tenant_id'])
 @Index(['tenant_id', 'sucursal_id'])
-@Index(['tenant_id', 'numeroComprobante'], { unique: true })
+@Index(['tenant_id', 'sucursal_id', 'numeroComprobante'], { unique: true })
+@Check('total >= 0')
+@Check('costo_total >= 0')
+@Check('utilidad_total >= 0')
 export class Venta {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -69,7 +73,7 @@ export class Venta {
   @Column({ name: 'vendedor_nombre', nullable: true })
   vendedorNombre: string;
 
-  @ManyToOne(() => Sucursal)
+  @ManyToOne(() => Sucursal, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'sucursal_id' })
   sucursal: Sucursal;
 

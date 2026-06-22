@@ -187,7 +187,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
           producto_id: productoId,
         },
       });
-      expect(updatedStock.cantidadTotal).toBe(6); // 10 - 4 = 6
+      expect(updatedStock!.cantidadActual).toBe(6); // 10 - 4 = 6
       await queryRunner.release();
 
       // Verificar que el siguiente correlativo cambió a 000002

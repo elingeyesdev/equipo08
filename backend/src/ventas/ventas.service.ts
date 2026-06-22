@@ -106,7 +106,7 @@ export class VentasService {
         }
 
         const precioUnitario = Number(producto.precioVenta);
-        const costoUnitario = Number(producto.precioCosto);
+        const costoUnitario = Number(stock.costoPromedio) > 0 ? Number(stock.costoPromedio) : Number(producto.precioCosto);
         const subtotal = precioUnitario * item.cantidad;
         const costoSubtotal = costoUnitario * item.cantidad;
         const utilidadSubtotal = subtotal - costoSubtotal;
@@ -141,7 +141,7 @@ export class VentasService {
           costoSubtotal,
           utilidadSubtotal,
           stockResultante: updatedStock.cantidadActual,
-          valorResultante: Number(updatedStock.valorAdquisicion),
+          valorResultante: Number(updatedStock.costoPromedio),
         });
       }
 

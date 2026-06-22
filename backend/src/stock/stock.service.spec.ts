@@ -91,7 +91,7 @@ describe('StockService (Prueba Unitaria)', () => {
         sucursal_id: 'sucursal-A',
         producto_id: 'prod-1',
         cantidadActual: 10,
-        valorAdquisicion: 100,
+        costoPromedio: 10,
       };
 
       const targetStock = {
@@ -99,7 +99,7 @@ describe('StockService (Prueba Unitaria)', () => {
         sucursal_id: 'sucursal-B',
         producto_id: 'prod-1',
         cantidadActual: 2,
-        valorAdquisicion: 20,
+        costoPromedio: 10,
       };
 
       // Mockear las búsquedas de la transacción
@@ -122,12 +122,11 @@ describe('StockService (Prueba Unitaria)', () => {
 
       // Verificación de descuento en origen (10 - 5 = 5)
       expect(sourceStock.cantidadActual).toBe(5);
-      // Costo unitario promedio = 100 / 10 = 10. Valor transferido = 10 * 5 = 50. Nuevo valor = 100 - 50 = 50
-      expect(sourceStock.valorAdquisicion).toBe(50);
+      expect(sourceStock.costoPromedio).toBe(10); // En salidas, se mantiene el costo promedio
 
       // Verificación de incremento en destino (2 + 5 = 7)
       expect(targetStock.cantidadActual).toBe(7);
-      expect(targetStock.valorAdquisicion).toBe(70); // 20 + 50 = 70
+      expect(targetStock.costoPromedio).toBe(10); // Entrada al mismo costo promedio ponderado de 10
 
       // Guardados en la transacción: 2 stocks + 2 movimientos de inventario (4 guardados)
       expect(managerMock.save).toHaveBeenCalledTimes(4);

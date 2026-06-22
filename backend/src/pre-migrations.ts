@@ -53,7 +53,8 @@ export async function runPreMigrations() {
     ['productos', 'updatedAt', 'updated_at'],
 
     // lotes_ingreso
-    ['lotes_ingreso', 'costoUnitarioSnapshot', 'costo_unitario_snapshot'],
+    ['lotes_ingreso', 'costoUnitarioSnapshot', 'costo_unitario'],
+    ['lotes_ingreso', 'costo_unitario_snapshot', 'costo_unitario'],
     ['lotes_ingreso', 'fechaElaboracion', 'fecha_elaboracion'],
     ['lotes_ingreso', 'fechaVencimiento', 'fecha_vencimiento'],
     ['lotes_ingreso', 'fechaIngreso', 'fecha_ingreso'],
@@ -61,7 +62,8 @@ export async function runPreMigrations() {
     // stock
     ['stock', 'cantidadTotal', 'cantidad_actual'],
     ['stock', 'cantidad_total', 'cantidad_actual'],
-    ['stock', 'valorAdquisicion', 'valor_adquisicion'],
+    ['stock', 'valorAdquisicion', 'costo_promedio'],
+    ['stock', 'valor_adquisicion', 'costo_promedio'],
     ['stock', 'ultimaActualizacion', 'ultima_actualizacion'],
 
     // sucursales
@@ -85,6 +87,9 @@ export async function runPreMigrations() {
     ['venta_detalles', 'precioUnitarioSnapshot', 'precio_unitario_snapshot'],
     ['venta_detalles', 'costoUnitarioSnapshot', 'costo_unitario_snapshot'],
     ['venta_detalles', 'createdAt', 'created_at'],
+
+    // movimientos_inventario
+    ['movimientos_inventario', 'cantidad', 'cantidad_delta'],
   ];
 
   try {

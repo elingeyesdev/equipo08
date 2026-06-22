@@ -93,24 +93,24 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
              });
            }
            return Promise.resolve({
-             id: 'stock-1',
-             cantidadActual: 2,
-             valorAdquisicion: 120,
-           });
-         },
-       );
+            id: 'stock-1',
+            cantidadActual: 2,
+            costoPromedio: 60,
+          });
+        },
+      );
 
-       const dto = {
-         sucursal_id: 'branch-1',
-         clienteNombre: 'Carlos',
-         clienteDocumento: '123',
-         items: [{ producto_id: 'prod-1', cantidad: 5 }],
-       };
+      const dto = {
+        sucursal_id: 'branch-1',
+        clienteNombre: 'Carlos',
+        clienteDocumento: '123',
+        items: [{ producto_id: 'prod-1', cantidad: 5 }],
+      };
 
-       await expect(service.create(dto as any, 'tenant-1')).rejects.toThrow(
+      await expect(service.create(dto as any, 'tenant-1')).rejects.toThrow(
          BadRequestException,
-       );
-     });
+      );
+    });
 
     // PRUEBA 4: Procesamiento exitoso y reducción de stock
     it('4. [Regla de Negocio] create - Debe guardar la venta y reducir el stock disponible si hay suficiencia', async () => {
@@ -126,7 +126,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
          sucursal_id: 'branch-1',
          producto_id: 'prod-1',
          cantidadActual: 10,
-         valorAdquisicion: 600,
+         costoPromedio: 60,
        };
        const mockSavedVenta = {
          id: 'venta-1',
@@ -143,7 +143,6 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
        mockStockService.applyStockDelta.mockImplementation(
          async (manager, tenant_id, sucursal_id, producto_id, cantidad, valorDelta) => {
            mockStock.cantidadActual += cantidad;
-           mockStock.valorAdquisicion += valorDelta;
            await manager.save(Stock, mockStock);
            return mockStock;
          }

@@ -12,9 +12,13 @@ import {
 import { Proveedor } from '../proveedores/proveedor.entity';
 import { Stock } from '../stock/stock.entity';
 
+import { Check } from 'typeorm';
+
 @Entity('productos')
 @Index(['tenant_id', 'id'])
 @Index(['tenant_id', 'sku'], { unique: true })
+@Check('precio_venta >= 0')
+@Check('precio_costo >= 0')
 export class Producto {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -52,7 +56,7 @@ export class Producto {
   @Column({ nullable: true })
   proveedor_id: string;
 
-  @ManyToOne(() => Proveedor, { nullable: true })
+  @ManyToOne(() => Proveedor, { nullable: true, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'proveedor_id' })
   proveedor: Proveedor;
 
