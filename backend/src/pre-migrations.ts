@@ -131,12 +131,21 @@ export async function runPreMigrations() {
       console.log('Pre-migration: Dropping ventas.detalle column...');
       await client.query('ALTER TABLE "ventas" DROP COLUMN "detalle"');
     }
-    // Populating stock_id on existing 'ajustes_inventario' rows before dropping columns
-    // We can find the stock row using tenant_id, sucursal_id, and producto_id (or create one if it doesn't exist)
+    // Check if stock_id column exists in ajustes_inventario. 
+    // If it doesn't exist, we add it as a nullable column first so we can populate it before TypeORM tries to sync it as NOT NULL.
+    const checkStockIdCol = await client.query(`
+      SELECT column_name FROM information_schema.columns 
+      WHERE table_name = 'ajustes_inventario' AND column_name = 'stock_id'
+    `);
+    if (checkStockIdCol.rowCount === 0) {
+      console.log('Pre-migration: Adding temporary nullable stock_id to ajustes_inventario...');
+      await client.query('ALTER TABLE "ajustes_inventario" ADD COLUMN "stock_id" uuid NULL');
+    }
+
     const pendingAjustes = await client.query(`
       SELECT id, tenant_id, sucursal_id, producto_id 
       FROM ajustes_inventario 
-      WHERE stock_id IS NULL OR stock_id = ''
+      WHERE stock_id IS NULL
     `);
 
     for (const row of pendingAjustes.rows) {
