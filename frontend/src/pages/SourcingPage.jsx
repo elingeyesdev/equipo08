@@ -24,7 +24,7 @@ export default function SourcingPage() {
   const [loteForm, setLoteForm] = useState(() => {
     const sId = sessionStorage.getItem('user_sucursal_id') || '';
     const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
-    return { producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' };
+    return { producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, costoUnitario: '', fechaElaboracion: '', fechaVencimiento: '' };
   });
   const toast = useToast();
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,7 +87,7 @@ export default function SourcingPage() {
   const resetForm = () => {
     const sId = sessionStorage.getItem('user_sucursal_id') || '';
     const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
-    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
+    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, costoUnitario: '', fechaElaboracion: '', fechaVencimiento: '' });
     setEditingId(null);
     setShowForm(false);
     setProductSearchQuery('');
@@ -101,6 +101,7 @@ export default function SourcingPage() {
       proveedor_id: h.proveedor_id,
       sucursal_id: h.sucursal_id,
       cantidad: h.cantidad,
+      costoUnitario: h.costoUnitario || '',
       fechaElaboracion: h.fechaElaboracion || '',
       fechaVencimiento: h.fechaVencimiento || ''
     });
@@ -142,7 +143,8 @@ export default function SourcingPage() {
         ...loteForm,
         fechaElaboracion: loteForm.fechaElaboracion || null,
         fechaVencimiento: loteForm.fechaVencimiento || null,
-        cantidad: parseInt(loteForm.cantidad)
+        cantidad: parseInt(loteForm.cantidad),
+        costoUnitario: loteForm.costoUnitario ? parseFloat(loteForm.costoUnitario) : undefined,
       };
 
       if (editingId) {
@@ -362,6 +364,12 @@ export default function SourcingPage() {
                 <input type="number" min="1" required value={loteForm.cantidad} onChange={e => setLoteForm({...loteForm, cantidad: e.target.value})} />
               </div>
 
+              <div className="form-group">
+                <label>Costo Unitario de Compra (Bs) *</label>
+                <input type="number" min="0" step="0.01" required placeholder="Ej: 45.00" value={loteForm.costoUnitario} onChange={e => setLoteForm({...loteForm, costoUnitario: e.target.value})} />
+                <span className="block mt-1 text-xs text-slate-500">Precio que pagaste al proveedor por unidad</span>
+              </div>
+
               {showExpirationDate && (
                 <>
                   <div className="form-group">
@@ -506,7 +514,7 @@ export default function SourcingPage() {
                     </tr>
                   );
                   return paginatedHistorial.map(h => {
-                    const costoSnap = Number(h.costoUnitarioSnapshot || 0);
+                    const costoSnap = Number(h.costoUnitario || h.costoUnitarioSnapshot || 0);
                     const inversionTotal = costoSnap * h.cantidad;
                     return (
                       <tr key={h.id}>

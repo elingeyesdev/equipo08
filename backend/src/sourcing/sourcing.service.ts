@@ -51,7 +51,10 @@ export class SourcingService {
         );
       }
 
-      const costoUnitario = Number(producto.precioCosto || 0);
+      // Prioridad: costo del DTO > precioCosto del catálogo
+      const costoUnitario = dto.costoUnitario != null && dto.costoUnitario > 0
+        ? Number(dto.costoUnitario)
+        : Number(producto.precioCosto || 0);
       const lote = queryRunner.manager.create(LoteIngreso, {
         ...dto,
         tenant_id,
