@@ -116,9 +116,9 @@ export default function StockPage() {
 
   const filteredAjustes = selectedBranch === 'ALL'
     ? ajustes
-    : ajustes.filter(a => a.sucursal_id === selectedBranch);
+    : ajustes.filter(a => (a.stock?.sucursal?.id || a.sucursal_id) === selectedBranch);
 
-  const totalValuation = filteredStock.reduce((acc, curr) => acc + Number(curr.valorAdquisicion || 0), 0);
+  const totalValuation = filteredStock.reduce((acc, curr) => acc + (Number(curr.costoPromedio || 0) * Number(curr.cantidadActual || 0)), 0);
 
   const historicalLossValue = filteredAjustes.reduce((acc, a) => {
     let exactLoss = Number(a.valor_perdido || 0);

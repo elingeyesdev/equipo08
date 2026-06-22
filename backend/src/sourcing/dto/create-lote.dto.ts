@@ -11,10 +11,6 @@ export class CreateLoteIngresoDto {
   producto_id: string;
 
   @ApiProperty()
-  @IsString()
-  proveedor_id: string;
-
-  @ApiProperty()
   @IsNumber()
   @Min(1)
   cantidad: number;

@@ -131,6 +131,33 @@ export async function runPreMigrations() {
       console.log('Pre-migration: Dropping ventas.detalle column...');
       await client.query('ALTER TABLE "ventas" DROP COLUMN "detalle"');
     }
+    // Drop redundant proveedor_id from lotes_ingreso (proveedor goes via producto)
+    const dropCols = [
+      ['lotes_ingreso', 'proveedor_id'],
+      ['ajustes_inventario', 'producto_id'],
+      ['ajustes_inventario', 'sucursal_id'],
+    ];
+    for (const [table, col] of dropCols) {
+      const checkDrop = await client.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = $1 AND column_name = $2
+      `, [table, col]);
+      if (checkDrop.rowCount > 0) {
+        // Drop FK constraints first if they exist
+        const fks = await client.query(`
+          SELECT constraint_name FROM information_schema.table_constraints
+          WHERE table_name = $1 AND constraint_type = 'FOREIGN KEY'
+          AND constraint_name LIKE '%' || $2 || '%'
+        `, [table, col]);
+        for (const fk of fks.rows) {
+          console.log(`Pre-migration: Dropping FK ${fk.constraint_name} on ${table}...`);
+          await client.query(`ALTER TABLE "${table}" DROP CONSTRAINT "${fk.constraint_name}"`);
+        }
+        console.log(`Pre-migration: Dropping ${table}.${col} (redundant)...`);
+        await client.query(`ALTER TABLE "${table}" DROP COLUMN "${col}"`);
+      }
+    }
 
     console.log('Pre-startup migrations completed successfully.');
   } catch (error) {

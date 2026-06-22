@@ -6,8 +6,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Sucursal } from '../sucursales/sucursal.entity';
-import { Producto } from '../productos/producto.entity';
 import { User } from '../users/user.entity';
 import { Stock } from '../stock/stock.entity';
 
@@ -27,15 +25,9 @@ export class AjusteInventario {
   tenant_id: string;
 
   @Column()
-  sucursal_id: string;
-
-  @Column()
-  producto_id: string;
-
-  @Column()
   usuario_id: string;
 
-  @Column({ nullable: true })
+  @Column()
   stock_id: string;
 
   @Column('int')
@@ -60,18 +52,9 @@ export class AjusteInventario {
   @CreateDateColumn()
   fecha: Date;
 
-
-  @ManyToOne(() => Stock, { nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne(() => Stock, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'stock_id' })
   stock: Stock;
-
-  @ManyToOne(() => Sucursal, { onDelete: 'CASCADE', createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'sucursal_id' })
-  sucursal: Sucursal;
-
-  @ManyToOne(() => Producto, { onDelete: 'CASCADE', createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'producto_id' })
-  producto: Producto;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'usuario_id' })

@@ -57,16 +57,17 @@ export default function AuditReportsPage() {
   };
 
   const getProductName = (a) => {
+    if (a.stock?.producto?.name) return a.stock.producto.name;
     if (a.producto?.name) return a.producto.name;
-    if (a.producto?.nombre) return a.producto.nombre;
-    const s = stock.find(st => st.producto_id === a.producto_id);
+    const s = stock.find(st => st.id === a.stock_id);
     if (s && s.producto?.name) return s.producto.name;
-    return a.producto_id || 'Producto Desconocido';
+    return 'Producto Desconocido';
   };
 
   const getProductSku = (a) => {
+    if (a.stock?.producto?.sku) return a.stock.producto.sku;
     if (a.producto?.sku) return a.producto.sku;
-    const s = stock.find(st => st.producto_id === a.producto_id);
+    const s = stock.find(st => st.id === a.stock_id);
     if (s && s.producto?.sku) return s.producto.sku;
     return null;
   };
@@ -105,7 +106,7 @@ export default function AuditReportsPage() {
     }
     let validSucursal = true;
     if (selectedSucursal !== 'ALL') {
-       validSucursal = a.sucursal_id === selectedSucursal;
+       validSucursal = (a.stock?.sucursal?.id || a.sucursal_id) === selectedSucursal;
     }
     return validDate && validUser && validMotivo && validSucursal;
   });
@@ -420,8 +421,8 @@ export default function AuditReportsPage() {
                   const cantFisica = Number(a.cantidad_fisica) || 0;
                   const cantSistema = Number(a.cantidad_sistema) || 0;
                   // Si no hay cantidad_sistema registrada, intentamos buscarla en el stock actual (solo como fallback visual)
-                  const fallbackStock = stock.find(s => s.producto_id === a.producto_id)?.cantidadTotal || 0;
-                  const sistemaReal = a.cantidad_sistema !== null && a.cantidad_sistema !== undefined ? cantSistema : fallbackStock;
+                  const fallbackStock = stock.find(s => s.id === a.stock_id);
+                  const sistemaReal = a.cantidad_sistema !== null && a.cantidad_sistema !== undefined ? cantSistema : (fallbackStock?.cantidadActual || 0);
                   const deltaVal = cantFisica - sistemaReal;
                   return (
                     <tr key={a.id}>
@@ -439,7 +440,7 @@ export default function AuditReportsPage() {
                         )}
                       </td>
                       <td className="text-sm text-slate-800">
-                        {a.sucursal?.name || a.sucursal_nombre || a.sucursal_id || 'Sucursal Desconocida'}
+                        {a.stock?.sucursal?.name || a.sucursal?.name || 'Sucursal Desconocida'}
                       </td>
                       <td className="text-sm text-slate-800">
                         {a.usuario?.name || a.usuario_nombre || a.usuario_id || 'Operador Desconocido'}

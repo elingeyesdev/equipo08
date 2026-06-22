@@ -30,20 +30,30 @@ export class AjustesService {
       dto.sucursal_id,
       dto.producto_id,
     );
+
+    if (!stockActual) {
+      throw new BadRequestException(
+        'No existe registro de stock para este producto en esta sucursal.',
+      );
+    }
+
     let avgCost = 0;
-    if (stockActual && stockActual.cantidadActual > 0) {
+    if (stockActual.cantidadActual > 0) {
       avgCost = Number(stockActual.costoPromedio);
     }
 
     const unitsLost = dto.cantidad_sistema - dto.cantidad_fisica;
     const valor_perdido = unitsLost > 0 ? unitsLost * avgCost : 0;
 
-    // 1. Guardar el Acta de Ajuste (Auditoría Lineal)
+    // 1. Guardar el Acta de Ajuste (vinculado a stock_id)
     const nuevoAjuste = this.ajusteRep.create({
       tenant_id,
       usuario_id,
-      stock_id: stockActual?.id,
-      ...dto,
+      stock_id: stockActual.id,
+      cantidad_sistema: dto.cantidad_sistema,
+      cantidad_fisica: dto.cantidad_fisica,
+      motivo: dto.motivo,
+      observaciones: dto.observaciones,
       valor_perdido,
     });
     const guardado = await this.ajusteRep.save(nuevoAjuste);
@@ -51,7 +61,6 @@ export class AjustesService {
     // 2. Sincronizador Transversal: Forzar la actualización del Stock Físico a la cantidad reportada.
     const diferencia = dto.cantidad_fisica - dto.cantidad_sistema;
 
-    // El método sumStock del StockService acepta valores negativos
     await this.stockService.sumStock(
       tenant_id,
       dto.sucursal_id,
@@ -71,7 +80,7 @@ export class AjustesService {
   async findAll(tenant_id: string): Promise<AjusteInventario[]> {
     return this.ajusteRep.find({
       where: { tenant_id },
-      relations: ['sucursal', 'producto', 'usuario'],
+      relations: ['stock', 'stock.producto', 'stock.sucursal', 'usuario'],
       order: { fecha: 'DESC' },
     });
   }

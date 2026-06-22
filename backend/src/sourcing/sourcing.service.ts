@@ -45,20 +45,18 @@ export class SourcingService {
         );
       }
 
-      if (producto.proveedor_id !== dto.proveedor_id) {
-        throw new BadRequestException(
-          'No puedes ingresar un lote con un proveedor distinto al oficial del producto. Por favor actualiza el proveedor en el Catalogo si es necesario.',
-        );
-      }
-
       // Prioridad: costo del DTO > precioCosto del catálogo
       const costoUnitario = dto.costoUnitario != null && dto.costoUnitario > 0
         ? Number(dto.costoUnitario)
         : Number(producto.precioCosto || 0);
       const lote = queryRunner.manager.create(LoteIngreso, {
-        ...dto,
         tenant_id,
+        sucursal_id: dto.sucursal_id,
+        producto_id: dto.producto_id,
+        cantidad: dto.cantidad,
         costoUnitario,
+        fechaElaboracion: dto.fechaElaboracion,
+        fechaVencimiento: dto.fechaVencimiento,
         usuario_id,
       });
       const loteGuardado = await queryRunner.manager.save(lote);
@@ -91,7 +89,7 @@ export class SourcingService {
   async getHistorial(tenant_id: string): Promise<LoteIngreso[]> {
     return this.loteRep.find({
       where: { tenant_id },
-      relations: ['producto', 'proveedor', 'sucursal'],
+      relations: ['producto', 'producto.proveedor', 'sucursal'],
       order: { fechaIngreso: 'DESC' },
     });
   }
@@ -136,11 +134,7 @@ export class SourcingService {
         );
       }
 
-      if (producto.proveedor_id !== lote.proveedor_id) {
-        throw new BadRequestException(
-          'No puedes ingresar un lote con un proveedor distinto al oficial del producto. Por favor actualiza el proveedor en el Catalogo si es necesario.',
-        );
-      }
+
 
       lote.costoUnitario = Number(producto.precioCosto || 0);
       const loteGuardado = await queryRunner.manager.save(lote);

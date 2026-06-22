@@ -9,7 +9,6 @@ import {
   Check,
 } from 'typeorm';
 import { Producto } from '../productos/producto.entity';
-import { Proveedor } from '../proveedores/proveedor.entity';
 import { Sucursal } from '../sucursales/sucursal.entity';
 
 import { User } from '../users/user.entity';
@@ -30,9 +29,6 @@ export class LoteIngreso {
 
   @Column()
   producto_id: string;
-
-  @Column()
-  proveedor_id: string;
 
   @Column('int')
   cantidad: number;
@@ -55,10 +51,6 @@ export class LoteIngreso {
   @ManyToOne(() => Producto, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'producto_id' })
   producto: Producto;
-
-  @ManyToOne(() => Proveedor, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'proveedor_id' })
-  proveedor: Proveedor;
 
   @ManyToOne(() => Sucursal, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'sucursal_id' })

@@ -24,7 +24,7 @@ export default function SourcingPage() {
   const [loteForm, setLoteForm] = useState(() => {
     const sId = sessionStorage.getItem('user_sucursal_id') || '';
     const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
-    return { producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, costoUnitario: '', fechaElaboracion: '', fechaVencimiento: '' };
+    return { producto_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, costoUnitario: '', fechaElaboracion: '', fechaVencimiento: '' };
   });
   const toast = useToast();
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,7 +87,7 @@ export default function SourcingPage() {
   const resetForm = () => {
     const sId = sessionStorage.getItem('user_sucursal_id') || '';
     const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
-    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, costoUnitario: '', fechaElaboracion: '', fechaVencimiento: '' });
+    setLoteForm({ producto_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, costoUnitario: '', fechaElaboracion: '', fechaVencimiento: '' });
     setEditingId(null);
     setShowForm(false);
     setProductSearchQuery('');
@@ -98,7 +98,6 @@ export default function SourcingPage() {
     setEditingId(h.id);
     setLoteForm({
       producto_id: h.producto_id,
-      proveedor_id: h.proveedor_id,
       sucursal_id: h.sucursal_id,
       cantidad: h.cantidad,
       costoUnitario: h.costoUnitario || '',
@@ -133,10 +132,7 @@ export default function SourcingPage() {
   const handleCreateLote = async (e) => {
     e.preventDefault();
 
-    const selectedProd = products.find(p => p.id === loteForm.producto_id);
-    if (selectedProd && loteForm.proveedor_id !== selectedProd.proveedor_id) {
-       return toast.error('El proveedor seleccionado no coincide con el proveedor oficial del producto en el catálogo.');
-    }
+
 
     try {
       const payload = {
@@ -161,7 +157,7 @@ export default function SourcingPage() {
     }
   };
 
-  const isProviderLocked = !!loteForm.producto_id;
+
 
   const selectedProductObj = products.find(p => p.id === loteForm.producto_id);
   const showExpirationDate = selectedProductObj && ['Abarrotes y Alimentos', 'Bebidas'].includes(selectedProductObj.category);
@@ -169,7 +165,7 @@ export default function SourcingPage() {
   // Compute filtered items for pagination calculation
   const filteredHistorial = historial.filter(h => {
     if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
-    if (filterProveedor !== 'ALL' && h.proveedor_id !== filterProveedor) return false;
+    if (filterProveedor !== 'ALL' && h.producto?.proveedor_id !== filterProveedor) return false;
     if (filterSucursal !== 'ALL' && h.sucursal_id !== filterSucursal) return false;
     
     if (filterDateStart) {
@@ -293,7 +289,7 @@ export default function SourcingPage() {
                           type="button"
                           onClick={() => {
                             setProductSearchQuery('');
-                            setLoteForm({ ...loteForm, producto_id: '', proveedor_id: '' });
+                            setLoteForm({ ...loteForm, producto_id: '' });
                           }}
                           className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors border-none p-0 cursor-pointer"
                           title="Limpiar"
@@ -325,7 +321,7 @@ export default function SourcingPage() {
                                 key={p.id}
                                 type="button"
                                 onClick={() => {
-                                  setLoteForm({ ...loteForm, producto_id: p.id, proveedor_id: p.proveedor_id || '' });
+                                  setLoteForm({ ...loteForm, producto_id: p.id });
                                   setProductSearchQuery(label);
                                   setShowProductDropdown(false);
                                 }}
@@ -343,20 +339,14 @@ export default function SourcingPage() {
               </div>
 
               <div className="form-group">
-                <label>Proveedor (Remitente Físico) *</label>
-                <select
-                  required
-                  value={loteForm.proveedor_id}
-                  onChange={e => setLoteForm({...loteForm, proveedor_id: e.target.value})}
-                  disabled={isProviderLocked}
-                  className={isProviderLocked ? 'bg-slate-100' : 'bg-white'}
-                >
-                  <option value="">Seleccione proveedor...</option>
-                  {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                {isProviderLocked && (
-                  <span className="block mt-1 text-xs text-slate-500">Auto-asignado por el artículo maestro</span>
-                )}
+                <label>Proveedor Origen</label>
+                <input
+                  type="text"
+                  readOnly
+                  className="bg-slate-100 cursor-not-allowed"
+                  value={selectedProductObj?.proveedor?.name || selectedProductObj?.proveedor_id ? 'Cargando...' : 'Seleccione un producto primero'}
+                />
+                <span className="block mt-1 text-xs text-slate-500">Se hereda del producto en el catálogo</span>
               </div>
 
               <div className="form-group">
@@ -535,7 +525,7 @@ export default function SourcingPage() {
                             <span className="text-xs text-slate-400 mt-0.5 block">SKU: {h.producto.sku}</span>
                           )}
                         </td>
-                        <td className="text-sm text-slate-800">{h.proveedor?.name || '---'}</td>
+                        <td className="text-sm text-slate-800">{h.producto?.proveedor?.name || '---'}</td>
                         <td className="text-right text-sm text-slate-800">
                           {h.cantidad}
                         </td>

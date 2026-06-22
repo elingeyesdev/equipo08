@@ -133,16 +133,23 @@ export class ProductosService {
       );
     }
 
-    // Check if there are any inventory adjustments
-    const ajustesCount = await this.dataSource
-      .getRepository(AjusteInventario)
-      .count({
-        where: { producto_id: id },
-      });
-    if (ajustesCount > 0) {
-      throw new BadRequestException(
-        'No se puede eliminar el producto porque tiene un historial de ajustes de inventario registrado.',
-      );
+    // Check if there are any inventory adjustments (via stock records)
+    const stockRecords = await this.dataSource.getRepository(Stock).find({
+      where: { producto_id: id },
+      select: ['id'],
+    });
+    const stockIds = stockRecords.map(s => s.id);
+    if (stockIds.length > 0) {
+      const ajustesCount = await this.dataSource
+        .getRepository(AjusteInventario)
+        .createQueryBuilder('a')
+        .where('a.stock_id IN (:...stockIds)', { stockIds })
+        .getCount();
+      if (ajustesCount > 0) {
+        throw new BadRequestException(
+          'No se puede eliminar el producto porque tiene un historial de ajustes de inventario registrado.',
+        );
+      }
     }
 
     const ventasCount = await this.dataSource
