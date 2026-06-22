@@ -90,7 +90,7 @@ describe('StockService (Prueba Unitaria)', () => {
         tenant_id: 'tenant-1',
         sucursal_id: 'sucursal-A',
         producto_id: 'prod-1',
-        cantidadTotal: 10,
+        cantidadActual: 10,
         valorAdquisicion: 100,
       };
 
@@ -98,7 +98,7 @@ describe('StockService (Prueba Unitaria)', () => {
         tenant_id: 'tenant-1',
         sucursal_id: 'sucursal-B',
         producto_id: 'prod-1',
-        cantidadTotal: 2,
+        cantidadActual: 2,
         valorAdquisicion: 20,
       };
 
@@ -121,12 +121,12 @@ describe('StockService (Prueba Unitaria)', () => {
       expect(queryRunnerMock.startTransaction).toHaveBeenCalled();
 
       // Verificación de descuento en origen (10 - 5 = 5)
-      expect(sourceStock.cantidadTotal).toBe(5);
+      expect(sourceStock.cantidadActual).toBe(5);
       // Costo unitario promedio = 100 / 10 = 10. Valor transferido = 10 * 5 = 50. Nuevo valor = 100 - 50 = 50
       expect(sourceStock.valorAdquisicion).toBe(50);
 
       // Verificación de incremento en destino (2 + 5 = 7)
-      expect(targetStock.cantidadTotal).toBe(7);
+      expect(targetStock.cantidadActual).toBe(7);
       expect(targetStock.valorAdquisicion).toBe(70); // 20 + 50 = 70
 
       // Guardados en la transacción: 2 stocks + 2 movimientos de inventario (4 guardados)

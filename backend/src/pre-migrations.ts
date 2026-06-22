@@ -59,7 +59,8 @@ export async function runPreMigrations() {
     ['lotes_ingreso', 'fechaIngreso', 'fecha_ingreso'],
 
     // stock
-    ['stock', 'cantidadTotal', 'cantidad_total'],
+    ['stock', 'cantidadTotal', 'cantidad_actual'],
+    ['stock', 'cantidad_total', 'cantidad_actual'],
     ['stock', 'valorAdquisicion', 'valor_adquisicion'],
     ['stock', 'ultimaActualizacion', 'ultima_actualizacion'],
 

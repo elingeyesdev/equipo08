@@ -67,6 +67,10 @@ export class SourcingService {
         Number(dto.cantidad || 0) * costoUnitario,
         'INGRESO',
         `Lote de ingreso ${loteGuardado.id}`,
+        undefined,
+        undefined,
+        'COMPRA',
+        loteGuardado.id,
       );
 
       await queryRunner.commitTransaction();
@@ -152,6 +156,10 @@ export class SourcingService {
           currentValue - previous.valor,
           'INGRESO',
           `Modificación lote de ingreso ${loteGuardado.id}`,
+          undefined,
+          undefined,
+          'COMPRA',
+          loteGuardado.id,
         );
       } else {
         await this.stockService.applyStockDelta(
@@ -163,6 +171,10 @@ export class SourcingService {
           -previous.valor,
           'EGRESO',
           `Modificación lote de ingreso (desasociación) ${loteGuardado.id}`,
+          undefined,
+          undefined,
+          'COMPRA',
+          loteGuardado.id,
         );
 
         await this.stockService.applyStockDelta(
@@ -174,6 +186,10 @@ export class SourcingService {
           currentValue,
           'INGRESO',
           `Modificación lote de ingreso (asociación) ${loteGuardado.id}`,
+          undefined,
+          undefined,
+          'COMPRA',
+          loteGuardado.id,
         );
       }
 
@@ -211,6 +227,10 @@ export class SourcingService {
         -valorLote,
         'EGRESO',
         `Eliminación de lote de ingreso ${lote.id}`,
+        undefined,
+        undefined,
+        'COMPRA',
+        lote.id,
       );
 
       await queryRunner.commitTransaction();

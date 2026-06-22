@@ -6,12 +6,14 @@ import {
   Index,
   ManyToOne,
   JoinColumn,
+  Check,
 } from 'typeorm';
 import { Producto } from '../productos/producto.entity';
 import { Sucursal } from '../sucursales/sucursal.entity';
 
 @Entity('stock')
 @Index(['tenant_id', 'sucursal_id', 'producto_id'], { unique: true })
+@Check('cantidad_actual >= 0')
 export class Stock {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -25,8 +27,8 @@ export class Stock {
   @Column()
   producto_id: string;
 
-  @Column('int', { name: 'cantidad_total', default: 0 })
-  cantidadTotal: number;
+  @Column('int', { name: 'cantidad_actual', default: 0 })
+  cantidadActual: number;
 
   @Column('decimal', { name: 'valor_adquisicion', precision: 12, scale: 2, default: 0 })
   valorAdquisicion: number;

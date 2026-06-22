@@ -76,6 +76,7 @@ export class VentasService {
       const nextNum = (count + 1).toString().padStart(6, '0');
       const numeroComprobante = `FAC-${nextNum}`;
 
+      const generatedVentaId = require('uuid').v4();
       const detalle: ProcessedVentaItem[] = [];
       let total = 0;
       let costoTotal = 0;
@@ -98,9 +99,9 @@ export class VentasService {
           lock: { mode: 'pessimistic_write' },
         });
 
-        if (!stock || stock.cantidadTotal < item.cantidad) {
+        if (!stock || stock.cantidadActual < item.cantidad) {
           throw new BadRequestException(
-            `Stock insuficiente para ${producto.name}. Disponible: ${stock ? stock.cantidadTotal : 0}`,
+            `Stock insuficiente para ${producto.name}. Disponible: ${stock ? stock.cantidadActual : 0}`,
           );
         }
 
@@ -122,6 +123,10 @@ export class VentasService {
           -costoSubtotal,
           'EGRESO',
           `Venta ${numeroComprobante}`,
+          undefined,
+          vendedor_id,
+          'VENTA',
+          generatedVentaId,
         );
 
         detalle.push({
@@ -135,7 +140,7 @@ export class VentasService {
           subtotal,
           costoSubtotal,
           utilidadSubtotal,
-          stockResultante: updatedStock.cantidadTotal,
+          stockResultante: updatedStock.cantidadActual,
           valorResultante: Number(updatedStock.valorAdquisicion),
         });
       }
@@ -150,6 +155,7 @@ export class VentasService {
       const utilidadTotal = total - costoTotal;
 
       const venta = queryRunner.manager.create(Venta, {
+        id: generatedVentaId,
         tenant_id,
         sucursal_id: dto.sucursal_id,
         cliente_id: cliente?.id,
@@ -462,6 +468,10 @@ export class VentasService {
           cost,
           'ANULACION',
           `Anulación de venta ${venta.numeroComprobante}`,
+          undefined,
+          undefined, // No Cajero context ID inside service method signature for now, pass undefined or null
+          'ANULACION',
+          venta.id,
         );
       }
 

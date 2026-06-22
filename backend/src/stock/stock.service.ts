@@ -34,6 +34,9 @@ export class StockService {
     valorAdquisicionDelta: number = 0,
     tipo: string = 'AJUSTE',
     motivo?: string,
+    usuario_id?: string,
+    referencia_tipo?: string,
+    referencia_id?: string,
   ): Promise<Stock> {
     return this.applyStockDelta(
       this.stockRep.manager,
@@ -44,6 +47,10 @@ export class StockService {
       valorAdquisicionDelta,
       tipo,
       motivo,
+      undefined,
+      usuario_id,
+      referencia_tipo,
+      referencia_id,
     );
   }
 
@@ -57,31 +64,37 @@ export class StockService {
     tipo: string = 'AJUSTE',
     motivo?: string,
     existingStock?: Stock,
+    usuario_id?: string,
+    referencia_tipo?: string,
+    referencia_id?: string,
   ): Promise<Stock> {
     let stock = existingStock || await manager.findOne(Stock, {
       where: { tenant_id, sucursal_id, producto_id },
     });
 
-    const costBefore = stock && stock.cantidadTotal > 0
-      ? Number(stock.valorAdquisicion || 0) / stock.cantidadTotal
+    const costBefore = stock && stock.cantidadActual > 0
+      ? Number(stock.valorAdquisicion || 0) / stock.cantidadActual
       : 0;
+
+    const stockAnterior = stock ? Number(stock.cantidadActual || 0) : 0;
 
     if (!stock) {
       stock = manager.create(Stock, {
         tenant_id,
         sucursal_id,
         producto_id,
-        cantidadTotal: Number(cantidad || 0),
+        cantidadActual: Number(cantidad || 0),
         valorAdquisicion: Number(valorAdquisicionDelta || 0),
       });
     } else {
-      stock.cantidadTotal =
-        Number(stock.cantidadTotal || 0) + Number(cantidad || 0);
+      stock.cantidadActual =
+        Number(stock.cantidadActual || 0) + Number(cantidad || 0);
       stock.valorAdquisicion =
         Number(stock.valorAdquisicion || 0) +
         Number(valorAdquisicionDelta || 0);
     }
     const savedStock = await manager.save(Stock, stock);
+    const stockResultante = savedStock ? savedStock.cantidadActual : stock.cantidadActual;
 
     // Registrar movimiento de inventario
     const unitCost = costBefore || (cantidad !== 0 ? Math.abs(Number(valorAdquisicionDelta)) / Math.abs(cantidad) : 0);
@@ -90,12 +103,17 @@ export class StockService {
       stock_id: savedStock?.id || stock.id || 'mock-stock-id',
       tipo,
       cantidad,
+      stockAnterior,
+      stockResultante,
       costoUnitario: unitCost,
       motivo,
+      usuario_id,
+      referenciaTipo: referencia_tipo,
+      referenciaId: referencia_id,
     });
     await manager.save(MovimientoInventario, movimiento);
 
-    return savedStock;
+    return savedStock || stock;
   }
 
   async getStockByTenant(tenant_id: string): Promise<Stock[]> {
@@ -135,17 +153,17 @@ export class StockService {
         lock: { mode: 'pessimistic_write' },
       });
 
-      if (!sourceStock || sourceStock.cantidadTotal < cantidad) {
+      if (!sourceStock || sourceStock.cantidadActual < cantidad) {
         throw new BadRequestException(
-          `Stock insuficiente en sucursal origen. Disponible: ${sourceStock ? sourceStock.cantidadTotal : 0}`,
+          `Stock insuficiente en sucursal origen. Disponible: ${sourceStock ? sourceStock.cantidadActual : 0}`,
         );
       }
 
       // Calcular valor de la porción transferida
       const avgCost =
-        sourceStock.cantidadTotal > 0
+        sourceStock.cantidadActual > 0
           ? Number(sourceStock.valorAdquisicion || 0) /
-            sourceStock.cantidadTotal
+            sourceStock.cantidadActual
           : 0;
       const transferredValue = avgCost * cantidad;
 

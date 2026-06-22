@@ -81,88 +81,88 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
 
     // PRUEBA 3: Validación de stock en venta (Suficiencia de inventario)
     it('3. [Regla de Negocio] create - Debe fallar si la cantidad de venta supera la disponible en Stock', async () => {
-      const runner = mockDataSource.createQueryRunner();
-      runner.manager.findOne.mockImplementation(
-        (entity: any, criteria: any) => {
-          if (criteria.where.id === 'prod-1') {
-            return Promise.resolve({
-              id: 'prod-1',
-              name: 'Zapatos',
-              precioVenta: 100,
-              precioCosto: 60,
-            });
-          }
-          return Promise.resolve({
-            id: 'stock-1',
-            cantidadTotal: 2,
-            valorAdquisicion: 120,
-          });
-        },
-      );
+       const runner = mockDataSource.createQueryRunner();
+       runner.manager.findOne.mockImplementation(
+         (entity: any, criteria: any) => {
+           if (criteria.where.id === 'prod-1') {
+             return Promise.resolve({
+               id: 'prod-1',
+               name: 'Zapatos',
+               precioVenta: 100,
+               precioCosto: 60,
+             });
+           }
+           return Promise.resolve({
+             id: 'stock-1',
+             cantidadActual: 2,
+             valorAdquisicion: 120,
+           });
+         },
+       );
 
-      const dto = {
-        sucursal_id: 'branch-1',
-        clienteNombre: 'Carlos',
-        clienteDocumento: '123',
-        items: [{ producto_id: 'prod-1', cantidad: 5 }],
-      };
+       const dto = {
+         sucursal_id: 'branch-1',
+         clienteNombre: 'Carlos',
+         clienteDocumento: '123',
+         items: [{ producto_id: 'prod-1', cantidad: 5 }],
+       };
 
-      await expect(service.create(dto as any, 'tenant-1')).rejects.toThrow(
-        BadRequestException,
-      );
-    });
+       await expect(service.create(dto as any, 'tenant-1')).rejects.toThrow(
+         BadRequestException,
+       );
+     });
 
     // PRUEBA 4: Procesamiento exitoso y reducción de stock
     it('4. [Regla de Negocio] create - Debe guardar la venta y reducir el stock disponible si hay suficiencia', async () => {
-      const runner = mockDataSource.createQueryRunner();
-      const mockProduct = {
-        id: 'prod-1',
-        name: 'Zapatos',
-        precioVenta: 100,
-        precioCosto: 60,
-      };
-      const mockStock = {
-        id: 'stock-1',
-        sucursal_id: 'branch-1',
-        producto_id: 'prod-1',
-        cantidadTotal: 10,
-        valorAdquisicion: 600,
-      };
-      const mockSavedVenta = {
-        id: 'venta-1',
-        total: 100,
-        numeroComprobante: 'FAC-000001',
-        detalle: [],
-      };
-      runner.manager.findOne
-        .mockResolvedValueOnce(mockProduct)
-        .mockResolvedValueOnce(mockStock);
-      runner.manager.count.mockResolvedValue(0); // Para generar número de factura
-      runner.manager.create.mockReturnValue(mockSavedVenta);
-      runner.manager.save.mockResolvedValue(mockSavedVenta);
-      mockStockService.applyStockDelta.mockImplementation(
-        async (manager, tenant_id, sucursal_id, producto_id, cantidad, valorDelta) => {
-          mockStock.cantidadTotal += cantidad;
-          mockStock.valorAdquisicion += valorDelta;
-          await manager.save(Stock, mockStock);
-          return mockStock;
-        }
-      );
+       const runner = mockDataSource.createQueryRunner();
+       const mockProduct = {
+         id: 'prod-1',
+         name: 'Zapatos',
+         precioVenta: 100,
+         precioCosto: 60,
+       };
+       const mockStock = {
+         id: 'stock-1',
+         sucursal_id: 'branch-1',
+         producto_id: 'prod-1',
+         cantidadActual: 10,
+         valorAdquisicion: 600,
+       };
+       const mockSavedVenta = {
+         id: 'venta-1',
+         total: 100,
+         numeroComprobante: 'FAC-000001',
+         detalle: [],
+       };
+       runner.manager.findOne
+         .mockResolvedValueOnce(mockProduct)
+         .mockResolvedValueOnce(mockStock);
+       runner.manager.count.mockResolvedValue(0); // Para generar número de factura
+       runner.manager.create.mockReturnValue(mockSavedVenta);
+       runner.manager.save.mockResolvedValue(mockSavedVenta);
+       mockStockService.applyStockDelta.mockImplementation(
+         async (manager, tenant_id, sucursal_id, producto_id, cantidad, valorDelta) => {
+           mockStock.cantidadActual += cantidad;
+           mockStock.valorAdquisicion += valorDelta;
+           await manager.save(Stock, mockStock);
+           return mockStock;
+         }
+       );
 
-      const dto = {
-        sucursal_id: 'branch-1',
-        clienteNombre: 'Carlos',
-        clienteDocumento: '123',
-        items: [{ producto_id: 'prod-1', cantidad: 2 }],
-      };
-      const result = await service.create(dto as any, 'tenant-1');
-      expect(result.id).toBe('venta-1');
-      expect(mockStock.cantidadTotal).toBe(8);
-      expect(runner.manager.save).toHaveBeenCalledWith(
-        expect.anything(),
-        mockStock,
-      );
-    });
+       const dto = {
+         sucursal_id: 'branch-1',
+         clienteNombre: 'Carlos',
+         clienteDocumento: '123',
+         items: [{ producto_id: 'prod-1', cantidad: 2 }],
+       };
+       const result = await service.create(dto as any, 'tenant-1');
+       expect(result.id).toBe('venta-1');
+       expect(mockStock.cantidadActual).toBe(8);
+       expect(runner.manager.save).toHaveBeenCalledWith(
+         expect.anything(),
+         mockStock,
+       );
+     });
   });
 
   // MÓDULO 2: SEGURIDAD Y ACCESOS (JwtStrategy - Reglas de Negocio de Guardias)

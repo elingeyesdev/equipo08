@@ -31,9 +31,9 @@ export class AjustesService {
       dto.producto_id,
     );
     let avgCost = 0;
-    if (stockActual && stockActual.cantidadTotal > 0) {
+    if (stockActual && stockActual.cantidadActual > 0) {
       avgCost =
-        Number(stockActual.valorAdquisicion) / stockActual.cantidadTotal;
+        Number(stockActual.valorAdquisicion) / stockActual.cantidadActual;
     }
 
     const unitsLost = dto.cantidad_sistema - dto.cantidad_fisica;
@@ -59,6 +59,11 @@ export class AjustesService {
       dto.producto_id,
       diferencia,
       -valor_perdido,
+      'AJUSTE',
+      dto.motivo,
+      usuario_id,
+      'AJUSTE',
+      guardado.id,
     );
 
     return guardado;

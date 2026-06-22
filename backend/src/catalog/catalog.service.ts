@@ -35,7 +35,7 @@ export class CatalogService {
           where: { tenant_id: tenant.id, producto_id: prod.id },
         });
         const stockTotal = stocks.reduce(
-          (acc, curr) => acc + curr.cantidadTotal,
+          (acc, curr) => acc + curr.cantidadActual,
           0,
         );
         return {

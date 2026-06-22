@@ -52,7 +52,7 @@ export class Producto {
   @Column({ nullable: true })
   proveedor_id: string;
 
-  @ManyToOne(() => Proveedor)
+  @ManyToOne(() => Proveedor, { nullable: true })
   @JoinColumn({ name: 'proveedor_id' })
   proveedor: Proveedor;
 

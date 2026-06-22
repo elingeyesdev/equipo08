@@ -161,7 +161,7 @@ export class ProductosService {
       where: { producto_id: id },
     });
     const totalStock = activeStocks.reduce(
-      (acc, s) => acc + (s.cantidadTotal || 0),
+      (acc, s) => acc + (s.cantidadActual || 0),
       0,
     );
     if (totalStock > 0) {
