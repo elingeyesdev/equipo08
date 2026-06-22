@@ -142,11 +142,24 @@ export async function runPreMigrations() {
       await client.query('ALTER TABLE "ajustes_inventario" ADD COLUMN "stock_id" uuid NULL');
     }
 
-    const pendingAjustes = await client.query(`
-      SELECT id, tenant_id, sucursal_id, producto_id 
-      FROM ajustes_inventario 
-      WHERE stock_id IS NULL
+    // Only attempt to populate stock_id if sucursal_id and producto_id columns still exist in the database table
+    const checkSucursalCol = await client.query(`
+      SELECT column_name FROM information_schema.columns 
+      WHERE table_name = 'ajustes_inventario' AND column_name = 'sucursal_id'
     `);
+    const checkProductoCol = await client.query(`
+      SELECT column_name FROM information_schema.columns 
+      WHERE table_name = 'ajustes_inventario' AND column_name = 'producto_id'
+    `);
+
+    let pendingAjustes = { rows: [] };
+    if (checkSucursalCol.rowCount > 0 && checkProductoCol.rowCount > 0) {
+      pendingAjustes = await client.query(`
+        SELECT id, tenant_id, sucursal_id, producto_id 
+        FROM ajustes_inventario 
+        WHERE stock_id IS NULL
+      `);
+    }
 
     for (const row of pendingAjustes.rows) {
       // Emergency defaults for tenant_id and sucursal_id if they are null/empty in the old record
