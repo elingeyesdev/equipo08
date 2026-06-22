@@ -149,11 +149,25 @@ export async function runPreMigrations() {
     `);
 
     for (const row of pendingAjustes.rows) {
+      // Emergency defaults for tenant_id and sucursal_id if they are null/empty in the old record
+      let tenantId = row.tenant_id;
+      if (!tenantId) {
+        const anyTenant = await client.query('SELECT id FROM tenants LIMIT 1');
+        tenantId = anyTenant.rowCount > 0 ? anyTenant.rows[0].id : null;
+      }
+      const sucursalId = row.sucursal_id || null;
+      const productoId = row.producto_id;
+
+      if (!tenantId || !productoId) {
+        console.warn(`Pre-migration warning: Skipping row ${row.id} because tenant_id or producto_id is missing.`);
+        continue;
+      }
+
       // Find matching stock id
       const stockRes = await client.query(`
         SELECT id FROM stock 
-        WHERE tenant_id = $1 AND sucursal_id = $2 AND producto_id = $3
-      `, [row.tenant_id, row.sucursal_id, row.producto_id]);
+        WHERE tenant_id = $1 AND (sucursal_id = $2 OR (sucursal_id IS NULL AND $2 IS NULL)) AND producto_id = $3
+      `, [tenantId, sucursalId, productoId]);
 
       let stockId = '';
       if (stockRes.rowCount > 0) {
@@ -164,7 +178,7 @@ export async function runPreMigrations() {
           INSERT INTO stock (id, tenant_id, sucursal_id, producto_id, cantidad_actual, costo_promedio, ultima_actualizacion)
           VALUES (gen_random_uuid(), $1, $2, $3, 0, 0, NOW())
           RETURNING id
-        `, [row.tenant_id, row.sucursal_id, row.producto_id]);
+        `, [tenantId, sucursalId, productoId]);
         stockId = insertStock.rows[0].id;
       }
 
