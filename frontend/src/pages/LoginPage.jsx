@@ -104,7 +104,7 @@ export default function LoginPage({ setAuthToken }) {
           <button 
             type="submit" 
             disabled={loading} 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-2 shadow-sm"
+            className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-2 shadow-sm"
           >
             {loading ? 'Verificando...' : 'Ingresar al Sistema'} 
             {!loading && <ArrowRight size={18} />}

@@ -5,8 +5,12 @@ import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
 import { join } from 'path';
 import * as fs from 'fs';
+import { runPreMigrations } from './pre-migrations';
 
 async function bootstrap() {
+  // Ejecutar migraciones previas a la sincronización de base de datos
+  await runPreMigrations();
+
   const app = await NestFactory.create(AppModule);
 
   // Asegurar la existencia del directorio uploads
@@ -14,7 +18,7 @@ async function bootstrap() {
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
-  
+
   // Servir archivos estáticos de uploads
   app.use('/uploads', express.static(uploadDir));
 
@@ -24,13 +28,16 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Mall Multi-Tenant API')
-    .setDescription('API REST para la arquitectura Multi-Tenant del sistema Mall')
+    .setDescription(
+      'API REST para la arquitectura Multi-Tenant del sistema Mall',
+    )
     .setVersion('1.0')
     .addGlobalParameters({
       in: 'header',
       name: 'x-tenant-id',
       required: false,
-      description: 'El ID del tenant actual (Legacy, ahora usamos subdominio o token)',
+      description:
+        'El ID del tenant actual (Legacy, ahora usamos subdominio o token)',
     })
     .addBearerAuth(
       {
@@ -44,7 +51,7 @@ async function bootstrap() {
       'access-token',
     )
     .build();
-    
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 

@@ -2,15 +2,16 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { User } from '../users/user.entity';
-import { TenantStatus } from '../tenant/tenant.entity';
+import { Tenant, TenantStatus } from '../tenant/tenant.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private dataSource: DataSource,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -22,15 +23,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     const user = await this.userRepository.findOne({
       where: { id: payload.sub },
-      relations: ['tenant', 'sucursal'],
+      relations: ['sucursal'],
     });
 
     if (!user || !user.isActive) {
       throw new UnauthorizedException('USER_DISABLED');
     }
 
-    if (user.tenant && user.tenant.status === TenantStatus.SUSPENDED) {
-      throw new UnauthorizedException('TENANT_BLOCKED');
+    // Cargar tenant manualmente (ya no es una relación FK)
+    if (user.tenant_id) {
+      const tenant = await this.dataSource.getRepository(Tenant).findOne({ where: { id: user.tenant_id } });
+      if (tenant && tenant.status === TenantStatus.SUSPENDED) {
+        throw new UnauthorizedException('TENANT_BLOCKED');
+      }
     }
 
     const currentSucursalId = user.sucursal_id || null;
@@ -46,11 +51,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('BRANCH_DISABLED');
     }
 
-    return { 
-      userId: payload.sub, 
-      tenantId: payload.tenantId, 
+    return {
+      userId: payload.sub,
+      tenantId: payload.tenantId,
       role: payload.role,
-      tenantName: payload.tenantName 
+      tenantName: payload.tenantName,
     };
   }
 }

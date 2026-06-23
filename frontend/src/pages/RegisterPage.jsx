@@ -182,7 +182,7 @@ export default function RegisterPage() {
           <button 
             type="submit" 
             disabled={loading} 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-4 shadow-sm"
+            className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-60 mt-4 shadow-sm"
           >
             {loading ? 'Enviando solicitud...' : 'Solicitar Registro de Tienda'} 
             {!loading && <ArrowRight size={18} />}
@@ -232,7 +232,7 @@ export default function RegisterPage() {
                   setShowSuccessModal(false);
                   navigate('/');
                 }}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg shadow-sm transition-colors text-xs"
+                className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-semibold py-2 rounded-lg shadow-sm transition-colors text-xs"
               >
                 Aceptar
               </button>

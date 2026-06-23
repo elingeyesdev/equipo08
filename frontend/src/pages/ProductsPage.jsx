@@ -233,7 +233,7 @@ export default function ProductsPage() {
           <button 
             onClick={() => setShowFilters(!showFilters)} 
             className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-              showFilters ? 'bg-indigo-500 text-white shadow-indigo-500/20' : 'bg-white/20 hover:bg-white/30 text-white'
+              showFilters ? 'bg-white text-slate-800 border border-slate-300' : 'bg-white/20 hover:bg-white/30 text-white'
             }`}
           >
             <Search size={18} /> {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
@@ -363,7 +363,7 @@ export default function ProductsPage() {
                   )}
                   <label 
                     htmlFor="file-upload" 
-                    className={`cursor-pointer py-2 px-4 border border-transparent text-xs font-bold text-white rounded-lg flex items-center gap-1.5 transition-colors bg-indigo-600 ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-700'}`}
+                    className={`cursor-pointer py-2 px-4 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {uploading ? 'Procesando...' : 'Subir desde Equipo'}
                   </label>

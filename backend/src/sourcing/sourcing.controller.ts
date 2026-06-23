@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Req,
+} from '@nestjs/common';
 import { SourcingService } from './sourcing.service';
 import { CreateLoteIngresoDto } from './dto/create-lote.dto';
 import { TenantId } from '../tenant/tenant-id.decorator';
@@ -15,8 +24,9 @@ export class SourcingController {
   registrarIngreso(
     @TenantId() tenantId: string,
     @Body() dto: CreateLoteIngresoDto,
+    @Req() req: any,
   ) {
-    return this.sourcingService.registrarIngreso(tenantId, dto);
+    return this.sourcingService.registrarIngreso(tenantId, dto, req.user?.userId);
   }
 
   @Get()

@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum TenantStatus {
   PENDING = 'PENDING',
@@ -21,9 +27,6 @@ export class Tenant {
   @Column({ unique: true })
   email: string;
 
-  @Column()
-  password: string;
-
   @Column({
     type: 'enum',
     enum: TenantStatus,
@@ -40,24 +43,24 @@ export class Tenant {
   @Column({ nullable: true })
   nit: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'razon_social', nullable: true })
   razonSocial: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'logo_url', type: 'text', nullable: true })
   logoUrl: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'banner_url', type: 'text', nullable: true })
   bannerUrl: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'brand_color', nullable: true })
   brandColor: string;
 
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

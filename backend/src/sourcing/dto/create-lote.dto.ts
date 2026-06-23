@@ -11,13 +11,15 @@ export class CreateLoteIngresoDto {
   producto_id: string;
 
   @ApiProperty()
-  @IsString()
-  proveedor_id: string;
-
-  @ApiProperty()
   @IsNumber()
   @Min(1)
   cantidad: number;
+
+  @ApiProperty({ required: false, description: 'Costo unitario de compra. Si no se envía, se usa el precioCosto del catálogo.' })
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  costoUnitario?: number;
 
   @ApiProperty({ required: false })
   @IsString()

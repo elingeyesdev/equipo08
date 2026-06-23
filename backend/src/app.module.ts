@@ -18,19 +18,27 @@ import { CatalogModule } from './catalog/catalog.module';
 import { MailModule } from './mail/mail.module';
 
 import { Tenant } from './tenant/tenant.entity';
+import { Cliente } from './clientes/cliente.entity';
 import { Proveedor } from './proveedores/proveedor.entity';
 import { Producto } from './productos/producto.entity';
 import { Sucursal } from './sucursales/sucursal.entity';
 import { LoteIngreso } from './sourcing/lote-ingreso.entity';
 import { Stock } from './stock/stock.entity';
+import { MovimientoInventario } from './stock/movimiento-inventario.entity';
 import { User } from './users/user.entity';
-import { RolePermissions } from './users/role-permissions.entity';
 import { AjusteInventario } from './ajustes/ajuste.entity';
 import { Venta } from './ventas/venta.entity';
+import { VentaDetalle } from './ventas/venta-detalle.entity';
 
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { PermissionsGuard } from './auth/guards/permissions.guard';
+
+const shouldSynchronizeDatabase =
+  process.env.DB_SYNCHRONIZE === 'true' ||
+  (process.env.DB_SYNCHRONIZE !== 'false' &&
+    process.env.NODE_ENV !== 'production' &&
+    !process.env.RENDER);
 
 @Module({
   imports: [
@@ -41,9 +49,23 @@ import { PermissionsGuard } from './auth/guards/permissions.guard';
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || '1234',
       database: process.env.DB_DATABASE || 'mall_db',
-      entities: [Tenant, Proveedor, Producto, LoteIngreso, Stock, Sucursal, User, RolePermissions, AjusteInventario, Venta],
-      synchronize: true,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      entities: [
+        Tenant,
+        Cliente,
+        Proveedor,
+        Producto,
+        LoteIngreso,
+        Stock,
+        MovimientoInventario,
+        Sucursal,
+        User,
+        AjusteInventario,
+        Venta,
+        VentaDetalle,
+      ],
+      synchronize: shouldSynchronizeDatabase,
+      ssl:
+        process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     }),
     AuthModule,
     TenantModule,

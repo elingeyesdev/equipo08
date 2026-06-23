@@ -1,10 +1,24 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { Proveedor } from '../proveedores/proveedor.entity';
 import { Stock } from '../stock/stock.entity';
+
+import { Check } from 'typeorm';
 
 @Entity('productos')
 @Index(['tenant_id', 'id'])
 @Index(['tenant_id', 'sku'], { unique: true })
+@Check('precio_venta >= 0')
+@Check('precio_costo >= 0')
 export class Producto {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -17,7 +31,7 @@ export class Producto {
 
   @Column()
   sku: string;
-  
+
   @Column({ nullable: true })
   description: string;
 
@@ -30,28 +44,28 @@ export class Producto {
   @Column({ type: 'text', nullable: true })
   imagen_url: string;
 
-  @Column('int', { default: 10 })
+  @Column('int', { name: 'stock_minimo', default: 10 })
   stockMinimo: number;
 
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  @Column('decimal', { name: 'precio_costo', precision: 10, scale: 2, default: 0 })
   precioCosto: number;
 
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  @Column('decimal', { name: 'precio_venta', precision: 10, scale: 2, default: 0 })
   precioVenta: number;
 
   @Column({ nullable: true })
   proveedor_id: string;
 
-  @ManyToOne(() => Proveedor)
+  @ManyToOne(() => Proveedor, { nullable: true, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'proveedor_id' })
   proveedor: Proveedor;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => Stock, stock => stock.producto)
+  @OneToMany(() => Stock, (stock) => stock.producto)
   stocks: Stock[];
 }

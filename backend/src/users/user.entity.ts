@@ -1,6 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { Tenant } from '../tenant/tenant.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  Index,
+} from 'typeorm';
 import { Sucursal } from '../sucursales/sucursal.entity';
+import { Tenant } from '../tenant/tenant.entity';
 
 export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
@@ -18,6 +27,13 @@ export class User {
   @Column({ nullable: true })
   tenant_id: string;
 
+  @ManyToOne(() => Tenant, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'tenant_id' })
+  tenant: Tenant;
+
   @Column({ nullable: true })
   sucursal_id: string;
 
@@ -27,8 +43,8 @@ export class User {
   @Column()
   email: string;
 
-  @Column()
-  password: string;
+  @Column({ name: 'password_hash' })
+  passwordHash: string;
 
   @Column({
     type: 'enum',
@@ -37,20 +53,16 @@ export class User {
   })
   role: UserRole;
 
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
-
-  @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenant_id' })
-  tenant: Tenant;
 
   @ManyToOne(() => Sucursal, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'sucursal_id' })
   sucursal: Sucursal;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

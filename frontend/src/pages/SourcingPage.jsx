@@ -24,7 +24,7 @@ export default function SourcingPage() {
   const [loteForm, setLoteForm] = useState(() => {
     const sId = sessionStorage.getItem('user_sucursal_id') || '';
     const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
-    return { producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' };
+    return { producto_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, costoUnitario: '', fechaElaboracion: '', fechaVencimiento: '' };
   });
   const toast = useToast();
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,7 +87,7 @@ export default function SourcingPage() {
   const resetForm = () => {
     const sId = sessionStorage.getItem('user_sucursal_id') || '';
     const isOwner = sessionStorage.getItem('user_role') === 'OWNER';
-    setLoteForm({ producto_id: '', proveedor_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, fechaElaboracion: '', fechaVencimiento: '' });
+    setLoteForm({ producto_id: '', sucursal_id: (!isOwner && sId) ? sId : '', cantidad: 1, costoUnitario: '', fechaElaboracion: '', fechaVencimiento: '' });
     setEditingId(null);
     setShowForm(false);
     setProductSearchQuery('');
@@ -98,9 +98,9 @@ export default function SourcingPage() {
     setEditingId(h.id);
     setLoteForm({
       producto_id: h.producto_id,
-      proveedor_id: h.proveedor_id,
       sucursal_id: h.sucursal_id,
       cantidad: h.cantidad,
+      costoUnitario: h.costoUnitario || '',
       fechaElaboracion: h.fechaElaboracion || '',
       fechaVencimiento: h.fechaVencimiento || ''
     });
@@ -132,17 +132,15 @@ export default function SourcingPage() {
   const handleCreateLote = async (e) => {
     e.preventDefault();
 
-    const selectedProd = products.find(p => p.id === loteForm.producto_id);
-    if (selectedProd && loteForm.proveedor_id !== selectedProd.proveedor_id) {
-       return toast.error('El proveedor seleccionado no coincide con el proveedor oficial del producto en el catálogo.');
-    }
+
 
     try {
       const payload = {
         ...loteForm,
         fechaElaboracion: loteForm.fechaElaboracion || null,
         fechaVencimiento: loteForm.fechaVencimiento || null,
-        cantidad: parseInt(loteForm.cantidad)
+        cantidad: parseInt(loteForm.cantidad),
+        costoUnitario: loteForm.costoUnitario ? parseFloat(loteForm.costoUnitario) : undefined,
       };
 
       if (editingId) {
@@ -159,7 +157,7 @@ export default function SourcingPage() {
     }
   };
 
-  const isProviderLocked = !!loteForm.producto_id;
+
 
   const selectedProductObj = products.find(p => p.id === loteForm.producto_id);
   const showExpirationDate = selectedProductObj && ['Abarrotes y Alimentos', 'Bebidas'].includes(selectedProductObj.category);
@@ -167,7 +165,7 @@ export default function SourcingPage() {
   // Compute filtered items for pagination calculation
   const filteredHistorial = historial.filter(h => {
     if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
-    if (filterProveedor !== 'ALL' && h.proveedor_id !== filterProveedor) return false;
+    if (filterProveedor !== 'ALL' && h.producto?.proveedor_id !== filterProveedor) return false;
     if (filterSucursal !== 'ALL' && h.sucursal_id !== filterSucursal) return false;
     
     if (filterDateStart) {
@@ -200,7 +198,7 @@ export default function SourcingPage() {
           <button 
             onClick={() => setShowFilters(!showFilters)} 
             className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-              showFilters ? 'bg-indigo-500 text-white shadow-indigo-500/20' : 'bg-white/20 hover:bg-white/30 text-white'
+              showFilters ? 'bg-white text-slate-800 border border-slate-300' : 'bg-white/20 hover:bg-white/30 text-white'
             }`}
           >
             <Search size={18} /> {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
@@ -291,7 +289,7 @@ export default function SourcingPage() {
                           type="button"
                           onClick={() => {
                             setProductSearchQuery('');
-                            setLoteForm({ ...loteForm, producto_id: '', proveedor_id: '' });
+                            setLoteForm({ ...loteForm, producto_id: '' });
                           }}
                           className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors border-none p-0 cursor-pointer"
                           title="Limpiar"
@@ -323,7 +321,7 @@ export default function SourcingPage() {
                                 key={p.id}
                                 type="button"
                                 onClick={() => {
-                                  setLoteForm({ ...loteForm, producto_id: p.id, proveedor_id: p.proveedor_id || '' });
+                                  setLoteForm({ ...loteForm, producto_id: p.id });
                                   setProductSearchQuery(label);
                                   setShowProductDropdown(false);
                                 }}
@@ -341,25 +339,25 @@ export default function SourcingPage() {
               </div>
 
               <div className="form-group">
-                <label>Proveedor (Remitente Físico) *</label>
-                <select
-                  required
-                  value={loteForm.proveedor_id}
-                  onChange={e => setLoteForm({...loteForm, proveedor_id: e.target.value})}
-                  disabled={isProviderLocked}
-                  className={isProviderLocked ? 'bg-slate-100' : 'bg-white'}
-                >
-                  <option value="">Seleccione proveedor...</option>
-                  {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-                {isProviderLocked && (
-                  <span className="block mt-1 text-xs text-slate-500">Auto-asignado por el artículo maestro</span>
-                )}
+                <label>Proveedor Origen</label>
+                <input
+                  type="text"
+                  readOnly
+                  className="bg-slate-100 cursor-not-allowed"
+                  value={selectedProductObj?.proveedor?.name || selectedProductObj?.proveedor_id ? 'Cargando...' : 'Seleccione un producto primero'}
+                />
+                <span className="block mt-1 text-xs text-slate-500">Se hereda del producto en el catálogo</span>
               </div>
 
               <div className="form-group">
                 <label>Unidades Físicas (Cajas/Pzas) *</label>
                 <input type="number" min="1" required value={loteForm.cantidad} onChange={e => setLoteForm({...loteForm, cantidad: e.target.value})} />
+              </div>
+
+              <div className="form-group">
+                <label>Costo Unitario de Compra (Bs) *</label>
+                <input type="number" min="0" step="0.01" required placeholder="Ej: 45.00" value={loteForm.costoUnitario} onChange={e => setLoteForm({...loteForm, costoUnitario: e.target.value})} />
+                <span className="block mt-1 text-xs text-slate-500">Precio que pagaste al proveedor por unidad</span>
               </div>
 
               {showExpirationDate && (
@@ -384,7 +382,7 @@ export default function SourcingPage() {
               >
                 Cancelar
               </button>
-              <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-2">
+              <button type="submit" className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold shadow-sm transition-colors flex items-center gap-2">
                 <ShoppingCart size={14} /> {editingId ? 'Guardar Cambios' : 'Confirmar Ingreso en Inventario'}
               </button>
             </div>
@@ -506,7 +504,7 @@ export default function SourcingPage() {
                     </tr>
                   );
                   return paginatedHistorial.map(h => {
-                    const costoSnap = Number(h.costoUnitarioSnapshot || 0);
+                    const costoSnap = Number(h.costoUnitario || h.costoUnitarioSnapshot || 0);
                     const inversionTotal = costoSnap * h.cantidad;
                     return (
                       <tr key={h.id}>
@@ -527,7 +525,7 @@ export default function SourcingPage() {
                             <span className="text-xs text-slate-400 mt-0.5 block">SKU: {h.producto.sku}</span>
                           )}
                         </td>
-                        <td className="text-sm text-slate-800">{h.proveedor?.name || '---'}</td>
+                        <td className="text-sm text-slate-800">{h.producto?.proveedor?.name || '---'}</td>
                         <td className="text-right text-sm text-slate-800">
                           {h.cantidad}
                         </td>

@@ -5,40 +5,37 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
-  ManyToOne,
-  JoinColumn,
+  OneToMany,
 } from 'typeorm';
-import { Tenant } from '../tenant/tenant.entity';
+import { Venta } from '../ventas/venta.entity';
 
-@Entity('sucursales')
-@Index(['tenant_id', 'id'])
-export class Sucursal {
+@Entity('clientes')
+@Index(['tenant_id', 'documento'])
+export class Cliente {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ nullable: true })
   tenant_id: string;
 
-  @ManyToOne(() => Tenant, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'tenant_id' })
-  tenant: Tenant;
-
   @Column()
-  name: string;
+  nombre: string;
 
   @Column({ nullable: true })
-  address: string;
+  documento: string;
 
   @Column({ nullable: true })
-  phone: string;
+  email: string;
 
   @Column({ nullable: true })
-  horarios: string;
+  telefono: string;
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
+
+
+  @OneToMany(() => Venta, (venta) => venta.cliente)
+  ventas: Venta[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
