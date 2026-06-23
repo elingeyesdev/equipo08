@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, ILike, IsNull, DataSource, In } from 'typeorm';
 import { Producto } from './producto.entity';
 import { Categoria } from './categoria.entity';
+import { ProductoVariacion } from './producto-variacion.entity';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { LoteIngreso } from '../sourcing/lote-ingreso.entity';
 import { Stock } from '../stock/stock.entity';
@@ -86,49 +87,73 @@ export class ProductosService {
   async create(tenant_id: string, dto: CreateProductoDto): Promise<Producto> {
     await this.validateProducto(tenant_id, dto);
 
-    // Evitar bug de Postgres "invalid input syntax for type uuid" cuando frontend envía string vacío
-    if (dto.proveedor_id === '') {
-      delete dto.proveedor_id;
-    }
-    if (dto.categoria_id === '') {
-      delete dto.categoria_id;
-    }
+    // Usamos transaccionalidad para asegurar consistencia del producto base y su variante por defecto
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    // Lógica de compatibilidad hacia atrás: si envían 'category' de texto pero no 'categoria_id',
-    // buscamos o creamos la categoría dinámicamente para no romper nada.
-    let categoriaId = dto.categoria_id;
-    if (!categoriaId && dto.category) {
-      const catRep = this.dataSource.getRepository(Categoria);
-      let cat = await catRep.findOne({
-        where: { tenant_id, nombre: ILike(dto.category) },
-      });
-      if (!cat) {
-        cat = catRep.create({ tenant_id, nombre: dto.category.trim() });
-        cat = await catRep.save(cat);
+    try {
+      let categoriaId = dto.categoria_id;
+      if (!categoriaId && dto.category) {
+        const catRep = queryRunner.manager.getRepository(Categoria);
+        let cat = await catRep.findOne({
+          where: { tenant_id, nombre: ILike(dto.category) },
+        });
+        if (!cat) {
+          cat = catRep.create({ tenant_id, nombre: dto.category.trim() });
+          cat = await catRep.save(cat);
+        }
+        categoriaId = cat.id;
       }
-      categoriaId = cat.id;
-    }
 
-    const prod = this.prodRep.create({
-      ...dto,
-      categoria_id: categoriaId,
-      tenant_id,
-    });
-    return this.prodRep.save(prod);
+      const prod = queryRunner.manager.create(Producto, {
+        ...dto,
+        categoria_id: categoriaId,
+        tenant_id,
+      });
+      const prodSaved = await queryRunner.manager.save(prod);
+
+      // Crear variante por defecto basada en la información clásica
+      const varRep = queryRunner.manager.getRepository(ProductoVariacion);
+      const defaultVar = varRep.create({
+        producto_id: prodSaved.id,
+        sku: dto.sku,
+        precioCosto: dto.precioCosto || 0,
+        precioVenta: dto.precioVenta || 0,
+        opciones: dto.attributes || {},
+      });
+      await queryRunner.manager.save(defaultVar);
+
+      await queryRunner.commitTransaction();
+      return prodSaved;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async findAll(tenant_id: string): Promise<Producto[]> {
     const productos = await this.prodRep.find({
       where: { tenant_id },
-      relations: ['proveedor', 'stocks', 'categoria'],
+      relations: ['proveedor', 'stocks', 'categoria', 'variaciones'],
     });
 
     // Mapeamos para garantizar compatibilidad hacia atrás con el frontend:
     // Hacemos que 'category' refleje siempre el nombre de la categoría enlazada.
-    return productos.map(p => ({
-      ...p,
-      category: p.categoria ? p.categoria.nombre : (p as any).category,
-    })) as any;
+    return productos.map(p => {
+      // Tomamos la primera variante (o creamos una simulación en memoria si no tiene)
+      const variant = p.variaciones && p.variaciones.length > 0 ? p.variaciones[0] : null;
+      return {
+        ...p,
+        sku: variant ? variant.sku : p.sku,
+        precioCosto: variant ? Number(variant.precioCosto) : Number(p.precioCosto),
+        precioVenta: variant ? Number(variant.precioVenta) : Number(p.precioVenta),
+        attributes: variant ? variant.opciones : p.attributes,
+        category: p.categoria ? p.categoria.nombre : (p as any).category,
+      };
+    }) as any;
   }
 
   async update(
@@ -136,36 +161,74 @@ export class ProductosService {
     id: string,
     dto: Partial<CreateProductoDto>,
   ): Promise<Producto> {
-    const prod = await this.prodRep.findOne({ where: { id, tenant_id } });
-    if (!prod) throw new NotFoundException('Producto no encontrado');
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    await this.validateProducto(tenant_id, dto, id);
-
-    if (dto.proveedor_id === '') {
-      delete dto.proveedor_id;
-    }
-    if (dto.categoria_id === '') {
-      delete dto.categoria_id;
-    }
-
-    let categoriaId = dto.categoria_id;
-    if (!categoriaId && dto.category) {
-      const catRep = this.dataSource.getRepository(Categoria);
-      let cat = await catRep.findOne({
-        where: { tenant_id, nombre: ILike(dto.category) },
+    try {
+      const prod = await queryRunner.manager.findOne(Producto, {
+        where: { id, tenant_id },
+        relations: ['variaciones'],
       });
-      if (!cat) {
-        cat = catRep.create({ tenant_id, nombre: dto.category.trim() });
-        cat = await catRep.save(cat);
-      }
-      categoriaId = cat.id;
-    }
+      if (!prod) throw new NotFoundException('Producto no encontrado');
 
-    Object.assign(prod, {
-      ...dto,
-      ...(categoriaId ? { categoria_id: categoriaId } : {}),
-    });
-    return this.prodRep.save(prod);
+      await this.validateProducto(tenant_id, dto, id);
+
+      if (dto.proveedor_id === '') {
+        delete dto.proveedor_id;
+      }
+      if (dto.categoria_id === '') {
+        delete dto.categoria_id;
+      }
+
+      let categoriaId = dto.categoria_id;
+      if (!categoriaId && dto.category) {
+        const catRep = queryRunner.manager.getRepository(Categoria);
+        let cat = await catRep.findOne({
+          where: { tenant_id, nombre: ILike(dto.category) },
+        });
+        if (!cat) {
+          cat = catRep.create({ tenant_id, nombre: dto.category.trim() });
+          cat = await catRep.save(cat);
+        }
+        categoriaId = cat.id;
+      }
+
+      Object.assign(prod, {
+        ...dto,
+        ...(categoriaId ? { categoria_id: categoriaId } : {}),
+      });
+      const prodSaved = await queryRunner.manager.save(prod);
+
+      // Sincronizar con la variante por defecto (primera variante)
+      if (prod.variaciones && prod.variaciones.length > 0) {
+        const defaultVar = prod.variaciones[0];
+        if (dto.sku !== undefined) defaultVar.sku = dto.sku;
+        if (dto.precioCosto !== undefined) defaultVar.precioCosto = dto.precioCosto;
+        if (dto.precioVenta !== undefined) defaultVar.precioVenta = dto.precioVenta;
+        if (dto.attributes !== undefined) defaultVar.opciones = dto.attributes;
+        await queryRunner.manager.save(defaultVar);
+      } else {
+        // En caso de que no tenga variantes (ej. si fue creado antes de la migración)
+        const varRep = queryRunner.manager.getRepository(ProductoVariacion);
+        const defaultVar = varRep.create({
+          producto_id: prodSaved.id,
+          sku: dto.sku || prodSaved.sku,
+          precioCosto: dto.precioCosto !== undefined ? dto.precioCosto : prodSaved.precioCosto,
+          precioVenta: dto.precioVenta !== undefined ? dto.precioVenta : prodSaved.precioVenta,
+          opciones: dto.attributes || prodSaved.attributes || {},
+        });
+        await queryRunner.manager.save(defaultVar);
+      }
+
+      await queryRunner.commitTransaction();
+      return prodSaved;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async remove(tenant_id: string, id: string): Promise<void> {

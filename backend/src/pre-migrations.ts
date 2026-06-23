@@ -389,6 +389,46 @@ export async function runPreMigrations() {
       }
     }
 
+    // PRODUCT VARIATIONS MIGRATION STEP:
+    // 1. Create table 'producto_variaciones' if it does not exist
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "producto_variaciones" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "producto_id" UUID NOT NULL REFERENCES "productos"("id") ON DELETE CASCADE,
+        "sku" VARCHAR NOT NULL,
+        "precio_costo" DECIMAL(10,2) NOT NULL DEFAULT 0,
+        "precio_venta" DECIMAL(10,2) NOT NULL DEFAULT 0,
+        "opciones" JSONB NOT NULL DEFAULT '{}',
+        "created_at" TIMESTAMP NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
+        CONSTRAINT "UQ_variacion_sku" UNIQUE ("sku")
+      )
+    `);
+
+    // 2. Populate default variation for existing products that don't have variations yet
+    const pendingProductsForVariants = await client.query(`
+      SELECT p.id, p.sku, p.precio_costo, p.precio_venta, p.attributes 
+      FROM productos p
+      WHERE NOT EXISTS (
+        SELECT 1 FROM producto_variaciones pv WHERE pv.producto_id = p.id
+      )
+    `);
+
+    for (const row of pendingProductsForVariants.rows) {
+      const sku = row.sku || `SKU-${row.id.split('-')[0]}`;
+      const costo = row.precio_costo != null ? row.precio_costo : 0;
+      const venta = row.precio_venta != null ? row.precio_venta : 0;
+      const opciones = row.attributes || '{}';
+
+      // Insert default variation
+      await client.query(`
+        INSERT INTO producto_variaciones (id, producto_id, sku, precio_costo, precio_venta, opciones, created_at, updated_at)
+        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now(), now())
+        ON CONFLICT (sku) DO NOTHING
+      `, [row.id, sku, costo, venta, typeof opciones === 'string' ? opciones : JSON.stringify(opciones)]);
+      console.log(`Pre-migration: Created default variation for product "${row.id}" with SKU ${sku}`);
+    }
+
     // Drop redundant proveedor_id and columns from lotes_ingreso / ajustes_inventario
     const dropCols = [
       ['lotes_ingreso', 'proveedor_id'],

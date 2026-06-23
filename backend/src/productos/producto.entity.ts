@@ -14,6 +14,8 @@ import { Proveedor } from '../proveedores/proveedor.entity';
 import { Stock } from '../stock/stock.entity';
 import { Categoria } from './categoria.entity';
 
+import { ProductoVariacion } from './producto-variacion.entity';
+
 @Entity('productos')
 @Index(['tenant_id', 'id'])
 @Index(['tenant_id', 'sku'], { unique: true })
@@ -75,4 +77,7 @@ export class Producto {
 
   @OneToMany(() => Stock, (stock) => stock.producto)
   stocks: Stock[];
+
+  @OneToMany(() => ProductoVariacion, (variacion) => variacion.producto)
+  variaciones: ProductoVariacion[];
 }
