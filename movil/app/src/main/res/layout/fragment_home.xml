@@ -356,6 +356,23 @@
                 android:textSize="14sp"
                 android:visibility="gone" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewAllSales"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
+                android:text="Ver historial completo de ventas"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/primary_color"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_ventas"
+                app:iconTint="@color/white"
+                app:iconGravity="textStart"
+                app:rippleColor="#20ffffff" />
+
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

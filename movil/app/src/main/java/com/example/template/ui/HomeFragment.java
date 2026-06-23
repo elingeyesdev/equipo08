@@ -120,6 +120,12 @@ public class HomeFragment extends Fragment {
         if (cvMetricRevenue != null) cvMetricRevenue.setOnClickListener(kpiClickListener);
         if (cvMetricProfit != null) cvMetricProfit.setOnClickListener(kpiClickListener);
 
+        // Botón para ver todo el historial de ventas
+        com.google.android.material.button.MaterialButton btnViewAllSales = view.findViewById(R.id.btnViewAllSales);
+        if (btnViewAllSales != null) {
+            btnViewAllSales.setOnClickListener(kpiClickListener);
+        }
+
         // Load data in parallel
         loadDashboardData();
 

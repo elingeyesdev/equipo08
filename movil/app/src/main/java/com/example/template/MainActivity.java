@@ -149,11 +149,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .commit();
         }
 
-        MenuItem adminItem = navigationView.getMenu().findItem(R.id.nav_admin_group);
-        if (adminItem != null) {
-            SpannableString s = new SpannableString(adminItem.getTitle());
-            s.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.primary_color)), 0, s.length(), 0);
-            adminItem.setTitle(s);
+        int[] groupIds = {R.id.group_navigation, R.id.group_cruds, R.id.group_sales, R.id.nav_admin_group, R.id.group_session};
+        for (int id : groupIds) {
+            MenuItem groupItem = navigationView.getMenu().findItem(id);
+            if (groupItem != null && groupItem.getTitle() != null) {
+                SpannableString s = new SpannableString(groupItem.getTitle());
+                // Color gris claro para que resalte sutilmente en el fondo oscuro
+                s.setSpan(new ForegroundColorSpan(android.graphics.Color.parseColor("#94A3B8")), 0, s.length(), 0);
+                // Texto un poco más pequeño
+                s.setSpan(new android.text.style.RelativeSizeSpan(0.8f), 0, s.length(), 0);
+                groupItem.setTitle(s);
+            }
         }
 
         applyPermissions();

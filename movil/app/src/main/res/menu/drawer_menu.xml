@@ -1,43 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/nav_home"
-        android:icon="@drawable/ic_dashboard"
-        android:title="Inicio (Dashboard)" />
-    <item
-        android:id="@+id/nav_providers"
-        android:icon="@drawable/ic_providers"
-        android:title="Proveedores" />
-    <item
-        android:id="@+id/nav_sucursales"
-        android:icon="@drawable/ic_sucursales"
-        android:title="Sucursales" />
-    <item
-        android:id="@+id/nav_products"
-        android:icon="@drawable/ic_products"
-        android:title="Catálogo" />
-    <item
-        android:id="@+id/nav_sourcing"
-        android:icon="@drawable/ic_sourcing"
-        android:title="Sourcing" />
-    <item
-        android:id="@+id/nav_stock"
-        android:icon="@drawable/ic_stock"
-        android:title="Inventario" />
-    <item
-        android:id="@+id/nav_pos"
-        android:icon="@drawable/ic_sales"
-        android:title="Terminal POS" />
-    <item
-        android:id="@+id/nav_sales_history"
-        android:icon="@drawable/ic_ventas"
-        android:title="Ventas" />
-    <item
-        android:id="@+id/nav_audit_reports"
-        android:icon="@drawable/ic_audit"
-        android:title="Reportes de auditoría" />
-        
+    <item android:id="@+id/group_navigation" android:title="Navegación Principal">
+        <menu>
+            <item
+                android:id="@+id/nav_home"
+                android:icon="@drawable/ic_dashboard"
+                android:title="Inicio" />
+        </menu>
+    </item>
+
+    <item android:id="@+id/group_cruds" android:title="Gestión de Catálogos">
+        <menu>
+            <item
+                android:id="@+id/nav_providers"
+                android:icon="@drawable/ic_providers"
+                android:title="Proveedores" />
+            <item
+                android:id="@+id/nav_sucursales"
+                android:icon="@drawable/ic_sucursales"
+                android:title="Sucursales" />
+            <item
+                android:id="@+id/nav_products"
+                android:icon="@drawable/ic_products"
+                android:title="Catálogo" />
+        </menu>
+    </item>
+
+    <item android:id="@+id/group_sales" android:title="Ventas y Operaciones">
+        <menu>
+            <item
+                android:id="@+id/nav_sourcing"
+                android:icon="@drawable/ic_sourcing"
+                android:title="Abastecimiento" />
+            <item
+                android:id="@+id/nav_stock"
+                android:icon="@drawable/ic_stock"
+                android:title="Inventario" />
+            <item
+                android:id="@+id/nav_pos"
+                android:icon="@drawable/ic_sales"
+                android:title="Terminal POS" />
+            <item
+                android:id="@+id/nav_sales_history"
+                android:icon="@drawable/ic_ventas"
+                android:title="Ventas" />
+            <item
+                android:id="@+id/nav_audit_reports"
+                android:icon="@drawable/ic_audit"
+                android:title="Reportes de auditoría" />
+        </menu>
+    </item>
+
     <item android:id="@+id/nav_admin_group" android:title="Administración">
         <menu>
             <item
@@ -55,8 +69,12 @@
         </menu>
     </item>
 
-    <item
-        android:id="@+id/nav_logout"
-        android:icon="@drawable/ic_logout"
-        android:title="Cerrar Sesión" />
+    <item android:id="@+id/group_session" android:title="Sesión">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_logout"
+                android:title="Cerrar Sesión" />
+        </menu>
+    </item>
 </menu>
