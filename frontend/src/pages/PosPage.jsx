@@ -447,12 +447,12 @@ export default function PosPage() {
             onClick={handleLogout}
             role="button"
             className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity cursor-pointer animate-fadeIn"
-            title="Cerrar Sesión"
+            title="Volver al panel principal"
           >
-            <div className="w-10 h-10 bg-rose-600/20 text-rose-400 border border-rose-500/30 rounded-full mb-2 flex items-center justify-center shadow-md">
-              <LogOut size={20} />
+            <div className="w-10 h-10 bg-slate-800 text-white rounded-full mb-2 flex items-center justify-center shadow-md">
+              <ArrowLeft size={20} />
             </div>
-            <span className="text-[11px] font-black tracking-tight text-rose-400 text-center px-1 truncate w-full uppercase">Salir</span>
+            <span className="text-[11px] font-black tracking-tight text-slate-200 text-center px-1 truncate w-full uppercase">Volver</span>
           </div>
         ) : (
           <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity" title="Volver al panel principal">
