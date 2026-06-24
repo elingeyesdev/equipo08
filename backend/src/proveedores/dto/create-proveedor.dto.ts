@@ -14,5 +14,10 @@ export class CreateProveedorDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
+  phone?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
   taxId?: string;
 }

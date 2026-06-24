@@ -22,6 +22,9 @@ export class Proveedor {
   @Column({ name: 'contact_email', nullable: true })
   contactEmail: string;
 
+  @Column({ name: 'phone', nullable: true })
+  phone: string;
+
   @Column({ name: 'tax_id', nullable: true })
   taxId: string;
 

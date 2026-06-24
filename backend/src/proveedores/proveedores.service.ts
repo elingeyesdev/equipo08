@@ -155,12 +155,14 @@ export class ProveedoresService implements OnModuleInit {
         name: dto.name,
         taxId: dto.taxId,
         contactEmail: dto.contactEmail || undefined,
+        phone: dto.phone || undefined,
       });
       await this.proveRep.save(globalProv);
     } else {
       // Si ya existe globalmente, heredamos su nombre oficial y correo
       dto.name = globalProv.name;
       dto.contactEmail = globalProv.contactEmail || dto.contactEmail;
+      dto.phone = globalProv.phone || dto.phone;
     }
 
     await this.validateProveedor(tenant_id, dto);
