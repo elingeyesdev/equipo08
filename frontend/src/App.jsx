@@ -148,7 +148,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
         </div>
         <nav className={`flex flex-col gap-2 mt-2 w-full ${!isOpen ? 'items-center' : ''}`}>
 
-          {userRole !== 'SUPER_ADMIN' && (
+          {userRole !== 'SUPER_ADMIN' && userRole !== 'VENDEDOR' && (
             <NavItem to="/" icon={LayoutDashboard} label="Resumen" active={p === '/'} isOpen={isOpen} />
           )}
 
@@ -343,7 +343,7 @@ function App() {
                     <div className={`main-content transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative`}>
                       <AnimatePresence mode="wait">
                         <Routes location={location} key={location.pathname}>
-                          <Route path="/"              element={<PageTransition>{userRole === 'SUPER_ADMIN' ? <Navigate to="/admin-console" replace /> : <DashboardPage key={authToken} />}</PageTransition>} />
+                          <Route path="/"              element={<PageTransition>{userRole === 'SUPER_ADMIN' ? <Navigate to="/admin-console" replace /> : (userRole === 'VENDEDOR' ? <Navigate to="/pos" replace /> : <DashboardPage key={authToken} />)}</PageTransition>} />
                           <Route path="/providers"     element={<PageTransition><ProvidersPage     key={authToken} /></PageTransition>} />
                           <Route path="/sucursales"    element={<PageTransition><SucursalesPage    key={authToken} /></PageTransition>} />
                           <Route path="/products"      element={<PageTransition><ProductsPage      key={authToken} /></PageTransition>} />
