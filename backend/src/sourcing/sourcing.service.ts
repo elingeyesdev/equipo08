@@ -7,6 +7,7 @@ import { Stock } from '../stock/stock.entity';
 import { StockService } from '../stock/stock.service';
 import { Sucursal } from '../sucursales/sucursal.entity';
 import { Producto } from '../productos/producto.entity';
+import { ProductoVariacion } from '../productos/producto-variacion.entity';
 
 @Injectable()
 export class SourcingService {
@@ -47,15 +48,33 @@ export class SourcingService {
         ? Number(dto.costoUnitario)
         : Number(producto.precioCosto || 0);
 
-      // Buscar o crear stock_id
+      // Buscar o crear la variante por defecto en la base de datos para este producto
+      let variant = await queryRunner.manager.findOne(ProductoVariacion, {
+        where: { producto: { id: dto.producto_id, tenant_id } },
+        order: { createdAt: 'ASC' },
+      });
+      if (!variant) {
+        // En caso extremo que no exista, la creamos al vuelo para mantener consistencia
+        variant = queryRunner.manager.create(ProductoVariacion, {
+          producto_id: dto.producto_id,
+          sku: `SKU-${dto.producto_id.split('-')[0]}`,
+          precioCosto: costoUnitario,
+          precioVenta: Number(producto.precioVenta || 0),
+          opciones: {},
+        });
+        variant = await queryRunner.manager.save(variant);
+      }
+
+      // Buscar o crear stock_id utilizando producto_variacion_id
       let stock = await queryRunner.manager.findOne(Stock, {
-        where: { tenant_id, sucursal_id: dto.sucursal_id, producto_id: dto.producto_id },
+        where: { tenant_id, sucursal_id: dto.sucursal_id, producto_variacion_id: variant.id },
       });
       if (!stock) {
         stock = queryRunner.manager.create(Stock, {
           tenant_id,
           sucursal_id: dto.sucursal_id,
           producto_id: dto.producto_id,
+          producto_variacion_id: variant.id,
           cantidadActual: 0,
           costoPromedio: 0,
         });
@@ -86,6 +105,7 @@ export class SourcingService {
         usuario_id,
         'COMPRA',
         loteGuardado.id,
+        variant.id,
       );
 
       await queryRunner.commitTransaction();
@@ -164,15 +184,32 @@ export class SourcingService {
         );
       }
 
-      // Buscar o crear stock_id nuevo
+      // Buscar o crear la variante por defecto
+      let variant = await queryRunner.manager.findOne(ProductoVariacion, {
+        where: { producto: { id: currentProductoId, tenant_id } },
+        order: { createdAt: 'ASC' },
+      });
+      if (!variant) {
+        variant = queryRunner.manager.create(ProductoVariacion, {
+          producto_id: currentProductoId,
+          sku: `SKU-${currentProductoId.split('-')[0]}`,
+          precioCosto: Number(producto.precioCosto || 0),
+          precioVenta: Number(producto.precioVenta || 0),
+          opciones: {},
+        });
+        variant = await queryRunner.manager.save(variant);
+      }
+
+      // Buscar o crear stock
       let stock = await queryRunner.manager.findOne(Stock, {
-        where: { tenant_id, sucursal_id: currentSucursalId, producto_id: currentProductoId },
+        where: { tenant_id, sucursal_id: currentSucursalId, producto_variacion_id: variant.id },
       });
       if (!stock) {
         stock = queryRunner.manager.create(Stock, {
           tenant_id,
           sucursal_id: currentSucursalId,
           producto_id: currentProductoId,
+          producto_variacion_id: variant.id,
           cantidadActual: 0,
           costoPromedio: 0,
         });
@@ -184,6 +221,16 @@ export class SourcingService {
       if (dto.fechaElaboracion !== undefined) lote.fechaElaboracion = dto.fechaElaboracion;
       if (dto.fechaVencimiento !== undefined) lote.fechaVencimiento = dto.fechaVencimiento;
       lote.costoUnitario = Number(producto.precioCosto || 0);
+
+      const checkElaboracion = lote.fechaElaboracion;
+      const checkVencimiento = lote.fechaVencimiento;
+      if (checkElaboracion && checkVencimiento) {
+        const elaboracion = new Date(checkElaboracion);
+        const vencimiento = new Date(checkVencimiento);
+        if (vencimiento < elaboracion) {
+          throw new BadRequestException('La fecha de vencimiento no puede ser anterior a la fecha de elaboración.');
+        }
+      }
 
       const loteGuardado = await queryRunner.manager.save(lote);
       const currentValue =
@@ -207,8 +254,12 @@ export class SourcingService {
           undefined,
           'COMPRA',
           loteGuardado.id,
+          variant.id,
         );
       } else {
+        // Obtener el anterior variant_id del stock asociado al lote
+        const previousVariantId = lote.stock?.producto_variacion_id;
+
         // Desasociar del anterior
         await this.stockService.applyStockDelta(
           queryRunner.manager,
@@ -223,6 +274,7 @@ export class SourcingService {
           undefined,
           'COMPRA',
           loteGuardado.id,
+          previousVariantId,
         );
 
         // Asociar al nuevo
@@ -239,6 +291,7 @@ export class SourcingService {
           undefined,
           'COMPRA',
           loteGuardado.id,
+          variant.id,
         );
       }
 
@@ -276,6 +329,7 @@ export class SourcingService {
       
       const sucursalId = lote.stock?.sucursal_id;
       const productoId = lote.stock?.producto_id;
+      const variacionId = lote.stock?.producto_variacion_id;
 
       await queryRunner.manager.remove(lote);
 
@@ -293,6 +347,7 @@ export class SourcingService {
           undefined,
           'COMPRA',
           lote.id,
+          variacionId,
         );
       }
 

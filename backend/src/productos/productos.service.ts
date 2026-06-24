@@ -37,12 +37,12 @@ export class ProductosService {
 
     if (dto.name) {
       if (
-        !/^[A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s]*[A-Za-záéíóúÁÉÍÓÚñÑ][A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s]*$/.test(
+        !/^[A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s\-丨\|]*[A-Za-záéíóúÁÉÍÓÚñÑ][A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s\-丨\|]*$/.test(
           dto.name,
         )
       ) {
         throw new BadRequestException(
-          'El nombre del artículo no puede contener símbolos y debe tener al menos una letra (no puede ser solo números).',
+          'El nombre del artículo no puede contener símbolos especiales (excepto guiones o barras verticales) y debe tener al menos una letra (no puede ser solo números).',
         );
       }
 
