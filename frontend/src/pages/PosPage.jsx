@@ -187,6 +187,19 @@ export default function PosPage() {
     }
   };
 
+  // Calcular cantidad reservada por producto en las órdenes en espera (tickets)
+  const heldQuantities = useMemo(() => {
+    const qtyMap = {};
+    holdOrders.forEach(order => {
+      if (order.items) {
+        order.items.forEach(item => {
+          qtyMap[item.producto_id] = (qtyMap[item.producto_id] || 0) + item.cantidad;
+        });
+      }
+    });
+    return qtyMap;
+  }, [holdOrders]);
+
   // Dinámicamente extraer la primera palabra del nombre como categoría si no hay category real
   const products = useMemo(() => {
     return stockInfo.map(s => {
@@ -196,8 +209,12 @@ export default function PosPage() {
         catName = s.producto?.name?.split(' ')[0] || 'General';
       }
       
+      const heldQty = heldQuantities[s.producto_id] || 0;
+      const adjustedStock = Math.max(0, s.cantidadTotal - heldQty);
+      
       return {
         ...s,
+        cantidadTotal: adjustedStock,
         category: catName,
         displayName: s.producto?.name,
         description: s.producto?.sku || 'Item',
@@ -205,10 +222,10 @@ export default function PosPage() {
         image: s.producto?.imagen_url 
           ? getBackendUrl(s.producto.imagen_url) 
           : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80',
-        available: s.cantidadTotal > 0
+        available: adjustedStock > 0
       };
     });
-  }, [stockInfo]);
+  }, [stockInfo, heldQuantities]);
 
   // Obtener lista única de categorías dinámicas
   const dynamicCategories = useMemo(() => {
