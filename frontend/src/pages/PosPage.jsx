@@ -464,7 +464,7 @@ export default function PosPage() {
         {/* Top Header / Branch Selector */}
         <div className="h-[70px] bg-[#0f172a] border-b border-slate-800 flex items-center justify-between px-8 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <span className="text-white font-extrabold text-lg tracking-tight">Terminal POS</span>
+            <span className="text-slate-200 font-semibold text-base tracking-normal">Terminal POS</span>
           </div>
           {!isBranchLocked && sucursales.length > 1 && (
             <select
