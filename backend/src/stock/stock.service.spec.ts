@@ -75,7 +75,7 @@ describe('StockService - Pruebas de Producción', () => {
 
       await service.applyStockDelta(
         manager, 'tenant-1', 'suc-1', 'prod-1',
-        -5, -250, 'EGRESO', 'Venta FAC-000001',
+        -5, -250, 'EGRESO', 'Venta CPB-000001',
         stockExistente as any,
       );
 

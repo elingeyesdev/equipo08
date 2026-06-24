@@ -21,7 +21,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
         save: jest.fn(),
         findOne: jest.fn().mockResolvedValue({
           id: 'venta-1',
-          numeroComprobante: 'FAC-000001',
+          numeroComprobante: 'CPB-000001',
           fecha: new Date(),
           detail: [],
           total: 100,
@@ -131,7 +131,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
        const mockSavedVenta = {
          id: 'venta-1',
          total: 100,
-         numeroComprobante: 'FAC-000001',
+         numeroComprobante: 'CPB-000001',
          detalle: [],
        };
        runner.manager.findOne

@@ -174,7 +174,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
         });
 
       expect(res.status).toBe(201);
-      expect(res.body.numeroComprobante).toBe('FAC-000001');
+      expect(res.body.numeroComprobante).toBe('CPB-000001');
       expect(Number(res.body.total)).toBe(400); // 4 * 100 precioVenta
 
       // Verificar que el stock se descontó en la base de datos

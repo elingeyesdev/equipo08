@@ -74,7 +74,7 @@ export class VentasService {
         where: { tenant_id, sucursal_id: dto.sucursal_id },
       });
       const nextNum = (count + 1).toString().padStart(6, '0');
-      const numeroComprobante = `FAC-${nextNum}`;
+      const numeroComprobante = `CPB-${nextNum}`;
 
       const generatedVentaId = require('uuid').v4();
       const detalle: ProcessedVentaItem[] = [];
