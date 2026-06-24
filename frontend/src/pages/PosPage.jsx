@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api, { getBackendUrl } from '../api';
 import { useToast } from '../components/ToastContext';
 import {
-  Minus, Plus, Trash2, Bell, Receipt, Calculator, Store, LayoutGrid, Sun, Moon, Tag, ArrowLeft, ShoppingCart, Search, Loader2
+  Minus, Plus, Trash2, Bell, Receipt, Calculator, Store, LayoutGrid, Sun, Moon, Tag, ArrowLeft, ShoppingCart, Search, Loader2, LogOut
 } from 'lucide-react';
 
 export default function PosPage() {
@@ -62,6 +62,11 @@ export default function PosPage() {
   const userSucursalName = sessionStorage.getItem('user_sucursal_name');
   const tenantName = sessionStorage.getItem('tenant_name') || 'Mi Tienda';
   const isBranchLocked = userRole !== 'OWNER' && !!userSucursalId;
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    window.location.href = '/login';
+  };
 
   useEffect(() => {
     localStorage.setItem(cartKey, JSON.stringify(cart));
@@ -437,12 +442,26 @@ export default function PosPage() {
       
       {/* LEFT SIDEBAR - Categories */}
       <div className="w-[110px] bg-[#0f172a] border-r border-slate-800 flex flex-col items-center py-6 shadow-sm z-10 flex-shrink-0 overflow-y-auto custom-scrollbar">
-        <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity" title="Volver al panel principal">
-          <div className="w-10 h-10 bg-slate-800 text-white rounded-full mb-2 flex items-center justify-center shadow-md">
-            <ArrowLeft size={20} />
+        {userRole === 'VENDEDOR' ? (
+          <div 
+            onClick={handleLogout}
+            role="button"
+            className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity cursor-pointer animate-fadeIn"
+            title="Cerrar Sesión"
+          >
+            <div className="w-10 h-10 bg-rose-600/20 text-rose-400 border border-rose-500/30 rounded-full mb-2 flex items-center justify-center shadow-md">
+              <LogOut size={20} />
+            </div>
+            <span className="text-[11px] font-black tracking-tight text-rose-400 text-center px-1 truncate w-full uppercase">Salir</span>
           </div>
-          <span className="text-[11px] font-black tracking-tight text-slate-200 text-center px-1 truncate w-full uppercase">Volver</span>
-        </Link>
+        ) : (
+          <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity" title="Volver al panel principal">
+            <div className="w-10 h-10 bg-slate-800 text-white rounded-full mb-2 flex items-center justify-center shadow-md">
+              <ArrowLeft size={20} />
+            </div>
+            <span className="text-[11px] font-black tracking-tight text-slate-200 text-center px-1 truncate w-full uppercase">Volver</span>
+          </Link>
+        )}
 
         <div 
           onClick={toggleTheme}
