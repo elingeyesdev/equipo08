@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [metrics, setMetrics] = useState({
     totalSales: 0,
     totalRevenue: 0,
+    totalProfit: 0,
     totalStockItems: 0,
     totalStockValue: 0,
     totalLosses: 0,
@@ -117,7 +118,7 @@ export default function DashboardPage() {
               <DollarSign size={100} strokeWidth={2} />
             </div>
             <div className="p-6 relative z-10 flex-1">
-              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {metrics.totalRevenue.toFixed(0)}</h3>
+              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {(metrics.totalRevenue || 0).toFixed(0)}</h3>
               <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Ingreso Bruto</p>
             </div>
             <a href="/sales#historial" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">
@@ -133,7 +134,7 @@ export default function DashboardPage() {
               <BarChart2 size={100} strokeWidth={2} />
             </div>
             <div className="p-6 relative z-10 flex-1">
-              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {metrics.totalProfit.toFixed(0)}</h3>
+              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {(metrics.totalProfit || 0).toFixed(0)}</h3>
               <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Utilidad Neta</p>
             </div>
             <a href="/sales#historial" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">

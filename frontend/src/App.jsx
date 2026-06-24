@@ -89,8 +89,11 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
   const hasPerm = (key) => {
     if (userRole === 'OWNER') return true;
     if (!permissions) return false;
-    const p = permissions.find(p => p.role === userRole);
-    return p ? p[key.replace('.', '_')] : false;
+    if (Array.isArray(permissions)) {
+      const p = permissions.find(p => p.role === userRole);
+      return p ? p[key.replace('.', '_')] : false;
+    }
+    return permissions[key.replace('.', '_')] || false;
   };
 
   const p = location.pathname;
@@ -237,7 +240,14 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
 /* ─── APP ROOT ──────────────────────────────────────────────────── */
 function App() {
   const [authToken, setAuthToken] = useState(sessionStorage.getItem('access_token'));
-  const [permissions, setPermissions] = useState(null);
+  const [permissions, setPermissions] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('permissions');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [authError, setAuthError] = useState(null);
   const userRole = sessionStorage.getItem('user_role') || 'VENDEDOR';
