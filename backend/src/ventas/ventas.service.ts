@@ -70,6 +70,15 @@ export class VentasService {
     await queryRunner.startTransaction();
 
     try {
+      const trimmedNombre = dto.clienteNombre ? dto.clienteNombre.trim() : '';
+      const trimmedDocumento = dto.clienteDocumento ? dto.clienteDocumento.trim() : '';
+
+      if (trimmedNombre && trimmedNombre.toLowerCase() !== 'cliente casual' && !trimmedDocumento) {
+        throw new BadRequestException(
+          'Debe ingresar el NIT / CI del cliente para registrar una venta a su nombre.',
+        );
+      }
+
       const count = await queryRunner.manager.count(Venta, {
         where: { tenant_id, sucursal_id: dto.sucursal_id },
       });

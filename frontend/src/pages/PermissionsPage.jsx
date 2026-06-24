@@ -21,13 +21,13 @@ export default function PermissionsPage() {
             <h2 className="text-base font-bold text-slate-800 border-b border-slate-100 pb-4">
               SUPERVISOR / ENCARGADO DE SUCURSAL
             </h2>
-            <p className="text-sm text-slate-650 mt-4 leading-relaxed">
+            <p className="text-sm text-slate-600 mt-4 leading-relaxed">
               Este perfil está pensado para la persona encargada de una tienda o sucursal. Su función principal es apoyar en el control diario del negocio, gestionando ventas, productos, ingresos de mercadería y revisión del inventario.
             </p>
             
             <div className="mt-6 space-y-4">
-              <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">FUNCIONES HABILITADAS</h3>
-              <ul className="text-sm text-slate-650 space-y-2.5 list-none pl-0">
+              <h3 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">FUNCIONES HABILITADAS</h3>
+              <ul className="text-sm text-slate-600 space-y-2.5 list-none pl-0">
                 <li>• <strong>Caja y POS:</strong> puede registrar ventas, cobrar y realizar modificaciones dentro del proceso de venta.</li>
                 <li>• <strong>Catálogo:</strong> puede registrar productos y actualizar precios de venta o costo.</li>
                 <li>• <strong>Ingreso de mercadería:</strong> puede registrar entradas de stock, lotes nuevos y datos relacionados al proveedor.</li>
@@ -38,8 +38,8 @@ export default function PermissionsPage() {
           </div>
           
           <div className="mt-8 pt-4 border-t border-slate-100">
-            <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">RESTRICCIONES</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <h3 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">RESTRICCIONES</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
               No puede eliminar sucursales, anular ventas históricas definitivas ni crear o despedir personal. Estas acciones quedan reservadas para perfiles administrativos superiores.
             </p>
           </div>
@@ -56,8 +56,8 @@ export default function PermissionsPage() {
             </p>
             
             <div className="mt-6 space-y-4">
-              <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">FUNCIONES HABILITADAS</h3>
-              <ul className="text-sm text-slate-650 space-y-2.5 list-none pl-0">
+              <h3 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">FUNCIONES HABILITADAS</h3>
+              <ul className="text-sm text-slate-600 space-y-2.5 list-none pl-0">
                 <li>• <strong>Caja y POS:</strong> puede registrar ventas, cobrar y utilizar la terminal de ventas en sucursal asignada.</li>
                 <li>• <strong>Consulta:</strong> puede revisar el stock disponible de productos y consultar precios actualizados en catálogo en tiempo real.</li>
               </ul>
@@ -65,8 +65,8 @@ export default function PermissionsPage() {
           </div>
 
           <div className="mt-8 pt-4 border-t border-slate-100">
-            <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">RESTRICCIONES</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <h3 className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">RESTRICCIONES</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
               No tiene acceso a la creación de productos, modificación de precios de costo o venta, ingresos de nuevos lotes o visualización de auditorías de pérdida del negocio.
             </p>
           </div>

@@ -344,6 +344,19 @@ export default function PosPage() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
+    const trimmedNombre = clienteNombre ? clienteNombre.trim() : '';
+    const trimmedDocumento = clienteDocumento ? clienteDocumento.trim() : '';
+
+    if (!trimmedNombre) {
+      toast.error('El nombre del cliente no puede estar vacío');
+      return;
+    }
+
+    if (trimmedNombre.toLowerCase() !== 'cliente casual' && !trimmedDocumento) {
+      toast.error('Debe ingresar el NIT / CI del cliente para registrar una venta a su nombre');
+      return;
+    }
+
     const receivedVal = Number(montoRecibido) || total;
     if (receivedVal < total) {
       toast.error('El monto recibido no puede ser menor al total a cobrar');
@@ -373,7 +386,8 @@ export default function PosPage() {
       setMontoRecibido('');
       fetchStock();
     } catch (err) {
-      toast.error('Error al procesar la orden');
+      const msg = err.response?.data?.message || 'Error al procesar la orden';
+      toast.error(typeof msg === 'string' ? msg : 'Error al procesar la orden');
     } finally {
       setSaving(false);
     }
@@ -410,7 +424,7 @@ export default function PosPage() {
           <div className="w-10 h-10 bg-slate-800 text-white rounded-full mb-2 flex items-center justify-center shadow-md">
             <ArrowLeft size={20} />
           </div>
-          <span className="text-[11px] font-black tracking-tight text-slate-200 text-center px-1 truncate w-full">{tenantName}</span>
+          <span className="text-[11px] font-black tracking-tight text-slate-200 text-center px-1 truncate w-full uppercase">Volver</span>
         </Link>
 
         <div 
