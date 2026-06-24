@@ -47,8 +47,7 @@ export default function AdminConsolePage() {
   return (
     <div className="max-w-6xl mx-auto pb-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-          <ShieldAlert className="text-rose-500" size={32} />
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
           Supervisión Global del Mall
         </h1>
         <p className="text-slate-500 font-medium mt-2">Control maestro de todas las tiendas registradas en el sistema.</p>
@@ -57,19 +56,14 @@ export default function AdminConsolePage() {
       {/* Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Tiendas', value: metrics.total, icon: Building2, color: 'text-slate-600', bg: 'bg-slate-100' },
-          { label: 'Pendientes', value: metrics.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Aprobadas', value: metrics.approved, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Sistema', value: 'Operativo', icon: Activity, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Total Tiendas', value: metrics.total, color: 'text-slate-800 dark:text-slate-200' },
+          { label: 'Pendientes', value: metrics.pending, color: 'text-amber-600 dark:text-amber-400' },
+          { label: 'Aprobadas', value: metrics.approved, color: 'text-emerald-600 dark:text-emerald-400' },
+          { label: 'Sistema', value: 'Operativo', color: 'text-blue-600 dark:text-blue-400' },
         ].map((m, i) => (
-          <div key={i} className={`${m.bg} p-5 rounded-2xl border border-slate-200/50 flex items-center gap-4`}>
-            <div className={`p-3 rounded-xl bg-white shadow-sm ${m.color}`}>
-              <m.icon size={24} />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{m.label}</div>
-              <div className={`text-2xl font-black ${m.color}`}>{m.value}</div>
-            </div>
+          <div key={i} className="bg-white border border-slate-200 dark:border-slate-800 p-5 rounded-2xl flex flex-col justify-center min-h-[90px] shadow-sm">
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{m.label}</div>
+            <div className={`text-2xl font-black mt-1 ${m.color}`}>{m.value}</div>
           </div>
         ))}
       </div>
@@ -77,8 +71,8 @@ export default function AdminConsolePage() {
       {/* Tenants Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Building2 size={18} className="text-slate-400" /> Directorio de Tiendas
+          <h2 className="text-base font-bold text-slate-800">
+            Directorio de Tiendas
           </h2>
         </div>
         <div className="overflow-x-auto">
