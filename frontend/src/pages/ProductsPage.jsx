@@ -130,16 +130,22 @@ export default function ProductsPage() {
 
   const fetchData = async () => {
     try {
-      const [prodRes, provRes, catRes] = await Promise.all([
+      const [prodRes, provRes] = await Promise.all([
         api.get('/productos'),
-        api.get('/proveedores'),
-        api.get('/productos/categorias')
+        api.get('/proveedores')
       ]);
       setProducts(prodRes.data);
       setProviders(provRes.data);
-      setCategories(catRes.data);
     } catch (err) {
       console.error(err);
+      toast.error('Error al cargar productos o proveedores');
+    }
+
+    try {
+      const catRes = await api.get('/productos/categorias');
+      setCategories(catRes.data);
+    } catch (err) {
+      console.error('Error al cargar categorías:', err);
     } finally {
       setLoading(false);
     }
@@ -373,7 +379,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="full-width-container animate-fadein space-y-6">
+    <div className="full-width-container animate-fadein space-y-6 relative">
       
       {/* Header and Actions */}
       <div className="page-header-bar">
@@ -709,13 +715,15 @@ export default function ProductsPage() {
                         <tr 
                           key={p.id}
                           onContextMenu={(e) => {
+                            e.preventDefault();
+                            const container = e.currentTarget.closest('.full-width-container');
+                            const rect = container.getBoundingClientRect();
                             const menuWidth = 192;
                             const menuHeight = 90;
-                            let posX = e.clientX;
-                            let posY = e.clientY;
-                            if (posX + menuWidth > window.innerWidth) posX = window.innerWidth - menuWidth - 10;
-                            if (posY + menuHeight > window.innerHeight) posY = window.innerHeight - menuHeight - 10;
-                            e.preventDefault();
+                            let posX = e.clientX - rect.left;
+                            let posY = e.clientY - rect.top;
+                            if (posX + menuWidth > rect.width) posX = rect.width - menuWidth - 10;
+                            if (posY + menuHeight > rect.height) posY = rect.height - menuHeight - 10;
                             setContextMenu({ x: posX, y: posY, product: p });
                           }}
                           className="hover:bg-slate-50/50 transition-colors"
@@ -798,15 +806,17 @@ export default function ProductsPage() {
                         <React.Fragment key={name}>
                           <tr 
                             onContextMenu={(e) => {
-                              const menuWidth = 192;
-                              const menuHeight = 90;
-                              let posX = e.clientX;
-                              let posY = e.clientY;
-                              if (posX + menuWidth > window.innerWidth) posX = window.innerWidth - menuWidth - 10;
-                              if (posY + menuHeight > window.innerHeight) posY = window.innerHeight - menuHeight - 10;
-                              e.preventDefault();
-                              setContextMenu({ x: posX, y: posY, product: main });
-                            }}
+                               e.preventDefault();
+                               const container = e.currentTarget.closest('.full-width-container');
+                               const rect = container.getBoundingClientRect();
+                               const menuWidth = 192;
+                               const menuHeight = 90;
+                               let posX = e.clientX - rect.left;
+                               let posY = e.clientY - rect.top;
+                               if (posX + menuWidth > rect.width) posX = rect.width - menuWidth - 10;
+                               if (posY + menuHeight > rect.height) posY = rect.height - menuHeight - 10;
+                               setContextMenu({ x: posX, y: posY, product: main });
+                             }}
                             className="bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500 hover:bg-slate-100/50 transition-colors"
                           >
                             <td>
@@ -838,15 +848,17 @@ export default function ProductsPage() {
                             <tr 
                               key={p.id} 
                               onContextMenu={(e) => {
-                                const menuWidth = 192;
-                                const menuHeight = 90;
-                                let posX = e.clientX;
-                                let posY = e.clientY;
-                                if (posX + menuWidth > window.innerWidth) posX = window.innerWidth - menuWidth - 10;
-                                if (posY + menuHeight > window.innerHeight) posY = window.innerHeight - menuHeight - 10;
-                                e.preventDefault();
-                                setContextMenu({ x: posX, y: posY, product: p });
-                              }}
+                                 e.preventDefault();
+                                 const container = e.currentTarget.closest('.full-width-container');
+                                 const rect = container.getBoundingClientRect();
+                                 const menuWidth = 192;
+                                 const menuHeight = 90;
+                                 let posX = e.clientX - rect.left;
+                                 let posY = e.clientY - rect.top;
+                                 if (posX + menuWidth > rect.width) posX = rect.width - menuWidth - 10;
+                                 if (posY + menuHeight > rect.height) posY = rect.height - menuHeight - 10;
+                                 setContextMenu({ x: posX, y: posY, product: p });
+                               }}
                               className="bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200 hover:bg-slate-200/30 transition-colors"
                             >
                               <td className="pl-8">
@@ -927,38 +939,40 @@ export default function ProductsPage() {
       {contextMenu && (
         <>
           <div 
-            className="fixed inset-0 z-40 bg-transparent" 
+            className="absolute inset-0 z-40 bg-transparent" 
             onClick={() => setContextMenu(null)}
             onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); }}
           />
           <div 
-            className="fixed bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-1.5 w-48 z-50 animate-fadeIn"
+            className="absolute bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl shadow-xl py-1.5 w-48 z-50 animate-fadeIn"
             style={{ 
               top: contextMenu.y, 
               left: contextMenu.x,
             }}
           >
-            <button 
+            <div 
+              role="button"
               onClick={() => {
                 handleViewKardex(contextMenu.product);
                 setContextMenu(null);
               }}
-              className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2 transition-colors"
+              className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-205 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-2.5 transition-colors cursor-pointer select-none"
             >
-              <ClipboardList size={14} className="text-slate-400" />
-              Ver Kardex
-            </button>
+              <ClipboardList size={15} className="text-slate-400 dark:text-slate-500" />
+              <span>Ver Kardex</span>
+            </div>
             {hasPermission('catalogo_crear') && (
-              <button 
+              <div 
+                role="button"
                 onClick={() => {
                   handleCloneVariant(contextMenu.product);
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-600 dark:text-indigo-450 hover:bg-indigo-50/30 dark:hover:bg-slate-800/50 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800 transition-colors"
+                className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-650 dark:text-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 flex items-center gap-2.5 border-t border-slate-100 dark:border-slate-800 transition-colors cursor-pointer select-none"
               >
-                <Copy size={14} className="text-indigo-400" />
-                Agregar Variante
-              </button>
+                <Copy size={15} className="text-indigo-400" />
+                <span>Agregar Variante</span>
+              </div>
             )}
           </div>
         </>
