@@ -325,13 +325,13 @@ export default function ProductsPage() {
                   <tr>
                     <th>Fecha y Hora</th>
                     <th>Sucursal</th>
-                    <th>Variante / SKU</th>
+                    <th>Operador</th>
                     <th className="text-center">Operación</th>
                     <th className="text-right">Cantidad</th>
                     <th className="text-right">Saldo Anterior</th>
                     <th className="text-right">Saldo Resultante</th>
-                    <th>Usuario Responsable</th>
                     <th>Motivo / Referencia</th>
+                    <th className="text-right">Precio / Costo Unitario</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -343,19 +343,12 @@ export default function ProductsPage() {
                       <td className="font-semibold text-slate-700 dark:text-slate-300">
                         {m.sucursalNombre}
                       </td>
-                      <td>
-                        <div className="flex flex-col">
-                          {m.sku && <span className="font-mono text-[10px] text-slate-400">{m.sku}</span>}
-                          {m.variacionDetalle && Object.keys(m.variacionDetalle).length > 0 && (
-                            <span className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">
-                              {Object.entries(m.variacionDetalle).map(([k, v]) => `${k}:${v}`).join(', ')}
-                            </span>
-                          )}
-                        </div>
+                      <td className="text-slate-650 dark:text-slate-350 font-semibold">
+                        {m.usuarioNombre}
                       </td>
                       <td className="text-center">
                         <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-md border ${getBadgeClass(m.tipo)}`}>
-                          {m.tipo}
+                          {m.tipo === 'INGRESO' ? 'Compra' : m.tipo === 'EGRESO' ? 'Venta' : m.tipo === 'TRANSFERENCIA' ? 'Transferencia' : m.tipo === 'AJUSTE' ? 'Ajuste' : m.tipo}
                         </span>
                       </td>
                       <td className={`text-right font-bold ${m.cantidadDelta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
@@ -363,9 +356,11 @@ export default function ProductsPage() {
                       </td>
                       <td className="text-right text-slate-500 font-semibold">{m.stockAnterior}</td>
                       <td className="text-right text-slate-700 dark:text-slate-300 font-black">{m.stockResultante}</td>
-                      <td className="text-slate-600 dark:text-slate-400">{m.usuarioNombre}</td>
                       <td className="max-w-[200px] truncate text-slate-500" title={m.motivo}>
                         {m.motivo || '-'}
+                      </td>
+                      <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                        Bs {Number(m.costoUnitario || 0).toFixed(2)}
                       </td>
                     </tr>
                   ))}
