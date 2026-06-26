@@ -35,6 +35,8 @@ export default function ProductsPage() {
   const [kardexProduct, setKardexProduct] = useState(null);
   const [kardexMovements, setKardexMovements] = useState([]);
   const [loadingKardex, setLoadingKardex] = useState(false);
+  const [kardexStartDate, setKardexStartDate] = useState('');
+  const [kardexEndDate, setKardexEndDate] = useState('');
 
   const handleViewKardex = async (product) => {
     setKardexProductId(product.id);
@@ -281,6 +283,20 @@ export default function ProductsPage() {
       }
     };
 
+    const filteredKardexMovements = kardexMovements.filter(m => {
+      if (!m.fecha) return true;
+      const itemDate = new Date(m.fecha).getTime();
+      if (kardexStartDate) {
+        const start = new Date(`${kardexStartDate}T00:00:00`).getTime();
+        if (itemDate < start) return false;
+      }
+      if (kardexEndDate) {
+        const end = new Date(`${kardexEndDate}T23:59:59`).getTime();
+        if (itemDate > end) return false;
+      }
+      return true;
+    });
+
     return (
       <div className="full-width-container animate-fadein space-y-6">
         {/* Header bar */}
@@ -291,6 +307,8 @@ export default function ProductsPage() {
                 setKardexProductId(null);
                 setKardexProduct(null);
                 setKardexMovements([]);
+                setKardexStartDate('');
+                setKardexEndDate('');
               }}
               className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all shadow-sm flex items-center justify-center cursor-pointer border-none"
               title="Volver al Catálogo"
@@ -302,6 +320,42 @@ export default function ProductsPage() {
               <p>Historial completo de movimientos de: <b>{kardexProduct.name}</b> {kardexProduct.sku ? `(SKU: ${kardexProduct.sku})` : ''}</p>
             </div>
           </div>
+        </div>
+
+        {/* Date Filter Bar */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap items-center gap-4 animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filtrar por Fecha:</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500">Desde:</label>
+              <input 
+                type="date" 
+                value={kardexStartDate} 
+                onChange={e => setKardexStartDate(e.target.value)} 
+                className="h-[38px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500">Hasta:</label>
+              <input 
+                type="date" 
+                value={kardexEndDate} 
+                onChange={e => setKardexEndDate(e.target.value)} 
+                className="h-[38px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+              />
+            </div>
+          </div>
+          {(kardexStartDate || kardexEndDate) && (
+            <button 
+              type="button"
+              onClick={() => { setKardexStartDate(''); setKardexEndDate(''); }}
+              className="text-xs font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider cursor-pointer transition-colors bg-transparent border-none p-0 h-auto self-center flex items-center"
+            >
+              Limpiar Filtro
+            </button>
+          )}
         </div>
 
         {/* Content Table */}
@@ -320,48 +374,57 @@ export default function ProductsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="table-premium">
-                <thead>
-                  <tr>
-                    <th>Fecha y Hora</th>
-                    <th>Sucursal</th>
-                    <th>Operador</th>
-                    <th className="text-center">Operación</th>
-                    <th className="text-right">Cantidad</th>
-                    <th className="text-right">Saldo Anterior</th>
-                    <th className="text-right">Saldo Resultante</th>
-                    <th className="text-right">Precio / Costo Unitario</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {kardexMovements.map((m) => (
-                    <tr key={m.id}>
-                      <td className="whitespace-nowrap font-medium text-slate-600 dark:text-slate-400">
-                        {formatDate(m.fecha)}
-                      </td>
-                      <td className="font-semibold text-slate-700 dark:text-slate-300">
-                        {m.sucursalNombre}
-                      </td>
-                      <td className="text-slate-650 dark:text-slate-350 font-semibold">
-                        {m.usuarioNombre}
-                      </td>
-                      <td className="text-center">
-                        <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-md border ${getBadgeClass(m.tipo)}`}>
-                          {m.tipo === 'INGRESO' ? 'Compra' : m.tipo === 'EGRESO' ? 'Venta' : m.tipo === 'TRANSFERENCIA' ? 'Transferencia' : m.tipo === 'AJUSTE' ? 'Ajuste' : m.tipo}
-                        </span>
-                      </td>
-                      <td className={`text-right font-bold ${m.cantidadDelta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                        {m.cantidadDelta > 0 ? `+${m.cantidadDelta}` : m.cantidadDelta}
-                      </td>
-                      <td className="text-right text-slate-500 font-semibold">{m.stockAnterior}</td>
-                      <td className="text-right text-slate-700 dark:text-slate-300 font-black">{m.stockResultante}</td>
-                      <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
-                        Bs {Number(m.costoUnitario || 0).toFixed(2)}
-                      </td>
+              {filteredKardexMovements.length === 0 ? (
+                <div className="py-16 text-center text-slate-400 font-medium">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <ClipboardList size={28} className="text-slate-300" />
+                    <span>No hay movimientos registrados para este artículo en el rango de fechas seleccionado.</span>
+                  </div>
+                </div>
+              ) : (
+                <table className="table-premium">
+                  <thead>
+                    <tr>
+                      <th>Fecha y Hora</th>
+                      <th>Sucursal</th>
+                      <th>Operador</th>
+                      <th className="text-center">Operación</th>
+                      <th className="text-right">Cantidad</th>
+                      <th className="text-right">Saldo Anterior</th>
+                      <th className="text-right">Saldo Resultante</th>
+                      <th className="text-right">Precio / Costo Unitario</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredKardexMovements.map((m) => (
+                      <tr key={m.id}>
+                        <td className="whitespace-nowrap font-medium text-slate-600 dark:text-slate-400">
+                          {formatDate(m.fecha)}
+                        </td>
+                        <td className="font-semibold text-slate-700 dark:text-slate-300">
+                          {m.sucursalNombre}
+                        </td>
+                        <td className="text-slate-650 dark:text-slate-350 font-semibold">
+                          {m.usuarioNombre}
+                        </td>
+                        <td className="text-center">
+                          <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-md border ${getBadgeClass(m.tipo)}`}>
+                            {m.tipo === 'INGRESO' ? 'Compra' : m.tipo === 'EGRESO' ? 'Venta' : m.tipo === 'TRANSFERENCIA' ? 'Transferencia' : m.tipo === 'AJUSTE' ? 'Ajuste' : m.tipo}
+                          </span>
+                        </td>
+                        <td className={`text-right font-bold ${m.cantidadDelta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                          {m.cantidadDelta > 0 ? `+${m.cantidadDelta}` : m.cantidadDelta}
+                        </td>
+                        <td className="text-right text-slate-500 font-semibold">{m.stockAnterior}</td>
+                        <td className="text-right text-slate-700 dark:text-slate-300 font-black">{m.stockResultante}</td>
+                        <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                          Bs {Number(m.costoUnitario || 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           )}
         </div>
