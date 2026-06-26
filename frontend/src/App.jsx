@@ -8,6 +8,7 @@ import StockPage from './pages/StockPage';
 import SalesPage from './pages/SalesPage';
 import AuditReportsPage from './pages/AuditReportsPage';
 import ProductsPage from './pages/ProductsPage';
+import CategoriesPage from './pages/CategoriesPage';
 import SucursalesPage from './pages/SucursalesPage';
 import UsersPage from './pages/UsersPage';
 import PermissionsPage from './pages/PermissionsPage';
@@ -156,13 +157,16 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
           )}
 
           {hasPerm('catalogo.ver') && (
-            <NavItem to="/providers"   icon={Users}      label="Proveedores"        active={p === '/providers'} isOpen={isOpen} />
+            <>
+              <NavItem to="/providers"   icon={Users}      label="Proveedores"        active={p === '/providers'} isOpen={isOpen} />
+              <NavItem to="/categories"  icon={Tag}        label="Categorías"         active={p === '/categories'} isOpen={isOpen} />
+            </>
           )}
           {hasPerm('sucursales.ver') && (
             <NavItem to="/sucursales"  icon={Store}      label="Sucursales"         active={p === '/sucursales'} isOpen={isOpen} />
           )}
           {hasPerm('catalogo.ver') && (
-            <NavItem to="/products"    icon={Tag}        label="Catálogo"           active={p === '/products'} isOpen={isOpen} />
+            <NavItem to="/products"    icon={Package}    label="Catálogo"           active={p === '/products'} isOpen={isOpen} />
           )}
           {hasPerm('sourcing.ver') && (
             <NavItem to="/sourcing"    icon={ShoppingCart} label="Lotes"            active={p === '/sourcing'} isOpen={isOpen} />
@@ -356,6 +360,7 @@ function App() {
                         <Routes location={location} key={location.pathname}>
                           <Route path="/"              element={<PageTransition>{userRole === 'SUPER_ADMIN' ? <Navigate to="/admin-console" replace /> : (userRole === 'VENDEDOR' ? <Navigate to="/pos" replace /> : <DashboardPage key={authToken} />)}</PageTransition>} />
                           <Route path="/providers"     element={<PageTransition><ProvidersPage     key={authToken} /></PageTransition>} />
+                          <Route path="/categories"    element={<PageTransition><CategoriesPage    key={authToken} /></PageTransition>} />
                           <Route path="/sucursales"    element={<PageTransition><SucursalesPage    key={authToken} /></PageTransition>} />
                           <Route path="/products"      element={<PageTransition><ProductsPage      key={authToken} /></PageTransition>} />
                           <Route path="/sourcing"      element={<PageTransition><SourcingPage      key={authToken} /></PageTransition>} />

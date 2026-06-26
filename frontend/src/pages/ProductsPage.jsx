@@ -16,6 +16,7 @@ const CATEGORY_ATTRIBUTES = {
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [providers, setProviders] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -26,6 +27,7 @@ export default function ProductsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('ALL');
+  const [contextMenu, setContextMenu] = useState(null);
   const toast = useToast();
   const [expandedProducts, setExpandedProducts] = useState({});
 
@@ -128,12 +130,14 @@ export default function ProductsPage() {
 
   const fetchData = async () => {
     try {
-      const [prodRes, provRes] = await Promise.all([
+      const [prodRes, provRes, catRes] = await Promise.all([
         api.get('/productos'),
-        api.get('/proveedores')
+        api.get('/proveedores'),
+        api.get('/productos/categorias')
       ]);
       setProducts(prodRes.data);
       setProviders(provRes.data);
+      setCategories(catRes.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -225,7 +229,7 @@ export default function ProductsPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '', attributes: {} });
+    setFormData({ name: '', sku: '', proveedor_id: '', category: categories[0]?.nombre || 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '', attributes: {} });
     setEditingId(null);
     setShowForm(false);
   };
@@ -486,20 +490,12 @@ export default function ProductsPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="prod-category">Categoría Global *</label>
+                <label htmlFor="prod-category">Categoría *</label>
                 <select id="prod-category" required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value, attributes: {}})}>
-                  <option value="Abarrotes y Alimentos">Abarrotes y Alimentos</option>
-                  <option value="Bebidas">Bebidas</option>
-                  <option value="Ropa y Moda">Ropa y Moda</option>
-                  <option value="Zapatos y Calzado">Zapatos y Calzado</option>
-                  <option value="Belleza y Cuidado Personal">Belleza y Cuidado Personal</option>
-                  <option value="Joyería y Relojes">Joyería y Relojes</option>
-                  <option value="Juguetes y Niños">Juguetes y Niños</option>
-                  <option value="Hogar y Decoración">Hogar y Decoración</option>
-                  <option value="Electrónica y Tecnología">Electrónica y Tecnología</option>
-                  <option value="Ferretería y Construcción">Ferretería y Construcción</option>
-                  <option value="Deportes y Aire Libre">Deportes y Aire Libre</option>
-                  <option value="Otros">Otros</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.nombre}>{cat.nombre}</option>
+                  ))}
+                  {categories.length === 0 && <option value="Otros">Otros</option>}
                 </select>
               </div>
 
@@ -635,19 +631,9 @@ export default function ProductsPage() {
               className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
             >
               <option value="ALL">-- Todas las categorías --</option>
-              <option value="Abarrotes y Alimentos">Abarrotes y Alimentos</option>
-              <option value="Bebidas">Bebidas</option>
-              <option value="Ropa y Moda">Ropa y Moda</option>
-              <option value="Zapatos y Calzado">Zapatos y Calzado</option>
-              <option value="Belleza y Cuidado Personal">Belleza y Cuidado Personal</option>
-              <option value="Joyería y Relojes">Joyería y Relojes</option>
-              <option value="Juguetes y Niños">Juguetes y Niños</option>
-              <option value="Hogar y Decoración">Hogar y Decoración</option>
-              <option value="Electrónica y Tecnología">Electrónica y Tecnología</option>
-              <option value="Ferretería y Construcción">Ferretería y Construcción</option>
-              <option value="Deportes y Aire Libre">Deportes y Aire Libre</option>
-              <option value="Entretenimiento y Ocio">Entretenimiento y Ocio</option>
-              <option value="Otros">Otros</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.nombre}>{cat.nombre}</option>
+              ))}
             </select>
           </div>
           <div className="w-full md:w-auto flex justify-end mt-2 md:mt-0">
@@ -720,7 +706,20 @@ export default function ProductsPage() {
                       // Single product row (no variants)
                       const p = variants[0];
                       return (
-                        <tr key={p.id}>
+                        <tr 
+                          key={p.id}
+                          onContextMenu={(e) => {
+                            const menuWidth = 192;
+                            const menuHeight = 90;
+                            let posX = e.clientX;
+                            let posY = e.clientY;
+                            if (posX + menuWidth > window.innerWidth) posX = window.innerWidth - menuWidth - 10;
+                            if (posY + menuHeight > window.innerHeight) posY = window.innerHeight - menuHeight - 10;
+                            e.preventDefault();
+                            setContextMenu({ x: posX, y: posY, product: p });
+                          }}
+                          className="hover:bg-slate-50/50 transition-colors"
+                        >
                           <td>
                             <div className="flex flex-col items-start gap-1">
                               <span className="text-sm font-semibold text-slate-800">{p.name}</span>
@@ -752,22 +751,6 @@ export default function ProductsPage() {
                           <td className="text-right text-sm text-slate-800">Bs {Number(p.precioVenta).toFixed(2)}</td>
                           <td className="text-center">
                             <div className="flex items-center justify-center gap-1.5">
-                              <button 
-                                onClick={() => handleViewKardex(p)} 
-                                className="btn-premium-icon text-slate-600 dark:text-slate-400"
-                                title="Ver Kardex"
-                              >
-                                <ClipboardList size={15} />
-                              </button>
-                              {hasPermission('catalogo_crear') && (
-                                <button 
-                                  onClick={() => handleCloneVariant(p)} 
-                                  className="btn-premium-icon text-indigo-600 dark:text-indigo-400"
-                                  title="Agregar Variante"
-                                >
-                                  <Copy size={15} />
-                                </button>
-                              )}
                               {hasPermission('catalogo_editar') && (
                                 <button 
                                   onClick={() => handleEdit(p)} 
@@ -813,7 +796,19 @@ export default function ProductsPage() {
 
                       return (
                         <React.Fragment key={name}>
-                          <tr className="bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500">
+                          <tr 
+                            onContextMenu={(e) => {
+                              const menuWidth = 192;
+                              const menuHeight = 90;
+                              let posX = e.clientX;
+                              let posY = e.clientY;
+                              if (posX + menuWidth > window.innerWidth) posX = window.innerWidth - menuWidth - 10;
+                              if (posY + menuHeight > window.innerHeight) posY = window.innerHeight - menuHeight - 10;
+                              e.preventDefault();
+                              setContextMenu({ x: posX, y: posY, product: main });
+                            }}
+                            className="bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500 hover:bg-slate-100/50 transition-colors"
+                          >
                             <td>
                               <div 
                                 role="button" 
@@ -835,29 +830,25 @@ export default function ProductsPage() {
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayCosto}</td>
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayVenta}</td>
                             <td className="text-center">
-                              <div className="flex items-center justify-center gap-1.5">
-                                <button 
-                                  onClick={() => handleViewKardex(main)} 
-                                  className="btn-premium-icon text-slate-600 dark:text-slate-400"
-                                  title="Ver Kardex"
-                                >
-                                  <ClipboardList size={15} />
-                                </button>
-                                {hasPermission('catalogo_crear') && (
-                                  <button 
-                                    onClick={() => handleCloneVariant(main)} 
-                                    className="btn-premium-icon text-indigo-600 dark:text-indigo-400"
-                                    title="Agregar Variante"
-                                  >
-                                    <Copy size={15} />
-                                  </button>
-                                )}
-                              </div>
+                              {/* Acciones movidas al menú de clic derecho */}
                             </td>
                           </tr>
 
                           {isExpanded && variants.map(p => (
-                            <tr key={p.id} className="bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200">
+                            <tr 
+                              key={p.id} 
+                              onContextMenu={(e) => {
+                                const menuWidth = 192;
+                                const menuHeight = 90;
+                                let posX = e.clientX;
+                                let posY = e.clientY;
+                                if (posX + menuWidth > window.innerWidth) posX = window.innerWidth - menuWidth - 10;
+                                if (posY + menuHeight > window.innerHeight) posY = window.innerHeight - menuHeight - 10;
+                                e.preventDefault();
+                                setContextMenu({ x: posX, y: posY, product: p });
+                              }}
+                              className="bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200 hover:bg-slate-200/30 transition-colors"
+                            >
                               <td className="pl-8">
                                 <div className="flex items-center gap-2">
                                   <span className="text-slate-300 dark:text-slate-700 font-mono">└─</span>
@@ -892,13 +883,6 @@ export default function ProductsPage() {
                               <td className="text-right text-xs text-slate-800 font-mono font-bold">Bs {Number(p.precioVenta).toFixed(2)}</td>
                               <td className="text-center">
                                 <div className="flex items-center justify-center gap-1.5">
-                                  <button 
-                                    onClick={() => handleViewKardex(p)} 
-                                    className="btn-premium-icon text-slate-600 dark:text-slate-400"
-                                    title="Ver Kardex"
-                                  >
-                                    <ClipboardList size={15} />
-                                  </button>
                                   {hasPermission('catalogo_editar') && (
                                     <button 
                                       onClick={() => handleEdit(p)} 
@@ -939,6 +923,46 @@ export default function ProductsPage() {
         onConfirm={proceedDelete}
         onCancel={() => setConfirmDelete(null)}
       />
+
+      {contextMenu && (
+        <>
+          <div 
+            className="fixed inset-0 z-40 bg-transparent" 
+            onClick={() => setContextMenu(null)}
+            onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); }}
+          />
+          <div 
+            className="fixed bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl py-1.5 w-48 z-50 animate-fadeIn"
+            style={{ 
+              top: contextMenu.y, 
+              left: contextMenu.x,
+            }}
+          >
+            <button 
+              onClick={() => {
+                handleViewKardex(contextMenu.product);
+                setContextMenu(null);
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2 transition-colors"
+            >
+              <ClipboardList size={14} className="text-slate-400" />
+              Ver Kardex
+            </button>
+            {hasPermission('catalogo_crear') && (
+              <button 
+                onClick={() => {
+                  handleCloneVariant(contextMenu.product);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-600 dark:text-indigo-450 hover:bg-indigo-50/30 dark:hover:bg-slate-800/50 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800 transition-colors"
+              >
+                <Copy size={14} className="text-indigo-400" />
+                Agregar Variante
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
