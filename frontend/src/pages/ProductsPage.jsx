@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api, { getBackendUrl } from '../api';
-import { PackageSearch, Plus, X, Loader2, Edit2, Trash2, AlertTriangle, Tag, Search, Copy, ChevronRight, ChevronDown } from 'lucide-react';
+import { PackageSearch, Plus, X, Loader2, Edit2, Trash2, AlertTriangle, Tag, Search, Copy, ChevronRight, ChevronDown, ClipboardList, ArrowLeft } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
-import KardexModal from '../components/KardexModal';
 
 const CATEGORY_ATTRIBUTES = {
   "Bebidas": [{ key: "sabor", label: "Sabor" }, { key: "volumen_ml", label: "Volumen (ML)" }],
@@ -30,25 +29,24 @@ export default function ProductsPage() {
   const toast = useToast();
   const [expandedProducts, setExpandedProducts] = useState({});
 
-  const [contextMenu, setContextMenu] = useState(null); // { x, y, productId, productName }
-  const [showKardexModal, setShowKardexModal] = useState(false);
   const [kardexProductId, setKardexProductId] = useState(null);
-  const [kardexProductName, setKardexProductName] = useState('');
+  const [kardexProduct, setKardexProduct] = useState(null);
+  const [kardexMovements, setKardexMovements] = useState([]);
+  const [loadingKardex, setLoadingKardex] = useState(false);
 
-  useEffect(() => {
-    const handleCloseMenu = () => setContextMenu(null);
-    window.addEventListener('click', handleCloseMenu);
-    return () => window.removeEventListener('click', handleCloseMenu);
-  }, []);
-
-  const handleContextMenu = (e, product) => {
-    e.preventDefault();
-    setContextMenu({
-      x: e.clientX,
-      y: e.clientY,
-      productId: product.id,
-      productName: `${product.name} ${product.sku ? `(SKU: ${product.sku})` : ''}`
-    });
+  const handleViewKardex = async (product) => {
+    setKardexProductId(product.id);
+    setKardexProduct(product);
+    setLoadingKardex(true);
+    try {
+      const res = await api.get(`/stock/kardex/${product.id}`);
+      setKardexMovements(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al cargar movimientos del Kardex');
+    } finally {
+      setLoadingKardex(false);
+    }
   };
 
   const toggleExpand = (name) => {
@@ -241,6 +239,134 @@ export default function ProductsPage() {
 
   const currentMargin = calculateMargin(formData.precioCosto, formData.precioVenta);
   const isLoss = currentMargin < 0;
+
+  if (kardexProductId && kardexProduct) {
+    const getBadgeClass = (tipo) => {
+      switch (tipo) {
+        case 'INGRESO':
+          return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/30';
+        case 'EGRESO':
+          return 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-800/30';
+        case 'TRANSFERENCIA':
+          return 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-800/30';
+        case 'AJUSTE':
+          return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-800/30';
+        default:
+          return 'bg-slate-50 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400 border-slate-200 dark:border-slate-800/30';
+      }
+    };
+
+    const formatDate = (dateStr) => {
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return dateStr;
+      }
+    };
+
+    return (
+      <div className="full-width-container animate-fadein space-y-6">
+        {/* Header bar */}
+        <div className="page-header-bar">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                setKardexProductId(null);
+                setKardexProduct(null);
+                setKardexMovements([]);
+              }}
+              className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all shadow-sm flex items-center justify-center cursor-pointer border-none"
+              title="Volver al Catálogo"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1>Kardex de Inventario</h1>
+              <p>Historial completo de movimientos de: <b>{kardexProduct.name}</b> {kardexProduct.sku ? `(SKU: ${kardexProduct.sku})` : ''}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Table */}
+        <div className="table-premium-wrapper">
+          {loadingKardex ? (
+            <div className="py-20 text-center flex flex-col items-center justify-center">
+              <Loader2 className="animate-spin text-indigo-600 mb-2" size={28} />
+              <p className="text-xs text-slate-500 font-semibold">Cargando movimientos del Kardex...</p>
+            </div>
+          ) : kardexMovements.length === 0 ? (
+            <div className="py-16 text-center text-slate-400 font-medium">
+              <div className="flex flex-col items-center justify-center gap-2">
+                <ClipboardList size={28} className="text-slate-300" />
+                <span>No se registraron movimientos para este artículo en el Kardex.</span>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table-premium">
+                <thead>
+                  <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Sucursal</th>
+                    <th>Variante / SKU</th>
+                    <th className="text-center">Operación</th>
+                    <th className="text-right">Cantidad</th>
+                    <th className="text-right">Saldo Anterior</th>
+                    <th className="text-right">Saldo Resultante</th>
+                    <th>Usuario Responsable</th>
+                    <th>Motivo / Referencia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kardexMovements.map((m) => (
+                    <tr key={m.id}>
+                      <td className="whitespace-nowrap font-medium text-slate-600 dark:text-slate-400">
+                        {formatDate(m.fecha)}
+                      </td>
+                      <td className="font-semibold text-slate-700 dark:text-slate-300">
+                        {m.sucursalNombre}
+                      </td>
+                      <td>
+                        <div className="flex flex-col">
+                          {m.sku && <span className="font-mono text-[10px] text-slate-400">{m.sku}</span>}
+                          {m.variacionDetalle && Object.keys(m.variacionDetalle).length > 0 && (
+                            <span className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">
+                              {Object.entries(m.variacionDetalle).map(([k, v]) => `${k}:${v}`).join(', ')}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="text-center">
+                        <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-md border ${getBadgeClass(m.tipo)}`}>
+                          {m.tipo}
+                        </span>
+                      </td>
+                      <td className={`text-right font-bold ${m.cantidadDelta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                        {m.cantidadDelta > 0 ? `+${m.cantidadDelta}` : m.cantidadDelta}
+                      </td>
+                      <td className="text-right text-slate-500 font-semibold">{m.stockAnterior}</td>
+                      <td className="text-right text-slate-700 dark:text-slate-300 font-black">{m.stockResultante}</td>
+                      <td className="text-slate-600 dark:text-slate-400">{m.usuarioNombre}</td>
+                      <td className="max-w-[200px] truncate text-slate-500" title={m.motivo}>
+                        {m.motivo || '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="full-width-container animate-fadein space-y-6">
@@ -594,7 +720,7 @@ export default function ProductsPage() {
                       // Single product row (no variants)
                       const p = variants[0];
                       return (
-                        <tr key={p.id} onContextMenu={(e) => handleContextMenu(e, p)}>
+                        <tr key={p.id}>
                           <td>
                             <div className="flex flex-col items-start gap-1">
                               <span className="text-sm font-semibold text-slate-800">{p.name}</span>
@@ -626,6 +752,13 @@ export default function ProductsPage() {
                           <td className="text-right text-sm text-slate-800">Bs {Number(p.precioVenta).toFixed(2)}</td>
                           <td className="text-center">
                             <div className="flex items-center justify-center gap-1.5">
+                              <button 
+                                onClick={() => handleViewKardex(p)} 
+                                className="btn-premium-icon text-slate-600 dark:text-slate-400"
+                                title="Ver Kardex"
+                              >
+                                <ClipboardList size={15} />
+                              </button>
                               {hasPermission('catalogo_crear') && (
                                 <button 
                                   onClick={() => handleCloneVariant(p)} 
@@ -680,7 +813,7 @@ export default function ProductsPage() {
 
                       return (
                         <React.Fragment key={name}>
-                          <tr className="bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500" onContextMenu={(e) => handleContextMenu(e, main)}>
+                          <tr className="bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500">
                             <td>
                               <div 
                                 role="button" 
@@ -702,20 +835,29 @@ export default function ProductsPage() {
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayCosto}</td>
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayVenta}</td>
                             <td className="text-center">
-                              {hasPermission('catalogo_crear') && (
+                              <div className="flex items-center justify-center gap-1.5">
                                 <button 
-                                  onClick={() => handleCloneVariant(main)} 
-                                  className="btn-premium-icon text-indigo-600 dark:text-indigo-400"
-                                  title="Agregar Variante"
+                                  onClick={() => handleViewKardex(main)} 
+                                  className="btn-premium-icon text-slate-600 dark:text-slate-400"
+                                  title="Ver Kardex"
                                 >
-                                  <Copy size={15} />
+                                  <ClipboardList size={15} />
                                 </button>
-                              )}
+                                {hasPermission('catalogo_crear') && (
+                                  <button 
+                                    onClick={() => handleCloneVariant(main)} 
+                                    className="btn-premium-icon text-indigo-600 dark:text-indigo-400"
+                                    title="Agregar Variante"
+                                  >
+                                    <Copy size={15} />
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
 
                           {isExpanded && variants.map(p => (
-                            <tr key={p.id} className="bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200" onContextMenu={(e) => handleContextMenu(e, p)}>
+                            <tr key={p.id} className="bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200">
                               <td className="pl-8">
                                 <div className="flex items-center gap-2">
                                   <span className="text-slate-300 dark:text-slate-700 font-mono">└─</span>
@@ -750,6 +892,13 @@ export default function ProductsPage() {
                               <td className="text-right text-xs text-slate-800 font-mono font-bold">Bs {Number(p.precioVenta).toFixed(2)}</td>
                               <td className="text-center">
                                 <div className="flex items-center justify-center gap-1.5">
+                                  <button 
+                                    onClick={() => handleViewKardex(p)} 
+                                    className="btn-premium-icon text-slate-600 dark:text-slate-400"
+                                    title="Ver Kardex"
+                                  >
+                                    <ClipboardList size={15} />
+                                  </button>
                                   {hasPermission('catalogo_editar') && (
                                     <button 
                                       onClick={() => handleEdit(p)} 
@@ -789,33 +938,6 @@ export default function ProductsPage() {
         message="¿Estás seguro que deseas dar de baja permanentemente este producto del catálogo comercial? Esta acción no puede revertirse."
         onConfirm={proceedDelete}
         onCancel={() => setConfirmDelete(null)}
-      />
-
-      {contextMenu && (
-        <div 
-          className="fixed bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-xl py-1.5 z-[99999]"
-          style={{ top: contextMenu.y, left: contextMenu.x }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => {
-              setKardexProductId(contextMenu.productId);
-              setKardexProductName(contextMenu.productName);
-              setShowKardexModal(true);
-              setContextMenu(null);
-            }}
-            className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-none bg-transparent cursor-pointer"
-          >
-            Ver Kardex
-          </button>
-        </div>
-      )}
-
-      <KardexModal
-        isOpen={showKardexModal}
-        onClose={() => setShowKardexModal(false)}
-        productId={kardexProductId}
-        productName={kardexProductName}
       />
     </div>
   );
