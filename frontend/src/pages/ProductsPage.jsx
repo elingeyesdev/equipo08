@@ -330,7 +330,6 @@ export default function ProductsPage() {
                     <th className="text-right">Cantidad</th>
                     <th className="text-right">Saldo Anterior</th>
                     <th className="text-right">Saldo Resultante</th>
-                    <th>Motivo / Referencia</th>
                     <th className="text-right">Precio / Costo Unitario</th>
                   </tr>
                 </thead>
@@ -356,9 +355,6 @@ export default function ProductsPage() {
                       </td>
                       <td className="text-right text-slate-500 font-semibold">{m.stockAnterior}</td>
                       <td className="text-right text-slate-700 dark:text-slate-300 font-black">{m.stockResultante}</td>
-                      <td className="max-w-[200px] truncate text-slate-500" title={m.motivo}>
-                        {m.motivo || '-'}
-                      </td>
                       <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
                         Bs {Number(m.costoUnitario || 0).toFixed(2)}
                       </td>
