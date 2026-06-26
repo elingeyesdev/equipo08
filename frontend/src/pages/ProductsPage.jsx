@@ -944,7 +944,7 @@ export default function ProductsPage() {
             onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); }}
           />
           <div 
-            className="absolute bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl shadow-xl py-1.5 w-48 z-50 animate-fadeIn"
+            className="absolute bg-white dark:bg-slate-900 border border-slate-950/30 dark:border-slate-800 rounded-xl shadow-xl py-1.5 w-48 z-50 animate-fadeIn"
             style={{ 
               top: contextMenu.y, 
               left: contextMenu.x,
@@ -968,7 +968,7 @@ export default function ProductsPage() {
                   handleCloneVariant(contextMenu.product);
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-650 dark:text-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 flex items-center gap-2.5 border-t border-slate-100 dark:border-slate-800 transition-colors cursor-pointer select-none"
+                className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-650 dark:text-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 flex items-center gap-2.5 border-t border-slate-950/10 dark:border-slate-800 transition-colors cursor-pointer select-none"
               >
                 <Copy size={15} className="text-indigo-400" />
                 <span>Agregar Variante</span>
