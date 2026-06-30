@@ -15,6 +15,17 @@
         android:padding="16dp"
         android:background="?android:attr/selectableItemBackground">
 
+        <!-- Top Section: Expand indicator and name -->
+        <ImageView
+            android:id="@+id/ivChevron"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_chevron_down"
+            app:tint="#64748b"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/tvNombre" />
+
         <TextView
             android:id="@+id/tvNombre"
             android:layout_width="0dp"
@@ -23,36 +34,26 @@
             android:textColor="#0f172a"
             android:textSize="17sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/tvVariantCount"
+            app:layout_constraintStart_toEndOf="@+id/ivChevron"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/tvSku"
+            android:id="@+id/tvVariantCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SKU: N/A"
-            android:background="#f1f5f9"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="2dp"
-            android:textColor="#475569"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:layout_marginTop="6dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvNombre" />
-
-        <TextView
-            android:id="@+id/tvVariant"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Variante"
+            android:text="2 variantes"
             android:textColor="@color/accent_color"
-            android:textSize="13sp"
-            android:layout_marginTop="6dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:background="#e6f4ea"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:layout_marginStart="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvSku" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/tvNombre" />
 
         <TextView
             android:id="@+id/tvProveedor"
@@ -61,10 +62,11 @@
             android:text="Proveedor"
             android:textColor="#475569"
             android:textSize="13sp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="32dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvVariant" />
+            app:layout_constraintTop_toBottomOf="@+id/tvNombre" />
 
         <View
             android:id="@+id/divider"
@@ -171,31 +173,7 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_copy"
                 app:tint="@color/accent_color"
-                android:contentDescription="Copy/Clone Variant"
-                android:layout_marginEnd="6dp" />
-
-            <ImageButton
-                android:id="@+id/btnEdit"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:padding="8dp"
-                android:scaleType="fitCenter"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_edit"
-                app:tint="#64748b"
-                android:contentDescription="Edit"
-                android:layout_marginEnd="6dp" />
-
-            <ImageButton
-                android:id="@+id/btnDelete"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:padding="8dp"
-                android:scaleType="fitCenter"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_delete"
-                app:tint="#ef4444"
-                android:contentDescription="Delete" />
+                android:contentDescription="Copy/Clone Variant" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

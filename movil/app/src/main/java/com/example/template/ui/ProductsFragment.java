@@ -149,6 +149,11 @@ public class ProductsFragment extends Fragment {
             public void onEditClick(Producto producto) {
                 editProducto(producto);
             }
+
+            @Override
+            public void onCopyClick(Producto producto) {
+                copyProducto(producto);
+            }
         });
         recyclerView.setAdapter(adapter);
 
@@ -249,6 +254,58 @@ public class ProductsFragment extends Fragment {
         }
         
         // Force attributes generation even if category selection listener doesn't fire
+        updateAttributeFields(producto.getAttributes());
+
+        // Proveedor
+        if (producto.getProveedorId() != null) {
+            for (int i = 0; i < proveedoresList.size(); i++) {
+                if (proveedoresList.get(i).getId().equals(producto.getProveedorId())) {
+                    spinnerProveedor.setSelection(i);
+                    break;
+                }
+            }
+        }
+        
+        if (!isFormVisible) {
+            toggleForm(true);
+        }
+    }
+
+    private void copyProducto(Producto producto) {
+        editingProducto = null;
+        etName.setText(producto.getName(), false);
+        etDescription.setText("");
+        etSku.setText("");
+        etPrecioCoste.setText(String.valueOf(producto.getPrecioCosto()));
+        etPrecioVenta.setText(String.valueOf(producto.getPrecioVenta()));
+        etStockMinimo.setText(String.valueOf(producto.getStockMinimo()));
+        
+        uploadedImageUrl = producto.getImagenUrl();
+        if (uploadedImageUrl != null && !uploadedImageUrl.trim().isEmpty()) {
+            ivProductPreview.setVisibility(View.VISIBLE);
+            com.example.template.utils.ImageLoader.loadImage(uploadedImageUrl, ivProductPreview);
+            tvImageStatus.setText("Imagen cargada");
+            tvRemoveProductImage.setVisibility(View.VISIBLE);
+        } else {
+            ivProductPreview.setVisibility(View.GONE);
+            tvImageStatus.setText("No se ha seleccionado imagen");
+            tvRemoveProductImage.setVisibility(View.GONE);
+        }
+        
+        btnGuardar.setText("Nuevo artículo");
+        
+        // Categoria
+        if (producto.getCategory() != null) {
+            ArrayAdapter<String> catAdapter = (ArrayAdapter<String>) spinnerCategoria.getAdapter();
+            for (int i = 0; i < catAdapter.getCount(); i++) {
+                if (catAdapter.getItem(i).equalsIgnoreCase(producto.getCategory())) {
+                    spinnerCategoria.setSelection(i);
+                    break;
+                }
+            }
+        }
+        
+        // Force attributes generation and copy attributes
         updateAttributeFields(producto.getAttributes());
 
         // Proveedor

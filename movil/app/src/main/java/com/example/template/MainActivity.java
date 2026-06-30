@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Force the system status bar color to match the header color (slate #0f172a)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_color));
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.primary_color));
         }
 
         toolbar.inflateMenu(R.menu.toolbar_menu);
@@ -262,10 +263,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
+        if (drawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
+            drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START);
         } else {
-            super.onBackPressed();
+            androidx.fragment.app.Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            if (currentFragment != null && !(currentFragment instanceof HomeFragment)) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new HomeFragment())
+                        .commit();
+                uncheckAllMenuItems(navigationView.getMenu());
+                navigationView.setCheckedItem(R.id.nav_home);
+                updateToolbarTitle("Inicio");
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 

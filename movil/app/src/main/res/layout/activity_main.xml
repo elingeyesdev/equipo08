@@ -20,7 +20,7 @@
             android:layout_height="48dp"
             android:background="@color/primary_color"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:title="OmniMall"
+            app:title="BolClick"
             app:titleTextColor="@color/white"
             app:layout_constraintTop_toTopOf="parent" />
 
