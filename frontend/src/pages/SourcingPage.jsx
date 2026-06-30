@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
-import { ShoppingCart, Plus, X, Loader2, Edit2, Trash2, Package, Search } from 'lucide-react';
+import { ShoppingCart, Plus, X, Loader2, Edit2, Trash2, Package, Search, Filter } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -197,11 +197,11 @@ export default function SourcingPage() {
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowFilters(!showFilters)} 
-            className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-              showFilters ? 'bg-white text-slate-800 border border-slate-300' : 'bg-white/20 hover:bg-white/30 text-white'
+            className={`py-2 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm border ${
+              showFilters ? 'bg-white text-slate-900 border-slate-300' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
           >
-            <Search size={18} /> {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
+            <Filter size={16} /> {showFilters ? 'Ocultar Filtros' : 'Filtrar'}
           </button>
           {hasPermission('sourcing_crear') && (
             <button
@@ -266,75 +266,49 @@ export default function SourcingPage() {
                     value={(() => {
                       const p = products.find(prod => prod.id === loteForm.producto_id);
                       if (!p) return '';
-                      return `${p.name} ${p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''}`;
+                      const formattedAttrs = p.attributes
+                        ? Object.entries(p.attributes).map(([k, v]) => {
+                            if (k === 'volumen_ml') {
+                              const num = Number(v);
+                              if (!isNaN(num)) {
+                                return num >= 1000 ? `${num / 1000}L` : `${num}ml`;
+                              }
+                            }
+                            return v;
+                          }).join(' | ')
+                        : '';
+                      return `${p.name} ${formattedAttrs ? `- ${formattedAttrs}` : p.description ? `- ${p.description}` : ''}`;
                     })()}
                   />
                 ) : (
-                  <>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        placeholder="Buscar producto por nombre, talla, color o SKU..."
-                        value={productSearchQuery}
-                        onChange={e => {
-                          setProductSearchQuery(e.target.value);
-                          setShowProductDropdown(true);
-                        }}
-                        onFocus={() => setShowProductDropdown(true)}
-                        className="w-full pr-10"
-                      />
-                      {productSearchQuery && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setProductSearchQuery('');
-                            setLoteForm({ ...loteForm, producto_id: '' });
-                          }}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors border-none p-0 cursor-pointer"
-                          title="Limpiar"
-                        >
-                          <X size={12} />
-                        </button>
-                      )}
-                    </div>
-                    {showProductDropdown && (
-                      <div className="absolute left-0 right-0 top-full mt-1.5 max-h-64 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-[100] divide-y divide-slate-100 animate-fadeIn">
-                        {(() => {
-                          const query = productSearchQuery.toLowerCase().trim();
-                          const filteredProducts = products.filter(p => {
-                            const name = (p.name || '').toLowerCase();
-                            const sku = (p.sku || '').toLowerCase();
-                            const desc = (p.description || '').toLowerCase();
-                            const attrs = p.attributes ? Object.values(p.attributes).map(v => String(v).toLowerCase()).join(' ') : '';
-                            return name.includes(query) || sku.includes(query) || desc.includes(query) || attrs.includes(query);
-                          });
-
-                          if (filteredProducts.length === 0) {
-                            return <div className="p-4 text-xs text-slate-400 text-center font-medium">No se encontraron productos</div>;
-                          }
-
-                          return filteredProducts.map(p => {
-                            const label = `${p.name} ${p.attributes && Object.keys(p.attributes).length > 0 ? `- ${Object.values(p.attributes).join(' | ')}` : p.description ? `- ${p.description}` : ''}`;
-                            return (
-                              <button
-                                key={p.id}
-                                type="button"
-                                onClick={() => {
-                                  setLoteForm({ ...loteForm, producto_id: p.id });
-                                  setProductSearchQuery(label);
-                                  setShowProductDropdown(false);
-                                }}
-                                className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors block border-none bg-white font-sans"
-                              >
-                                {label}
-                              </button>
-                            );
-                          });
-                        })()}
-                      </div>
-                    )}
-                  </>
+                  <select
+                    required
+                    value={loteForm.producto_id}
+                    onChange={e => {
+                      setLoteForm({ ...loteForm, producto_id: e.target.value });
+                    }}
+                  >
+                    <option value="">Seleccione producto...</option>
+                    {products.map(p => {
+                      const formattedAttrs = p.attributes
+                        ? Object.entries(p.attributes).map(([k, v]) => {
+                            if (k === 'volumen_ml') {
+                              const num = Number(v);
+                              if (!isNaN(num)) {
+                                return num >= 1000 ? `${num / 1000}L` : `${num}ml`;
+                              }
+                            }
+                            return v;
+                          }).join(' | ')
+                        : '';
+                      const label = `${p.name} ${formattedAttrs ? `- ${formattedAttrs}` : p.description ? `- ${p.description}` : ''}`;
+                      return (
+                        <option key={p.id} value={p.id}>
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
                 )}
               </div>
 
@@ -344,20 +318,51 @@ export default function SourcingPage() {
                   type="text"
                   readOnly
                   className="bg-slate-100 cursor-not-allowed"
-                  value={selectedProductObj?.proveedor?.name || selectedProductObj?.proveedor_id ? 'Cargando...' : 'Seleccione un producto primero'}
+                  value={(() => {
+                    if (!selectedProductObj) return 'Seleccione un producto primero';
+                    if (selectedProductObj.proveedor?.name) return selectedProductObj.proveedor.name;
+                    if (selectedProductObj.proveedor_id) {
+                      const prov = providers.find(p => p.id === selectedProductObj.proveedor_id);
+                      return prov ? prov.name : 'Proveedor no encontrado';
+                    }
+                    return 'Sin proveedor asignado';
+                  })()}
                 />
                 <span className="block mt-1 text-xs text-slate-500">Se hereda del producto en el catálogo</span>
               </div>
 
               <div className="form-group">
                 <label>Unidades Físicas (Cajas/Pzas) *</label>
-                <input type="number" min="1" required value={loteForm.cantidad} onChange={e => setLoteForm({...loteForm, cantidad: e.target.value})} />
+                <input 
+                  type="number" 
+                  min="1" 
+                  required 
+                  value={loteForm.cantidad} 
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (val.length <= 15) {
+                      setLoteForm({...loteForm, cantidad: val});
+                    }
+                  }} 
+                />
               </div>
 
               <div className="form-group">
-                <label>Costo Unitario de Compra (Bs) *</label>
-                <input type="number" min="0" step="0.01" required placeholder="Ej: 45.00" value={loteForm.costoUnitario} onChange={e => setLoteForm({...loteForm, costoUnitario: e.target.value})} />
-                <span className="block mt-1 text-xs text-slate-500">Precio que pagaste al proveedor por unidad</span>
+                <label>Costo Unitario de Compra (Bs)</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  step="0.01" 
+                  placeholder={selectedProductObj ? `Heredado: Bs. ${selectedProductObj.precioCosto}` : 'Ej: 45.00'} 
+                  value={loteForm.costoUnitario} 
+                  onChange={e => {
+                    const val = e.target.value;
+                    if (val.length <= 15) {
+                      setLoteForm({...loteForm, costoUnitario: val});
+                    }
+                  }} 
+                />
+                <span className="block mt-1 text-xs text-slate-500">Si lo dejas vacío, heredará automáticamente el costo configurado en el catálogo.</span>
               </div>
 
               {showExpirationDate && (
@@ -552,15 +557,15 @@ export default function SourcingPage() {
               </tbody>
             </table>
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 border-t border-slate-100">
-                <span className="text-xs text-slate-500">
+              <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   Mostrando página {currentPage} de {totalPages} ({filteredHistorial.length} lotes en total)
                 </span>
                 <div className="flex gap-1">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-350 dark:hover:bg-slate-700/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     Anterior
                   </button>
@@ -570,8 +575,8 @@ export default function SourcingPage() {
                       onClick={() => setCurrentPage(i + 1)}
                       className={`w-8 h-8 text-xs font-bold rounded-lg transition-all ${
                         currentPage === i + 1
-                          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-650/15'
-                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                          ? 'bg-[#184e77] dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-350 dark:hover:bg-slate-700/60'
                       }`}
                     >
                       {i + 1}
@@ -580,7 +585,7 @@ export default function SourcingPage() {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-350 dark:hover:bg-slate-700/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     Siguiente
                   </button>

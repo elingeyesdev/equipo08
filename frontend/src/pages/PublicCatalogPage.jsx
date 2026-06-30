@@ -567,13 +567,17 @@ export default function PublicCatalogPage() {
                           </div>
                         ) : null)}
                         {(selectedVariant?.description || selectedProduct.description) && (
-                          <div className="mt-4 pt-4 border-t border-[var(--border)] text-sm">
-                            {selectedVariant?.description || selectedProduct.description}
+                          <div className="mt-4 pt-4 border-t border-[var(--border)] text-xs text-[var(--txt-muted)]">
+                            <span className="font-semibold block uppercase tracking-wider mb-1">Descripción:</span>
+                            <span className="text-sm text-[var(--txt-secondary)]">{selectedVariant?.description || selectedProduct.description}</span>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <p>{selectedVariant?.description || selectedProduct.description || 'Este producto no cuenta con especificaciones adicionales.'}</p>
+                      <div>
+                        <span className="text-xs font-semibold block uppercase tracking-wider text-[var(--txt-muted)] mb-1">Descripción:</span>
+                        <p className="text-sm text-[var(--txt-secondary)]">{selectedVariant?.description || selectedProduct.description || 'Este producto no cuenta con especificaciones adicionales.'}</p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -712,7 +716,7 @@ export default function PublicCatalogPage() {
                     <span className="text-[var(--txt-secondary)] font-semibold text-sm">Total estimado</span>
                     <span className="text-xl font-black">Bs {cartTotal.toFixed(2)}</span>
                   </div>
-                  <button onClick={sendWhatsApp} className="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-sm border-none cursor-pointer">
+                  <button onClick={sendWhatsApp} className="w-full bg-[#0d1b2a] hover:bg-[#1a2e42] text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] shadow-sm border-none cursor-pointer">
                     <Send size={18} /> Confirmar por WhatsApp
                   </button>
                 </div>

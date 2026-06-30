@@ -136,8 +136,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto pb-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--txt-primary)] tracking-tight flex items-center gap-3">
-          <Settings className="text-[var(--txt-secondary)]" size={32} />
+        <h1 className="text-3xl font-bold text-[var(--txt-primary)] tracking-tight">
           Ajustes del Negocio
         </h1>
         <p className="text-[var(--txt-secondary)] font-medium mt-2">Personaliza la información principal de tu tienda.</p>
@@ -145,8 +144,8 @@ export default function SettingsPage() {
 
       <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--bg)]">
-          <h2 className="text-base font-bold text-[var(--txt-primary)] flex items-center gap-2">
-            <Store size={18} className="text-[var(--txt-secondary)]" /> Perfil Comercial
+          <h2 className="text-base font-bold text-[var(--txt-primary)]">
+            Perfil Comercial
           </h2>
         </div>
         

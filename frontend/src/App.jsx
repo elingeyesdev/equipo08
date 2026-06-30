@@ -8,6 +8,7 @@ import StockPage from './pages/StockPage';
 import SalesPage from './pages/SalesPage';
 import AuditReportsPage from './pages/AuditReportsPage';
 import ProductsPage from './pages/ProductsPage';
+import CategoriesPage from './pages/CategoriesPage';
 import SucursalesPage from './pages/SucursalesPage';
 import UsersPage from './pages/UsersPage';
 import PermissionsPage from './pages/PermissionsPage';
@@ -89,8 +90,11 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
   const hasPerm = (key) => {
     if (userRole === 'OWNER') return true;
     if (!permissions) return false;
-    const p = permissions.find(p => p.role === userRole);
-    return p ? p[key.replace('.', '_')] : false;
+    if (Array.isArray(permissions)) {
+      const p = permissions.find(p => p.role === userRole);
+      return p ? p[key.replace('.', '_')] : false;
+    }
+    return permissions[key.replace('.', '_')] || false;
   };
 
   const p = location.pathname;
@@ -148,18 +152,21 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
         </div>
         <nav className={`flex flex-col gap-2 mt-2 w-full ${!isOpen ? 'items-center' : ''}`}>
 
-          {userRole !== 'SUPER_ADMIN' && (
+          {userRole !== 'SUPER_ADMIN' && userRole !== 'VENDEDOR' && (
             <NavItem to="/" icon={LayoutDashboard} label="Resumen" active={p === '/'} isOpen={isOpen} />
           )}
 
           {hasPerm('catalogo.ver') && (
-            <NavItem to="/providers"   icon={Users}      label="Proveedores"        active={p === '/providers'} isOpen={isOpen} />
+            <>
+              <NavItem to="/providers"   icon={Users}      label="Proveedores"        active={p === '/providers'} isOpen={isOpen} />
+              <NavItem to="/categories"  icon={Tag}        label="Categorías"         active={p === '/categories'} isOpen={isOpen} />
+            </>
           )}
           {hasPerm('sucursales.ver') && (
             <NavItem to="/sucursales"  icon={Store}      label="Sucursales"         active={p === '/sucursales'} isOpen={isOpen} />
           )}
           {hasPerm('catalogo.ver') && (
-            <NavItem to="/products"    icon={Tag}        label="Catálogo"           active={p === '/products'} isOpen={isOpen} />
+            <NavItem to="/products"    icon={Package}    label="Catálogo"           active={p === '/products'} isOpen={isOpen} />
           )}
           {hasPerm('sourcing.ver') && (
             <NavItem to="/sourcing"    icon={ShoppingCart} label="Lotes"            active={p === '/sourcing'} isOpen={isOpen} />
@@ -179,7 +186,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
             </>
           )}
 
-          {hasPerm('inventario.ver') && (
+          {hasPerm('inventario.ver') && userRole !== 'VENDEDOR' && (
             <>
               <NavItem to="/stock"         icon={Archive}   label="Inventario"          active={p === '/stock'} isOpen={isOpen} />
               <NavItem to="/audit-reports" icon={BarChart2} label="Auditoría"           active={p === '/audit-reports'} isOpen={isOpen} />
@@ -237,7 +244,14 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
 /* ─── APP ROOT ──────────────────────────────────────────────────── */
 function App() {
   const [authToken, setAuthToken] = useState(sessionStorage.getItem('access_token'));
-  const [permissions, setPermissions] = useState(null);
+  const [permissions, setPermissions] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('permissions');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [authError, setAuthError] = useState(null);
   const userRole = sessionStorage.getItem('user_role') || 'VENDEDOR';
@@ -262,10 +276,11 @@ function App() {
       // 1. Obtener datos actualizados del usuario (ej: si le cambiaron la sucursal)
       try {
         const meRes = await api.get('/users/me');
-        const currentSucursalId = sessionStorage.getItem('user_sucursal_id');
+        const currentSucursalId = sessionStorage.getItem('user_sucursal_id') || '';
+        const meSucursalId = meRes.data.sucursal_id || '';
         
         // Si la sucursal cambió, actualizamos y recargamos para limpiar estado de componentes
-        if (meRes.data.sucursal_id !== currentSucursalId && meRes.data.role !== 'OWNER' && meRes.data.role !== 'SUPER_ADMIN') {
+        if (meSucursalId !== currentSucursalId && meRes.data.role !== 'OWNER' && meRes.data.role !== 'SUPER_ADMIN') {
           sessionStorage.setItem('user_sucursal_id', meRes.data.sucursal_id || '');
           sessionStorage.setItem('user_sucursal_name', meRes.data.sucursal_name || '');
           window.location.reload();
@@ -343,8 +358,9 @@ function App() {
                     <div className={`main-content transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] relative`}>
                       <AnimatePresence mode="wait">
                         <Routes location={location} key={location.pathname}>
-                          <Route path="/"              element={<PageTransition>{userRole === 'SUPER_ADMIN' ? <Navigate to="/admin-console" replace /> : <DashboardPage key={authToken} />}</PageTransition>} />
+                          <Route path="/"              element={<PageTransition>{userRole === 'SUPER_ADMIN' ? <Navigate to="/admin-console" replace /> : (userRole === 'VENDEDOR' ? <Navigate to="/pos" replace /> : <DashboardPage key={authToken} />)}</PageTransition>} />
                           <Route path="/providers"     element={<PageTransition><ProvidersPage     key={authToken} /></PageTransition>} />
+                          <Route path="/categories"    element={<PageTransition><CategoriesPage    key={authToken} /></PageTransition>} />
                           <Route path="/sucursales"    element={<PageTransition><SucursalesPage    key={authToken} /></PageTransition>} />
                           <Route path="/products"      element={<PageTransition><ProductsPage      key={authToken} /></PageTransition>} />
                           <Route path="/sourcing"      element={<PageTransition><SourcingPage      key={authToken} /></PageTransition>} />

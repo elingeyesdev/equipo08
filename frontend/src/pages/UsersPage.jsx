@@ -121,13 +121,13 @@ export default function UsersPage() {
         </div>
         <div className="flex gap-2">
           <button
-            className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-              showFilters ? 'bg-white text-slate-800 border border-slate-300' : 'bg-white/20 hover:bg-white/30 text-white'
+            className={`py-2 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm border ${
+              showFilters ? 'bg-white text-slate-900 border-slate-300' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
             onClick={() => setShowFilters(!showFilters)}
           >
-            <Filter size={18} />
-            {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
+            <Filter size={16} />
+            {showFilters ? 'Ocultar Filtros' : 'Filtrar'}
           </button>
           <button 
             onClick={showForm ? handleCancel : () => setShowForm(true)} 

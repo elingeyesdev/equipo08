@@ -321,6 +321,169 @@ export async function runPreMigrations() {
     console.log('Pre-migration: Altering lotes_ingreso.stock_id to SET NOT NULL...');
     await client.query('ALTER TABLE "lotes_ingreso" ALTER COLUMN "stock_id" SET NOT NULL');
 
+    // CATEGORIAS MIGRATION STEP:
+    // 1. Create table 'categorias' if it does not exist
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "categorias" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "tenant_id" VARCHAR NOT NULL,
+        "nombre" VARCHAR NOT NULL,
+        "parent_id" UUID NULL REFERENCES "categorias"("id") ON DELETE SET NULL,
+        "created_at" TIMESTAMP NOT NULL DEFAULT now(),
+        CONSTRAINT "UQ_tenant_nombre" UNIQUE ("tenant_id", "nombre")
+      )
+    `);
+
+    // 2. Add 'categoria_id' column to 'productos' if it doesn't exist yet
+    const checkProductCatIdCol = await client.query(`
+      SELECT column_name FROM information_schema.columns 
+      WHERE table_name = 'productos' AND column_name = 'categoria_id'
+    `);
+    if (checkProductCatIdCol.rowCount === 0) {
+      console.log('Pre-migration: Adding categoria_id column to productos...');
+      await client.query('ALTER TABLE "productos" ADD COLUMN "categoria_id" UUID NULL');
+    }
+
+    // 3. Find all products that have a non-empty string 'category' but NULL 'categoria_id'
+    // check if 'category' column exists first to avoid crash if it was dropped in some other version
+    const checkCategoryTextCol = await client.query(`
+      SELECT column_name FROM information_schema.columns 
+      WHERE table_name = 'productos' AND column_name = 'category'
+    `);
+    
+    if (checkCategoryTextCol.rowCount > 0) {
+      const pendingProducts = await client.query(`
+        SELECT id, tenant_id, category 
+        FROM productos 
+        WHERE categoria_id IS NULL AND category IS NOT NULL AND category != ''
+      `);
+
+      for (const row of pendingProducts.rows) {
+        const catName = row.category.trim();
+        // Check if category already exists in this tenant
+        let catRes = await client.query(`
+          SELECT id FROM categorias 
+          WHERE tenant_id = $1 AND LOWER(nombre) = LOWER($2)
+        `, [row.tenant_id, catName]);
+
+        let catId = '';
+        if (catRes.rowCount > 0) {
+          catId = catRes.rows[0].id;
+        } else {
+          // Insert category
+          const insertCat = await client.query(`
+            INSERT INTO categorias (id, tenant_id, nombre, created_at)
+            VALUES (gen_random_uuid(), $1, $2, now())
+            RETURNING id
+          `, [row.tenant_id, catName]);
+          catId = insertCat.rows[0].id;
+          console.log(`Pre-migration: Created category "${catName}" for tenant ${row.tenant_id}`);
+        }
+
+        // Update product with category ID
+        await client.query(`
+          UPDATE productos 
+          SET categoria_id = $1 
+          WHERE id = $2
+        `, [catId, row.id]);
+      }
+    }
+
+    // PRODUCT VARIATIONS MIGRATION STEP:
+    // 1. Create table 'producto_variaciones' if it does not exist
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "producto_variaciones" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "producto_id" UUID NOT NULL REFERENCES "productos"("id") ON DELETE CASCADE,
+        "sku" VARCHAR NOT NULL,
+        "precio_costo" DECIMAL(10,2) NOT NULL DEFAULT 0,
+        "precio_venta" DECIMAL(10,2) NOT NULL DEFAULT 0,
+        "opciones" JSONB NOT NULL DEFAULT '{}',
+        "created_at" TIMESTAMP NOT NULL DEFAULT now(),
+        "updated_at" TIMESTAMP NOT NULL DEFAULT now(),
+        CONSTRAINT "UQ_variacion_sku" UNIQUE ("sku")
+      )
+    `);
+
+    // 2. Populate default variation for existing products that don't have variations yet
+    const pendingProductsForVariants = await client.query(`
+      SELECT p.id, p.sku, p.precio_costo, p.precio_venta, p.attributes 
+      FROM productos p
+      WHERE NOT EXISTS (
+        SELECT 1 FROM producto_variaciones pv WHERE pv.producto_id = p.id
+      )
+    `);
+
+    for (const row of pendingProductsForVariants.rows) {
+      const sku = row.sku || `SKU-${row.id.split('-')[0]}`;
+      const costo = row.precio_costo != null ? row.precio_costo : 0;
+      const venta = row.precio_venta != null ? row.precio_venta : 0;
+      const opciones = row.attributes || '{}';
+
+      // Insert default variation
+      await client.query(`
+        INSERT INTO producto_variaciones (id, producto_id, sku, precio_costo, precio_venta, opciones, created_at, updated_at)
+        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, now(), now())
+        ON CONFLICT (sku) DO NOTHING
+      `, [row.id, sku, costo, venta, typeof opciones === 'string' ? opciones : JSON.stringify(opciones)]);
+      console.log(`Pre-migration: Created default variation for product "${row.id}" with SKU ${sku}`);
+    }
+
+    // STOCK VARIATIONS MIGRATION STEP:
+    // 1. Add 'producto_variacion_id' column to 'stock' if it does not exist
+    const checkStockVarCol = await client.query(`
+      SELECT column_name FROM information_schema.columns 
+      WHERE table_name = 'stock' AND column_name = 'producto_variacion_id'
+    `);
+    if (checkStockVarCol.rowCount === 0) {
+      console.log('Pre-migration: Adding producto_variacion_id column to stock...');
+      await client.query('ALTER TABLE "stock" ADD COLUMN "producto_variacion_id" UUID NULL');
+    }
+
+    // 2. Populate product_variacion_id using the default variation for each product
+    const pendingStock = await client.query(`
+      SELECT id, producto_id 
+      FROM stock 
+      WHERE producto_variacion_id IS NULL
+    `);
+
+    for (const row of pendingStock.rows) {
+      const varRes = await client.query(`
+        SELECT id FROM producto_variaciones 
+        WHERE producto_id = $1 
+        ORDER BY created_at ASC LIMIT 1
+      `, [row.producto_id]);
+
+      let varId = '';
+      if (varRes.rowCount > 0) {
+        varId = varRes.rows[0].id;
+      } else {
+        // En caso extremo que no se hubiese creado la variante por defecto (por SKU duplicado), la creamos al vuelo
+        const newVarRes = await client.query(`
+          INSERT INTO producto_variaciones (id, producto_id, sku, precio_costo, precio_venta, opciones, created_at, updated_at)
+          VALUES (gen_random_uuid(), $1, $2, 0, 0, '{}', now(), now())
+          RETURNING id
+        `, [row.producto_id, `SKU-STOCK-${row.id.split('-')[0]}`]);
+        varId = newVarRes.rows[0].id;
+      }
+
+      await client.query(`
+        UPDATE stock 
+        SET producto_variacion_id = $1 
+        WHERE id = $2
+      `, [varId, row.id]);
+    }
+
+    // 3. Clean any stock without varId
+    const cleanStockNulls = await client.query("DELETE FROM stock WHERE producto_variacion_id IS NULL");
+    if (cleanStockNulls.rowCount > 0) {
+      console.log(`Pre-migration: Deleted ${cleanStockNulls.rowCount} stock records due to missing variation.`);
+    }
+
+    // 4. Set stock.producto_variacion_id to NOT NULL
+    console.log('Pre-migration: Altering stock.producto_variacion_id to SET NOT NULL...');
+    await client.query('ALTER TABLE "stock" ALTER COLUMN "producto_variacion_id" SET NOT NULL');
+
     // Drop redundant proveedor_id and columns from lotes_ingreso / ajustes_inventario
     const dropCols = [
       ['lotes_ingreso', 'proveedor_id'],

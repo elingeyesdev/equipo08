@@ -8,11 +8,13 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Check,
 } from 'typeorm';
 import { Proveedor } from '../proveedores/proveedor.entity';
 import { Stock } from '../stock/stock.entity';
+import { Categoria } from './categoria.entity';
 
-import { Check } from 'typeorm';
+import { ProductoVariacion } from './producto-variacion.entity';
 
 @Entity('productos')
 @Index(['tenant_id', 'id'])
@@ -41,6 +43,9 @@ export class Producto {
   @Column({ nullable: true })
   category: string;
 
+  @Column({ name: 'categoria_id', type: 'uuid', nullable: true })
+  categoria_id: string;
+
   @Column({ type: 'text', nullable: true })
   imagen_url: string;
 
@@ -60,6 +65,10 @@ export class Producto {
   @JoinColumn({ name: 'proveedor_id' })
   proveedor: Proveedor;
 
+  @ManyToOne(() => Categoria, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'categoria_id' })
+  categoria: Categoria;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
@@ -68,4 +77,7 @@ export class Producto {
 
   @OneToMany(() => Stock, (stock) => stock.producto)
   stocks: Stock[];
+
+  @OneToMany(() => ProductoVariacion, (variacion) => variacion.producto)
+  variaciones: ProductoVariacion[];
 }

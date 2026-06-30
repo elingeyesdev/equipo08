@@ -81,19 +81,19 @@ const SUPERVISOR_DEFAULTS: Record<PermissionKey, boolean> = {
 };
 
 const VENDEDOR_DEFAULTS: Record<PermissionKey, boolean> = {
-  sucursales_ver: true,
+  sucursales_ver: false,
   sucursales_crear: false,
   sucursales_editar: false,
   sucursales_eliminar: false,
-  catalogo_ver: true,
+  catalogo_ver: false,
   catalogo_crear: false,
   catalogo_editar: false,
   catalogo_eliminar: false,
-  proveedores_ver: true,
+  proveedores_ver: false,
   proveedores_crear: false,
   proveedores_editar: false,
   proveedores_eliminar: false,
-  sourcing_ver: true,
+  sourcing_ver: false,
   sourcing_crear: false,
   sourcing_editar: false,
   sourcing_eliminar: false,

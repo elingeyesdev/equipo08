@@ -9,7 +9,7 @@ export default function ProvidersPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [formData, setFormData] = useState({ name: '', taxId: '', contactEmail: '' });
+  const [formData, setFormData] = useState({ name: '', taxId: '', contactEmail: '', phone: '' });
   const [searchingNit, setSearchingNit] = useState(false);
   const [isFound, setIsFound] = useState(false);
   const toast = useToast();
@@ -50,6 +50,7 @@ export default function ProvidersPage() {
         ...formData,
         name: data.name,
         contactEmail: data.contactEmail || '',
+        phone: data.phone || '',
       });
       setIsFound(true);
       toast.success('Proveedor Maestro encontrado y autocompletado.');
@@ -97,7 +98,7 @@ export default function ProvidersPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', taxId: '', contactEmail: '' });
+    setFormData({ name: '', taxId: '', contactEmail: '', phone: '' });
     setIsFound(false);
     setShowForm(false);
   };
@@ -148,9 +149,11 @@ export default function ProvidersPage() {
                     id="prov-tax-id"
                     type="text" 
                     value={formData.taxId} 
-                    onChange={e => setFormData({...formData, taxId: e.target.value})} 
-                    pattern="^\d{8,12}$" 
-                    title="Debe contener entre 8 y 12 números sin espacios ni símbolos" 
+                    onChange={e => {
+                      const cleanVal = e.target.value.replace(/\D/g, '').slice(0, 12);
+                      setFormData({...formData, taxId: cleanVal});
+                    }} 
+                    maxLength={12}
                     placeholder="Escribe el NIT..." 
                     className="flex-1"
                   />
@@ -177,7 +180,11 @@ export default function ProvidersPage() {
                   id="prov-name"
                   type="text" 
                   value={formData.name} 
-                  onChange={e => setFormData({...formData, name: e.target.value})}
+                  onChange={e => {
+                    const cleanName = e.target.value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ0-9\s]/g, '').slice(0, 20);
+                    setFormData({...formData, name: cleanName});
+                  }}
+                  maxLength={20}
                   required 
                   placeholder="Escribe la razón social..." 
                 />
@@ -191,6 +198,21 @@ export default function ProvidersPage() {
                   value={formData.contactEmail} 
                   onChange={e => setFormData({...formData, contactEmail: e.target.value})}
                   placeholder="correo@proveedor.com" 
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="prov-phone">Teléfono de Contacto</label>
+                <input 
+                  id="prov-phone"
+                  type="text" 
+                  value={formData.phone} 
+                  onChange={e => {
+                    const cleanPhone = e.target.value.replace(/\D/g, '').slice(0, 8);
+                    setFormData({...formData, phone: cleanPhone});
+                  }}
+                  maxLength={8}
+                  placeholder="Ej. 70000000" 
                 />
               </div>
 
@@ -227,16 +249,17 @@ export default function ProvidersPage() {
             <table className="table-premium">
               <thead>
                 <tr>
-                  <th style={{ width: '40%' }}>Razón Social Local</th>
-                  <th style={{ width: '25%' }}>NIT / RUT</th>
-                  <th style={{ width: '25%' }}>Correo de Contacto</th>
+                  <th style={{ width: '30%' }}>Razón Social Local</th>
+                  <th style={{ width: '20%' }}>NIT / RUT</th>
+                  <th style={{ width: '20%' }}>Correo de Contacto</th>
+                  <th style={{ width: '20%' }}>Teléfono</th>
                   {hasPermission('proveedores_eliminar') && <th className="text-center" style={{ width: '10%' }}>Acciones</th>}
                 </tr>
               </thead>
               <tbody>
                 {providers.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="text-center py-16 text-slate-400 font-medium">
+                    <td colSpan="5" className="text-center py-16 text-slate-400 font-medium">
                       No hay proveedores registrados en tu Empresa. Importa uno usando su NIT.
                     </td>
                   </tr>
@@ -246,6 +269,7 @@ export default function ProvidersPage() {
                       <td className="text-sm text-slate-800">{p.name}</td>
                       <td className="text-sm text-slate-800">{p.taxId || '-'}</td>
                       <td className="text-sm text-slate-800">{p.contactEmail || '-'}</td>
+                      <td className="text-sm text-slate-800">{p.phone || '-'}</td>
                       {hasPermission('proveedores_eliminar') && (
                         <td className="text-center">
                           <button 

@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { LayoutDashboard, TrendingUp, Archive, AlertTriangle, Receipt, DollarSign, ArrowRight, ShoppingCart, BarChart2, Loader2 } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Archive, AlertTriangle, Receipt, DollarSign, ArrowRight, ShoppingCart, BarChart2, Loader2, Filter } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function DashboardPage() {
   const userName = sessionStorage.getItem('user_name') || 'Usuario';
   const userRole = sessionStorage.getItem('user_role') || 'VENDEDOR';
+  const userSucursalId = sessionStorage.getItem('user_sucursal_id') || '';
+  const userSucursalName = sessionStorage.getItem('user_sucursal_name') || '';
   const toast = useToast();
 
   const [loading, setLoading] = useState(true);
+  const [sucursales, setSucursales] = useState([]);
+  const [selectedSucursal, setSelectedSucursal] = useState(userRole !== 'OWNER' && userSucursalId ? userSucursalId : 'ALL');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+
   const [metrics, setMetrics] = useState({
     totalSales: 0,
     totalRevenue: 0,
+    totalProfit: 0,
     totalStockItems: 0,
     totalStockValue: 0,
     totalLosses: 0,
@@ -20,15 +29,38 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    loadDashboardData();
+    fetchSucursales();
   }, []);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [selectedSucursal, startDate, endDate]);
+
+  const fetchSucursales = async () => {
+    try {
+      const { data } = await api.get('/sucursales');
+      setSucursales(data || []);
+    } catch (err) {
+      console.error('Error al cargar sucursales:', err);
+    }
+  };
 
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // Usamos Promise.all para cargar optimizadamente en paralelo.
+      const params = {};
+      if (selectedSucursal && selectedSucursal !== 'ALL') {
+        params.sucursal_id = selectedSucursal;
+      }
+      if (startDate) {
+        params.startDate = startDate;
+      }
+      if (endDate) {
+        params.endDate = endDate;
+      }
+
       const [kpisRes, stockRes, ajustesRes] = await Promise.all([
-        api.get('/ventas/kpis/dashboard').catch(() => ({ data: { totalVentas: 0, ingresosTotales: 0, utilidadTotal: 0, recentSales: [] } })),
+        api.get('/ventas/kpis/dashboard', { params }).catch(() => ({ data: { totalVentas: 0, ingresosTotales: 0, utilidadTotal: 0, recentSales: [] } })),
         api.get('/stock').catch(() => ({ data: [] })),
         api.get('/ajustes').catch(() => ({ data: [] }))
       ]);
@@ -37,20 +69,41 @@ export default function DashboardPage() {
       const stock = stockRes.data || [];
       const ajustes = ajustesRes.data || [];
 
-      // Validar consistencia e interpretar información
+      // Filtrado local de stock
+      const filteredStock = selectedSucursal && selectedSucursal !== 'ALL'
+        ? stock.filter(item => item.sucursal_id === selectedSucursal)
+        : stock;
+
+      // Filtrado local de pérdidas (ajustes) por fecha y sucursal
+      const filteredAjustes = ajustes.filter(aj => {
+        if (selectedSucursal && selectedSucursal !== 'ALL' && aj.sucursal_id !== selectedSucursal) {
+          return false;
+        }
+        if (startDate || endDate) {
+          const ajDate = new Date(aj.createdAt || aj.fecha).getTime();
+          if (startDate) {
+            const start = new Date(`${startDate}T00:00:00`).getTime();
+            if (ajDate < start) return false;
+          }
+          if (endDate) {
+            const end = new Date(`${endDate}T23:59:59`).getTime();
+            if (ajDate > end) return false;
+          }
+        }
+        return true;
+      });
+
       const totalSales = kpis.totalVentas;
       const totalRevenue = kpis.ingresosTotales;
       const totalProfit = kpis.utilidadTotal;
       
-      const totalStockItems = stock.reduce((acc, item) => acc + Number(item.cantidadTotal || item.cantidad || 0), 0);
-      const totalStockValue = stock.reduce((acc, item) => {
+      const totalStockItems = filteredStock.reduce((acc, item) => acc + Number(item.cantidadTotal || item.cantidad || 0), 0);
+      const totalStockValue = filteredStock.reduce((acc, item) => {
         const itemPrice = item.producto?.precioVenta || item.producto?.precio || 0;
         return acc + (Number(item.cantidadTotal || item.cantidad || 0) * Number(itemPrice));
       }, 0);
 
-      const totalLosses = ajustes.reduce((acc, aj) => acc + Number(aj.valor_perdido || 0), 0);
-
-      // Obtener últimas 5 ventas para mostrar actividad reciente
+      const totalLosses = filteredAjustes.reduce((acc, aj) => acc + Number(aj.valor_perdido || 0), 0);
       const recentSales = kpis.recentSales || [];
 
       setMetrics({
@@ -91,7 +144,78 @@ export default function DashboardPage() {
           <h1>Dashboard</h1>
           <p>Hola, <b>{userName}</b>. Aquí tienes un resumen unificado del estado de tu tienda.</p>
         </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setShowFilters(!showFilters)} 
+            className={`py-2 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm border ${
+              showFilters ? 'bg-white text-slate-900 border-slate-300' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <Filter size={16} /> {showFilters ? 'Ocultar Filtros' : 'Filtrar'}
+          </button>
+        </div>
       </div>
+
+      {/* FILTROS DE DASHBOARD */}
+      {showFilters && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap items-center gap-6 animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filtrar Dashboard:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 flex-1">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500">Sucursal:</label>
+              <select
+                value={selectedSucursal}
+                onChange={e => setSelectedSucursal(e.target.value)}
+                disabled={userRole !== 'OWNER' && !!userSucursalId}
+                className="h-[38px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 disabled:opacity-75 disabled:cursor-not-allowed"
+              >
+                {userRole === 'OWNER' && <option value="ALL">-- Todas las sucursales --</option>}
+                {sucursales.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+                {userRole !== 'OWNER' && userSucursalId && sucursales.length === 0 && (
+                  <option value={userSucursalId}>{userSucursalName || 'Mi Sucursal'}</option>
+                )}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500">Desde:</label>
+              <input 
+                type="date" 
+                value={startDate} 
+                onChange={e => setStartDate(e.target.value)} 
+                className="h-[38px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500">Hasta:</label>
+              <input 
+                type="date" 
+                value={endDate} 
+                onChange={e => setEndDate(e.target.value)} 
+                className="h-[38px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+              />
+            </div>
+          </div>
+
+          {(selectedSucursal !== (userRole !== 'OWNER' && userSucursalId ? userSucursalId : 'ALL') || startDate || endDate) && (
+            <button 
+              type="button"
+              onClick={() => {
+                setSelectedSucursal(userRole !== 'OWNER' && userSucursalId ? userSucursalId : 'ALL');
+                setStartDate('');
+                setEndDate('');
+              }}
+              className="text-xs font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider cursor-pointer transition-colors bg-transparent border-none p-0 h-auto self-center"
+            >
+              Limpiar Filtro
+            </button>
+          )}
+        </div>
+      )}
 
       {/* KPI GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 lg:grid-cols-3 gap-6 mb-8">
@@ -117,7 +241,7 @@ export default function DashboardPage() {
               <DollarSign size={100} strokeWidth={2} />
             </div>
             <div className="p-6 relative z-10 flex-1">
-              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {metrics.totalRevenue.toFixed(0)}</h3>
+              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {(metrics.totalRevenue || 0).toFixed(0)}</h3>
               <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Ingreso Bruto</p>
             </div>
             <a href="/sales#historial" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">
@@ -133,7 +257,7 @@ export default function DashboardPage() {
               <BarChart2 size={100} strokeWidth={2} />
             </div>
             <div className="p-6 relative z-10 flex-1">
-              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {metrics.totalProfit.toFixed(0)}</h3>
+              <h3 className="text-3xl font-semibold mb-1 text-white">Bs {(metrics.totalProfit || 0).toFixed(0)}</h3>
               <p className="text-sm font-medium text-white/90 uppercase tracking-wide">Utilidad Neta</p>
             </div>
             <a href="/sales#historial" className="w-full bg-black/10 hover:bg-black/20 transition-colors py-2 px-6 flex items-center justify-between text-sm font-medium text-white relative z-10">

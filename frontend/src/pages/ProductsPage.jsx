@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api, { getBackendUrl } from '../api';
-import { PackageSearch, Plus, X, Loader2, Edit2, Trash2, AlertTriangle, Tag, Search, Copy, ChevronRight, ChevronDown } from 'lucide-react';
+import { PackageSearch, Plus, X, Loader2, Edit2, Trash2, AlertTriangle, Tag, Search, Copy, ChevronRight, ChevronDown, ClipboardList, ArrowLeft, Filter } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -14,8 +14,14 @@ const CATEGORY_ATTRIBUTES = {
 };
 
 export default function ProductsPage() {
+  const userRole = sessionStorage.getItem('user_role');
+  const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
+  const userSucursalId = sessionStorage.getItem('user_sucursal_id') || '';
+  const userSucursalName = sessionStorage.getItem('user_sucursal_name') || '';
+
   const [products, setProducts] = useState([]);
   const [providers, setProviders] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -26,8 +32,33 @@ export default function ProductsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('ALL');
+  const [contextMenu, setContextMenu] = useState(null);
   const toast = useToast();
   const [expandedProducts, setExpandedProducts] = useState({});
+
+  const [kardexProductId, setKardexProductId] = useState(null);
+  const [kardexProduct, setKardexProduct] = useState(null);
+  const [kardexMovements, setKardexMovements] = useState([]);
+  const [loadingKardex, setLoadingKardex] = useState(false);
+  const [kardexStartDate, setKardexStartDate] = useState('');
+  const [kardexEndDate, setKardexEndDate] = useState('');
+  const [sucursales, setSucursales] = useState([]);
+  const [selectedKardexSucursal, setSelectedKardexSucursal] = useState(userRole !== 'OWNER' && userSucursalId ? userSucursalId : 'ALL');
+
+  const handleViewKardex = async (product) => {
+    setKardexProductId(product.id);
+    setKardexProduct(product);
+    setLoadingKardex(true);
+    try {
+      const res = await api.get(`/stock/kardex/${product.id}`);
+      setKardexMovements(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al cargar movimientos del Kardex');
+    } finally {
+      setLoadingKardex(false);
+    }
+  };
 
   const toggleExpand = (name) => {
     setExpandedProducts(prev => ({
@@ -94,10 +125,7 @@ export default function ProductsPage() {
     }
   };
 
-  const userRole = sessionStorage.getItem('user_role');
-  const userPermissions = JSON.parse(sessionStorage.getItem('permissions') || '{}');
-
-  const hasPermission = (key) => {
+   const hasPermission = (key) => {
     if (userRole === 'OWNER') return true;
     return !!userPermissions[key];
   };
@@ -108,14 +136,24 @@ export default function ProductsPage() {
 
   const fetchData = async () => {
     try {
-      const [prodRes, provRes] = await Promise.all([
+      const [prodRes, provRes, sucRes] = await Promise.all([
         api.get('/productos'),
-        api.get('/proveedores')
+        api.get('/proveedores'),
+        api.get('/sucursales')
       ]);
       setProducts(prodRes.data);
       setProviders(provRes.data);
+      setSucursales(sucRes.data || []);
     } catch (err) {
       console.error(err);
+      toast.error('Error al cargar productos, proveedores o sucursales');
+    }
+
+    try {
+      const catRes = await api.get('/productos/categorias');
+      setCategories(catRes.data);
+    } catch (err) {
+      console.error('Error al cargar categorías:', err);
     } finally {
       setLoading(false);
     }
@@ -205,7 +243,7 @@ export default function ProductsPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', sku: '', proveedor_id: '', category: 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '', attributes: {} });
+    setFormData({ name: '', sku: '', proveedor_id: '', category: categories[0]?.nombre || 'Otros', precioCosto: '', precioVenta: '', description: '', stockMinimo: 10, imagen_url: '', attributes: {} });
     setEditingId(null);
     setShowForm(false);
   };
@@ -220,8 +258,214 @@ export default function ProductsPage() {
   const currentMargin = calculateMargin(formData.precioCosto, formData.precioVenta);
   const isLoss = currentMargin < 0;
 
+  if (kardexProductId && kardexProduct) {
+    const getBadgeClass = (tipo) => {
+      switch (tipo) {
+        case 'INGRESO':
+          return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/30';
+        case 'EGRESO':
+          return 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-800/30';
+        case 'TRANSFERENCIA':
+          return 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-800/30';
+        case 'AJUSTE':
+          return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-800/30';
+        default:
+          return 'bg-slate-50 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400 border-slate-200 dark:border-slate-800/30';
+      }
+    };
+
+    const formatDate = (dateStr) => {
+      try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return dateStr;
+      }
+    };
+
+    const filteredKardexMovements = kardexMovements.filter(m => {
+      if (selectedKardexSucursal && selectedKardexSucursal !== 'ALL' && m.sucursalId !== selectedKardexSucursal) {
+        return false;
+      }
+      if (!m.fecha) return true;
+      const itemDate = new Date(m.fecha).getTime();
+      if (kardexStartDate) {
+        const start = new Date(`${kardexStartDate}T00:00:00`).getTime();
+        if (itemDate < start) return false;
+      }
+      if (kardexEndDate) {
+        const end = new Date(`${kardexEndDate}T23:59:59`).getTime();
+        if (itemDate > end) return false;
+      }
+      return true;
+    });
+
+    return (
+      <div className="full-width-container animate-fadein space-y-6">
+        {/* Header bar */}
+        <div className="page-header-bar">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                setKardexProductId(null);
+                setKardexProduct(null);
+                setKardexMovements([]);
+                setKardexStartDate('');
+                setKardexEndDate('');
+                setSelectedKardexSucursal(userRole !== 'OWNER' && userSucursalId ? userSucursalId : 'ALL');
+              }}
+              className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all shadow-sm flex items-center justify-center cursor-pointer border-none"
+              title="Volver al Catálogo"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1>Kardex de Inventario</h1>
+              <p>Historial completo de movimientos de: <b>{kardexProduct.name}</b> {kardexProduct.sku ? `(SKU: ${kardexProduct.sku})` : ''}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Date Filter Bar */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap items-center gap-4 animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filtrar Kardex:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 flex-1">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500">Sucursal:</label>
+              <select
+                value={selectedKardexSucursal}
+                onChange={e => setSelectedKardexSucursal(e.target.value)}
+                disabled={userRole !== 'OWNER' && !!userSucursalId}
+                className="h-[38px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 disabled:opacity-75 disabled:cursor-not-allowed"
+              >
+                {userRole === 'OWNER' && <option value="ALL">-- Todas las sucursales --</option>}
+                {sucursales.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+                {userRole !== 'OWNER' && userSucursalId && sucursales.length === 0 && (
+                  <option value={userSucursalId}>{userSucursalName || 'Mi Sucursal'}</option>
+                )}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500">Desde:</label>
+              <input 
+                type="date" 
+                value={kardexStartDate} 
+                onChange={e => setKardexStartDate(e.target.value)} 
+                className="h-[38px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate-500">Hasta:</label>
+              <input 
+                type="date" 
+                value={kardexEndDate} 
+                onChange={e => setKardexEndDate(e.target.value)} 
+                className="h-[38px] px-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-350 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
+              />
+            </div>
+          </div>
+          {(selectedKardexSucursal !== (userRole !== 'OWNER' && userSucursalId ? userSucursalId : 'ALL') || kardexStartDate || kardexEndDate) && (
+            <button 
+              type="button"
+              onClick={() => { 
+                setSelectedKardexSucursal(userRole !== 'OWNER' && userSucursalId ? userSucursalId : 'ALL');
+                setKardexStartDate(''); 
+                setKardexEndDate(''); 
+              }}
+              className="text-xs font-bold text-rose-600 hover:text-rose-700 uppercase tracking-wider cursor-pointer transition-colors bg-transparent border-none p-0 h-auto self-center flex items-center"
+            >
+              Limpiar Filtro
+            </button>
+          )}
+        </div>
+
+        {/* Content Table */}
+        <div className="table-premium-wrapper">
+          {loadingKardex ? (
+            <div className="py-20 text-center flex flex-col items-center justify-center">
+              <Loader2 className="animate-spin text-indigo-600 mb-2" size={28} />
+              <p className="text-xs text-slate-500 font-semibold">Cargando movimientos del Kardex...</p>
+            </div>
+          ) : kardexMovements.length === 0 ? (
+            <div className="py-16 text-center text-slate-400 font-medium">
+              <div className="flex flex-col items-center justify-center gap-2">
+                <ClipboardList size={28} className="text-slate-300" />
+                <span>No se registraron movimientos para este artículo en el Kardex.</span>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              {filteredKardexMovements.length === 0 ? (
+                <div className="py-16 text-center text-slate-400 font-medium">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <ClipboardList size={28} className="text-slate-300" />
+                    <span>No hay movimientos registrados para este artículo en el rango de fechas seleccionado.</span>
+                  </div>
+                </div>
+              ) : (
+                <table className="table-premium">
+                  <thead>
+                    <tr>
+                      <th>Fecha y Hora</th>
+                      <th>Sucursal</th>
+                      <th>Operador</th>
+                      <th className="text-center">Operación</th>
+                      <th className="text-right">Cantidad</th>
+                      <th className="text-right">Saldo Anterior</th>
+                      <th className="text-right">Saldo Resultante</th>
+                      <th className="text-right">Precio / Costo Unitario</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredKardexMovements.map((m) => (
+                      <tr key={m.id}>
+                        <td className="whitespace-nowrap font-medium text-slate-600 dark:text-slate-400">
+                          {formatDate(m.fecha)}
+                        </td>
+                        <td className="font-semibold text-slate-700 dark:text-slate-300">
+                          {m.sucursalNombre}
+                        </td>
+                        <td className="text-slate-650 dark:text-slate-350 font-semibold">
+                          {m.usuarioNombre}
+                        </td>
+                        <td className="text-center">
+                          <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-md border ${getBadgeClass(m.tipo)}`}>
+                            {m.tipo === 'INGRESO' ? 'Compra' : m.tipo === 'EGRESO' ? 'Venta' : m.tipo === 'TRANSFERENCIA' ? 'Transferencia' : m.tipo === 'AJUSTE' ? 'Ajuste' : m.tipo}
+                          </span>
+                        </td>
+                        <td className={`text-right font-bold ${m.cantidadDelta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                          {m.cantidadDelta > 0 ? `+${m.cantidadDelta}` : m.cantidadDelta}
+                        </td>
+                        <td className="text-right text-slate-500 font-semibold">{m.stockAnterior}</td>
+                        <td className="text-right text-slate-700 dark:text-slate-300 font-black">{m.stockResultante}</td>
+                        <td className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
+                          Bs {Number(m.costoUnitario || 0).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="full-width-container animate-fadein space-y-6">
+    <div className="full-width-container animate-fadein space-y-6 relative">
       
       {/* Header and Actions */}
       <div className="page-header-bar">
@@ -232,11 +476,11 @@ export default function ProductsPage() {
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowFilters(!showFilters)} 
-            className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-              showFilters ? 'bg-white text-slate-800 border border-slate-300' : 'bg-white/20 hover:bg-white/30 text-white'
+            className={`py-2 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm border ${
+              showFilters ? 'bg-white text-slate-900 border-slate-300' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
           >
-            <Search size={18} /> {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
+            <Filter size={16} /> {showFilters ? 'Ocultar Filtros' : 'Filtrar'}
           </button>
           {hasPermission('catalogo_crear') && (
             <button 
@@ -293,10 +537,22 @@ export default function ProductsPage() {
                     id={`attr-${attr.key}`}
                     type="text"
                     value={formData.attributes?.[attr.key] || ''}
-                    onChange={e => setFormData({
-                      ...formData, 
-                      attributes: { ...(formData.attributes || {}), [attr.key]: e.target.value }
-                    })}
+                    onChange={e => {
+                      let cleanVal = e.target.value;
+                      if (attr.key === 'peso') {
+                        const numeric = cleanVal.replace(/[^0-9.]/g, '');
+                        const parts = numeric.split('.');
+                        cleanVal = parts[0] + (parts.length > 1 ? '.' + parts.slice(1).join('') : '');
+                      } else if (attr.key === 'volumen_ml' || attr.key === 'garantia') {
+                        cleanVal = cleanVal.replace(/\D/g, '');
+                      } else {
+                        cleanVal = cleanVal.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ0-9\s\-]/g, '');
+                      }
+                      setFormData({
+                        ...formData, 
+                        attributes: { ...(formData.attributes || {}), [attr.key]: cleanVal }
+                      });
+                    }}
                     placeholder={`Ej. ${attr.label}`}
                   />
                 </div>
@@ -326,20 +582,12 @@ export default function ProductsPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="prod-category">Categoría Global *</label>
+                <label htmlFor="prod-category">Categoría *</label>
                 <select id="prod-category" required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value, attributes: {}})}>
-                  <option value="Abarrotes y Alimentos">Abarrotes y Alimentos</option>
-                  <option value="Bebidas">Bebidas</option>
-                  <option value="Ropa y Moda">Ropa y Moda</option>
-                  <option value="Zapatos y Calzado">Zapatos y Calzado</option>
-                  <option value="Belleza y Cuidado Personal">Belleza y Cuidado Personal</option>
-                  <option value="Joyería y Relojes">Joyería y Relojes</option>
-                  <option value="Juguetes y Niños">Juguetes y Niños</option>
-                  <option value="Hogar y Decoración">Hogar y Decoración</option>
-                  <option value="Electrónica y Tecnología">Electrónica y Tecnología</option>
-                  <option value="Ferretería y Construcción">Ferretería y Construcción</option>
-                  <option value="Deportes y Aire Libre">Deportes y Aire Libre</option>
-                  <option value="Otros">Otros</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.nombre}>{cat.nombre}</option>
+                  ))}
+                  {categories.length === 0 && <option value="Otros">Otros</option>}
                 </select>
               </div>
 
@@ -475,19 +723,9 @@ export default function ProductsPage() {
               className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
             >
               <option value="ALL">-- Todas las categorías --</option>
-              <option value="Abarrotes y Alimentos">Abarrotes y Alimentos</option>
-              <option value="Bebidas">Bebidas</option>
-              <option value="Ropa y Moda">Ropa y Moda</option>
-              <option value="Zapatos y Calzado">Zapatos y Calzado</option>
-              <option value="Belleza y Cuidado Personal">Belleza y Cuidado Personal</option>
-              <option value="Joyería y Relojes">Joyería y Relojes</option>
-              <option value="Juguetes y Niños">Juguetes y Niños</option>
-              <option value="Hogar y Decoración">Hogar y Decoración</option>
-              <option value="Electrónica y Tecnología">Electrónica y Tecnología</option>
-              <option value="Ferretería y Construcción">Ferretería y Construcción</option>
-              <option value="Deportes y Aire Libre">Deportes y Aire Libre</option>
-              <option value="Entretenimiento y Ocio">Entretenimiento y Ocio</option>
-              <option value="Otros">Otros</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.nombre}>{cat.nombre}</option>
+              ))}
             </select>
           </div>
           <div className="w-full md:w-auto flex justify-end mt-2 md:mt-0">
@@ -560,7 +798,22 @@ export default function ProductsPage() {
                       // Single product row (no variants)
                       const p = variants[0];
                       return (
-                        <tr key={p.id}>
+                        <tr 
+                          key={p.id}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            const container = e.currentTarget.closest('.full-width-container');
+                            const rect = container.getBoundingClientRect();
+                            const menuWidth = 192;
+                            const menuHeight = 90;
+                            let posX = e.clientX - rect.left;
+                            let posY = e.clientY - rect.top;
+                            if (posX + menuWidth > rect.width) posX = rect.width - menuWidth - 10;
+                            if (posY + menuHeight > rect.height) posY = rect.height - menuHeight - 10;
+                            setContextMenu({ x: posX, y: posY, product: p });
+                          }}
+                          className="hover:bg-slate-50/50 transition-colors"
+                        >
                           <td>
                             <div className="flex flex-col items-start gap-1">
                               <span className="text-sm font-semibold text-slate-800">{p.name}</span>
@@ -592,15 +845,6 @@ export default function ProductsPage() {
                           <td className="text-right text-sm text-slate-800">Bs {Number(p.precioVenta).toFixed(2)}</td>
                           <td className="text-center">
                             <div className="flex items-center justify-center gap-1.5">
-                              {hasPermission('catalogo_crear') && (
-                                <button 
-                                  onClick={() => handleCloneVariant(p)} 
-                                  className="btn-premium-icon text-indigo-600 dark:text-indigo-400"
-                                  title="Agregar Variante"
-                                >
-                                  <Copy size={15} />
-                                </button>
-                              )}
                               {hasPermission('catalogo_editar') && (
                                 <button 
                                   onClick={() => handleEdit(p)} 
@@ -646,7 +890,21 @@ export default function ProductsPage() {
 
                       return (
                         <React.Fragment key={name}>
-                          <tr className="bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500">
+                          <tr 
+                            onContextMenu={(e) => {
+                               e.preventDefault();
+                               const container = e.currentTarget.closest('.full-width-container');
+                               const rect = container.getBoundingClientRect();
+                               const menuWidth = 192;
+                               const menuHeight = 90;
+                               let posX = e.clientX - rect.left;
+                               let posY = e.clientY - rect.top;
+                               if (posX + menuWidth > rect.width) posX = rect.width - menuWidth - 10;
+                               if (posY + menuHeight > rect.height) posY = rect.height - menuHeight - 10;
+                               setContextMenu({ x: posX, y: posY, product: main });
+                             }}
+                            className="bg-slate-50/40 dark:bg-slate-900/20 font-bold border-l-4 border-indigo-500 hover:bg-slate-100/50 transition-colors"
+                          >
                             <td>
                               <div 
                                 role="button" 
@@ -668,20 +926,27 @@ export default function ProductsPage() {
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayCosto}</td>
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayVenta}</td>
                             <td className="text-center">
-                              {hasPermission('catalogo_crear') && (
-                                <button 
-                                  onClick={() => handleCloneVariant(main)} 
-                                  className="btn-premium-icon text-indigo-600 dark:text-indigo-400"
-                                  title="Agregar Variante"
-                                >
-                                  <Copy size={15} />
-                                </button>
-                              )}
+                              {/* Acciones movidas al menú de clic derecho */}
                             </td>
                           </tr>
 
                           {isExpanded && variants.map(p => (
-                            <tr key={p.id} className="bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200">
+                            <tr 
+                              key={p.id} 
+                              onContextMenu={(e) => {
+                                 e.preventDefault();
+                                 const container = e.currentTarget.closest('.full-width-container');
+                                 const rect = container.getBoundingClientRect();
+                                 const menuWidth = 192;
+                                 const menuHeight = 90;
+                                 let posX = e.clientX - rect.left;
+                                 let posY = e.clientY - rect.top;
+                                 if (posX + menuWidth > rect.width) posX = rect.width - menuWidth - 10;
+                                 if (posY + menuHeight > rect.height) posY = rect.height - menuHeight - 10;
+                                 setContextMenu({ x: posX, y: posY, product: p });
+                               }}
+                              className="bg-slate-100/20 dark:bg-slate-900/10 border-l border-slate-200 hover:bg-slate-200/30 transition-colors"
+                            >
                               <td className="pl-8">
                                 <div className="flex items-center gap-2">
                                   <span className="text-slate-300 dark:text-slate-700 font-mono">└─</span>
@@ -756,6 +1021,48 @@ export default function ProductsPage() {
         onConfirm={proceedDelete}
         onCancel={() => setConfirmDelete(null)}
       />
+
+      {contextMenu && (
+        <>
+          <div 
+            className="absolute inset-0 z-40 bg-transparent" 
+            onClick={() => setContextMenu(null)}
+            onContextMenu={(e) => { e.preventDefault(); setContextMenu(null); }}
+          />
+          <div 
+            className="absolute bg-white dark:bg-slate-900 border border-slate-950/30 dark:border-slate-800 rounded-xl shadow-xl py-1.5 w-48 z-50 animate-fadeIn"
+            style={{ 
+              top: contextMenu.y, 
+              left: contextMenu.x,
+            }}
+          >
+            <div 
+              role="button"
+              onClick={() => {
+                handleViewKardex(contextMenu.product);
+                setContextMenu(null);
+              }}
+              className="w-full text-left px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-205 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-2.5 transition-colors cursor-pointer select-none"
+            >
+              <ClipboardList size={15} className="text-slate-400 dark:text-slate-500" />
+              <span>Ver Kardex</span>
+            </div>
+            {hasPermission('catalogo_crear') && (
+              <div 
+                role="button"
+                onClick={() => {
+                  handleCloneVariant(contextMenu.product);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-xs font-semibold text-indigo-650 dark:text-indigo-400 hover:bg-indigo-50/40 dark:hover:bg-slate-800/60 flex items-center gap-2.5 border-t border-slate-950/10 dark:border-slate-800 transition-colors cursor-pointer select-none"
+              >
+                <Copy size={15} className="text-indigo-400" />
+                <span>Agregar Variante</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

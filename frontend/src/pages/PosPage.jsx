@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api, { getBackendUrl } from '../api';
 import { useToast } from '../components/ToastContext';
 import {
-  Minus, Plus, Trash2, Bell, Receipt, Calculator, Store, LayoutGrid, Sun, Moon, Tag, ArrowLeft, ShoppingCart, Search, Loader2
+  Minus, Plus, Trash2, Bell, Receipt, Calculator, Store, LayoutGrid, Sun, Moon, Tag, ArrowLeft, ShoppingCart, Search, Loader2, LogOut
 } from 'lucide-react';
 
 export default function PosPage() {
@@ -62,6 +62,11 @@ export default function PosPage() {
   const userSucursalName = sessionStorage.getItem('user_sucursal_name');
   const tenantName = sessionStorage.getItem('tenant_name') || 'Mi Tienda';
   const isBranchLocked = userRole !== 'OWNER' && !!userSucursalId;
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    window.location.href = '/login';
+  };
 
   useEffect(() => {
     localStorage.setItem(cartKey, JSON.stringify(cart));
@@ -187,6 +192,19 @@ export default function PosPage() {
     }
   };
 
+  // Calcular cantidad reservada por producto en las órdenes en espera (tickets)
+  const heldQuantities = useMemo(() => {
+    const qtyMap = {};
+    holdOrders.forEach(order => {
+      if (order.items) {
+        order.items.forEach(item => {
+          qtyMap[item.producto_id] = (qtyMap[item.producto_id] || 0) + item.cantidad;
+        });
+      }
+    });
+    return qtyMap;
+  }, [holdOrders]);
+
   // Dinámicamente extraer la primera palabra del nombre como categoría si no hay category real
   const products = useMemo(() => {
     return stockInfo.map(s => {
@@ -196,8 +214,12 @@ export default function PosPage() {
         catName = s.producto?.name?.split(' ')[0] || 'General';
       }
       
+      const heldQty = heldQuantities[s.producto_id] || 0;
+      const adjustedStock = Math.max(0, s.cantidadTotal - heldQty);
+      
       return {
         ...s,
+        cantidadTotal: adjustedStock,
         category: catName,
         displayName: s.producto?.name,
         description: s.producto?.sku || 'Item',
@@ -205,10 +227,10 @@ export default function PosPage() {
         image: s.producto?.imagen_url 
           ? getBackendUrl(s.producto.imagen_url) 
           : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80',
-        available: s.cantidadTotal > 0
+        available: adjustedStock > 0
       };
     });
-  }, [stockInfo]);
+  }, [stockInfo, heldQuantities]);
 
   // Obtener lista única de categorías dinámicas
   const dynamicCategories = useMemo(() => {
@@ -344,6 +366,19 @@ export default function PosPage() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
+    const trimmedNombre = clienteNombre ? clienteNombre.trim() : '';
+    const trimmedDocumento = clienteDocumento ? clienteDocumento.trim() : '';
+
+    if (!trimmedNombre) {
+      toast.error('El nombre del cliente no puede estar vacío');
+      return;
+    }
+
+    if (trimmedNombre.toLowerCase() !== 'cliente casual' && !trimmedDocumento) {
+      toast.error('Debe ingresar el NIT / CI del cliente para registrar una venta a su nombre');
+      return;
+    }
+
     const receivedVal = Number(montoRecibido) || total;
     if (receivedVal < total) {
       toast.error('El monto recibido no puede ser menor al total a cobrar');
@@ -373,7 +408,8 @@ export default function PosPage() {
       setMontoRecibido('');
       fetchStock();
     } catch (err) {
-      toast.error('Error al procesar la orden');
+      const msg = err.response?.data?.message || 'Error al procesar la orden';
+      toast.error(typeof msg === 'string' ? msg : 'Error al procesar la orden');
     } finally {
       setSaving(false);
     }
@@ -406,12 +442,25 @@ export default function PosPage() {
       
       {/* LEFT SIDEBAR - Categories */}
       <div className="w-[110px] bg-[#0f172a] border-r border-slate-800 flex flex-col items-center py-6 shadow-sm z-10 flex-shrink-0 overflow-y-auto custom-scrollbar">
-        <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity" title="Volver al panel principal">
-          <div className="w-10 h-10 bg-slate-800 text-white rounded-full mb-2 flex items-center justify-center shadow-md">
-            <ArrowLeft size={20} />
-          </div>
-          <span className="text-[11px] font-black tracking-tight text-slate-200 text-center px-1 truncate w-full">{tenantName}</span>
-        </Link>
+        {userRole === 'VENDEDOR' ? (
+          <Link 
+            to="/sales" 
+            className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity cursor-pointer"
+            title="Volver a Ventas"
+          >
+            <div className="w-10 h-10 bg-slate-800 text-white rounded-full mb-2 flex items-center justify-center shadow-md">
+              <ArrowLeft size={20} />
+            </div>
+            <span className="text-[11px] font-black tracking-tight text-slate-200 text-center px-1 truncate w-full uppercase">Volver</span>
+          </Link>
+        ) : (
+          <Link to="/" className="flex flex-col items-center mb-6 hover:opacity-80 transition-opacity" title="Volver al panel principal">
+            <div className="w-10 h-10 bg-slate-800 text-white rounded-full mb-2 flex items-center justify-center shadow-md">
+              <ArrowLeft size={20} />
+            </div>
+            <span className="text-[11px] font-black tracking-tight text-slate-200 text-center px-1 truncate w-full uppercase">Volver</span>
+          </Link>
+        )}
 
         <div 
           onClick={toggleTheme}
@@ -450,7 +499,7 @@ export default function PosPage() {
         {/* Top Header / Branch Selector */}
         <div className="h-[70px] bg-[#0f172a] border-b border-slate-800 flex items-center justify-between px-8 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <span className="text-white font-extrabold text-lg tracking-tight">Terminal POS</span>
+            <span className="text-slate-200 font-semibold text-base tracking-normal">Terminal POS</span>
           </div>
           {!isBranchLocked && sucursales.length > 1 && (
             <select
@@ -521,15 +570,16 @@ export default function PosPage() {
       <div className="w-[380px] bg-white border-l border-slate-200 flex flex-col h-full shadow-lg z-20 flex-shrink-0">
         
         {/* Cart Header */}
-        <div className="p-6 pb-0 flex-shrink-0">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2 text-slate-800 font-bold text-lg">
-              <Store size={20} />
-              <span>Caja 01</span>
-            </div>
-            <span className="text-sm text-slate-500 font-medium">Orden: #{orderNumber}</span>
+        <div className="bg-[#0f172a] text-white p-6 h-[70px] border-b border-slate-800 flex justify-between items-center flex-shrink-0">
+          <div className="flex items-center gap-2 font-bold text-base">
+            <Store size={18} className="text-white" />
+            <span>Caja 01</span>
           </div>
-          
+          <span className="text-xs text-slate-400 font-medium">Orden: #{orderNumber}</span>
+        </div>
+
+        {/* Tab Selector below Header */}
+        <div className="p-6 pb-0 flex-shrink-0">
           <div className="flex border-b border-slate-100 dark:border-slate-800 w-full mb-4">
             <div 
               role="button" 
@@ -686,7 +736,11 @@ export default function PosPage() {
                   <input 
                     type="text" 
                     value={clienteDocumento} 
-                    onChange={e => setClienteDocumento(e.target.value)} 
+                    onChange={e => {
+                      const cleanVal = e.target.value.replace(/\D/g, '').slice(0, 12);
+                      setClienteDocumento(cleanVal);
+                    }} 
+                    maxLength={12}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchClient(); } }}
                     placeholder="Ej. 1234567" 
                     className="flex-1 py-2.5 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-100 text-slate-900 dark:text-white placeholder:text-slate-400"
