@@ -117,7 +117,7 @@ export default function AuditReportsPage() {
       return toast.error('Debes seleccionar sucursal y producto');
     }
 
-    // Buscar la cantidad actual en sistema para ese producto+sucursal
+    
     const stockRow = stock.find(s => s.producto_id === auditForm.producto_id && s.sucursal_id === auditForm.sucursal_id);
     const cantidadSistema = stockRow ? Number(stockRow.cantidadTotal) : 0;
     const unidadesPerdidas = Number(auditForm.cantidad_fisica || 0);
@@ -156,7 +156,7 @@ export default function AuditReportsPage() {
 
   return (
     <div className="full-width-container animate-fadein space-y-8">
-      {/* Header */}
+      {}
       <div className="page-header-bar">
         <div>
           <h1>Registro Analítico de Ajustes</h1>
@@ -299,9 +299,9 @@ export default function AuditReportsPage() {
         </div>
       )}
 
-      {/* KPI Cards */}
+      {}
       <div className="grid grid-cols-2 gap-4">
-        {/* Loss Card */}
+        {}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm border-l-4 border-l-red-500">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
             Pérdida Total Estimada
@@ -311,7 +311,7 @@ export default function AuditReportsPage() {
           </p>
         </div>
 
-        {/* Count Card */}
+        {}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm border-l-4 border-l-blue-500">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
             Ajustes Encontrados
@@ -322,10 +322,10 @@ export default function AuditReportsPage() {
         </div>
       </div>
 
-      {/* Filters Panel */}
+      {}
       {showFilters && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row flex-wrap items-end md:items-center gap-4 animate-fadeIn">
-          {/* Start Date */}
+          {}
           <div className="flex-1 min-w-[150px]">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Desde</label>
             <input
@@ -335,7 +335,7 @@ export default function AuditReportsPage() {
               className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
             />
           </div>
-          {/* End Date */}
+          {}
           <div className="flex-1 min-w-[150px]">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hasta</label>
             <input
@@ -345,7 +345,7 @@ export default function AuditReportsPage() {
               className="w-full h-[42px] px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10"
             />
           </div>
-          {/* Operador */}
+          {}
           <div className="flex-1 min-w-[150px]">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Operador</label>
             <select
@@ -359,7 +359,7 @@ export default function AuditReportsPage() {
               ))}
             </select>
           </div>
-          {/* Motivo */}
+          {}
           <div className="flex-1 min-w-[150px]">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Motivo</label>
             <select
@@ -374,7 +374,7 @@ export default function AuditReportsPage() {
               <option value="CADUCIDAD">Vencido</option>
             </select>
           </div>
-          {/* Sucursal */}
+          {}
           <div className="flex-1 min-w-[150px]">
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sucursal</label>
             <select
@@ -406,7 +406,7 @@ export default function AuditReportsPage() {
         </div>
       )}
 
-      {/* Table */}
+      {}
       <div className="table-premium-wrapper">
         <div className="overflow-x-auto">
           <table className="table-premium">
@@ -438,7 +438,7 @@ export default function AuditReportsPage() {
                 filteredAjustes.map(a => {
                   const cantFisica = Number(a.cantidad_fisica) || 0;
                   const cantSistema = Number(a.cantidad_sistema) || 0;
-                  // Si no hay cantidad_sistema registrada, intentamos buscarla en el stock actual (solo como fallback visual)
+                  
                   const fallbackStock = stock.find(s => s.id === a.stock_id);
                   const sistemaReal = a.cantidad_sistema !== null && a.cantidad_sistema !== undefined ? cantSistema : (fallbackStock?.cantidadActual || 0);
                   const deltaVal = cantFisica - sistemaReal;

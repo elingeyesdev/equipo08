@@ -14,7 +14,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Header -->
+        
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
             android:background="@color/profit_color"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Info Text -->
+        
         <TextView
             android:id="@+id/tvAuditInfo"
             android:layout_width="match_parent"
@@ -63,7 +63,7 @@
             android:orientation="horizontal"
             android:baselineAligned="false">
             
-            <!-- Left Column: Cantidad -->
+            
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
                     android:textColor="@color/primary_color" />
             </LinearLayout>
 
-            <!-- Right Column: Motivo -->
+            
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -118,7 +118,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Dynamic Warning Box -->
+        
         <LinearLayout
             android:id="@+id/llWarningBox"
             android:layout_width="match_parent"
@@ -162,7 +162,7 @@
             android:gravity="top|start"
             android:textColor="@color/primary_color" />
 
-        <!-- Buttons -->
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -180,13 +180,14 @@
                 android:layout_marginEnd="12dp"
                 style="?android:attr/borderlessButtonStyle" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnProcesar"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
                 android:text="Procesar Acta"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#00C0E6"
+                android:backgroundTint="#0f172a"
+                app:cornerRadius="8dp"
                 android:paddingHorizontal="16dp" />
         </LinearLayout>
 

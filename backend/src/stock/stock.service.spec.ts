@@ -2,20 +2,16 @@ import { BadRequestException } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { Stock } from './stock.entity';
 
-/**
- * Suite de Pruebas: Transacciones, Rollback, Bloqueo de Stock y Multi-Tenant
- * ============================================================================
- * Estas pruebas verifican las reglas críticas de producción del módulo de inventario.
- */
+
 describe('StockService - Pruebas de Producción', () => {
   let service: StockService;
   let mockStockRep: any;
   let mockDataSource: any;
 
-  // Mock de un EntityManager reutilizable
+  
   const createMockManager = () => ({
     findOne: jest.fn((entity: any, options: any) => {
-      // Mock para la búsqueda de variaciones en resolveVariacionId
+      
       if (entity.name === 'ProductoVariacion') {
         return Promise.resolve({ id: 'generated-id' });
       }
@@ -46,24 +42,24 @@ describe('StockService - Pruebas de Producción', () => {
     service = new StockService(mockStockRep, mockDataSource);
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MÓDULO 1: TRANSACCIONES Y CONSISTENCIA
-  // ═══════════════════════════════════════════════════════════════════════════
+  
+  
+  
   describe('Transacciones y Consistencia', () => {
 
     it('11. [Transacción] applyStockDelta - Debe crear stock Y movimiento en la misma transacción', async () => {
       const manager = createMockManager();
-      manager.findOne.mockResolvedValue(null); // No existe stock previo
+      manager.findOne.mockResolvedValue(null); 
 
       const result = await service.applyStockDelta(
         manager, 'tenant-1', 'suc-1', 'prod-1',
         10, 500, 'INGRESO', 'Lote inicial',
       );
 
-      // Verificar que se guardaron las entidades en el mismo manager (3 llamadas en total por la ProductoVariacion de emergencia)
-      expect(manager.save).toHaveBeenCalledTimes(3); // Variacion + Stock + MovimientoInventario
+      
+      expect(manager.save).toHaveBeenCalledTimes(3); 
       expect(result.cantidadActual).toBe(10);
-      expect(result.costoPromedio).toBe(50); // 500/10
+      expect(result.costoPromedio).toBe(50); 
     });
 
     it('12. [Transacción] applyStockDelta - Debe registrar movimiento con stock_anterior y stock_resultante correctos', async () => {
@@ -79,8 +75,8 @@ describe('StockService - Pruebas de Producción', () => {
         stockExistente as any,
       );
 
-      // Verificar que el movimiento registra stockAnterior=20 y stockResultante=15
-      const movimientoCall = manager.save.mock.calls[1]; // Segunda llamada = movimiento
+      
+      const movimientoCall = manager.save.mock.calls[1]; 
       const movimientoData = movimientoCall[1];
       expect(movimientoData.stockAnterior).toBe(20);
       expect(movimientoData.stockResultante).toBe(15);
@@ -90,7 +86,7 @@ describe('StockService - Pruebas de Producción', () => {
 
     it('13. [Transacción] applyStockDelta - Debe calcular WAC correctamente en entradas', async () => {
       const manager = createMockManager();
-      // Stock existente: 10 unidades a Bs 50 c/u = Bs 500 total
+      
       const stockExistente = {
         id: 'stock-1', tenant_id: 'tenant-1', sucursal_id: 'suc-1',
         producto_id: 'prod-1', cantidadActual: 10, costoPromedio: 50,
@@ -98,11 +94,11 @@ describe('StockService - Pruebas de Producción', () => {
 
       await service.applyStockDelta(
         manager, 'tenant-1', 'suc-1', 'prod-1',
-        5, 400, 'INGRESO', 'Nuevo lote', // 5 unidades a Bs 80 c/u = Bs 400
+        5, 400, 'INGRESO', 'Nuevo lote', 
         stockExistente as any,
       );
 
-      // WAC = (10*50 + 400) / 15 = 900/15 = 60
+      
       expect(stockExistente.costoPromedio).toBe(60);
       expect(stockExistente.cantidadActual).toBe(15);
     });
@@ -120,15 +116,15 @@ describe('StockService - Pruebas de Producción', () => {
         stockExistente as any,
       );
 
-      // En salidas, el costo promedio NO cambia
+      
       expect(stockExistente.costoPromedio).toBe(75);
       expect(stockExistente.cantidadActual).toBe(12);
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MÓDULO 2: BLOQUEO DE STOCK (SOBREVENTA)
-  // ═══════════════════════════════════════════════════════════════════════════
+  
+  
+  
   describe('Bloqueo de Stock - Anti-Sobreventa', () => {
 
     it('15. [Bloqueo] applyStockDelta - Debe rechazar si el stock quedaría negativo', async () => {
@@ -180,9 +176,9 @@ describe('StockService - Pruebas de Producción', () => {
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MÓDULO 3: ROLLBACK EN TRANSACCIONES
-  // ═══════════════════════════════════════════════════════════════════════════
+  
+  
+  
   describe('Rollback en Transacciones', () => {
 
     it('18. [Rollback] transferStock - Debe hacer rollback si sucursal origen no tiene stock suficiente', async () => {
@@ -207,7 +203,7 @@ describe('StockService - Pruebas de Producción', () => {
         service.transferStock('tenant-1', 'suc-1', 'suc-1', 'prod-1', 5),
       ).rejects.toThrow('No se puede transferir a la misma sucursal');
 
-      // Fail-fast: la validación ocurre ANTES de startTransaction
+      
       expect(runner.startTransaction).not.toHaveBeenCalled();
       expect(runner.commitTransaction).not.toHaveBeenCalled();
     });
@@ -219,7 +215,7 @@ describe('StockService - Pruebas de Producción', () => {
         service.transferStock('tenant-1', 'suc-1', 'suc-2', 'prod-1', 0),
       ).rejects.toThrow('La cantidad debe ser mayor a cero');
 
-      // Fail-fast: la validación ocurre ANTES de startTransaction
+      
       expect(runner.startTransaction).not.toHaveBeenCalled();
     });
 
@@ -236,9 +232,9 @@ describe('StockService - Pruebas de Producción', () => {
     });
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MÓDULO 4: AISLAMIENTO MULTI-TENANT
-  // ═══════════════════════════════════════════════════════════════════════════
+  
+  
+  
   describe('Aislamiento Multi-Tenant', () => {
 
     it('22. [Multi-Tenant] getStockRow - Debe filtrar siempre por tenant_id', async () => {
@@ -271,12 +267,12 @@ describe('StockService - Pruebas de Producción', () => {
         10, 500, 'INGRESO', 'Primer lote',
       );
 
-      // El stock creado debe tener el tenant_id correcto
+      
       const stockCreateCall = manager.create.mock.calls[0];
       const stockData = stockCreateCall[1];
       expect(stockData.tenant_id).toBe('tenant-X');
 
-      // El movimiento también debe tener el tenant_id correcto
+      
       const movCreateCall = manager.create.mock.calls[1];
       const movData = movCreateCall[1];
       expect(movData.tenant_id).toBe('tenant-X');
@@ -301,18 +297,18 @@ describe('StockService - Pruebas de Producción', () => {
         id: 'stock-1', cantidadActual: 20, costoPromedio: 50,
       };
       
-      // La primera llamada resolverá la variación y retornará su mock
+      
       runner.manager.findOne
-        .mockResolvedValueOnce({ id: 'generated-id' }) // resolveVariacionId call
-        .mockResolvedValueOnce(mockSourceStock)       // stock origen con lock
-        .mockResolvedValueOnce(null);                 // stock destino no existe
+        .mockResolvedValueOnce({ id: 'generated-id' }) 
+        .mockResolvedValueOnce(mockSourceStock)       
+        .mockResolvedValueOnce(null);                 
 
-      // Mock applyStockDelta para que no falle
+      
       jest.spyOn(service, 'applyStockDelta').mockResolvedValue(mockSourceStock as any);
 
       await service.transferStock('tenant-AISLADO', 'suc-1', 'suc-2', 'prod-1', 5);
 
-      // Verificar que findOne del origen filtró por tenant_id y producto_variacion_id
+      
       expect(runner.manager.findOne).toHaveBeenNthCalledWith(2, Stock, {
         where: { tenant_id: 'tenant-AISLADO', sucursal_id: 'suc-1', producto_variacion_id: 'generated-id' },
         lock: { mode: 'pessimistic_write' },

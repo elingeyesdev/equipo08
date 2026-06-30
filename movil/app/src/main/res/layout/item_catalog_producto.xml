@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Image Container (Rounded CardView at the top) -->
+        
         <androidx.cardview.widget.CardView
             android:id="@+id/cvImageContainer"
             android:layout_width="match_parent"
@@ -32,7 +32,7 @@
                 android:scaleType="centerCrop" />
         </androidx.cardview.widget.CardView>
 
-        <!-- Product Details Area -->
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
             android:paddingHorizontal="10dp"
             android:paddingBottom="12dp">
 
-            <!-- Category Tag -->
+            
             <TextView
                 android:id="@+id/tvProductCategory"
                 android:layout_width="wrap_content"
@@ -54,7 +54,7 @@
                 android:textSize="9sp"
                 android:textStyle="bold" />
 
-            <!-- Product Name -->
+            
             <TextView
                 android:id="@+id/tvProductName"
                 android:layout_width="match_parent"
@@ -67,7 +67,7 @@
                 android:maxLines="2"
                 android:ellipsize="end" />
 
-            <!-- Description -->
+            
             <TextView
                 android:id="@+id/tvProductDescription"
                 android:layout_width="match_parent"
@@ -79,7 +79,7 @@
                 android:maxLines="2"
                 android:ellipsize="end" />
 
-            <!-- Bottom Row (Price and Stock Badge) -->
+            
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
-                <!-- Stock badge -->
+                
                 <TextView
                     android:id="@+id/tvStockBadge"
                     android:layout_width="wrap_content"

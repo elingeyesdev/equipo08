@@ -208,17 +208,17 @@ export default function RegisterPage() {
               className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 border border-slate-100 flex flex-col items-center text-center font-sans"
               style={{ colorScheme: 'light', color: '#0f172a' }}
             >
-              {/* Success Badge */}
+              {}
               <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 mb-4 flex-shrink-0">
                 <CheckCircle size={24} strokeWidth={2} />
               </div>
 
-              {/* Title */}
+              {}
               <h3 className="text-base font-bold text-slate-900 mb-2">
                 Solicitud Recibida
               </h3>
 
-              {/* Message */}
+              {}
               <p className="text-xs font-semibold text-emerald-700 bg-emerald-50/50 px-2 py-1 rounded-md mb-3">
                 Tu solicitud de registro ha sido recibida con éxito.
               </p>
@@ -226,7 +226,7 @@ export default function RegisterPage() {
                 Tu espacio comercial se encuentra en revisión. Te confirmaremos la aprobación por correo electrónico (Gmail) en las próximas horas.
               </p>
 
-              {/* Actions */}
+              {}
               <button
                 onClick={() => {
                   setShowSuccessModal(false);

@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import './index.css';
 
-/* ─── PAGE TRANSITION ────────────────────────────────────────────── */
+
 function PageTransition({ children }) {
   const location = useLocation();
   return (
@@ -45,7 +45,7 @@ function PageTransition({ children }) {
   );
 }
 
-/* ─── NAV ITEM ─────────────────────────────────────────────────── */
+
 function NavItem({ to, icon: Icon, label, active, isOpen }) {
   return (
     <Link to={to} className={`nav-link ${active ? 'active' : ''} ${!isOpen ? 'justify-center px-0' : ''}`} title={!isOpen ? label : undefined}>
@@ -55,7 +55,7 @@ function NavItem({ to, icon: Icon, label, active, isOpen }) {
   );
 }
 
-/* ─── SIDEBAR ──────────────────────────────────────────────────── */
+
 function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
   const location = useLocation();
   const tenantName = sessionStorage.getItem('tenant_name') || 'Mi Empresa';
@@ -109,10 +109,10 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
   return (
     <div className={`sidebar transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${isOpen ? 'w-[280px]' : 'w-[88px] items-center'}`}>
       
-      {/* ── Top scroll area ── */}
+      {}
       <div className={`flex flex-col gap-6 flex-1 overflow-y-auto w-full ${isOpen ? 'p-5' : 'py-5 px-3'}`}>
 
-        {/* Toggle and User Chip Area */}
+        {}
         <div className="flex flex-col gap-4">
           <div className={`flex items-center ${isOpen ? 'justify-between' : 'justify-center'} pt-2`}>
             {isOpen && (
@@ -133,7 +133,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
             </button>
           </div>
 
-          {/* User chip */}
+          {}
           <div className={`flex items-center gap-3 ${isOpen ? 'px-4 py-3' : 'justify-center py-3 px-0'} rounded-2xl bg-black/10 border border-white/10 backdrop-blur-md shadow-inner`}>
             {logoUrl ? (
               <img src={getBackendUrl(logoUrl)} alt="Logo" className="w-10 h-10 rounded-xl object-cover bg-white flex-shrink-0" />
@@ -213,7 +213,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
         </nav>
       </div>
 
-      {/* ── Tienda Online & Logout ── */}
+      {}
       <div className={`p-5 w-full border-t border-white/10 flex flex-col gap-3 items-center`}>
         {userRole !== 'SUPER_ADMIN' && (
           <a 
@@ -241,7 +241,7 @@ function Sidebar({ setAuthToken, permissions, isOpen, setIsOpen }) {
 }
 
 
-/* ─── APP ROOT ──────────────────────────────────────────────────── */
+
 function App() {
   const [authToken, setAuthToken] = useState(sessionStorage.getItem('access_token'));
   const [permissions, setPermissions] = useState(() => {
@@ -273,13 +273,13 @@ function App() {
 
   const fetchPermissions = async () => {
     try {
-      // 1. Obtener datos actualizados del usuario (ej: si le cambiaron la sucursal)
+      
       try {
         const meRes = await api.get('/users/me');
         const currentSucursalId = sessionStorage.getItem('user_sucursal_id') || '';
         const meSucursalId = meRes.data.sucursal_id || '';
         
-        // Si la sucursal cambió, actualizamos y recargamos para limpiar estado de componentes
+        
         if (meSucursalId !== currentSucursalId && meRes.data.role !== 'OWNER' && meRes.data.role !== 'SUPER_ADMIN') {
           sessionStorage.setItem('user_sucursal_id', meRes.data.sucursal_id || '');
           sessionStorage.setItem('user_sucursal_name', meRes.data.sucursal_name || '');
@@ -287,10 +287,10 @@ function App() {
           return;
         }
       } catch(e) {
-        // Ignorar si el endpoint falla (ej. versión antigua del backend)
+        
       }
 
-      // 2. Obtener permisos
+      
       const res = await api.get('/users/permissions');
       setPermissions(res.data);
       
@@ -337,10 +337,10 @@ function App() {
     <ToastProvider>
       <Router>
         <Routes>
-          {/* Ruta Pública Independiente (Sin Layout ni Autenticación Requerida) */}
+          {}
           <Route path="/tienda/:domain" element={<PublicCatalogPage />} />
           
-          {/* Rutas de la Aplicación */}
+          {}
           <Route path="/*" element={
             !authToken ? (
               <Routes>

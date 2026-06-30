@@ -105,6 +105,20 @@
         </LinearLayout>
 
         <ImageButton
+            android:id="@+id/btnShowSchedule"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_clock"
+            app:tint="#64748b"
+            android:contentDescription="Ver Horarios"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnEdit" />
+
+        <ImageButton
             android:id="@+id/btnEdit"
             android:layout_width="36dp"
             android:layout_height="36dp"

@@ -50,7 +50,7 @@ public class SourcingFragment extends Fragment {
     private Button btnGuardar, btnToggleFilters;
     private CardView cardForm, cardFilter;
     private ScrollView scrollForm;
-    private EditText etVolumen, etFechaVencimiento, etFechaProduccion, etSearch, etFilterDateFrom, etFilterDateTo;
+    private EditText etVolumen, etCostoUnitario, etFechaVencimiento, etFechaProduccion, etSearch, etFilterDateFrom, etFilterDateTo;
     private TextInputLayout tilFechaVencimiento, tilFechaProduccion;
     private Spinner spinnerSucursal, spinnerProducto, spinnerProveedor, spinnerFilterSucursal;
     private RecyclerView recyclerView;
@@ -64,6 +64,7 @@ public class SourcingFragment extends Fragment {
     private List<Producto> productosList = new ArrayList<>();
     private List<Proveedor> proveedoresList = new ArrayList<>();
     private List<Sucursal> sucursalesList = new ArrayList<>();
+    private com.example.template.utils.SessionManager sessionManager;
     
     private ArrayAdapter<Proveedor> provAdapter;
 
@@ -78,6 +79,7 @@ public class SourcingFragment extends Fragment {
         cardFilter = view.findViewById(R.id.cardFilter);
         scrollForm = view.findViewById(R.id.scrollForm);
         etVolumen = view.findViewById(R.id.etVolumen);
+        etCostoUnitario = view.findViewById(R.id.etCostoUnitario);
         spinnerSucursal = view.findViewById(R.id.spinnerSucursal);
         spinnerProducto = view.findViewById(R.id.spinnerProducto);
         spinnerProveedor = view.findViewById(R.id.spinnerProveedor);
@@ -107,6 +109,7 @@ public class SourcingFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
+        sessionManager = new com.example.template.utils.SessionManager(getContext());
 
         btnToggleForm.setOnClickListener(v -> toggleForm());
         btnGuardar.setOnClickListener(v -> saveLote());
@@ -148,6 +151,7 @@ public class SourcingFragment extends Fragment {
             btnToggleForm.setImageResource(R.drawable.ic_add);
             btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a")));
             etVolumen.setText("");
+            etCostoUnitario.setText("");
             etFechaVencimiento.setText("");
             etFechaProduccion.setText("");
         }
@@ -198,6 +202,9 @@ public class SourcingFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Producto prod = productosList.get(position);
                 String provTarget = prod.getProveedorId();
+                if (provTarget == null && prod.getProveedor() != null) {
+                    provTarget = prod.getProveedor().getId();
+                }
                 if(provTarget != null && proveedoresList != null && provAdapter != null) {
                     for (int i = 0; i < proveedoresList.size(); i++) {
                         if (proveedoresList.get(i).getId().equals(provTarget)) {
@@ -206,6 +213,7 @@ public class SourcingFragment extends Fragment {
                         }
                     }
                 }
+                spinnerProveedor.setEnabled(false);
                 
                 String cat = prod.getCategory();
                 if (cat != null && (cat.equals("Abarrotes y Alimentos") || cat.equals("Bebidas"))) {
@@ -238,17 +246,32 @@ public class SourcingFragment extends Fragment {
     }
 
     private void loadSpinnersData() {
-        // Load Sucursales
+        
         apiService.getSucursales().enqueue(new Callback<List<Sucursal>>() {
             @Override
             public void onResponse(Call<List<Sucursal>> call, Response<List<Sucursal>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    List<Sucursal> allBranches = response.body();
                     sucursalesList.clear();
-                    for (Sucursal s : response.body()) {
-                        if (s.isActive()) {
-                            sucursalesList.add(s);
+                    
+                    String userRole = sessionManager.getRole();
+                    String userSucursalId = sessionManager.getSucursalId();
+                    boolean isRestricted = !"OWNER".equalsIgnoreCase(userRole) && !"SUPER_ADMIN".equalsIgnoreCase(userRole) && userSucursalId != null && !userSucursalId.isEmpty();
+
+                    if (isRestricted) {
+                        for (Sucursal s : allBranches) {
+                            if (s.isActive() && userSucursalId.equals(s.getId())) {
+                                sucursalesList.add(s);
+                            }
+                        }
+                    } else {
+                        for (Sucursal s : allBranches) {
+                            if (s.isActive()) {
+                                sucursalesList.add(s);
+                            }
                         }
                     }
+                    
                     if (getContext() != null) {
                         ArrayAdapter<Sucursal> sucAdapter = new ArrayAdapter<>(
                             getContext(), android.R.layout.simple_spinner_item, sucursalesList
@@ -257,13 +280,22 @@ public class SourcingFragment extends Fragment {
                         spinnerSucursal.setAdapter(sucAdapter);
 
                         List<String> filterOptions = new ArrayList<>();
-                        filterOptions.add("Todas las sucursales");
+                        if (!isRestricted) {
+                            filterOptions.add("Todas las sucursales");
+                        }
                         for (Sucursal s : sucursalesList) {
                             filterOptions.add(s.getName());
                         }
+                        
                         ArrayAdapter<String> filterSucAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, filterOptions);
                         filterSucAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         spinnerFilterSucursal.setAdapter(filterSucAdapter);
+                        
+                        if (isRestricted) {
+                            spinnerFilterSucursal.setEnabled(false);
+                        } else {
+                            spinnerFilterSucursal.setEnabled(true);
+                        }
                         
                         spinnerFilterSucursal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { filterLotes(); }
@@ -276,7 +308,7 @@ public class SourcingFragment extends Fragment {
             public void onFailure(Call<List<Sucursal>> call, Throwable t) {}
         });
 
-        // Load Productos
+        
         apiService.getProductos().enqueue(new Callback<List<Producto>>() {
             @Override
             public void onResponse(Call<List<Producto>> call, Response<List<Producto>> response) {
@@ -296,7 +328,7 @@ public class SourcingFragment extends Fragment {
             public void onFailure(Call<List<Producto>> call, Throwable t) {}
         });
 
-        // Load Proveedores
+        
         apiService.getProveedores().enqueue(new Callback<List<Proveedor>>() {
             @Override
             public void onResponse(Call<List<Proveedor>> call, Response<List<Proveedor>> response) {
@@ -323,18 +355,34 @@ public class SourcingFragment extends Fragment {
         String query = etSearch != null && etSearch.getText() != null ? etSearch.getText().toString().toLowerCase() : "";
         String dateFrom = etFilterDateFrom != null ? etFilterDateFrom.getText().toString() : "";
         String dateTo = etFilterDateTo != null ? etFilterDateTo.getText().toString() : "";
-        int sucIndex = spinnerFilterSucursal != null ? spinnerFilterSucursal.getSelectedItemPosition() : 0;
         
+        String userRole = sessionManager.getRole();
+        String userSucursalId = sessionManager.getSucursalId();
+        boolean isRestricted = !"OWNER".equalsIgnoreCase(userRole) && !"SUPER_ADMIN".equalsIgnoreCase(userRole) && userSucursalId != null && !userSucursalId.isEmpty();
+
         Sucursal selectedBranch = null;
-        if (sucIndex > 0 && sucursalesList != null && sucIndex - 1 < sucursalesList.size()) {
-            selectedBranch = sucursalesList.get(sucIndex - 1);
+        String selectedOption = spinnerFilterSucursal != null && spinnerFilterSucursal.getSelectedItem() != null ? spinnerFilterSucursal.getSelectedItem().toString() : "";
+        
+        if (!selectedOption.equals("Todas las sucursales") && !selectedOption.isEmpty()) {
+            for (Sucursal s : sucursalesList) {
+                if (selectedOption.equals(s.getName())) {
+                    selectedBranch = s;
+                    break;
+                }
+            }
         }
 
         List<LoteIngreso> filteredList = new ArrayList<>();
         for (LoteIngreso lote : allLotesList) {
             boolean match = true;
             
-            // Text search
+            if (isRestricted) {
+                if (lote.getSucursalId() == null || !lote.getSucursalId().equals(userSucursalId)) {
+                    continue;
+                }
+            }
+            
+            
             if (!query.isEmpty() && lote.getProducto() != null) {
                 String name = lote.getProducto().getName() != null ? lote.getProducto().getName().toLowerCase() : "";
                 String sku = lote.getProducto().getSku() != null ? lote.getProducto().getSku().toLowerCase() : "";
@@ -343,20 +391,20 @@ public class SourcingFragment extends Fragment {
                 }
             }
             
-            // Sucursal filter
+            
             if (match && selectedBranch != null) {
                 if (lote.getSucursalId() == null || !lote.getSucursalId().equals(selectedBranch.getId())) {
                     match = false;
                 }
             }
             
-            // Date filter (Vencimiento)
+            
             if (match && (!dateFrom.isEmpty() || !dateTo.isEmpty())) {
                 String venc = lote.getFechaVencimiento();
                 if (venc == null || venc.isEmpty()) {
                     match = false;
                 } else {
-                    venc = venc.substring(0, Math.min(venc.length(), 10)); // just date part
+                    venc = venc.substring(0, Math.min(venc.length(), 10)); 
                     if (!dateFrom.isEmpty() && venc.compareTo(dateFrom) < 0) {
                         match = false;
                     }
@@ -404,6 +452,15 @@ public class SourcingFragment extends Fragment {
 
         LoteIngreso request = new LoteIngreso(selectedSucursal.getId(), selectedProd.getId(), selectedProv.getId(), vol, fechaVencimiento, fechaProduccion);
         
+        String costoStr = etCostoUnitario.getText().toString().trim();
+        if (!costoStr.isEmpty()) {
+            try {
+                request.setCostoUnitario(Double.parseDouble(costoStr));
+            } catch (NumberFormatException e) {
+                
+            }
+        }
+        
         apiService.createLote(request).enqueue(new Callback<LoteIngreso>() {
             @Override
             public void onResponse(Call<LoteIngreso> call, Response<LoteIngreso> response) {
@@ -423,13 +480,13 @@ public class SourcingFragment extends Fragment {
     }
 
     private void confirmDelete(LoteIngreso lote) {
-        if (getContext() == null) return;
-        new androidx.appcompat.app.AlertDialog.Builder(getContext())
-            .setTitle("Eliminar Ingreso")
-            .setMessage("¿Estás seguro de que quieres eliminar este lote de ingreso?")
-            .setPositiveButton("Eliminar", (dialog, which) -> deleteLote(lote))
-            .setNegativeButton("Cancelar", null)
-            .show();
+        com.example.template.utils.DialogHelper.showConfirmDialog(
+            getContext(),
+            "Eliminar Ingreso",
+            "¿Estás seguro de que deseas eliminar este lote de ingreso?\n\nEsta acción no se puede deshacer.",
+            "Eliminar",
+            () -> deleteLote(lote)
+        );
     }
 
     private void deleteLote(LoteIngreso lote) {

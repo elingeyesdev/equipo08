@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'super-secret-key-123', // Debe coincidir con la de AuthModule
+      secretOrKey: 'super-secret-key-123', 
     });
   }
 
@@ -30,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('USER_DISABLED');
     }
 
-    // Cargar tenant manualmente (ya no es una relación FK)
+    
     if (user.tenant_id) {
       const tenant = await this.dataSource.getRepository(Tenant).findOne({ where: { id: user.tenant_id } });
       if (tenant && tenant.status === TenantStatus.SUSPENDED) {

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/bg_dark">
 
-    <!-- Loading State -->
+    
     <ProgressBar
         android:id="@+id/progressBarHome"
         android:layout_width="wrap_content"
@@ -14,7 +14,7 @@
         android:layout_gravity="center"
         android:visibility="visible" />
 
-    <!-- Dashboard Content -->
+    
     <ScrollView
         android:id="@+id/scrollDashboardContent"
         android:layout_width="match_parent"
@@ -28,7 +28,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Welcome Header -->
+            
             <TextView
                 android:id="@+id/tvWelcomeTitle"
                 android:layout_width="match_parent"
@@ -40,7 +40,7 @@
                 android:letterSpacing="-0.02"
                 android:text="Resumen de tienda" />
 
-            <!-- Metrics Section Title -->
+            
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,13 +52,13 @@
                 android:textStyle="bold"
                 android:letterSpacing="0.05" />
 
-            <!-- KPI Cards Layout -->
+            
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- 1. Ventas Históricas Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cvMetricSales"
                     android:layout_width="match_parent"
@@ -110,7 +110,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- 2. Ingresos Totales Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cvMetricRevenue"
                     android:layout_width="match_parent"
@@ -162,7 +162,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- 3. Utilidad Bruta Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cvMetricProfit"
                     android:layout_width="match_parent"
@@ -214,7 +214,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- 4. Stock Físico Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -273,7 +273,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- 5. Pérdidas Confirmadas Card -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cvMetricLosses"
                     android:layout_width="match_parent"
@@ -326,7 +326,7 @@
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
 
-            <!-- Recent Activity Section Title -->
+            
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -338,7 +338,7 @@
                 android:textStyle="bold"
                 android:letterSpacing="0.05" />
 
-            <!-- Recent Sales List -->
+            
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRecentSales"
                 android:layout_width="match_parent"
@@ -368,9 +368,6 @@
                 android:textStyle="bold"
                 app:backgroundTint="@color/primary_color"
                 app:cornerRadius="12dp"
-                app:icon="@drawable/ic_ventas"
-                app:iconTint="@color/white"
-                app:iconGravity="textStart"
                 app:rippleColor="#20ffffff" />
 
         </LinearLayout>

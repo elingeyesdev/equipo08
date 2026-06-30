@@ -12,6 +12,12 @@ public class AuthResponse {
     @SerializedName("tenant_id")
     private String rootTenantId;
 
+    @SerializedName("sucursal_id")
+    private String sucursalId;
+
+    @SerializedName("sucursal_name")
+    private String sucursalName;
+
     public String getAccessToken() {
         return accessToken;
     }
@@ -33,6 +39,16 @@ public class AuthResponse {
         return user != null ? user.role : null;
     }
 
+    public String getSucursalId() {
+        if (sucursalId != null) return sucursalId;
+        return user != null ? user.sucursalId : null;
+    }
+
+    public String getSucursalName() {
+        if (sucursalName != null) return sucursalName;
+        return user != null ? user.sucursalName : null;
+    }
+
     public static class UserData {
         public String id;
         public String name;
@@ -40,5 +56,11 @@ public class AuthResponse {
         public String role;
         public String tenant_id;
         public String tenant_name;
+
+        @SerializedName("sucursal_id")
+        public String sucursalId;
+
+        @SerializedName("sucursal_name")
+        public String sucursalName;
     }
 }

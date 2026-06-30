@@ -47,12 +47,12 @@ import retrofit2.Response;
 
 public class TerminalPOSFragment extends Fragment {
 
-    // Terminal POS Views
+    
     private Spinner spinnerBranch;
     private RecyclerView rvProducts;
     private SalesProductAdapter productAdapter;
 
-    // Categories Filters
+    
     private LinearLayout llCategoriesContainer;
     private String selectedCategory = "Todos";
     private final String[] categories = {
@@ -62,7 +62,7 @@ public class TerminalPOSFragment extends Fragment {
         "Deportes y Aire Libre", "Entretenimiento y Ocio", "Otros"
     };
 
-    // Cart / Billing Views
+    
     private CardView cvCartPanel;
     private TextView tvCartCount, tvCartTotal;
     private Button btnToggleCart, btnCheckout, btnTicket;
@@ -70,31 +70,32 @@ public class TerminalPOSFragment extends Fragment {
     private RecyclerView rvCartItems;
     private CartAdapter cartAdapter;
 
-    // Subtabs Views
+    
     private Button btnCartTabNew, btnCartTabHistory;
     private LinearLayout llCartTabNewContent, llCartTabHistoryContent;
     private RecyclerView rvSavedTickets;
     private TextView tvEmptyTickets;
     private SavedTicketsAdapter savedTicketsAdapter;
 
-    // SwipeRefreshLayout
+    
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshProducts;
 
-    // API
+    
     private ApiService apiService;
 
-    // State Variables
+    
     private List<Sucursal> sucursalesList = new ArrayList<>();
     private List<Stock> allStockList = new ArrayList<>();
     private List<Stock> filteredStockList = new ArrayList<>();
+    private com.example.template.utils.SessionManager sessionManager;
     
-    // Cart products list in memory
+    
     private List<CartProduct> cartProducts = new ArrayList<>();
     private boolean isCartExpanded = false;
 
-    // Ticket list queue in memory
+    
     private static List<SavedTicket> savedTicketsList = new ArrayList<>();
-    private static int ticketCounter = 11; // Matches the screenshots
+    private static int ticketCounter = 11; 
 
     @Nullable
     @Override
@@ -102,12 +103,13 @@ public class TerminalPOSFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_terminal_pos, container, false);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
+        sessionManager = new com.example.template.utils.SessionManager(getContext());
 
-        // Bind POS
+        
         spinnerBranch = view.findViewById(R.id.spinnerBranch);
         rvProducts = view.findViewById(R.id.rvProducts);
 
-        // Bind Cart
+        
         cvCartPanel = view.findViewById(R.id.cvCartPanel);
         tvCartCount = view.findViewById(R.id.tvCartCount);
         tvCartTotal = view.findViewById(R.id.tvCartTotal);
@@ -117,7 +119,7 @@ public class TerminalPOSFragment extends Fragment {
         btnCheckout = view.findViewById(R.id.btnCheckout);
         btnTicket = view.findViewById(R.id.btnTicket);
 
-        // Bind Subtabs
+        
         btnCartTabNew = view.findViewById(R.id.btnCartTabNew);
         btnCartTabHistory = view.findViewById(R.id.btnCartTabHistory);
         llCartTabNewContent = view.findViewById(R.id.llCartTabNewContent);
@@ -125,10 +127,10 @@ public class TerminalPOSFragment extends Fragment {
         rvSavedTickets = view.findViewById(R.id.rvSavedTickets);
         tvEmptyTickets = view.findViewById(R.id.tvEmptyTickets);
 
-        // Bind SwipeRefreshLayout
+        
         swipeRefreshProducts = view.findViewById(R.id.swipeRefreshProducts);
 
-        // Setup SwipeRefreshLayout
+        
         swipeRefreshProducts.setOnRefreshListener(() -> loadStock());
 
         loadTicketsFromPrefs();
@@ -156,13 +158,13 @@ public class TerminalPOSFragment extends Fragment {
             tv.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
             tv.setGravity(android.view.Gravity.CENTER);
             
-            // Set padding
+            
             float density = getResources().getDisplayMetrics().density;
             int hp = (int) (16 * density);
             int vp = (int) (10 * density);
             tv.setPadding(hp, vp, hp, vp);
 
-            // Set margins
+            
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -195,12 +197,12 @@ public class TerminalPOSFragment extends Fragment {
         gd.setCornerRadius(8 * density);
         
         if (isSelected) {
-            gd.setColor(Color.parseColor("#0f172a")); // Dark Slate selected
+            gd.setColor(Color.parseColor("#0f172a")); 
             gd.setStroke((int) (1.5 * density), Color.parseColor("#0f172a"));
             tv.setTextColor(Color.WHITE);
         } else {
             gd.setColor(Color.WHITE);
-            gd.setStroke((int) (1.5 * density), Color.parseColor("#cbd5e1")); // Light grey border
+            gd.setStroke((int) (1.5 * density), Color.parseColor("#cbd5e1")); 
             tv.setTextColor(Color.parseColor("#475569"));
         }
         tv.setBackground(gd);
@@ -244,7 +246,13 @@ public class TerminalPOSFragment extends Fragment {
             }
         });
 
-        btnCheckout.setOnClickListener(v -> showConfirmarPagoDialog());
+        btnCheckout.setOnClickListener(v -> {
+            if (cartProducts.isEmpty()) {
+                Toast.makeText(getContext(), "El carrito está vacío", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            showConfirmarPagoDialog();
+        });
         btnTicket.setOnClickListener(v -> handleSaveAsTicket());
     }
 
@@ -296,7 +304,7 @@ public class TerminalPOSFragment extends Fragment {
             itemsCount += cp.getCantidad();
         }
 
-        // Deep copy items
+        
         List<CartProduct> itemsCopy = new ArrayList<>();
         for (CartProduct cp : cartProducts) {
             itemsCopy.add(new CartProduct(
@@ -315,12 +323,12 @@ public class TerminalPOSFragment extends Fragment {
 
         Toast.makeText(getContext(), "Pedido guardado como ticket: " + ticketId, Toast.LENGTH_LONG).show();
 
-        // Clear cart
+        
         cartProducts.clear();
         updateCartTotals();
         cartAdapter.notifyDataSetChanged();
 
-        // Switch to Tickets Tab to display newly queued ticket
+        
         btnCartTabHistory.performClick();
     }
 
@@ -336,7 +344,7 @@ public class TerminalPOSFragment extends Fragment {
         Button btnDialogConfirmVenta = dialogView.findViewById(R.id.btnDialogConfirmVenta);
         ImageButton btnDialogClose = dialogView.findViewById(R.id.btnDialogClose);
 
-        // Pre-fill values
+        
         etDialogClienteNombre.setText("Cliente Casual");
         
         double total = 0;
@@ -350,7 +358,7 @@ public class TerminalPOSFragment extends Fragment {
         etDialogMontoRecibido.setText(String.format(java.util.Locale.US, "%.2f", finalTotal));
         btnDialogConfirmVenta.setText("Confirmar venta • " + formattedTotal);
 
-        // Populate Payment Method Spinner
+        
         String[] paymentMethods = {"Efectivo", "QR", "Transferencia", "Tarjeta"};
         ArrayAdapter<String> pmAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, paymentMethods);
         pmAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -415,21 +423,21 @@ public class TerminalPOSFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(getContext(), "¡Venta registrada exitosamente!", Toast.LENGTH_LONG).show();
                     
-                    // Show receipt dialog
+                    
                     Venta savedVenta = response.body();
                     showComprobanteDialog(savedVenta);
 
-                    // Reset cart
+                    
                     cartProducts.clear();
                     updateCartTotals();
                     cartAdapter.notifyDataSetChanged();
                     
-                    // Collapse cart
+                    
                     isCartExpanded = false;
                     llCartDetails.setVisibility(View.GONE);
                     btnToggleCart.setText("Ver detalles");
 
-                    // Reload inventories
+                    
                     loadStock();
                 } else {
                     Toast.makeText(getContext(), "Error al procesar la venta en el servidor", Toast.LENGTH_SHORT).show();
@@ -446,12 +454,12 @@ public class TerminalPOSFragment extends Fragment {
     }
 
     private void setupRecyclerViews() {
-        // POS Catalogue: 2 column grid
+        
         rvProducts.setLayoutManager(new GridLayoutManager(getContext(), 2));
         productAdapter = new SalesProductAdapter(filteredStockList, stockItem -> addToCart(stockItem));
         rvProducts.setAdapter(productAdapter);
 
-        // Cart items: Linear layout
+        
         rvCartItems.setLayoutManager(new LinearLayoutManager(getContext()));
         cartAdapter = new CartAdapter(cartProducts, new CartAdapter.CartActionListener() {
             @Override
@@ -469,12 +477,12 @@ public class TerminalPOSFragment extends Fragment {
         });
         rvCartItems.setAdapter(cartAdapter);
 
-        // Saved Tickets items: Linear layout
+        
         rvSavedTickets.setLayoutManager(new LinearLayoutManager(getContext()));
         savedTicketsAdapter = new SavedTicketsAdapter(savedTicketsList, new SavedTicketsAdapter.SavedTicketActionListener() {
             @Override
             public void onLoadTicket(SavedTicket ticket) {
-                // Load ticket copy to active cart products
+                
                 cartProducts.clear();
                 for (CartProduct cp : ticket.getItems()) {
                     cartProducts.add(new CartProduct(
@@ -487,11 +495,11 @@ public class TerminalPOSFragment extends Fragment {
                     ));
                 }
 
-                // Remove from queue
+                
                 savedTicketsList.remove(ticket);
                 saveTicketsToPrefs();
 
-                // Update UI elements
+                
                 updateCartTotals();
                 cartAdapter.notifyDataSetChanged();
                 btnCartTabNew.performClick();
@@ -530,10 +538,23 @@ public class TerminalPOSFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Sucursal>> call, Response<List<Sucursal>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    List<Sucursal> allBranches = response.body();
                     sucursalesList.clear();
-                    for (Sucursal s : response.body()) {
-                        if (s.isActive()) {
-                            sucursalesList.add(s);
+                    
+                    String userRole = sessionManager.getRole();
+                    String userSucursalId = sessionManager.getSucursalId();
+                    
+                    if (!"OWNER".equalsIgnoreCase(userRole) && !"SUPER_ADMIN".equalsIgnoreCase(userRole) && userSucursalId != null && !userSucursalId.isEmpty()) {
+                        for (Sucursal s : allBranches) {
+                            if (s.isActive() && userSucursalId.equals(s.getId())) {
+                                sucursalesList.add(s);
+                            }
+                        }
+                    } else {
+                        for (Sucursal s : allBranches) {
+                            if (s.isActive()) {
+                                sucursalesList.add(s);
+                            }
                         }
                     }
                     setupSpinner();
@@ -558,6 +579,16 @@ public class TerminalPOSFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, options);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerBranch.setAdapter(adapter);
+
+        String userRole = sessionManager.getRole();
+        String userSucursalId = sessionManager.getSucursalId();
+        boolean isRestricted = !"OWNER".equalsIgnoreCase(userRole) && !"SUPER_ADMIN".equalsIgnoreCase(userRole) && userSucursalId != null && !userSucursalId.isEmpty();
+
+        if (isRestricted) {
+            spinnerBranch.setEnabled(false);
+        } else {
+            spinnerBranch.setEnabled(true);
+        }
     }
 
     private void loadStock() {
@@ -655,7 +686,7 @@ public class TerminalPOSFragment extends Fragment {
         cvCartPanel.setVisibility(View.VISIBLE);
         tvCartTotal.setText(String.format("Bs %.2f", total));
 
-        // Update subtabs text count dynamically
+        
         btnCartTabNew.setText("Nueva orden (" + totalItems + ")");
         btnCartTabHistory.setText("Tickets (" + savedTicketsList.size() + ")");
     }
@@ -674,7 +705,7 @@ public class TerminalPOSFragment extends Fragment {
         Button btnCerrar = dialogView.findViewById(R.id.btnCerrarComprobante);
         Button btnDescargar = dialogView.findViewById(R.id.btnDescargarComprobante);
 
-        // Fill headers
+        
         tvNro.setText("Comprobante Nro: " + (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "N/A"));
         
         String formattedDate = "N/A";
@@ -831,7 +862,7 @@ public class TerminalPOSFragment extends Fragment {
         dialog.show();
     }
 
-    // --- INNER CLASS REPRESENTING A SAVED TICKET / SUSPENDED ORDER ---
+    
     private static class SavedTicket {
         private String id;
         private String timestamp;
@@ -854,7 +885,7 @@ public class TerminalPOSFragment extends Fragment {
         public int getTotalItemsCount() { return totalItemsCount; }
     }
 
-    // --- RECYCLER ADAPTER FOR SAVED TICKETS ---
+    
     private static class SavedTicketsAdapter extends RecyclerView.Adapter<SavedTicketsAdapter.ViewHolder> {
         private List<SavedTicket> list;
         private SavedTicketActionListener listener;
@@ -917,7 +948,7 @@ public class TerminalPOSFragment extends Fragment {
         }
     }
 
-    // --- INNER CLASS REPRESENTING CART PRODUCT DRAFT ---
+    
     private static class CartProduct {
         private String productoId;
         private String name;
@@ -944,7 +975,7 @@ public class TerminalPOSFragment extends Fragment {
         public int getMaxStock() { return maxStock; }
     }
 
-    // --- POS PRODUCT CATALOG LIST RECYCLER ADAPTER ---
+    
     private static class SalesProductAdapter extends RecyclerView.Adapter<SalesProductAdapter.ViewHolder> {
         private List<Stock> list;
         private OnProductClickListener listener;
@@ -1022,7 +1053,7 @@ public class TerminalPOSFragment extends Fragment {
         }
     }
 
-    // --- BILLING SHOPPING CART RECYCLER ADAPTER ---
+    
     private static class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         private List<CartProduct> list;
         private CartActionListener listener;

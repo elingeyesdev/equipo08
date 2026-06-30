@@ -35,6 +35,7 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void onDeleteClick(Producto producto);
         void onEditClick(Producto producto);
         void onCopyClick(Producto producto);
+        void onProductLongClick(Producto producto);
     }
 
     public static class Item {
@@ -76,7 +77,7 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return;
         }
 
-        // Group by name
+        
         Map<String, List<Producto>> groups = new LinkedHashMap<>();
         for (Producto p : originalList) {
             String name = p.getName();
@@ -153,7 +154,7 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 h.tvProveedor.setText("Proveedor: N/A");
             }
 
-            // Prices
+            
             double costo = p.getPrecioCosto();
             double venta = p.getPrecioVenta();
             h.tvPrecioCosto.setText(String.format(java.util.Locale.US, "Bs %.2f", costo));
@@ -163,7 +164,7 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             double pct = venta > 0 ? (profit / venta) * 100 : 0;
             h.tvMargen.setText(String.format(java.util.Locale.US, "%.0f%%", pct));
 
-            // Actions Visibility
+            
             if (canManage) {
                 h.btnCopy.setVisibility(View.VISIBLE);
                 h.btnEdit.setVisibility(View.VISIBLE);
@@ -183,6 +184,13 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             h.btnDelete.setOnClickListener(v -> {
                 if (actionListener != null) actionListener.onDeleteClick(p);
             });
+            h.itemView.setOnLongClickListener(v -> {
+                if (actionListener != null) {
+                    actionListener.onProductLongClick(p);
+                    return true;
+                }
+                return false;
+            });
 
         } else if (holder instanceof ParentViewHolder) {
             ParentViewHolder h = (ParentViewHolder) holder;
@@ -198,7 +206,7 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 h.tvProveedor.setText("Proveedor: N/A");
             }
 
-            // Range calculations
+            
             double minCosto = Double.MAX_VALUE;
             double maxCosto = -Double.MAX_VALUE;
             double minVenta = Double.MAX_VALUE;
@@ -228,11 +236,11 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             h.tvPrecioVenta.setText(displayVenta);
             h.tvMargen.setText(displayMargen);
 
-            // Chevron
+            
             h.ivChevron.setImageResource(item.isExpanded ? R.drawable.ic_chevron_down : R.drawable.ic_chevron_down);
             h.ivChevron.setRotation(item.isExpanded ? 180f : 0f);
 
-            // Expand/Collapse toggle on click
+            
             h.itemView.setOnClickListener(v -> {
                 String groupName = item.groupName;
                 if (expandedGroups.contains(groupName)) {
@@ -243,7 +251,7 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 rebuildDisplayList();
             });
 
-            // Actions Visibility
+            
             if (canManage) {
                 h.btnCopy.setVisibility(View.VISIBLE);
             } else {
@@ -267,7 +275,7 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 h.tvProveedor.setText("Proveedor: N/A");
             }
 
-            // Prices
+            
             double costo = p.getPrecioCosto();
             double venta = p.getPrecioVenta();
             h.tvPrecioCosto.setText(String.format(java.util.Locale.US, "Bs %.2f", costo));
@@ -277,7 +285,7 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             double pct = venta > 0 ? (profit / venta) * 100 : 0;
             h.tvMargen.setText(String.format(java.util.Locale.US, "%.0f%%", pct));
 
-            // Actions Visibility
+            
             if (canManage) {
                 h.btnEdit.setVisibility(View.VISIBLE);
                 h.btnDelete.setVisibility(View.VISIBLE);
@@ -291,6 +299,13 @@ public class ProductoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             });
             h.btnDelete.setOnClickListener(v -> {
                 if (actionListener != null) actionListener.onDeleteClick(p);
+            });
+            h.itemView.setOnLongClickListener(v -> {
+                if (actionListener != null) {
+                    actionListener.onProductLongClick(p);
+                    return true;
+                }
+                return false;
             });
         }
     }

@@ -23,7 +23,7 @@ export class MovimientoInventario {
   stock_id: string;
 
   @Column({ type: 'varchar' })
-  tipo: string; // INGRESO, EGRESO, AJUSTE, DEVOLUCION, ANULACION, TRANSFERENCIA
+  tipo: string; 
 
   @Column('int', { name: 'cantidad_delta' })
   cantidadDelta: number;
@@ -44,7 +44,7 @@ export class MovimientoInventario {
   usuario_id: string;
 
   @Column({ name: 'referencia_tipo', type: 'varchar', nullable: true })
-  referenciaTipo: string; // VENTA, COMPRA, AJUSTE, TRANSFERENCIA, ANULACION
+  referenciaTipo: string; 
 
   @Column({ name: 'referencia_id', type: 'uuid', nullable: true })
   referenciaId: string;

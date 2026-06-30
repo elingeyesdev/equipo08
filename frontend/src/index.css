@@ -4,21 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── DESIGN TOKENS ─────────────────────────────────────────────── */
+
 :root {
-  --bg:            #eef2f6;   /* slate blue-gray background for depth */
+  --bg:            #eef2f6;   
   --bg-card:       #ffffff;
-  --border:        #cbd5e1;   /* slate-300 for higher contrast */
-  --border-subtle: #e2e8f0;   /* slate-200 for visible borders */
-  --txt-primary:   #0f172a;   /* slate-950 */
-  --txt-secondary: #334155;   /* slate-700 for better legibility */
-  --txt-muted:     #556376;   /* slate-500 for visible muted text */
-  --blue:          #0284c7;   /* sky-600 (Sea Blue) */
-  --blue-hover:    #0369a1;   /* sky-700 (Deep Sea Blue) */
-  --blue-light:    #e0f2fe;   /* sky-100 (Sea Blue light) */
-  --danger:        #914e4e;   /* corporate muted red */
+  --border:        #cbd5e1;   
+  --border-subtle: #e2e8f0;   
+  --txt-primary:   #0f172a;   
+  --txt-secondary: #334155;   
+  --txt-muted:     #556376;   
+  --blue:          #0284c7;   
+  --blue-hover:    #0369a1;   
+  --blue-light:    #e0f2fe;   
+  --danger:        #914e4e;   
   --danger-light:  #faf7f7;
-  --success:       #059669;   /* emerald-600 */
+  --success:       #059669;   
   --success:       #059669;
   --success-light: #ecfdf5;
   --warning:       #d97706;
@@ -44,7 +44,7 @@
   --warning-light: #78350f;
 }
 
-/* ─── TAILWIND OVERRIDES FOR DARK MODE ───────────────────────────── */
+
 .dark .bg-white { background-color: var(--bg-card) !important; }
 .dark .bg-slate-50 { background-color: var(--bg-input) !important; }
 .dark .bg-slate-100 { background-color: var(--bg-hover) !important; }
@@ -61,7 +61,7 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
 }
 
-/* Alerts, Pills & Gradients Overrides for Dark Mode */
+
 .dark .bg-emerald-100 { background-color: var(--success-light) !important; border-color: var(--success) !important; }
 .dark .text-emerald-700 { color: var(--success) !important; }
 
@@ -76,7 +76,7 @@
 .dark .bg-gradient-to-r { background: var(--bg-hover) !important; }
 .dark .text-indigo-700, .dark .text-indigo-600 { color: var(--txt-secondary) !important; }
 
-/* Botones Primarios Premium en Dark Mode (Blanco sobre oscuro) */
+
 .dark .bg-indigo-600, .dark .bg-blue-600, .dark .bg-teal-600 { 
   background-color: var(--txt-primary) !important; 
   color: var(--bg-card) !important;
@@ -90,7 +90,7 @@
 .dark .bg-indigo-50, .dark .bg-blue-50, .dark .bg-teal-50 { background-color: var(--bg-input) !important; border-color: var(--border) !important; }
 .dark .text-indigo-500, .dark .text-blue-500, .dark .text-indigo-400 { color: var(--blue-hover) !important; }
 
-/* Custom Buttons Overrides for Dark Mode */
+
 .dark .btn-premium, .dark .btn-premium-icon {
   background: var(--bg-card) !important;
   color: var(--txt-primary) !important;
@@ -111,7 +111,7 @@
   color: #fff !important;
 }
 
-/* ─── FORCE LIGHT MODE (Login / Register) ───────────────────────────── */
+
 [style*="color-scheme: light"] .bg-white { background-color: #ffffff !important; }
 [style*="color-scheme: light"] .bg-slate-50 { background-color: #f8fafc !important; }
 [style*="color-scheme: light"] .text-slate-900,
@@ -123,7 +123,7 @@
 [style*="color-scheme: light"] .border-slate-300 { border-color: #cbd5e1 !important; }
 [style*="color-scheme: light"] .shadow-xl { box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important; }
 
-/* ─── BASE ───────────────────────────────────────────────────────── */
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html { font-size: 16px; }
@@ -140,13 +140,13 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ─── SCROLLBAR ──────────────────────────────────────────────────── */
+
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* ─── TYPOGRAPHY ─────────────────────────────────────────────────── */
+
 h1, h2, h3, h4, h5, h6 {
   color: var(--txt-primary);
   font-weight: 600;
@@ -155,7 +155,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.025em;
 }
 
-/* ─── FORM PRIMITIVES ────────────────────────────────────────────── */
+
 input, select, textarea, button {
   font-family: inherit;
   font-size: 0.875rem;
@@ -183,7 +183,7 @@ label *, input, select, textarea {
 
 input, select, textarea {
   width: 100%;
-  height: 2.375rem;           /* h-[38px] */
+  height: 2.375rem;           
   padding: 0 0.75rem;
   border-radius: 8px;
   background-color: var(--bg-card);
@@ -227,7 +227,7 @@ input::placeholder, textarea::placeholder {
   font-weight: 400;
 }
 
-/* ─── FORM LAYOUT ────────────────────────────────────────────────── */
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -249,7 +249,7 @@ input::placeholder, textarea::placeholder {
   border-top: 1px solid var(--border-subtle);
 }
 
-/* ─── BUTTONS ────────────────────────────────────────────────────── */
+
 button {
   display: inline-flex;
   align-items: center;
@@ -351,7 +351,7 @@ button:disabled {
   transform: scale(1.05);
 }
 
-/* ─── CARDS / CONTAINERS ─────────────────────────────────────────── */
+
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -367,7 +367,7 @@ button:disabled {
   padding: 1.5rem;
 }
 
-/* ─── PAGE STRUCTURE ─────────────────────────────────────────────── */
+
 .app-layout {
   display: flex;
   min-height: 100vh;
@@ -453,12 +453,12 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  padding: 0.625rem 0.875rem; /* larger padding */
+  padding: 0.625rem 0.875rem; 
   color: #94a3b8;
   text-decoration: none;
   border-radius: 8px;
   font-weight: 500;
-  font-size: 0.9rem; /* larger font size */
+  font-size: 0.9rem; 
   transition: color 0.12s, background-color 0.12s;
   line-height: 1;
 }
@@ -488,7 +488,7 @@ button:disabled {
   margin-bottom: 0.25rem;
 }
 
-/* ─── TABLES ─────────────────────────────────────────────────────── */
+
 .data-table-wrapper {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -529,7 +529,7 @@ tbody tr:last-child td { border-bottom: none; }
 tbody tr { transition: background-color 0.15s ease; }
 tbody tr:hover td { background-color: var(--bg-hover); }
 
-/* ─── BADGES ─────────────────────────────────────────────────────── */
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -551,7 +551,7 @@ tbody tr:hover td { background-color: var(--bg-hover); }
 .badge.badge-supervisor { background: var(--blue-light); color: var(--blue); border: 1px solid #bfdbfe; }
 .badge.badge-vendedor   { background: var(--warning-light); color: var(--warning); border: 1px solid #fde68a; }
 
-/* ─── STATUS INDICATOR ───────────────────────────────────────────── */
+
 .status-dot {
   display: inline-block;
   width: 6px;
@@ -561,7 +561,7 @@ tbody tr:hover td { background-color: var(--bg-hover); }
 .status-dot.active   { background-color: var(--success); box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
 .status-dot.inactive { background-color: var(--txt-muted); }
 
-/* ─── TOGGLE SWITCH ──────────────────────────────────────────────── */
+
 .switch {
   position: relative;
   display: inline-block;
@@ -600,7 +600,7 @@ input:checked + .slider                 { background-color: var(--blue); border-
 input:checked + .slider::before         { transform: translateX(16px); }
 input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
 
-/* ─── AUTH PAGES ─────────────────────────────────────────────────── */
+
 .auth-container {
   display: flex;
   align-items: center;
@@ -629,7 +629,7 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
 }
 .auth-link:hover { text-decoration: underline; }
 
-/* ─── TOASTS ─────────────────────────────────────────────────────── */
+
 .toast-container {
   position: fixed;
   top: 1.25rem;
@@ -692,7 +692,7 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
 }
 .toast-close:hover { background-color: #f1f5f9; color: var(--txt-primary); }
 
-/* ─── MODAL ──────────────────────────────────────────────────────── */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -722,7 +722,7 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
   to   { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-/* ─── PERMISSIONS LAYOUT ─────────────────────────────────────────── */
+
 .permission-card { border-radius: 12px; border: 1px solid var(--border); overflow: hidden; background: var(--bg-card); }
 .permission-card-header { padding: 1rem 1.25rem; background: var(--bg-hover); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 .permission-groups { padding: 1.25rem; }
@@ -733,11 +733,11 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
 .permission-row:last-child { border-bottom: none; }
 .permission-row span { font-size: 0.875rem; color: var(--txt-primary); font-weight: 500; }
 
-/* ─── RESPONSIVE GRIDS ───────────────────────────────────────────── */
+
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
 @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
 
-/* ─── UTILS ──────────────────────────────────────────────────────── */
+
 .user-avatar {
   width: 34px;
   height: 34px;
@@ -753,12 +753,12 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
   flex-shrink: 0;
 }
 
-/* Page header */
+
 .page-header { margin-bottom: 1.5rem; }
 .page-title { font-size: 1.25rem; font-weight: 700; color: var(--txt-primary); margin: 0 0 0.25rem; letter-spacing: -0.02em; }
 .page-subtitle { font-size: 0.875rem; color: var(--txt-secondary); margin: 0; font-weight: 400; }
 
-/* Empty state */
+
 .empty-state {
   padding: 3.5rem 2rem;
   text-align: center;
@@ -774,7 +774,7 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
   margin: 0 auto 1rem;
 }
 
-/* Loading */
+
 .loading-state {
   display: flex;
   align-items: center;
@@ -786,7 +786,7 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
   font-weight: 500;
 }
 
-/* Spinner */
+
 .spinner { animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -796,7 +796,7 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
 }
 .animate-fadein { animation: fadeIn 0.2s ease both; }
 
-/* Filter bar */
+
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -807,7 +807,7 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
   border-bottom: 1px solid var(--border);
 }
 
-/* ─── PREMIUM TABLES (DENSE) ─────────────────────────────────────── */
+
 .table-premium-wrapper {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -862,15 +862,15 @@ input:focus-visible + .slider           { box-shadow: 0 0 0 3px rgba(37,99,235,0
   vertical-align: middle;
 }
 
-/* ─── TABLE CLEANUP (NO-NONSENSE PROFESSIONAL LOOK FOR ALL TABLES) ──────────────── */
-/* Tame Avatars and Icons */
+
+
 table td .w-12.h-12, .table-premium td .w-12.h-12 {
   width: 2rem !important;
   height: 2rem !important;
   border-radius: 4px !important;
 }
-/* Removed aggressive hide rule */
-/* Standardize Badges and Spans inside ALL tables (Sin recuadros, sin pastillas) */
+
+
 table td .badge, .table-premium td .badge,
 table td span[class*="bg-"], .table-premium td span[class*="bg-"] {
   padding: 0 !important;
@@ -879,7 +879,7 @@ table td span[class*="bg-"], .table-premium td span[class*="bg-"] {
   box-shadow: none !important;
 }
 
-/* FORZAR UNIFORMIDAD EXTREMA: Un solo color, un solo tipo de letra, sin negritas extremas ni colores */
+
 table td {
   color: var(--txt-secondary) !important;
   font-family: 'Source Sans 3', sans-serif !important;
@@ -887,9 +887,9 @@ table td {
   letter-spacing: normal !important;
 }
 
-/* Removed aggressive hide rule */
 
-/* Reduce font sizes that are too big */
+
+
 table td .text-base, .table-premium td .text-base {
   font-size: 0.85rem !important;
 }
@@ -901,7 +901,7 @@ table td .text-3xl, .table-premium td .text-3xl {
   border-bottom: none;
 }
 
-/* ─── PREMIUM BUTTONS ────────────────────────────────────────────── */
+
 .btn-premium {
   display: inline-flex;
   align-items: center;
@@ -998,7 +998,7 @@ table td .text-3xl, .table-premium td .text-3xl {
   padding: 0;
   border-radius: 4px;
   background: transparent;
-  border: none; /* Sin recuadro */
+  border: none; 
   color: var(--txt-secondary);
   display: inline-flex;
   align-items: center;
@@ -1036,7 +1036,7 @@ table td .text-3xl, .table-premium td .text-3xl {
 
 .btn-premium-icon-danger {
   background-color: transparent;
-  border: none; /* Sin recuadro */
+  border: none; 
   color: var(--danger);
 }
 

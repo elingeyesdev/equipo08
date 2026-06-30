@@ -19,7 +19,7 @@
 
 
 
-            <!-- CARD Form -->
+            
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardForm"
                 android:layout_width="match_parent"
@@ -111,7 +111,7 @@
                     <TextView 
                         android:layout_width="wrap_content" 
                         android:layout_height="wrap_content" 
-                        android:text="Categoría global *" 
+                        android:text="Categoría *" 
                         android:textColor="#5a6a85"
                         android:layout_marginBottom="4dp"/>
                     <Spinner
@@ -193,7 +193,7 @@
                             android:textColor="@color/primary_color" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Image Selection Layout -->
+                    
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -290,7 +290,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- LIST AREA -->
+            
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"

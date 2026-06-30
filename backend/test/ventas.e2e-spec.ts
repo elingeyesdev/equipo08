@@ -29,11 +29,11 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
 
-    // Limpiar y preparar base de datos para la prueba de integración
+    
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
 
-    // Crear un Tenant de prueba
+    
     const tenant = queryRunner.manager.create(Tenant, {
       name: 'Integration Shop',
       domain: 'integration-shop',
@@ -48,7 +48,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
     const savedTenant = await queryRunner.manager.save(Tenant, tenant);
     tenantId = savedTenant.id;
 
-    // Crear una sucursal
+    
     const sucursal = queryRunner.manager.create(Sucursal, {
       tenant_id: tenantId,
       name: 'Central Integration',
@@ -59,7 +59,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
     const savedSucursal = await queryRunner.manager.save(Sucursal, sucursal);
     sucursalId = savedSucursal.id;
 
-    // Crear un producto
+    
     const producto = queryRunner.manager.create(Producto, {
       tenant_id: tenantId,
       name: 'Producto Integrado',
@@ -73,7 +73,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
     const savedProducto = await queryRunner.manager.save(Producto, producto);
     productoId = savedProducto.id;
 
-    // Crear Stock para ese producto en esa sucursal
+    
     const stock = queryRunner.manager.create(Stock, {
       tenant_id: tenantId,
       sucursal_id: sucursalId,
@@ -83,7 +83,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
     });
     await queryRunner.manager.save(Stock, stock);
 
-    // Crear un usuario administrador del Tenant para autenticarnos
+    
     const bcrypt = require('bcrypt');
     const hashedPassword = await bcrypt.hash('password123', 10);
     const user = queryRunner.manager.create(User, {
@@ -97,7 +97,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
     await queryRunner.manager.save(User, user);
     await queryRunner.release();
 
-    // Obtener Token de autenticación
+    
     const loginRes = await request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email: 'integration-admin@shop.com', password: 'password123' });
@@ -106,7 +106,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
   });
 
   afterAll(async () => {
-    // Limpieza
+    
     const queryRunner = dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.query('DELETE FROM stock WHERE tenant_id = $1', [
@@ -151,7 +151,7 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
           clienteDocumento: '1234567',
           metodoPago: 'Efectivo',
           items: [
-            { producto_id: productoId, cantidad: 15 }, // Disponible 10
+            { producto_id: productoId, cantidad: 15 }, 
           ],
         });
 
@@ -169,15 +169,15 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
           clienteDocumento: '1234567',
           metodoPago: 'Efectivo',
           items: [
-            { producto_id: productoId, cantidad: 4 }, // Disponible 10
+            { producto_id: productoId, cantidad: 4 }, 
           ],
         });
 
       expect(res.status).toBe(201);
       expect(res.body.numeroComprobante).toBe('CPB-000001');
-      expect(Number(res.body.total)).toBe(400); // 4 * 100 precioVenta
+      expect(Number(res.body.total)).toBe(400); 
 
-      // Verificar que el stock se descontó en la base de datos
+      
       const queryRunner = dataSource.createQueryRunner();
       await queryRunner.connect();
       const updatedStock = await queryRunner.manager.findOne(Stock, {
@@ -187,10 +187,10 @@ describe('Ventas Integration Tests (Pruebas de Integración)', () => {
           producto_id: productoId,
         },
       });
-      expect(updatedStock!.cantidadActual).toBe(6); // 10 - 4 = 6
+      expect(updatedStock!.cantidadActual).toBe(6); 
       await queryRunner.release();
 
-      // Verificar que el siguiente correlativo cambió a 000002
+      
       const nextRes = await request(app.getHttpServer())
         .get(`/api/ventas/siguiente-numero/${sucursalId}`)
         .set('Authorization', `Bearer ${authToken}`);

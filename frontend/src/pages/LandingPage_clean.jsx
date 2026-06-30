@@ -663,14 +663,14 @@ export default function LandingPage() {
       <style>{styles}</style>
       <div className="lp">
 
-        {/* OVERHEADER */}
+        {}
         <div className="lp-overheader">
           <a href="#ayuda">Ayuda</a>
           <span className="lp-overheader-sep">|</span>
           <Link to="/login">Iniciar Sesión</Link>
         </div>
 
-        {/* NAV */}
+        {}
         <nav className="lp-nav">
           <div className="lp-nav-inner">
             <Link to="/" style={{ textDecoration: 'none' }}>
@@ -696,7 +696,7 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        {/* HERO */}
+        {}
         <section className="lp-hero">
           <div className="lp-hero-inner">
             <div className="lp-hero-text">
@@ -717,7 +717,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* EMPOWERING */}
+        {}
         <section className="lp-empowering">
           <div className="lp-empowering-inner">
             <div>
@@ -742,10 +742,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FEATURES EXPANDIDAS */}
+        {}
         <section style={{ background: '#fff', borderBottom: '1px solid #e0e0e0' }} id="herramientas">
 
-          {/* 1 POS imagen izq texto der */}
+          {}
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
             <img src="/feat-pos.png" alt="Punto de Venta BolClick" style={{ width: '100%', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }} />
             <div className="lp-tool-text">
@@ -760,7 +760,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 2 INVENTARIO texto izq imagen der */}
+          {}
           <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
               <div className="lp-tool-text">
@@ -777,7 +777,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 3 ANÁLISIS imagen izq texto der */}
+          {}
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
             <img src="/feat-analytics.png" alt="Análisis de Ventas BolClick" style={{ width: '100%', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }} />
             <div className="lp-tool-text">
@@ -792,7 +792,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 4 PERSONAL texto izq imagen der */}
+          {}
           <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
             <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
               <div className="lp-tool-text">
@@ -809,7 +809,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 5 MULTISUCURSAL imagen izq texto der */}
+          {}
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
             <img src="/feat-multistore.png" alt="Sucursales BolClick" style={{ width: '100%', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.10)' }} />
             <div className="lp-tool-text">
@@ -835,7 +835,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* MULTISUCURSAL */}
+          {}
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }}>
             <div style={{ background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: 8, padding: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#999', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Mis sucursales</div>
@@ -859,7 +859,7 @@ export default function LandingPage() {
 
         </section>
 
-        {/* STATS */}
+        {}
         <section className="lp-stats">
           <div className="lp-stats-inner">
             <div className="lp-stat">
@@ -884,7 +884,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FREE CTA */}
+        {}
         <section className="lp-free" id="precios">
           <div className="lp-free-inner">
             <h2>Empieza a usar BolClick hoy, es gratis</h2>
@@ -898,7 +898,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FOOTER */}
+        {}
         <footer className="lp-footer" id="ayuda">
           <div className="lp-footer-inner">
             <Link to="/" style={{ textDecoration: 'none' }}>

@@ -6,7 +6,7 @@ import { TenantStatus } from '../tenant/tenant.entity';
 import { Stock } from '../stock/stock.entity';
 
 describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios', () => {
-  // MÓDULO 1: REGLAS DE NEGOCIO DE VENTAS E INVENTARIO (VentasService)
+  
   describe('VentasService (Reglas de Inventario)', () => {
     let service: VentasService;
     let mockVentaRep: any;
@@ -63,14 +63,14 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       jest.spyOn(service, 'generatePdf').mockResolvedValue('mock.pdf');
     });
 
-    // PRUEBA 1: Regla de Correlativos Secuenciales
+    
     it('1. [Regla de Negocio] getSiguienteNumero - Debe generar número correlativo rellenado con 6 ceros', async () => {
       mockVentaRep.count.mockResolvedValue(4);
       const result = await service.getSiguienteNumero('tenant-1', 'branch-1');
       expect(result).toBe('000005');
     });
 
-    // PRUEBA 2: Restricción por tienda y sucursal en correlativos
+    
     it('2. [Regla de Negocio] getSiguienteNumero - Debe filtrar la búsqueda estrictamente por tenant_id y sucursal_id', async () => {
       mockVentaRep.count.mockResolvedValue(0);
       await service.getSiguienteNumero('my-tenant', 'my-branch');
@@ -79,7 +79,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       });
     });
 
-    // PRUEBA 3: Validación de stock en venta (Suficiencia de inventario)
+    
     it('3. [Regla de Negocio] create - Debe fallar si la cantidad de venta supera la disponible en Stock', async () => {
        const runner = mockDataSource.createQueryRunner();
        runner.manager.findOne.mockImplementation(
@@ -112,7 +112,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       );
     });
 
-    // PRUEBA 4: Procesamiento exitoso y reducción de stock
+    
     it('4. [Regla de Negocio] create - Debe guardar la venta y reducir el stock disponible si hay suficiencia', async () => {
        const runner = mockDataSource.createQueryRunner();
        const mockProduct = {
@@ -137,7 +137,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
        runner.manager.findOne
          .mockResolvedValueOnce(mockProduct)
          .mockResolvedValueOnce(mockStock);
-       runner.manager.count.mockResolvedValue(0); // Para generar número de factura
+       runner.manager.count.mockResolvedValue(0); 
        runner.manager.create.mockReturnValue(mockSavedVenta);
        runner.manager.save.mockResolvedValue(mockSavedVenta);
        mockStockService.applyStockDelta.mockImplementation(
@@ -164,7 +164,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
      });
   });
 
-  // MÓDULO 2: SEGURIDAD Y ACCESOS (JwtStrategy - Reglas de Negocio de Guardias)
+  
   describe('JwtStrategy (Verificación de Cuentas y Bloqueos)', () => {
     let strategy: JwtStrategy;
     let mockUserRep: any;
@@ -181,7 +181,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       strategy = new JwtStrategy(mockUserRep, mockDataSource as any);
     });
 
-    // PRUEBA 5: Verificación de Usuario Activo
+    
     it('5. [Regla de Negocio] validate - Debe arrojar error si el usuario está inactivo', async () => {
       mockUserRep.findOne.mockResolvedValue({ id: 'user-1', isActive: false });
 
@@ -191,7 +191,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       );
     });
 
-    // PRUEBA 6: Verificación de Estado de Tienda Suspended
+    
     it('6. [Regla de Negocio] validate - Debe arrojar error si la tienda (tenant) está SUSPENDIDA', async () => {
       mockUserRep.findOne.mockResolvedValue({
         id: 'user-1',
@@ -199,7 +199,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
         tenant_id: 't-1',
       });
 
-      // Mock DataSource para devolver tenant suspendido
+      
       const mockDataSource = {
         getRepository: jest.fn().mockReturnValue({
           findOne: jest.fn().mockResolvedValue({ id: 't-1', status: TenantStatus.SUSPENDED }),
@@ -213,7 +213,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       );
     });
 
-    // PRUEBA 7: Control de cambio de sucursal asignada
+    
     it('7. [Regla de Negocio] validate - Debe lanzar BRANCH_CHANGED si el token del empleado tiene una sucursal distinta a la actual', async () => {
       mockUserRep.findOne.mockResolvedValue({
         id: 'user-1',
@@ -232,7 +232,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       );
     });
 
-    // PRUEBA 8: Control de Sucursal Inactiva
+    
     it('8. [Regla de Negocio] validate - Debe lanzar BRANCH_DISABLED si la sucursal del empleado ha sido desactivada', async () => {
       mockUserRep.findOne.mockResolvedValue({
         id: 'user-1',
@@ -253,7 +253,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
     });
   });
 
-  // MÓDULO 3: AUTENTICACIÓN Y MIGRACIONES DE REGISTRO (AuthService)
+  
   describe('AuthService (Servicios de Acceso)', () => {
     let authService: AuthService;
     let mockTenantRep: any;
@@ -282,7 +282,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       );
     });
 
-    // PRUEBA 9: Bloqueo de Tiendas Pendientes de Aprobación
+    
     it('9. [Servicio / Regla] login - Debe lanzar error PENDING_APPROVAL si la tienda está registrada pero en revisión', async () => {
       const mockUser = {
         id: 'u-1',
@@ -293,7 +293,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       };
       const mockTenantPending = { id: 't-1', status: TenantStatus.PENDING, isActive: true };
 
-      // Mock de bcrypt.compare simulando contraseña correcta
+      
       require('bcrypt').compare = jest.fn().mockResolvedValue(true);
 
       const mockFindOne = jest.fn()
@@ -307,7 +307,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
       );
     });
 
-    // PRUEBA 10: Validación de Credenciales Incorrectas
+    
     it('10. [Servicio] login - Debe rechazar el acceso con Credenciales inválidas si la contraseña no coincide', async () => {
       const mockUser = {
         id: 'u-1',
@@ -317,7 +317,7 @@ describe('Sistema BolClick - Pruebas Unitarias de Reglas de Negocio y Servicios'
         role: 'VENDEDOR',
       };
 
-      // Mock de bcrypt.compare simulando contraseña incorrecta
+      
       require('bcrypt').compare = jest.fn().mockResolvedValue(false);
 
       mockDataSource.getRepository.mockReturnValue({ findOne: jest.fn().mockResolvedValue(mockUser) });

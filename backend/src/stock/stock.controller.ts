@@ -26,7 +26,7 @@ export class StockController {
   }
 
   @Post('transfer')
-  @RequirePermission('inventario.editar') // or inventario.crear depending on roles
+  @RequirePermission('inventario.editar') 
   transferStock(@TenantId() tenantId: string, @Body() dto: TransferStockDto) {
     return this.stockService.transferStock(
       tenantId,

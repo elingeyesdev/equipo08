@@ -59,7 +59,7 @@ export default function KardexModal({ isOpen, onClose, productId, productName })
   return (
     <div className="modal-overlay">
       <div className="modal-content !max-w-4xl" style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between border-b border-[var(--border)] pb-4 mb-4">
           <div className="flex items-center gap-2">
             <ClipboardList className="text-[var(--blue)]" size={20} />
@@ -73,7 +73,7 @@ export default function KardexModal({ isOpen, onClose, productId, productName })
           </button>
         </div>
 
-        {/* Content */}
+        {}
         <div style={{ flex: 1, overflowY: 'auto' }} className="pr-1">
           {loading ? (
             <div className="py-20 text-center flex flex-col items-center justify-center">

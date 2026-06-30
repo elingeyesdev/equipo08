@@ -54,6 +54,19 @@
             app:layout_constraintTop_toBottomOf="@+id/tvNit"
             android:layout_marginEnd="8dp"/>
 
+        <TextView
+            android:id="@+id/tvPhone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Teléfono"
+            android:textColor="#0f172a"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toStartOf="@+id/btnEdit"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvEmail"
+            android:layout_marginEnd="8dp"/>
+
         <ImageButton
             android:id="@+id/btnEdit"
             android:layout_width="36dp"

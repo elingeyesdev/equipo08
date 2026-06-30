@@ -40,10 +40,10 @@ public class HomeFragment extends Fragment {
     private ProgressBar progressBarHome;
     private ScrollView scrollDashboardContent;
 
-    // Header Views
+    
     private TextView tvWelcomeTitle;
 
-    // Metric Views
+    
     private TextView tvMetricSales;
     private TextView tvMetricRevenue;
     private TextView tvMetricProfit;
@@ -51,23 +51,23 @@ public class HomeFragment extends Fragment {
     private TextView tvMetricStockValue;
     private TextView tvMetricLosses;
 
-    // Card containers (to hide/show based on user role)
+    
     private CardView cvMetricSales;
     private CardView cvMetricRevenue;
     private CardView cvMetricProfit;
     private CardView cvMetricLosses;
 
-    // Recent Sales
+    
     private RecyclerView rvRecentSales;
     private TextView tvEmptyRecentSales;
     private RecentSalesAdapter recentSalesAdapter;
     private List<Venta> recentSalesList = new ArrayList<>();
 
-    // API & Session
+    
     private ApiService apiService;
     private SessionManager sessionManager;
 
-    // Call tracking
+    
     private int completedCalls = 0;
 
     @Nullable
@@ -78,7 +78,7 @@ public class HomeFragment extends Fragment {
         sessionManager = new SessionManager(getContext());
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
-        // Bind layouts
+        
         progressBarHome = view.findViewById(R.id.progressBarHome);
         scrollDashboardContent = view.findViewById(R.id.scrollDashboardContent);
 
@@ -98,18 +98,18 @@ public class HomeFragment extends Fragment {
         rvRecentSales = view.findViewById(R.id.rvRecentSales);
         tvEmptyRecentSales = view.findViewById(R.id.tvEmptyRecentSales);
 
-        // Setup RecyclerView
+        
         rvRecentSales.setLayoutManager(new LinearLayoutManager(getContext()));
         recentSalesAdapter = new RecentSalesAdapter(recentSalesList, venta -> showComprobanteDialog(venta));
         rvRecentSales.setAdapter(recentSalesAdapter);
 
-        // Welcome Texts
+        
         tvWelcomeTitle.setText("Resumen de tienda");
 
-        // Apply role security
+        
         applyRoleSecurity();
 
-        // Navigate to sales history on KPI click
+        
         cvMetricSales = view.findViewById(R.id.cvMetricSales);
         View.OnClickListener kpiClickListener = v -> {
             if (getActivity() instanceof MainActivity) {
@@ -120,13 +120,13 @@ public class HomeFragment extends Fragment {
         if (cvMetricRevenue != null) cvMetricRevenue.setOnClickListener(kpiClickListener);
         if (cvMetricProfit != null) cvMetricProfit.setOnClickListener(kpiClickListener);
 
-        // Botón para ver todo el historial de ventas
+        
         com.google.android.material.button.MaterialButton btnViewAllSales = view.findViewById(R.id.btnViewAllSales);
         if (btnViewAllSales != null) {
             btnViewAllSales.setOnClickListener(kpiClickListener);
         }
 
-        // Load data in parallel
+        
         loadDashboardData();
 
         return view;
@@ -135,7 +135,7 @@ public class HomeFragment extends Fragment {
     private void applyRoleSecurity() {
         String role = sessionManager.getRole();
         if ("VENDEDOR".equalsIgnoreCase(role)) {
-            // Hide sensitive financial cards for salesperson privacy
+            
             cvMetricRevenue.setVisibility(View.GONE);
             cvMetricProfit.setVisibility(View.GONE);
             cvMetricLosses.setVisibility(View.GONE);
@@ -153,8 +153,14 @@ public class HomeFragment extends Fragment {
         progressBarHome.setVisibility(View.VISIBLE);
         scrollDashboardContent.setVisibility(View.GONE);
 
-        // Call 1: Dashboard KPIs and Recent Sales
-        apiService.getDashboardKpis().enqueue(new Callback<DashboardKpis>() {
+        String userRole = sessionManager.getRole();
+        String userSucursalId = sessionManager.getSucursalId();
+        boolean isRestricted = !"OWNER".equalsIgnoreCase(userRole) && !"SUPER_ADMIN".equalsIgnoreCase(userRole) && userSucursalId != null && !userSucursalId.isEmpty();
+
+        String apiSucursalId = isRestricted ? userSucursalId : null;
+
+        
+        apiService.getDashboardKpis(apiSucursalId).enqueue(new Callback<DashboardKpis>() {
             @Override
             public void onResponse(Call<DashboardKpis> call, Response<DashboardKpis> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -190,7 +196,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // Call 2: Stock Units and Value
+        
         apiService.getStock().enqueue(new Callback<List<Stock>>() {
             @Override
             public void onResponse(Call<List<Stock>> call, Response<List<Stock>> response) {
@@ -200,6 +206,11 @@ public class HomeFragment extends Fragment {
                     double totalValue = 0.0;
 
                     for (Stock s : stocks) {
+                        if (isRestricted) {
+                            if (s.getSucursalId() == null || !s.getSucursalId().equals(userSucursalId)) {
+                                continue;
+                            }
+                        }
                         totalUnits += s.getCantidadTotal();
                         if (s.getProducto() != null) {
                             totalValue += s.getCantidadTotal() * s.getProducto().getPrecioVenta();
@@ -223,7 +234,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // Call 3: Audit Losses (Ajustes)
+        
         apiService.getAjustes().enqueue(new Callback<List<Ajuste>>() {
             @Override
             public void onResponse(Call<List<Ajuste>> call, Response<List<Ajuste>> response) {
@@ -232,11 +243,16 @@ public class HomeFragment extends Fragment {
                     double totalLossValue = 0.0;
 
                     for (Ajuste aj : ajustes) {
+                        if (isRestricted) {
+                            if (aj.getSucursal() == null || !aj.getSucursal().getId().equals(userSucursalId)) {
+                                continue;
+                            }
+                        }
                         if (aj.getValorPerdido() != null) {
                             try {
                                 totalLossValue += Double.parseDouble(aj.getValorPerdido());
                             } catch (NumberFormatException e) {
-                                // ignore parse errors
+                                
                             }
                         }
                     }
@@ -278,10 +294,10 @@ public class HomeFragment extends Fragment {
         Button btnCerrar = dialogView.findViewById(R.id.btnCerrarComprobante);
         Button btnDescargar = dialogView.findViewById(R.id.btnDescargarComprobante);
 
-        // Fill headers
+        
         tvNro.setText("Comprobante Nro: " + (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "N/A"));
         
-        // Date formatting: Parse UTC to local timezone beautifully (AM/PM format)
+        
         String formattedDate = "N/A";
         String dateStr = venta.getFecha();
         if (dateStr != null) {
@@ -323,7 +339,7 @@ public class HomeFragment extends Fragment {
         }
         tvFecha.setText("Fecha: " + formattedDate);
 
-        // Branch name
+        
         String sucursalName = "Principal";
         if (venta.getSucursal() != null && venta.getSucursal().getName() != null) {
             sucursalName = venta.getSucursal().getName();
@@ -333,7 +349,7 @@ public class HomeFragment extends Fragment {
         tvDoc.setText("NIT/CI: " + (venta.getClienteDocumento() != null ? venta.getClienteDocumento() : "N/A"));
         tvTotal.setText(String.format("Bs %.2f", venta.getTotal()));
 
-        // Add dynamic items lines
+        
         if (venta.getDetalle() != null) {
             llDetalleContainer.removeAllViews();
             float density = getResources().getDisplayMetrics().density;
@@ -346,7 +362,7 @@ public class HomeFragment extends Fragment {
                 ));
                 row.setPadding(0, (int)(8 * density), 0, (int)(8 * density));
 
-                // Cant. (width: 40dp)
+                
                 TextView tvCant = new TextView(getContext());
                 LinearLayout.LayoutParams lpCant = new LinearLayout.LayoutParams((int)(40 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
                 tvCant.setLayoutParams(lpCant);
@@ -354,7 +370,7 @@ public class HomeFragment extends Fragment {
                 tvCant.setTextColor(android.graphics.Color.parseColor("#475569"));
                 tvCant.setTextSize(11f);
 
-                // Descripción (width: 0dp, weight: 1)
+                
                 TextView tvDesc = new TextView(getContext());
                 LinearLayout.LayoutParams lpDesc = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
                 tvDesc.setLayoutParams(lpDesc);
@@ -362,7 +378,7 @@ public class HomeFragment extends Fragment {
                 tvDesc.setTextColor(android.graphics.Color.parseColor("#475569"));
                 tvDesc.setTextSize(11f);
 
-                // P. Unit (width: 70dp)
+                
                 TextView tvUnit = new TextView(getContext());
                 LinearLayout.LayoutParams lpUnit = new LinearLayout.LayoutParams((int)(70 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
                 tvUnit.setLayoutParams(lpUnit);
@@ -371,7 +387,7 @@ public class HomeFragment extends Fragment {
                 tvUnit.setTextSize(11f);
                 tvUnit.setGravity(android.view.Gravity.END);
 
-                // Subtotal (width: 80dp)
+                
                 TextView tvSub = new TextView(getContext());
                 LinearLayout.LayoutParams lpSub = new LinearLayout.LayoutParams((int)(80 * density), ViewGroup.LayoutParams.WRAP_CONTENT);
                 tvSub.setLayoutParams(lpSub);
@@ -411,7 +427,7 @@ public class HomeFragment extends Fragment {
                 String filename = (venta.getNumeroComprobante() != null ? venta.getNumeroComprobante() : "comprobante_" + venta.getId()) + ".pdf";
                 downloadRequest.setDestinationInExternalPublicDir(android.os.Environment.DIRECTORY_DOWNLOADS, filename);
 
-                // Add token headers
+                
                 com.example.template.utils.SessionManager sessionManager = new com.example.template.utils.SessionManager(getContext());
                 String token = sessionManager.getToken();
                 if (token != null) {
@@ -436,7 +452,7 @@ public class HomeFragment extends Fragment {
         dialog.show();
     }
 
-    // --- RECENT SALES LIST RECYCLER ADAPTER ---
+    
     private static class RecentSalesAdapter extends RecyclerView.Adapter<RecentSalesAdapter.ViewHolder> {
         private List<Venta> list;
         private OnSaleClickListener listener;
@@ -463,7 +479,7 @@ public class HomeFragment extends Fragment {
             holder.tvSaleTitle.setText("Venta #" + (v.getNumeroComprobante() != null ? v.getNumeroComprobante() : v.getId().substring(0, Math.min(v.getId().length(), 8))));
             holder.tvSaleTotal.setText(String.format(java.util.Locale.US, "Bs %.2f", v.getTotal()));
 
-            // Date format helper
+            
             String formattedDate = "N/A";
             String dateStr = v.getFecha();
             if (dateStr != null) {

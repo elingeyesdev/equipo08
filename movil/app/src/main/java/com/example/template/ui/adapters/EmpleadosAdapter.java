@@ -69,9 +69,9 @@ public class EmpleadosAdapter extends RecyclerView.Adapter<EmpleadosAdapter.View
             holder.btnEdit.setVisibility(View.VISIBLE);
             holder.btnDelete.setVisibility(View.VISIBLE);
             if ("SUPERVISOR".equals(rol)) {
-                setRoleBackgroundColor(holder.tvRol, "#5981DF"); // Blue
+                setRoleBackgroundColor(holder.tvRol, "#5981DF"); 
             } else {
-                setRoleBackgroundColor(holder.tvRol, "#0d9488"); // Green
+                setRoleBackgroundColor(holder.tvRol, "#0d9488"); 
             }
         }
         
@@ -80,9 +80,9 @@ public class EmpleadosAdapter extends RecyclerView.Adapter<EmpleadosAdapter.View
         String estado = e.getEstado() != null ? e.getEstado() : "Activo";
         holder.tvEstado.setText(estado);
         if ("Activo".equalsIgnoreCase(estado)) {
-            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); // Green
+            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); 
         } else {
-            holder.tvEstado.setTextColor(Color.parseColor("#475569")); // Gray
+            holder.tvEstado.setTextColor(Color.parseColor("#475569")); 
         }
 
         holder.btnDelete.setOnClickListener(v -> {

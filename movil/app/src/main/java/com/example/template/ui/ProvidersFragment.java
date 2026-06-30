@@ -35,7 +35,7 @@ public class ProvidersFragment extends Fragment {
     private FloatingActionButton btnToggleForm;
     private Button btnGuardar, btnBuscarNit;
     private CardView cardForm;
-    private EditText etRazonSocial, etNit, etEmail;
+    private EditText etRazonSocial, etNit, etEmail, etPhone;
     private RecyclerView recyclerView;
     private ProveedorAdapter adapter;
     private ApiService apiService;
@@ -53,6 +53,7 @@ public class ProvidersFragment extends Fragment {
         etRazonSocial = view.findViewById(R.id.etRazonSocial);
         etNit = view.findViewById(R.id.etNit);
         etEmail = view.findViewById(R.id.etEmail);
+        etPhone = view.findViewById(R.id.etPhone);
         recyclerView = view.findViewById(R.id.recyclerView);
 
         btnBuscarNit = view.findViewById(R.id.btnBuscarNit);
@@ -96,6 +97,7 @@ public class ProvidersFragment extends Fragment {
                             if (proveedor != null && proveedor.getName() != null) {
                                 etRazonSocial.setText(proveedor.getName());
                                 etEmail.setText(proveedor.getContactEmail() != null ? proveedor.getContactEmail() : "");
+                                etPhone.setText(proveedor.getPhone() != null ? proveedor.getPhone() : "");
                                 Toast.makeText(getContext(), "Proveedor Maestro encontrado y autocompletado.", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(getContext(), "NIT no registrado globalmente. Puedes ingresar los datos manualmente para registrarlo.", Toast.LENGTH_LONG).show();
@@ -126,17 +128,18 @@ public class ProvidersFragment extends Fragment {
             etRazonSocial.setText("");
             etNit.setText("");
             etEmail.setText("");
+            etPhone.setText("");
             btnGuardar.setText("Anexar proveedor a mi tienda");
         }
         isFormVisible = !isFormVisible || fromEdit;
         if (isFormVisible) {
             cardForm.setVisibility(View.VISIBLE);
             btnToggleForm.setImageResource(R.drawable.ic_close);
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488"))); // Gris/Verde
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0d9488"))); 
         } else {
             cardForm.setVisibility(View.GONE);
             btnToggleForm.setImageResource(R.drawable.ic_add);
-            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a"))); // Azul oscuro primario
+            btnToggleForm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0f172a"))); 
         }
     }
 
@@ -145,6 +148,7 @@ public class ProvidersFragment extends Fragment {
         etRazonSocial.setText(proveedor.getName());
         etNit.setText(proveedor.getTaxId());
         etEmail.setText(proveedor.getContactEmail() != null ? proveedor.getContactEmail() : "");
+        etPhone.setText(proveedor.getPhone() != null ? proveedor.getPhone() : "");
         btnGuardar.setText("Actualizar proveedor");
         if (!isFormVisible) {
             toggleForm(true);
@@ -171,18 +175,19 @@ public class ProvidersFragment extends Fragment {
         String name = etRazonSocial.getText().toString().trim();
         String nit = etNit.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
 
         if (nit.isEmpty()) {
-            etNit.setError("Ingrese un NIT");
+            Toast.makeText(getContext(), "El campo NIT es obligatorio", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (name.isEmpty()) {
-            etRazonSocial.setError("Ingrese o busque una razón social válida");
+            Toast.makeText(getContext(), "El campo Razón Social es obligatorio", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Proveedor request = new Proveedor(name, email.isEmpty() ? null : email, nit);
+        Proveedor request = new Proveedor(name, email.isEmpty() ? null : email, nit, phone.isEmpty() ? null : phone);
         if (editingProveedor != null) {
             request.setId(editingProveedor.getId());
             apiService.updateProveedor(editingProveedor.getId(), request).enqueue(new Callback<Proveedor>() {
@@ -211,7 +216,7 @@ public class ProvidersFragment extends Fragment {
                         Toast.makeText(getContext(), "Proveedor guardado", Toast.LENGTH_SHORT).show();
                         editingProveedor = null;
                         toggleForm(false);
-                        loadProveedores(); // refresh
+                        loadProveedores(); 
                     } else {
                         Toast.makeText(getContext(), "Error al guardar (Verifique NIT)", Toast.LENGTH_SHORT).show();
                     }
@@ -226,13 +231,13 @@ public class ProvidersFragment extends Fragment {
     }
 
     private void confirmDelete(Proveedor proveedor) {
-        if (getContext() == null) return;
-        new androidx.appcompat.app.AlertDialog.Builder(getContext())
-            .setTitle("Eliminar Proveedor")
-            .setMessage("¿Estás seguro de que quieres eliminar a " + proveedor.getName() + "?")
-            .setPositiveButton("Eliminar", (dialog, which) -> deleteProveedor(proveedor))
-            .setNegativeButton("Cancelar", null)
-            .show();
+        com.example.template.utils.DialogHelper.showConfirmDialog(
+            getContext(),
+            "Eliminar Proveedor",
+            "¿Estás seguro de que deseas eliminar al proveedor \"" + proveedor.getName() + "\"?",
+            "Eliminar",
+            () -> deleteProveedor(proveedor)
+        );
     }
 
     private void deleteProveedor(Proveedor proveedor) {

@@ -14,7 +14,7 @@ import { JwtStrategy } from './jwt.strategy';
     TypeOrmModule.forFeature([Tenant, User]),
     PassportModule,
     JwtModule.register({
-      secret: 'super-secret-key-123', // En producción usar variables de entorno
+      secret: 'super-secret-key-123', 
       signOptions: { expiresIn: '24h' },
     }),
     UsersModule,

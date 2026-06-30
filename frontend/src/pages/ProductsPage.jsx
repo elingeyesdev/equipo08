@@ -308,7 +308,7 @@ export default function ProductsPage() {
 
     return (
       <div className="full-width-container animate-fadein space-y-6">
-        {/* Header bar */}
+        {}
         <div className="page-header-bar">
           <div className="flex items-center gap-3">
             <button 
@@ -332,7 +332,7 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        {/* Date Filter Bar */}
+        {}
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap items-center gap-4 animate-fadeIn">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filtrar Kardex:</span>
@@ -390,7 +390,7 @@ export default function ProductsPage() {
           )}
         </div>
 
-        {/* Content Table */}
+        {}
         <div className="table-premium-wrapper">
           {loadingKardex ? (
             <div className="py-20 text-center flex flex-col items-center justify-center">
@@ -467,7 +467,7 @@ export default function ProductsPage() {
   return (
     <div className="full-width-container animate-fadein space-y-6 relative">
       
-      {/* Header and Actions */}
+      {}
       <div className="page-header-bar">
         <div>
           <h1>Catálogo de Artículos</h1>
@@ -495,7 +495,7 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Expandable Form Section */}
+      {}
       {showForm && (
         <div id="prod-form-top" className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
           <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-6">
@@ -702,7 +702,7 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* Filter Drawer */}
+      {}
       {showFilters && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row flex-wrap items-end md:items-center gap-4 animate-fadeIn">
           <div className="flex-1 min-w-[200px]">
@@ -736,7 +736,7 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* Table Section */}
+      {}
       <div className="table-premium-wrapper">
         {loading ? (
           <div className="py-20 text-center flex flex-col items-center justify-center">
@@ -770,7 +770,7 @@ export default function ProductsPage() {
                     return true;
                   });
 
-                  // Group by name
+                  
                   const groups = {};
                   filtered.forEach(p => {
                     if (!groups[p.name]) {
@@ -795,7 +795,7 @@ export default function ProductsPage() {
                     const isExpanded = !!expandedProducts[name];
                     
                     if (variants.length === 1) {
-                      // Single product row (no variants)
+                      
                       const p = variants[0];
                       return (
                         <tr 
@@ -868,7 +868,7 @@ export default function ProductsPage() {
                         </tr>
                       );
                     } else {
-                      // Multi-variant parent row
+                      
                       const main = variants[0];
                       const minCosto = Math.min(...variants.map(v => Number(v.precioCosto) || 0));
                       const maxCosto = Math.max(...variants.map(v => Number(v.precioCosto) || 0));
@@ -926,7 +926,7 @@ export default function ProductsPage() {
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayCosto}</td>
                             <td className="text-right text-sm text-slate-850 font-mono text-xs">{displayVenta}</td>
                             <td className="text-center">
-                              {/* Acciones movidas al menú de clic derecho */}
+                              {}
                             </td>
                           </tr>
 

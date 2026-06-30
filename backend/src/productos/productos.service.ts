@@ -92,7 +92,7 @@ export class ProductosService {
     }
 
     if (dto.sku) {
-      // Minimum 3 characters, alphanumeric + hyphen
+      
       if (!/^[A-Za-z0-9\-]{3,}$/.test(dto.sku)) {
         throw new BadRequestException(
           'El código SKU debe tener un mínimo de 3 caracteres y solo permite letras, números y guiones (-).',
@@ -117,7 +117,7 @@ export class ProductosService {
   async create(tenant_id: string, dto: CreateProductoDto): Promise<Producto> {
     await this.validateProducto(tenant_id, dto);
 
-    // Usamos transaccionalidad para asegurar consistencia del producto base y su variante por defecto
+    
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -143,7 +143,7 @@ export class ProductosService {
       });
       const prodSaved = await queryRunner.manager.save(prod);
 
-      // Crear variante por defecto basada en la información clásica
+      
       const varRep = queryRunner.manager.getRepository(ProductoVariacion);
       const defaultVar = varRep.create({
         producto_id: prodSaved.id,
@@ -170,10 +170,10 @@ export class ProductosService {
       relations: ['proveedor', 'stocks', 'categoria', 'variaciones'],
     });
 
-    // Mapeamos para garantizar compatibilidad hacia atrás con el frontend:
-    // Hacemos que 'category' refleje siempre el nombre de la categoría enlazada.
+    
+    
     return productos.map(p => {
-      // Tomamos la primera variante (o creamos una simulación en memoria si no tiene)
+      
       const variant = p.variaciones && p.variaciones.length > 0 ? p.variaciones[0] : null;
       return {
         ...p,
@@ -230,7 +230,7 @@ export class ProductosService {
       });
       const prodSaved = await queryRunner.manager.save(prod);
 
-      // Sincronizar con la variante por defecto (primera variante)
+      
       if (prod.variaciones && prod.variaciones.length > 0) {
         const defaultVar = prod.variaciones[0];
         if (dto.sku !== undefined) defaultVar.sku = dto.sku;
@@ -239,7 +239,7 @@ export class ProductosService {
         if (dto.attributes !== undefined) defaultVar.opciones = dto.attributes;
         await queryRunner.manager.save(defaultVar);
       } else {
-        // En caso de que no tenga variantes (ej. si fue creado antes de la migración)
+        
         const varRep = queryRunner.manager.getRepository(ProductoVariacion);
         const defaultVar = varRep.create({
           producto_id: prodSaved.id,
@@ -265,7 +265,7 @@ export class ProductosService {
     const prod = await this.prodRep.findOne({ where: { id, tenant_id } });
     if (!prod) throw new NotFoundException('Producto no encontrado');
 
-    // Check if there are any active batch history (lotes) via stock records
+    
     const stockRecords = await this.dataSource.getRepository(Stock).find({
       where: { producto_id: id },
       select: ['id'],
@@ -282,7 +282,7 @@ export class ProductosService {
       }
     }
 
-    // Check if there are any inventory adjustments (via stock records)
+    
     if (stockIds.length > 0) {
       const ajustesCount = await this.dataSource
         .getRepository(AjusteInventario)
@@ -307,7 +307,7 @@ export class ProductosService {
       );
     }
 
-    // Check if there is active stock in any branch
+    
     const activeStocks = await this.dataSource.getRepository(Stock).find({
       where: { producto_id: id },
     });
@@ -321,12 +321,12 @@ export class ProductosService {
       );
     }
 
-    // If we passed all checks, we can safely delete the empty stock records
+    
     if (activeStocks.length > 0) {
       await this.dataSource.getRepository(Stock).remove(activeStocks);
     }
 
-    // Now delete the product
+    
     await this.prodRep.remove(prod);
   }
 

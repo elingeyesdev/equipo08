@@ -25,7 +25,7 @@
                 android:backgroundTint="@color/accent_color"
                 android:textColor="#ffffff" />
 
-        <!-- Audit Form Section -->
+        
         <androidx.cardview.widget.CardView
             android:id="@+id/cardAuditForm"
             android:layout_width="match_parent"
@@ -197,7 +197,7 @@
                         android:textSize="12sp"/>
                 </LinearLayout>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSubmitAudit"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
@@ -205,11 +205,11 @@
                     android:text="Procesar ajuste"
                     android:backgroundTint="#0f172a"
                     android:textColor="#ffffff"
-                    android:enabled="false"/>
+                    app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- KPI 1 -->
+        
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -240,7 +240,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- KPI 2 -->
+        
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -271,7 +271,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Filter Section -->
+        
         <androidx.cardview.widget.CardView
             android:id="@+id/cardFilters"
             android:layout_width="match_parent"
@@ -410,7 +410,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- LIST AREA -->
+        
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"

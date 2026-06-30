@@ -45,17 +45,17 @@ public class PublicCatalogActivity extends AppCompatActivity {
     private ExtendedFloatingActionButton fabCart;
     private View flLoading, llEmptyState;
 
-    // Data lists
+    
     private List<CatalogProducto> allProducts = new ArrayList<>();
     private List<CatalogProducto> filteredProducts = new ArrayList<>();
     private List<CatalogCartItem> cartItems = new ArrayList<>();
 
-    // UI Adapters
+    
     private CatalogProductAdapter productAdapter;
 
-    // Store Info Mock
+    
     private String storeName = "Nike Store";
-    private String storePhone = "77777777"; // Número de WhatsApp de prueba
+    private String storePhone = "77777777"; 
     private String storeDesc = "Ropa y calzado deportivo de la mejor calidad.";
 
     private String selectedCategory = "TODOS";
@@ -66,13 +66,13 @@ public class PublicCatalogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_public_catalog);
 
-        // Extract domain from intent or deep link
+        
         String domain = null;
         Intent intent = getIntent();
         if (intent != null) {
             Uri data = intent.getData();
             if (data != null) {
-                // deep link format: omnimall://tienda/{domain} o https://omnimall.com/tienda/{domain}
+                
                 java.util.List<String> pathSegments = data.getPathSegments();
                 if (pathSegments != null && !pathSegments.isEmpty()) {
                     domain = pathSegments.get(pathSegments.size() - 1);
@@ -84,7 +84,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
         }
 
         if (domain == null || domain.trim().isEmpty()) {
-            domain = "nike"; // fallback
+            domain = "nike"; 
         }
 
         initViews();
@@ -92,7 +92,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
         setupRecyclerView();
         setupSearch();
 
-        // Cargar datos reales desde el backend
+        
         loadCatalogData(domain);
     }
 
@@ -122,16 +122,16 @@ public class PublicCatalogActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        // Calcular columnas dinámicamente para diseño responsive
-        int spanCount = 2; // Por defecto para celulares en vertical
+        
+        int spanCount = 2; 
         android.util.DisplayMetrics displayMetrics = new android.util.DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         float widthDp = displayMetrics.widthPixels / displayMetrics.density;
 
         if (widthDp >= 900) {
-            spanCount = 4; // Tabletas grandes u orientación horizontal en pantallas grandes
+            spanCount = 4; 
         } else if (widthDp >= 600) {
-            spanCount = 3; // Tabletas pequeñas u orientación horizontal en celulares
+            spanCount = 3; 
         }
 
         rvCatalogProducts.setLayoutManager(new GridLayoutManager(this, spanCount));
@@ -187,7 +187,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
                             tvStoreInitial.setText(storeName.substring(0, 1).toUpperCase());
                         }
 
-                        // Load store logo if present
+                        
                         if (catalog.getTienda().getLogoUrl() != null && !catalog.getTienda().getLogoUrl().isEmpty()) {
                             ivStoreLogo.setVisibility(View.VISIBLE);
                             tvStoreInitial.setVisibility(View.GONE);
@@ -235,7 +235,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
     private void setupCategoryChips() {
         cgCatalogCategories.removeAllViews();
 
-        // Extraer categorías únicas
+        
         Set<String> categories = new HashSet<>();
         categories.add("TODOS");
         for (CatalogProducto p : allProducts) {
@@ -244,7 +244,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
             }
         }
 
-        // Crear Chips
+        
         for (String cat : categories) {
             Chip chip = new Chip(this);
             chip.setText(cat);
@@ -266,7 +266,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
 
             chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 if (isChecked) {
-                    // Cambiar fondos visuales
+                    
                     for (int i = 0; i < cgCatalogCategories.getChildCount(); i++) {
                         Chip c = (Chip) cgCatalogCategories.getChildAt(i);
                         if (c != chip) {
@@ -504,7 +504,7 @@ public class PublicCatalogActivity extends AppCompatActivity {
 
         String phone = storePhone.replaceAll("\\D", "");
         if (phone.length() == 8) {
-            phone = "591" + phone; // Prefijo boliviano
+            phone = "591" + phone; 
         }
 
         try {

@@ -14,15 +14,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    // Configura aquí la URL de tu API:
-    // - Para usar el EMULADOR de Android: usa "http://10.0.2.2:3000/api/"
-    // - Para usar un CELULAR FÍSICO en la misma red Wi-Fi: usa la IP local de tu PC, ej: "http://192.168.1.X:3000/api/"
-    private static final String BASE_URL = "https://runner-affair-gratitude.ngrok-free.dev/api/"; // Desarrollo local (ngrok)
-     //private static final String BASE_URL = "http://10.0.2.2:3000/api/"; // Desarrollo local (Emulador)
-    // private static final String BASE_URL = "https://bolclick-backend.onrender.com/api/"; // Producción Render
 
-
-    // Activa esto (true) en desarrollo para omitir la validación de certificados SSL de ngrok
+    private static final String BASE_URL = "https://runner-affair-gratitude.ngrok-free.dev/api/";
+    
     private static final boolean OMITIR_CERTIFICADOS_SSL = true;
 
     public static String getBaseUrl() {
@@ -75,7 +69,7 @@ public class ApiClient {
                 }
             };
 
-            // Usamos "TLS" para asegurar compatibilidad con protocolos modernos requeridos por ngrok
+            
             final SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             

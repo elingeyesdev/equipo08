@@ -31,14 +31,14 @@
             android:name=".PublicCatalogActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
-            <!-- Deep linking con omnimall://tienda/{domain} -->
+            
             <intent-filter android:label="Abrir Tienda OmniMall">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="omnimall" android:host="tienda" />
             </intent-filter>
-            <!-- Deep linking con https://omnimall.com/tienda/{domain} -->
+            
             <intent-filter android:label="Abrir Tienda OmniMall Web">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

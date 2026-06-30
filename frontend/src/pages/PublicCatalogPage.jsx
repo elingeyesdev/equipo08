@@ -73,7 +73,7 @@ export default function PublicCatalogPage() {
     text += `\n*Total estimado: Bs ${cartTotal.toFixed(2)}*`;
     
     let phone = (tienda.phone || '').replace(/\D/g, '');
-    if (phone.length === 8) phone = `591${phone}`; // Asumimos prefijo boliviano si solo hay 8 dígitos
+    if (phone.length === 8) phone = `591${phone}`; 
     if (!phone) {
       alert("La tienda no tiene un número registrado para WhatsApp.");
       return;
@@ -211,7 +211,7 @@ export default function PublicCatalogPage() {
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
       <div className="min-h-screen bg-[var(--bg)] pb-24 font-sans text-[var(--txt-primary)] selection:bg-[var(--txt-primary)] selection:text-[var(--bg-card)]">
-      {/* Portada / Banner de Fondo */}
+      {}
       <div className="w-full h-48 sm:h-64 md:h-80 overflow-hidden relative bg-slate-100 dark:bg-slate-800 border-b border-[var(--border)]">
         {tienda.bannerUrl ? (
           <img 
@@ -223,8 +223,8 @@ export default function PublicCatalogPage() {
           <div className="w-full h-full bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900"></div>
         )}
 
-        {/* Floating Actions on Top of Banner */}
-        {/* Left: Volver al Mall (Flecha) */}
+        {}
+        {}
         <Link 
           to="/" 
           className="absolute top-4 left-4 md:left-6 flex items-center justify-center bg-slate-900/80 hover:bg-slate-900 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-white transition-colors p-3 rounded-full shadow-lg z-10 border border-slate-800/20 backdrop-blur-sm"
@@ -233,7 +233,7 @@ export default function PublicCatalogPage() {
           <ArrowLeft size={24} />
         </Link>
 
-        {/* Right: Theme Toggle */}
+        {}
         <button 
           onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
           className="absolute top-4 right-4 md:right-6 flex items-center justify-center bg-slate-900/80 hover:bg-slate-900 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-white transition-colors p-3 rounded-full shadow-lg z-10 border border-slate-800/20 backdrop-blur-sm"
@@ -243,7 +243,7 @@ export default function PublicCatalogPage() {
         </button>
       </div>
 
-      {/* Logo Container (Overlapping the Banner like Facebook) */}
+      {}
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center -mt-16 sm:-mt-20 z-20">
         <div className="relative">
           {tienda.logoUrl ? (
@@ -258,10 +258,10 @@ export default function PublicCatalogPage() {
             </div>
           )}
         </div>
-      </div>      {/* Main Content Area */}
+      </div>      {}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Buscador + Botón de Filtros */}
+        {}
         <div className="flex gap-3 mb-8">
           <div className="bg-white dark:bg-slate-900 rounded-xl p-1 shadow-sm border border-slate-200 dark:border-slate-800 flex-1 flex items-center">
             <Search className="ml-3 text-slate-400" size={18} />
@@ -282,7 +282,7 @@ export default function PublicCatalogPage() {
           </button>
         </div>
 
-        {/* Active Category Title */}
+        {}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-4">
           <div>
             <h2 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-white uppercase">
@@ -292,7 +292,7 @@ export default function PublicCatalogPage() {
           </div>
         </div>
 
-        {/* Cuadrícula de Productos */}
+        {}
         {groupedProducts.length === 0 ? (
           <div className="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-16 text-center flex flex-col items-center justify-center">
             <PackageSearch size={48} className="text-[var(--txt-muted)] mb-4" strokeWidth={1.5} />
@@ -354,11 +354,11 @@ export default function PublicCatalogPage() {
         )}
       </div>
 
-      {/* Drawer de Filtros (Lateral Izquierdo) */}
+      {}
       <AnimatePresence>
         {isFilterOpen && (
           <div className="fixed inset-0 z-[100] flex justify-start">
-            {/* Overlay */}
+            {}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -366,7 +366,7 @@ export default function PublicCatalogPage() {
               onClick={() => setIsFilterOpen(false)}
               className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm"
             />
-            {/* Drawer Content */}
+            {}
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
@@ -374,7 +374,7 @@ export default function PublicCatalogPage() {
               transition={{ type: 'tween', duration: 0.3 }}
               className="relative w-80 max-w-full bg-[var(--bg-card)] h-full shadow-2xl border-r border-[var(--border)] flex flex-col z-10"
             >
-              {/* Header */}
+              {}
               <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal size={18} className="text-[var(--txt-primary)]" />
@@ -389,7 +389,7 @@ export default function PublicCatalogPage() {
                 </button>
               </div>
 
-              {/* Body */}
+              {}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 <div>
                   <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 px-1">
@@ -401,7 +401,7 @@ export default function PublicCatalogPage() {
                         key={cat}
                         onClick={() => {
                           setFilterCategory(cat);
-                          setIsFilterOpen(false); // Close drawer on selection
+                          setIsFilterOpen(false); 
                         }}
                         className={`text-left w-full px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border ${
                           filterCategory === cat
@@ -416,7 +416,7 @@ export default function PublicCatalogPage() {
                 </div>
               </div>
 
-              {/* Footer */}
+              {}
               {tienda.phone && (
                 <div className="p-6 border-t border-[var(--border)] bg-[var(--bg)]/50">
                   <h4 className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Soporte</h4>
@@ -431,7 +431,7 @@ export default function PublicCatalogPage() {
         )}
       </AnimatePresence>
 
-      {/* Modal de Detalle de Producto */}
+      {}
       <AnimatePresence>
         {selectedProduct && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -477,7 +477,7 @@ export default function PublicCatalogPage() {
                   SKU: {selectedVariant?.sku || selectedProduct.items[0]?.sku}
                 </span>
 
-                {/* Selector de variantes */}
+                {}
                 {selectedProduct.items.length > 1 && (
                   <div className="mb-6 flex flex-col gap-4">
                     {Object.keys(allAttributesGrouped).length > 0 ? (
@@ -490,16 +490,16 @@ export default function PublicCatalogPage() {
                             {values.map(val => {
                               const isSelected = selectedAttributes[key] === val;
 
-                              // Check if there is any variant in selectedProduct that has this attribute value
-                              // AND matches the other selected attributes, AND has stock > 0.
-                              // In PublicCatalogPage, stock is usually in 'stock' or 'cantidadTotal'. Let's check both 'stock' and 'cantidadTotal'.
+                              
+                              
+                              
                               const hasStock = selectedProduct.items.some(item => {
                                 const attrs = item.attributes || {};
                                 if (attrs[key] !== val) return false;
 
-                                // Check other selected attributes
+                                
                                 for (const [k, v] of Object.entries(selectedAttributes)) {
-                                  if (k === key) continue; // ignore current attribute key
+                                  if (k === key) continue; 
                                   if (attrs[k] !== v) return false;
                                 }
                                 const stockVal = item.stock !== undefined ? item.stock : (item.cantidadTotal !== undefined ? item.cantidadTotal : 0);
@@ -611,7 +611,7 @@ export default function PublicCatalogPage() {
         )}
       </AnimatePresence>
 
-      {/* Botón flotante del carrito */}
+      {}
       <AnimatePresence>
         {cartItemsCount > 0 && !isCartOpen && (
           <motion.button
@@ -632,7 +632,7 @@ export default function PublicCatalogPage() {
         )}
       </AnimatePresence>
 
-      {/* Modal Carrito (Drawer Right) */}
+      {}
       <AnimatePresence>
         {isCartOpen && (
           <div className="fixed inset-0 z-[100] flex justify-end">

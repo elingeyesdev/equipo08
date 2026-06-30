@@ -39,7 +39,7 @@ export class Venta {
   @Column({ name: 'numero_comprobante' })
   numeroComprobante: string;
 
-  @Column({ name: 'cliente_name' }) // Map to database snake_case or clean name
+  @Column({ name: 'cliente_name' }) 
   clienteNombre: string;
 
   @Column({ name: 'cliente_documento', nullable: true })
@@ -49,7 +49,7 @@ export class Venta {
   fecha: Date;
 
   @Column({ type: 'varchar', default: 'COMPLETADA' })
-  estado: string; // 'COMPLETADA', 'ANULADA'
+  estado: string; 
 
   @Column('decimal', { precision: 12, scale: 2, default: 0 })
   total: number;

@@ -495,7 +495,7 @@ export class VentasService {
       venta.estado = 'ANULADA';
       const savedVenta = await queryRunner.manager.save(Venta, venta);
 
-      // Revertir el stock para cada detalle de la venta
+      
       for (const detail of venta.detalles) {
         const cost = Number(detail.costoUnitarioSnapshot || 0) * Number(detail.cantidad);
         await this.stockService.applyStockDelta(
@@ -508,7 +508,7 @@ export class VentasService {
           'ANULACION',
           `Anulación de venta ${venta.numeroComprobante}`,
           undefined,
-          undefined, // No Cajero context ID inside service method signature for now, pass undefined or null
+          undefined, 
           'ANULACION',
           venta.id,
         );

@@ -32,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
         
         sessionManager = new SessionManager(this);
         
-        // Limpiar la sesión de prueba anterior automáticamente
+        
         if ("dev-tenant-123".equals(sessionManager.getTenantId())) {
             sessionManager.logout();
         }
@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponse auth = response.body();
-                    sessionManager.createSession(auth.getTenant_id(), auth.getName(), email, auth.getAccessToken(), auth.getRole(), auth.getUserName());
+                    sessionManager.createSession(auth.getTenant_id(), auth.getName(), email, auth.getAccessToken(), auth.getRole(), auth.getUserName(), auth.getSucursalId(), auth.getSucursalName());
                     Toast.makeText(LoginActivity.this, "Bienvenido a " + auth.getName() + ", " + auth.getUserName(), Toast.LENGTH_LONG).show();
                     goToMain();
                 } else {
@@ -96,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void goToMain() {
         Intent intent = new Intent(this, MainActivity.class);
-        // Clear backstack
+        
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

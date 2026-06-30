@@ -76,7 +76,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Prices section -->
+        
         <LinearLayout
             android:id="@+id/layoutPrices"
             android:layout_width="0dp"
@@ -151,7 +151,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Actions section -->
+        
         <LinearLayout
             android:id="@+id/layoutActions"
             android:layout_width="wrap_content"

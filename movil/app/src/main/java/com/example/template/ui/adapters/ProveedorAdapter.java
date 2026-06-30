@@ -45,6 +45,7 @@ public class ProveedorAdapter extends RecyclerView.Adapter<ProveedorAdapter.View
         holder.tvRazonSocial.setText(p.getName());
         holder.tvNit.setText("NIT: " + p.getTaxId());
         holder.tvEmail.setText(p.getContactEmail() != null && !p.getContactEmail().isEmpty() ? p.getContactEmail() : "Sin Email");
+        holder.tvPhone.setText(p.getPhone() != null && !p.getPhone().isEmpty() ? "Telf: " + p.getPhone() : "Sin Teléfono");
 
         holder.btnDelete.setOnClickListener(v -> {
             if (actionListener != null) {
@@ -65,13 +66,14 @@ public class ProveedorAdapter extends RecyclerView.Adapter<ProveedorAdapter.View
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvRazonSocial, tvNit, tvEmail;
+        TextView tvRazonSocial, tvNit, tvEmail, tvPhone;
         ImageButton btnDelete, btnEdit;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvRazonSocial = itemView.findViewById(R.id.tvRazonSocial);
             tvNit = itemView.findViewById(R.id.tvNit);
             tvEmail = itemView.findViewById(R.id.tvEmail);
+            tvPhone = itemView.findViewById(R.id.tvPhone);
             btnDelete = itemView.findViewById(R.id.btnDelete);
             btnEdit = itemView.findViewById(R.id.btnEdit);
         }

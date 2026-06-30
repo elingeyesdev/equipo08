@@ -17,9 +17,9 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Forms and List Area -->
+            
 
-            <!-- CARD Form -->
+            
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardForm"
                 android:layout_width="match_parent"
@@ -128,14 +128,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
                         app:cornerRadius="8dp"
-                        android:backgroundTint="@color/profit_color"
+                        android:backgroundTint="#0f172a"
                         android:textColor="#ffffff"
-                        android:text="Confirmar alta de personal" />
+                        android:text="Alta de empleado" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Filters Area -->
+            
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -204,7 +204,7 @@
 
             </LinearLayout>
 
-            <!-- LIST AREA -->
+            
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"

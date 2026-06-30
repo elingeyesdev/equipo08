@@ -116,7 +116,7 @@ public class AuditAdapter extends RecyclerView.Adapter<AuditAdapter.ViewHolder> 
             holder.tvLoss.setText(String.format("Bs. %.2f", loss));
         }
 
-        // Bind observations description dynamically
+        
         if (a.getObservaciones() != null && !a.getObservaciones().trim().isEmpty()) {
             holder.tvObservaciones.setText("Obs: " + a.getObservaciones().trim());
             holder.tvObservaciones.setVisibility(View.VISIBLE);

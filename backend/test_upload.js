@@ -19,7 +19,7 @@ async function testUpload() {
     const token = loginData.access_token;
     console.log('Token obtenido:', token.substring(0, 10) + '...');
 
-    // Crear un blob de prueba
+    
     const blob = new Blob(['fake webp content'], { type: 'image/webp' });
     const formData = new FormData();
     formData.append('file', blob, 'test.webp');

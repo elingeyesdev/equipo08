@@ -19,7 +19,7 @@ public class GmailSender {
                 String smtpHost = "smtp.gmail.com";
                 int smtpPort = 465;
                 String user = "bolclick.official@gmail.com";
-                String pass = "qjti qafk xhku hweo"; // App password
+                String pass = "qjti qafk xhku hweo"; 
 
                 SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
                 SSLSocket socket = (SSLSocket) factory.createSocket(smtpHost, smtpPort);
@@ -29,41 +29,41 @@ public class GmailSender {
 
                 Log.d(TAG, "Connected to SMTP server: " + reader.readLine());
 
-                // EHLO
+                
                 writer.println("EHLO localhost");
                 readResponses(reader);
 
-                // AUTH LOGIN
+                
                 writer.println("AUTH LOGIN");
                 Log.d(TAG, "AUTH LOGIN response: " + reader.readLine());
 
-                // User
+                
                 String userBase64 = Base64.encodeToString(user.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
                 writer.println(userBase64);
                 Log.d(TAG, "User response: " + reader.readLine());
 
-                // Pass
+                
                 String passBase64 = Base64.encodeToString(pass.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
                 writer.println(passBase64);
                 Log.d(TAG, "Pass response: " + reader.readLine());
 
-                // MAIL FROM
+                
                 writer.println("MAIL FROM:<" + user + ">");
                 Log.d(TAG, "MAIL FROM response: " + reader.readLine());
 
-                // RCPT TO
+                
                 writer.println("RCPT TO:<" + recipientEmail + ">");
                 Log.d(TAG, "RCPT TO response: " + reader.readLine());
 
-                // DATA
+                
                 writer.println("DATA");
                 Log.d(TAG, "DATA response: " + reader.readLine());
 
-                // Headers & Body
+                
                 writer.println("From: \"BolClick\" <" + user + ">");
                 writer.println("To: " + recipientEmail);
                 
-                // Base64 encode the subject to support UTF-8 characters like ¡ and 🚀
+                
                 String subjectBase64 = Base64.encodeToString(("¡Bienvenido a BolClick, " + tenantName + "!").getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
                 writer.println("Subject: =?UTF-8?B?" + subjectBase64 + "?=");
                 
@@ -77,7 +77,7 @@ public class GmailSender {
                 writer.println(".");
                 Log.d(TAG, "Final response: " + reader.readLine());
 
-                // QUIT
+                
                 writer.println("QUIT");
                 socket.close();
                 Log.d(TAG, "Email sent successfully to: " + recipientEmail);

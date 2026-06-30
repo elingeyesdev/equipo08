@@ -69,12 +69,12 @@ export default function DashboardPage() {
       const stock = stockRes.data || [];
       const ajustes = ajustesRes.data || [];
 
-      // Filtrado local de stock
+      
       const filteredStock = selectedSucursal && selectedSucursal !== 'ALL'
         ? stock.filter(item => item.sucursal_id === selectedSucursal)
         : stock;
 
-      // Filtrado local de pérdidas (ajustes) por fecha y sucursal
+      
       const filteredAjustes = ajustes.filter(aj => {
         if (selectedSucursal && selectedSucursal !== 'ALL' && aj.sucursal_id !== selectedSucursal) {
           return false;
@@ -132,13 +132,13 @@ export default function DashboardPage() {
     );
   }
 
-  // Ocultar métricas financieras detalladas si es un vendedor básico, para privacidad del dueño.
+  
   const isBasicSeller = userRole === 'VENDEDOR';
 
   return (
     <div className="full-width-container animate-fadein space-y-6">
       
-      {/* HEADER */}
+      {}
       <div className="page-header-bar">
         <div>
           <h1>Dashboard</h1>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* FILTROS DE DASHBOARD */}
+      {}
       {showFilters && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-wrap items-center gap-6 animate-fadeIn">
           <div className="flex items-center gap-2">
@@ -217,10 +217,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* KPI GRID */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 lg:grid-cols-3 gap-6 mb-8">
         
-        {/* Card: Ventas Realizadas */}
+        {}
         <div className="relative overflow-hidden rounded-xl bg-[#2563eb] text-white flex flex-col justify-between">
           <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
             <ShoppingCart size={100} strokeWidth={2} />
@@ -234,7 +234,7 @@ export default function DashboardPage() {
           </a>
         </div>
 
-        {/* Card: Ingresos */}
+        {}
         {!isBasicSeller && (
           <div className="relative overflow-hidden rounded-xl bg-emerald-600 text-white flex flex-col justify-between">
             <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
@@ -250,7 +250,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Card: Utilidad Bruta */}
+        {}
         {!isBasicSeller && (
           <div className="relative overflow-hidden rounded-xl bg-amber-500 text-white flex flex-col justify-between">
             <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
@@ -266,7 +266,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Card: Inventario */}
+        {}
         <div className="relative overflow-hidden rounded-xl bg-[#4f46e5] text-white flex flex-col justify-between">
           <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
             <Archive size={100} strokeWidth={2} />
@@ -280,7 +280,7 @@ export default function DashboardPage() {
           </a>
         </div>
 
-        {/* Card: Pérdidas / Ajustes */}
+        {}
         {!isBasicSeller && (
           <div className="relative overflow-hidden rounded-xl bg-rose-600 text-white flex flex-col justify-between">
             <div className="absolute -right-2 -top-2 opacity-10 pointer-events-none">
@@ -297,7 +297,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* CHARTS SECTION */}
+      {}
       <div className="mb-8">
         <div className="pb-2">
           <div className="mb-4 flex items-center justify-between">

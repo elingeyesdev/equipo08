@@ -12,7 +12,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Filter Button -->
+        
         <Button
             android:id="@+id/btnToggleFilter"
             android:layout_width="match_parent"
@@ -22,7 +22,7 @@
             android:textColor="#ffffff"
             android:text="Filtrar" />
 
-        <!-- Alert Banner -->
+        
         <LinearLayout
             android:id="@+id/llAlertBanner"
             android:layout_width="match_parent"
@@ -65,7 +65,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- FILTER AREA -->
+        
         <androidx.cardview.widget.CardView
             android:id="@+id/cardFilter"
             android:layout_width="match_parent"
@@ -82,7 +82,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Branch Spinner -->
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,7 +106,7 @@
                         android:background="@null" />
                 </LinearLayout>
 
-                <!-- Search Input -->
+                
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -137,7 +137,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Valuation Box -->
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -192,7 +192,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- LIST AREA -->
+        
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"

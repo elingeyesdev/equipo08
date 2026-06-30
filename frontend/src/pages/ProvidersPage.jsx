@@ -45,7 +45,7 @@ export default function ProvidersPage() {
     setSearchingNit(true);
     try {
       const { data } = await api.get(`/proveedores/global/${formData.taxId}`);
-      // Auto-fill
+      
       setFormData({
         ...formData,
         name: data.name,
@@ -106,7 +106,7 @@ export default function ProvidersPage() {
   return (
     <div className="full-width-container animate-fadein space-y-6">
       
-      {/* Header and Actions */}
+      {}
       <div className="page-header-bar">
         <div>
           <h1>Directorio de Proveedores</h1>
@@ -237,7 +237,7 @@ export default function ProvidersPage() {
         </div>
       )}
 
-      {/* Directory Table */}
+      {}
       <div className="table-premium-wrapper">
         {loading ? (
           <div className="py-20 text-center flex flex-col items-center justify-center">

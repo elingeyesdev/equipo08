@@ -5,7 +5,7 @@ export default function DoomEasterEgg({ onClose }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Esc to close
+    
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onClose();
     };

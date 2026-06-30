@@ -21,7 +21,7 @@ public class RegisterRequest {
         this.razonSocial = razonSocial;
     }
 
-    // Getters and Setters
+    
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getDomain() { return domain; }

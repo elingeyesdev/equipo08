@@ -8,7 +8,7 @@ export default function SalesPage() {
   const [salesHistory, setSalesHistory] = useState([]);
   const [downloading, setDownloading] = useState(null);
   
-  // History Filters
+  
   const [historySearch, setHistorySearch] = useState('');
   const [historyStartDate, setHistoryStartDate] = useState('');
   const [historyEndDate, setHistoryEndDate] = useState('');
@@ -109,7 +109,7 @@ export default function SalesPage() {
       </div>
       
       <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-        {/* Filters */}
+        {}
         {showHistoryFilters && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 animate-fadeIn">
             <div className="relative">

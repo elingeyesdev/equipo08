@@ -7,7 +7,7 @@
     android:background="@drawable/bg_dialog_white"
     android:padding="24dp">
 
-    <!-- Header with Title and Close button -->
+    
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
             android:contentDescription="Cerrar" />
     </RelativeLayout>
 
-    <!-- Cliente -->
+    
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
         android:inputType="text"
         android:layout_marginBottom="20dp" />
 
-    <!-- NIT / CI (opcional) -->
+    
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
         android:inputType="text"
         android:layout_marginBottom="20dp" />
 
-    <!-- Pago & Monto recibido -->
+    
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -164,7 +164,7 @@
         android:background="#e2e8f0"
         android:layout_marginBottom="20dp" />
 
-    <!-- Total a pagar Row -->
+    
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -191,7 +191,7 @@
             android:layout_centerVertical="true"/>
     </RelativeLayout>
 
-    <!-- Confirm button -->
+    
     <Button
         android:id="@+id/btnDialogConfirmVenta"
         android:layout_width="match_parent"

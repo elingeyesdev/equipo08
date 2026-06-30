@@ -13,7 +13,7 @@ export class StockService {
     private readonly dataSource: DataSource,
   ) {}
 
-  // Helper para buscar o resolver dinámicamente la variante por defecto si no se pasa producto_variacion_id
+  
   private async resolveVariacionId(
     manager: EntityManager,
     tenant_id: string,
@@ -22,13 +22,13 @@ export class StockService {
   ): Promise<string> {
     if (producto_variacion_id) return producto_variacion_id;
 
-    // Buscar variante por defecto del producto
+    
     const variant = await manager.findOne(ProductoVariacion, {
       where: { producto: { id: producto_id, tenant_id } },
       order: { createdAt: 'ASC' },
     });
     if (!variant) {
-      // En caso extremo que no tenga variantes, la creamos al vuelo para no romper transaccionalidad
+      
       const newVar = manager.create(ProductoVariacion, {
         producto_id,
         sku: `SKU-${producto_id.split('-')[0]}`,
@@ -138,7 +138,7 @@ export class StockService {
 
       stock.cantidadActual = nuevaCantidad;
       stock.costoPromedio = nuevoCostoPromedio;
-      // Por si el registro de stock viejo no tenía seteado el producto_variacion_id
+      
       if (!stock.producto_variacion_id) {
         stock.producto_variacion_id = varId;
       }
@@ -209,7 +209,7 @@ export class StockService {
     try {
       const varId = await this.resolveVariacionId(queryRunner.manager, tenant_id, producto_id, producto_variacion_id);
 
-      // Bloquear registro origen
+      
       const sourceStock = await queryRunner.manager.findOne(Stock, {
         where: { tenant_id, sucursal_id: from_sucursal_id, producto_variacion_id: varId },
         lock: { mode: 'pessimistic_write' },
@@ -224,7 +224,7 @@ export class StockService {
       const avgCost = Number(sourceStock.costoPromedio || 0);
       const transferredValue = avgCost * cantidad;
 
-      // Descontar de origen utilizando applyStockDelta
+      
       await this.applyStockDelta(
         queryRunner.manager,
         tenant_id,
@@ -241,13 +241,13 @@ export class StockService {
         varId,
       );
 
-      // Bloquear/Crear registro destino
+      
       const targetStock = await queryRunner.manager.findOne(Stock, {
         where: { tenant_id, sucursal_id: to_sucursal_id, producto_variacion_id: varId },
         lock: { mode: 'pessimistic_write' },
       });
 
-      // Incrementar en destino utilizando applyStockDelta
+      
       await this.applyStockDelta(
         queryRunner.manager,
         tenant_id,

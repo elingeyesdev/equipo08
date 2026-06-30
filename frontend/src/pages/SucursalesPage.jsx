@@ -90,7 +90,7 @@ export default function SucursalesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Easter Egg Check: Lunes a Lunes de 07:00 a 08:00
+    
     const isEasterEgg = horariosData.some(h => 
       h.days.length === 7 && h.start === '07:00' && h.end === '08:00'
     );
@@ -312,7 +312,7 @@ export default function SucursalesPage() {
         </div>
       )}
 
-      {/* Table Section */}
+      {}
       <div className="table-premium-wrapper">
         {loading ? (
           <div className="py-20 text-center flex flex-col items-center justify-center">
@@ -403,7 +403,7 @@ export default function SucursalesPage() {
         onCancel={() => setConfirmDelete(null)}
       />
 
-      {/* Modal para ver Horarios */}
+      {}
       <AnimatePresence>
         {viewingHorarios && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

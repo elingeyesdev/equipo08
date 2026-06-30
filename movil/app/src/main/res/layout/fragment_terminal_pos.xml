@@ -7,7 +7,7 @@
     android:background="@color/bg_dark"
     android:padding="16dp">
 
-    <!-- Filter Panel -->
+    
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
             android:background="@null" />
     </LinearLayout>
 
-    <!-- Category Filter Horizontal Scroll -->
+    
     <HorizontalScrollView
         android:id="@+id/hsvCategories"
         android:layout_width="match_parent"
@@ -47,7 +47,7 @@
             android:paddingVertical="4dp" />
     </HorizontalScrollView>
 
-    <!-- Products Catalog Grid with SwipeRefresh -->
+    
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshProducts"
         android:layout_width="match_parent"
@@ -62,7 +62,7 @@
             android:paddingBottom="12dp" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <!-- Bottom Cart Panel -->
+    
     <androidx.cardview.widget.CardView
         android:id="@+id/cvCartPanel"
         android:layout_width="match_parent"
@@ -79,7 +79,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Cart Summary (Always visible) -->
+            
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -124,7 +124,7 @@
                     android:stateListAnimator="@null" />
             </RelativeLayout>
 
-            <!-- Expandable Cart Details -->
+            
             <LinearLayout
                 android:id="@+id/llCartDetails"
                 android:layout_width="match_parent"
@@ -133,7 +133,7 @@
                 android:layout_marginTop="12dp"
                 android:visibility="gone">
 
-                <!-- Inner Segmented Tabs for Cart Details -->
+                
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -177,7 +177,7 @@
                         android:stateListAnimator="@null"/>
                 </LinearLayout>
 
-                <!-- TAB 1 CONTENT: Nueva Orden -->
+                
                 <LinearLayout
                     android:id="@+id/llCartTabNewContent"
                     android:layout_width="match_parent"
@@ -185,7 +185,7 @@
                     android:orientation="vertical"
                     android:visibility="visible">
 
-                    <!-- Cart Products List -->
+                    
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvCartItems"
                         android:layout_width="match_parent"
@@ -194,7 +194,7 @@
                         android:background="@android:color/transparent"
                         android:padding="4dp"/>
 
-                    <!-- Action Buttons Stacked: Ticket (top) & Cobrar (bottom) -->
+                    
                     <Button
                         android:id="@+id/btnTicket"
                         android:layout_width="match_parent"
@@ -217,7 +217,7 @@
                         android:textSize="14sp"/>
                 </LinearLayout>
 
-                <!-- TAB 2 CONTENT: Historial (Saved Tickets) -->
+                
                 <LinearLayout
                     android:id="@+id/llCartTabHistoryContent"
                     android:layout_width="match_parent"
@@ -225,7 +225,7 @@
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <!-- Saved Tickets Recycler -->
+                    
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvSavedTickets"
                         android:layout_width="match_parent"

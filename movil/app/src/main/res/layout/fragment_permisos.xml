@@ -3,115 +3,239 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark">
+    android:background="#f8fafc">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
         
-            
-        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Políticas de Acceso (ACL)"
+            android:textColor="#0f172a"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
-        <!-- SUPERVISOR CARD -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="24dp"
+            android:text="Consulte las atribuciones, alcances de seguridad y responsabilidades predefinidas para su equipo."
+            android:textColor="#64748b"
+            android:textSize="14sp" />
+
+        
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
             android:backgroundTint="@android:color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="24dp">
 
-                <RelativeLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Supervisor"
-                        android:textStyle="bold"
-                        android:textColor="#5981DF"
-                        android:textSize="16sp"
-                        android:layout_centerVertical="true"
-                        android:drawablePadding="8dp" />
+                    android:text="SUPERVISOR / ENCARGADO DE SUCURSAL"
+                    android:textColor="#0f172a"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"/>
 
-                    <Button
-                        android:id="@+id/btnAplicarSupervisor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:backgroundTint="#5981DF"
-                        android:textColor="#ffffff"
-                        android:textSize="12sp"
-                        android:text="Aplicar perfil" />
-                </RelativeLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#f1f5f9"
+                    android:layout_marginBottom="12dp"/>
 
-                <!-- Container for toggles -->
-                <LinearLayout
-                    android:id="@+id/llSupervisorPermisos"
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"/>
+                    android:text="Este perfil está pensado para la persona encargada de una tienda o sucursal. Su función principal es apoyar en el control diario del negocio, gestionando ventas, productos, ingresos de mercadería y revisión del inventario."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.2"
+                    android:layout_marginBottom="20dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="FUNCIONES HABILITADAS"
+                    android:textColor="#0f172a"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="10dp"/>
+
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Caja y POS: puede registrar ventas, cobrar y realizar modificaciones dentro del proceso de venta."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Catálogo: puede registrar productos y actualizar precios de venta o costo."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Ingreso de mercadería: puede registrar entradas de stock, lotes nuevos y datos relacionados al proveedor."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Auditoría: puede reportar pérdidas, mermas, productos vencidos o diferencias encontradas en inventario."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Consulta: puede revisar proveedores, stock disponible e historial de movimientos de la sucursal."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="20dp"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#f1f5f9"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="RESTRICCIONES"
+                    android:textColor="#0284c7"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No puede eliminar sucursales, anular ventas históricas definitivas ni crear o despedir personal. Estas acciones quedan reservadas para perfiles administrativos superiores."
+                    android:textColor="#64748b"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.2"/>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- VENDEDOR CARD -->
+        
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
             android:backgroundTint="@android:color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="24dp">
 
-                <RelativeLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
-                    
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Vendedor"
-                        android:textStyle="bold"
-                        android:textColor="@color/profit_color"
-                        android:textSize="16sp"
-                        android:layout_centerVertical="true"
-                        android:drawablePadding="8dp" />
+                    android:text="VENDEDOR / ATENCIÓN Y CAJA"
+                    android:textColor="#0f172a"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"/>
 
-                    <Button
-                        android:id="@+id/btnAplicarVendedor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:backgroundTint="@color/accent_color"
-                        android:textColor="#ffffff"
-                        android:textSize="12sp"
-                        android:text="Aplicar perfil" />
-                </RelativeLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#f1f5f9"
+                    android:layout_marginBottom="12dp"/>
 
-                <!-- Container for toggles -->
-                <LinearLayout
-                    android:id="@+id/llVendedorPermisos"
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"/>
+                    android:text="Este perfil está orientado al personal encargado del cobro, atención al cliente y facturación rápida en caja. Es un rol puramente transaccional sin acceso a configuraciones de catálogo o almacén."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.2"
+                    android:layout_marginBottom="20dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="FUNCIONES HABILITADAS"
+                    android:textColor="#0f172a"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="10dp"/>
+
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Caja y POS: puede registrar ventas, cobrar y utilizar la terminal de ventas en sucursal asignada."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Consulta: puede revisar el stock disponible de productos y consultar precios actualizados en catálogo en tiempo real."
+                    android:textColor="#475569"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="20dp"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#f1f5f9"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="RESTRICCIONES"
+                    android:textColor="#0284c7"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="6dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="No tiene acceso a la creación de productos, modificación de precios de costo o venta, ingresos de nuevos lotes o visualización de auditorías de pérdida del negocio."
+                    android:textColor="#64748b"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.2"/>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

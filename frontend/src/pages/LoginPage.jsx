@@ -20,7 +20,7 @@ export default function LoginPage({ setAuthToken }) {
       const response = await api.post('/auth/login', { email, password });
       const { access_token, user } = response.data;
       
-      // Guardar todo en sessionStorage
+      
       sessionStorage.setItem('access_token', access_token);
       sessionStorage.setItem('user_id', user.id);
       sessionStorage.setItem('user_name', user.name);

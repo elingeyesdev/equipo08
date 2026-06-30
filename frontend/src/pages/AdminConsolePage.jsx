@@ -53,7 +53,7 @@ export default function AdminConsolePage() {
         <p className="text-slate-500 font-medium mt-2">Control maestro de todas las tiendas registradas en el sistema.</p>
       </div>
 
-      {/* Metrics */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Tiendas', value: metrics.total, color: 'text-slate-800 dark:text-slate-200' },
@@ -68,7 +68,7 @@ export default function AdminConsolePage() {
         ))}
       </div>
 
-      {/* Tenants Table */}
+      {}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <h2 className="text-base font-bold text-slate-800">
@@ -154,7 +154,7 @@ export default function AdminConsolePage() {
         </div>
       </div>
 
-      {/* Modal de Información de la Empresa */}
+      {}
       {selectedTenant && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700 animate-fadeIn">

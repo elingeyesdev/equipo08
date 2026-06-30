@@ -96,7 +96,7 @@ export default function CategoriesPage() {
   return (
     <div className="full-width-container animate-fadein space-y-6">
       
-      {/* Header and Actions */}
+      {}
       <div className="page-header-bar">
         <div>
           <h1>Categorías de Productos</h1>
@@ -164,7 +164,7 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      {/* Filter and Search Section */}
+      {}
       <div className="bg-white border border-slate-200/60 rounded-2xl p-5 shadow-sm">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex-1 min-w-[240px] relative">
@@ -180,7 +180,7 @@ export default function CategoriesPage() {
         </div>
       </div>
 
-      {/* Categories List */}
+      {}
       <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-400">

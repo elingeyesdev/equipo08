@@ -9,8 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ import com.example.template.network.ApiClient;
 import com.example.template.network.ApiService;
 import com.example.template.network.models.Sucursal;
 import com.example.template.ui.adapters.SucursalAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,13 +50,17 @@ public class SucursalesFragment extends Fragment {
     private boolean isFormVisible = false;
     private Sucursal editingSucursal = null;
 
-    // Schedule Picker UI
-    private TextView tvSelectedDaysLabel;
-    private Button btnSelectDays, btnStartTime, btnEndTime;
+    
+    private LinearLayout llHorariosContainer;
+    private Button btnAddHorario;
     private final String[] DAYS_OF_WEEK = {"Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"};
-    private final java.util.List<String> selectedDays = new ArrayList<>();
-    private String startTime = "08:00";
-    private String endTime = "18:00";
+    private final List<HorarioBlock> horarioBlocks = new ArrayList<>();
+
+    private static class HorarioBlock {
+        List<String> days = new ArrayList<>();
+        String start = "08:00";
+        String end = "18:00";
+    }
 
     @Nullable
     @Override
@@ -68,20 +74,15 @@ public class SucursalesFragment extends Fragment {
         etAddress = view.findViewById(R.id.etAddress);
         etPhone = view.findViewById(R.id.etPhone);
 
-        tvSelectedDaysLabel = view.findViewById(R.id.tvSelectedDaysLabel);
-        btnSelectDays = view.findViewById(R.id.btnSelectDays);
-        btnStartTime = view.findViewById(R.id.btnStartTime);
-        btnEndTime = view.findViewById(R.id.btnEndTime);
+        llHorariosContainer = view.findViewById(R.id.llHorariosContainer);
+        btnAddHorario = view.findViewById(R.id.btnAddHorario);
 
-        btnSelectDays.setOnClickListener(v -> showDaysPickerDialog());
-        btnStartTime.setOnClickListener(v -> showTimePickerDialog(true));
-        btnEndTime.setOnClickListener(v -> showTimePickerDialog(false));
+        btnAddHorario.setOnClickListener(v -> addHorarioBlock(null));
 
-        resetScheduleToDefault();
         spinnerStatus = view.findViewById(R.id.spinnerStatus);
         recyclerView = view.findViewById(R.id.recyclerView);
 
-        // Setup Spinner
+        
         String[] statusOptions = new String[]{"Activa y Operando", "Cerrada / Inactiva"};
         if (getContext() != null) {
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
@@ -110,7 +111,7 @@ public class SucursalesFragment extends Fragment {
         btnToggleForm.setOnClickListener(v -> toggleForm(false));
         btnGuardar.setOnClickListener(v -> saveSucursal());
 
-        // Default hide
+        
         btnToggleForm.setVisibility(View.GONE);
         adapter.setCanManage(false);
 
@@ -150,7 +151,9 @@ public class SucursalesFragment extends Fragment {
         if (!fromEdit) {
             editingSucursal = null;
             etName.setText(""); etAddress.setText(""); etPhone.setText("");
-            resetScheduleToDefault();
+            horarioBlocks.clear();
+            llHorariosContainer.removeAllViews();
+            addHorarioBlock(null); 
             spinnerStatus.setSelection(0);
             btnGuardar.setText("Crear sucursal físicamente");
         }
@@ -167,37 +170,147 @@ public class SucursalesFragment extends Fragment {
         }
     }
 
+    private void addHorarioBlock(@Nullable HorarioBlock existingBlock) {
+        if (getContext() == null) return;
+
+        HorarioBlock block;
+        if (existingBlock != null) {
+            block = existingBlock;
+        } else {
+            block = new HorarioBlock();
+            
+            block.days.add("Lunes");
+            block.days.add("Martes");
+            block.days.add("Miércoles");
+            block.days.add("Jueves");
+            block.days.add("Viernes");
+        }
+        horarioBlocks.add(block);
+
+        View blockView = LayoutInflater.from(getContext()).inflate(R.layout.item_horario_block, llHorariosContainer, false);
+        TextView tvSelectedDaysLabel = blockView.findViewById(R.id.tvSelectedDaysLabel);
+        Button btnSelectDays = blockView.findViewById(R.id.btnSelectDays);
+        Button btnStartTime = blockView.findViewById(R.id.btnStartTime);
+        Button btnEndTime = blockView.findViewById(R.id.btnEndTime);
+        ImageButton btnDeleteBlock = blockView.findViewById(R.id.btnDeleteBlock);
+
+        
+        updateDaysLabel(block, tvSelectedDaysLabel);
+        btnStartTime.setText(block.start);
+        btnEndTime.setText(block.end);
+
+        
+        btnSelectDays.setOnClickListener(v -> showDaysPickerDialog(block, tvSelectedDaysLabel));
+        btnStartTime.setOnClickListener(v -> showTimePickerDialog(block, btnStartTime, true));
+        btnEndTime.setOnClickListener(v -> showTimePickerDialog(block, btnEndTime, false));
+
+        btnDeleteBlock.setOnClickListener(v -> {
+            horarioBlocks.remove(block);
+            llHorariosContainer.removeView(blockView);
+        });
+
+        llHorariosContainer.addView(blockView);
+    }
+
+    private void showDaysPickerDialog(HorarioBlock block, TextView tvLabel) {
+        if (getContext() == null) return;
+        boolean[] checkedItems = new boolean[DAYS_OF_WEEK.length];
+        for (int i = 0; i < DAYS_OF_WEEK.length; i++) {
+            checkedItems[i] = block.days.contains(DAYS_OF_WEEK[i]);
+        }
+
+        new androidx.appcompat.app.AlertDialog.Builder(getContext())
+            .setTitle("Seleccionar Días")
+            .setMultiChoiceItems(DAYS_OF_WEEK, checkedItems, (dialog, which, isChecked) -> {
+                if (isChecked) {
+                    if (!block.days.contains(DAYS_OF_WEEK[which])) {
+                        block.days.add(DAYS_OF_WEEK[which]);
+                    }
+                } else {
+                    block.days.remove(DAYS_OF_WEEK[which]);
+                }
+            })
+            .setPositiveButton("Aceptar", (dialog, which) -> updateDaysLabel(block, tvLabel))
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    private void updateDaysLabel(HorarioBlock block, TextView tvLabel) {
+        List<String> sortedSelected = new ArrayList<>();
+        for (String day : DAYS_OF_WEEK) {
+            if (block.days.contains(day)) {
+                sortedSelected.add(day);
+            }
+        }
+        block.days.clear();
+        block.days.addAll(sortedSelected);
+
+        if (block.days.isEmpty()) {
+            tvLabel.setText("Días: Ninguno seleccionado");
+        } else if (block.days.size() == 7) {
+            tvLabel.setText("Días: Todos los días");
+        } else {
+            StringBuilder sb = new StringBuilder("Días: ");
+            for (int i = 0; i < block.days.size(); i++) {
+                sb.append(block.days.get(i));
+                if (i < block.days.size() - 1) sb.append(", ");
+            }
+            tvLabel.setText(sb.toString());
+        }
+    }
+
+    private void showTimePickerDialog(HorarioBlock block, Button btn, boolean isStart) {
+        if (getContext() == null) return;
+        String currentTime = isStart ? block.start : block.end;
+        int hour = 8;
+        int minute = 0;
+        try {
+            String[] parts = currentTime.split(":");
+            hour = Integer.parseInt(parts[0]);
+            minute = Integer.parseInt(parts[1]);
+        } catch (Exception e) {}
+
+        new android.app.TimePickerDialog(getContext(), (view, hourOfDay, min) -> {
+            String formattedTime = String.format(java.util.Locale.US, "%02d:%02d", hourOfDay, min);
+            if (isStart) {
+                block.start = formattedTime;
+            } else {
+                block.end = formattedTime;
+            }
+            btn.setText(formattedTime);
+        }, hour, minute, true).show();
+    }
+
     private void editSucursal(Sucursal sucursal) {
         editingSucursal = sucursal;
         etName.setText(sucursal.getName());
         etAddress.setText(sucursal.getAddress() != null ? sucursal.getAddress() : "");
         etPhone.setText(sucursal.getPhone() != null ? sucursal.getPhone() : "");
         
-        selectedDays.clear();
+        horarioBlocks.clear();
+        llHorariosContainer.removeAllViews();
+
         String json = sucursal.getHorarios();
         if (json != null && !json.isEmpty()) {
             try {
                 com.google.gson.JsonArray array = new com.google.gson.JsonParser().parse(json).getAsJsonArray();
-                if (array.size() > 0) {
-                    com.google.gson.JsonObject obj = array.get(0).getAsJsonObject();
+                for (int i = 0; i < array.size(); i++) {
+                    com.google.gson.JsonObject obj = array.get(i).getAsJsonObject();
+                    HorarioBlock block = new HorarioBlock();
                     com.google.gson.JsonArray days = obj.getAsJsonArray("days");
-                    for (int i = 0; i < days.size(); i++) {
-                        selectedDays.add(days.get(i).getAsString());
+                    for (int d = 0; d < days.size(); d++) {
+                        block.days.add(days.get(d).getAsString());
                     }
-                    startTime = obj.get("start").getAsString();
-                    endTime = obj.get("end").getAsString();
-                } else {
-                    resetScheduleToDefault();
+                    block.start = obj.get("start").getAsString();
+                    block.end = obj.get("end").getAsString();
+                    addHorarioBlock(block);
                 }
             } catch (Exception e) {
-                resetScheduleToDefault();
+                addHorarioBlock(null);
             }
         } else {
-            resetScheduleToDefault();
+            addHorarioBlock(null);
         }
-        updateDaysLabel();
-        btnStartTime.setText(startTime);
-        btnEndTime.setText(endTime);
 
         spinnerStatus.setSelection(sucursal.isActive() ? 0 : 1);
         btnGuardar.setText("Actualizar sucursal");
@@ -215,7 +328,7 @@ public class SucursalesFragment extends Fragment {
                     List<Sucursal> list = response.body();
                     adapter.updateData(list);
                     
-                    // Setup AutoComplete for phones
+                    
                     List<String> phones = new ArrayList<>();
                     for (Sucursal s : list) {
                         if (s.getPhone() != null && !s.getPhone().isEmpty() && !phones.contains(s.getPhone())) {
@@ -240,31 +353,34 @@ public class SucursalesFragment extends Fragment {
         String name = etName.getText().toString().trim();
         String address = etAddress.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
-        boolean isActive = spinnerStatus.getSelectedItemPosition() == 0; // 0 is "Activa y Operando"
+        boolean isActive = spinnerStatus.getSelectedItemPosition() == 0; 
 
         if (name.isEmpty()) {
-            etName.setError("Requerido");
+            Toast.makeText(getContext(), "El campo Nombre es obligatorio", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (!phone.isEmpty() && !phone.matches("^[0-9]{8}$")) {
-            etPhone.setError("El teléfono debe tener exactamente 8 dígitos");
+            Toast.makeText(getContext(), "El campo Teléfono debe tener exactamente 8 dígitos", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String horariosJson = null;
-        if (!selectedDays.isEmpty()) {
-            com.google.gson.JsonArray daysArray = new com.google.gson.JsonArray();
-            for (String day : selectedDays) {
-                daysArray.add(day);
-            }
-            com.google.gson.JsonObject block = new com.google.gson.JsonObject();
-            block.add("days", daysArray);
-            block.addProperty("start", startTime);
-            block.addProperty("end", endTime);
-
+        if (!horarioBlocks.isEmpty()) {
             com.google.gson.JsonArray scheduleArray = new com.google.gson.JsonArray();
-            scheduleArray.add(block);
+            for (HorarioBlock block : horarioBlocks) {
+                if (!block.days.isEmpty()) {
+                    com.google.gson.JsonArray daysArray = new com.google.gson.JsonArray();
+                    for (String day : block.days) {
+                        daysArray.add(day);
+                    }
+                    com.google.gson.JsonObject blockObj = new com.google.gson.JsonObject();
+                    blockObj.add("days", daysArray);
+                    blockObj.addProperty("start", block.start);
+                    blockObj.addProperty("end", block.end);
+                    scheduleArray.add(blockObj);
+                }
+            }
             horariosJson = scheduleArray.toString();
         }
 
@@ -300,7 +416,7 @@ public class SucursalesFragment extends Fragment {
                     if (response.isSuccessful()) {
                         Toast.makeText(getContext(), "Sucursal creada", Toast.LENGTH_SHORT).show();
                         toggleForm(false);
-                        loadSucursales(); // refresh
+                        loadSucursales(); 
                     } else {
                         Toast.makeText(getContext(), "Error al crear", Toast.LENGTH_SHORT).show();
                     }
@@ -314,13 +430,13 @@ public class SucursalesFragment extends Fragment {
     }
 
     private void confirmDelete(Sucursal sucursal) {
-        if (getContext() == null) return;
-        new androidx.appcompat.app.AlertDialog.Builder(getContext())
-            .setTitle("Eliminar Sucursal")
-            .setMessage("¿Estás seguro de que quieres eliminar la sucursal " + sucursal.getName() + "?")
-            .setPositiveButton("Eliminar", (dialog, which) -> deleteSucursal(sucursal))
-            .setNegativeButton("Cancelar", null)
-            .show();
+        com.example.template.utils.DialogHelper.showConfirmDialog(
+            getContext(),
+            "Eliminar Sucursal",
+            "¿Estás seguro de que deseas eliminar la sucursal \"" + sucursal.getName() + "\"?\n\nEsta acción no se puede deshacer.",
+            "Eliminar",
+            () -> deleteSucursal(sucursal)
+        );
     }
 
     private void deleteSucursal(Sucursal sucursal) {
@@ -340,90 +456,6 @@ public class SucursalesFragment extends Fragment {
                 Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void showDaysPickerDialog() {
-        if (getContext() == null) return;
-        boolean[] checkedItems = new boolean[DAYS_OF_WEEK.length];
-        for (int i = 0; i < DAYS_OF_WEEK.length; i++) {
-            checkedItems[i] = selectedDays.contains(DAYS_OF_WEEK[i]);
-        }
-
-        new androidx.appcompat.app.AlertDialog.Builder(getContext())
-            .setTitle("Seleccionar Días")
-            .setMultiChoiceItems(DAYS_OF_WEEK, checkedItems, (dialog, which, isChecked) -> {
-                if (isChecked) {
-                    if (!selectedDays.contains(DAYS_OF_WEEK[which])) {
-                        selectedDays.add(DAYS_OF_WEEK[which]);
-                    }
-                } else {
-                    selectedDays.remove(DAYS_OF_WEEK[which]);
-                }
-            })
-            .setPositiveButton("Aceptar", (dialog, which) -> updateDaysLabel())
-            .setNegativeButton("Cancelar", null)
-            .show();
-    }
-
-    private void updateDaysLabel() {
-        java.util.List<String> sortedSelected = new ArrayList<>();
-        for (String day : DAYS_OF_WEEK) {
-            if (selectedDays.contains(day)) {
-                sortedSelected.add(day);
-            }
-        }
-        selectedDays.clear();
-        selectedDays.addAll(sortedSelected);
-
-        if (selectedDays.isEmpty()) {
-            tvSelectedDaysLabel.setText("Días: Ninguno seleccionado");
-        } else if (selectedDays.size() == 7) {
-            tvSelectedDaysLabel.setText("Días: Todos los días");
-        } else {
-            StringBuilder sb = new StringBuilder("Días: ");
-            for (int i = 0; i < selectedDays.size(); i++) {
-                sb.append(selectedDays.get(i));
-                if (i < selectedDays.size() - 1) sb.append(", ");
-            }
-            tvSelectedDaysLabel.setText(sb.toString());
-        }
-    }
-
-    private void showTimePickerDialog(boolean isStart) {
-        if (getContext() == null) return;
-        String currentTime = isStart ? startTime : endTime;
-        int hour = 8;
-        int minute = 0;
-        try {
-            String[] parts = currentTime.split(":");
-            hour = Integer.parseInt(parts[0]);
-            minute = Integer.parseInt(parts[1]);
-        } catch (Exception e) {}
-
-        new android.app.TimePickerDialog(getContext(), (view, hourOfDay, min) -> {
-            String formattedTime = String.format(java.util.Locale.US, "%02d:%02d", hourOfDay, min);
-            if (isStart) {
-                startTime = formattedTime;
-                btnStartTime.setText(startTime);
-            } else {
-                endTime = formattedTime;
-                btnEndTime.setText(endTime);
-            }
-        }, hour, minute, true).show();
-    }
-
-    private void resetScheduleToDefault() {
-        selectedDays.clear();
-        selectedDays.add("Lunes");
-        selectedDays.add("Martes");
-        selectedDays.add("Miércoles");
-        selectedDays.add("Jueves");
-        selectedDays.add("Viernes");
-        updateDaysLabel();
-        startTime = "08:00";
-        endTime = "18:00";
-        if (btnStartTime != null) btnStartTime.setText(startTime);
-        if (btnEndTime != null) btnEndTime.setText(endTime);
     }
 
     @Override

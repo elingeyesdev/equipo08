@@ -35,6 +35,6 @@ public class Sucursal {
 
     @Override
     public String toString() {
-        return name; // Useful for potential Spinners
+        return name; 
     }
 }

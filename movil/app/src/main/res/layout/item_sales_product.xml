@@ -35,7 +35,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Image Container (between SKU and Nombre) -->
+        
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cvProductImageContainer"
             android:layout_width="match_parent"

@@ -48,6 +48,8 @@ export class CatalogService {
           imagen_url: prod.imagen_url,
           attributes: prod.attributes,
           stockTotal,
+          stock: stockTotal,
+          cantidadTotal: stockTotal,
         };
       }),
     );
@@ -62,7 +64,7 @@ export class CatalogService {
         brandColor: tenant.brandColor,
         phone: tenant.phone,
       },
-      productos: productosConStock.filter((p) => p.stockTotal > 0), // Solo mostrar con stock
+      productos: productosConStock.filter((p) => p.stockTotal > 0), 
     };
   }
 }

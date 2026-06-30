@@ -9,7 +9,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  // Show/Hide Inline Form (matching SourcingPage pattern)
+  
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [userForm, setUserForm] = useState({
@@ -21,7 +21,7 @@ export default function UsersPage() {
     isActive: true
   });
 
-  // Filters State
+  
   const [filterRole, setFilterRole] = useState('ALL');
   const [filterSucursal, setFilterSucursal] = useState('ALL');
   const [showFilters, setShowFilters] = useState(false);
@@ -39,7 +39,7 @@ export default function UsersPage() {
         api.get('/sucursales')
       ]);
       setUsers(usersRes.data);
-      setSucursales(usersRes.data); // Backwards compatibility if needed, but let's correct this line: it should be sucursalesRes.data!
+      setSucursales(usersRes.data); 
       setSucursales(sucursalesRes.data);
     } catch (err) {
       toast.error('Error al cargar datos del personal');
@@ -53,7 +53,7 @@ export default function UsersPage() {
     setUserForm({
       name: user.name,
       email: user.email,
-      password: '', // Password stays empty unless intentionally reset
+      password: '', 
       role: user.role,
       sucursal_id: user.sucursal_id || '',
       isActive: user.isActive ?? true
@@ -74,7 +74,7 @@ export default function UsersPage() {
     try {
       const payload = { ...userForm };
       if (!payload.sucursal_id) delete payload.sucursal_id;
-      if (editingId && !payload.password) delete payload.password; // Don't send empty pass on edit
+      if (editingId && !payload.password) delete payload.password; 
 
       if (editingId) {
         await api.put(`/users/${editingId}`, payload);
@@ -113,7 +113,7 @@ export default function UsersPage() {
   return (
     <div className="full-width-container animate-fadein space-y-6">
       
-      {/* Header Section */}
+      {}
       <div className="page-header-bar">
         <div>
           <h1>Personal y Empleados</h1>
@@ -140,7 +140,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Inline Form */}
+      {}
       {showForm && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
           <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-6">
@@ -261,7 +261,7 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Filter Drawer */}
+      {}
       {showFilters && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-end md:items-center gap-4 animate-fadeIn">
           <div className="flex-1 w-full">
@@ -300,7 +300,7 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Table Section */}
+      {}
       <div className="table-premium-wrapper">
         {loading ? (
           <div className="py-20 text-center flex flex-col items-center justify-center">

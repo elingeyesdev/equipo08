@@ -18,7 +18,7 @@
 
             
 
-            <!-- Card Settings Form -->
+            
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardSettingsForm"
                 android:layout_width="match_parent"
@@ -43,7 +43,7 @@
                         android:textSize="16sp"
                         android:layout_marginBottom="20dp"/>
 
-                    <!-- Store Name -->
+                    
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
                             android:textColor="#0f172a" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Contact Phone -->
+                    
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
                             android:textColor="#0f172a" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Logo Upload Layout -->
+                    
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -148,7 +148,7 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Brand Color Selection -->
+                    
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -167,7 +167,7 @@
                         android:layout_marginBottom="24dp"
                         android:visibility="gone">
 
-                        <!-- Color Preview Box -->
+                        
                         <View
                             android:id="@+id/viewSettingsColorPreview"
                             android:layout_width="48dp"
@@ -176,7 +176,7 @@
                             android:backgroundTint="@color/accent_color"
                             android:layout_marginEnd="12dp" />
 
-                        <!-- Brand Color Text Input -->
+                        
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="0dp"
                             android:layout_weight="1"
@@ -197,7 +197,7 @@
 
                     </LinearLayout>
 
-                    <!-- Save Changes Button -->
+                    
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSettingsSave"
                         android:layout_width="match_parent"
@@ -216,7 +216,7 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Center Progress Loading -->
+    
     <ProgressBar
         android:id="@+id/pbSettingsLoading"
         android:layout_width="wrap_content"

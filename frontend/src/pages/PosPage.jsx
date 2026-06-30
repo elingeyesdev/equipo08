@@ -28,7 +28,7 @@ export default function PosPage() {
   const [saving, setSaving] = useState(false);
   const [orderNumber, setOrderNumber] = useState('......');
   
-  // Hold Orders State
+  
   const [activeRightTab, setActiveRightTab] = useState('new');
   const [holdOrders, setHoldOrders] = useState(() => {
     try {
@@ -39,7 +39,7 @@ export default function PosPage() {
     }
   });
 
-  // Checkout Modal State
+  
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [clienteNombre, setClienteNombre] = useState('Cliente Casual');
   const [clienteDocumento, setClienteDocumento] = useState('');
@@ -47,12 +47,12 @@ export default function PosPage() {
   const [montoRecibido, setMontoRecibido] = useState('');
   const [searchingClient, setSearchingClient] = useState(false);
   
-  // Variant Selection State
+  
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedAttributes, setSelectedAttributes] = useState({});
   
-  // Theme state
+  
   const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
 
   const toast = useToast();
@@ -124,7 +124,7 @@ export default function PosPage() {
   useEffect(() => {
     fetchSucursales();
     
-    // Check global theme changes
+    
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
@@ -192,7 +192,7 @@ export default function PosPage() {
     }
   };
 
-  // Calcular cantidad reservada por producto en las órdenes en espera (tickets)
+  
   const heldQuantities = useMemo(() => {
     const qtyMap = {};
     holdOrders.forEach(order => {
@@ -205,12 +205,12 @@ export default function PosPage() {
     return qtyMap;
   }, [holdOrders]);
 
-  // Dinámicamente extraer la primera palabra del nombre como categoría si no hay category real
+  
   const products = useMemo(() => {
     return stockInfo.map(s => {
       let catName = s.producto?.category;
       if (!catName) {
-        // Fallback: usar la primera palabra del nombre del producto (ej: "Pantalón Jean" -> "Pantalón")
+        
         catName = s.producto?.name?.split(' ')[0] || 'General';
       }
       
@@ -232,10 +232,10 @@ export default function PosPage() {
     });
   }, [stockInfo, heldQuantities]);
 
-  // Obtener lista única de categorías dinámicas
+  
   const dynamicCategories = useMemo(() => {
     const cats = new Set(products.map(p => p.category));
-    return Array.from(cats).map(c => ({ id: c, name: c, icon: Tag })).slice(0, 8); // Max 8 categories to fit sidebar
+    return Array.from(cats).map(c => ({ id: c, name: c, icon: Tag })).slice(0, 8); 
   }, [products]);
 
   const CATEGORIES = [
@@ -331,7 +331,7 @@ export default function PosPage() {
   };
 
   const subtotal = cart.reduce((acc, item) => acc + (item.cantidad * item.precioUnitario), 0);
-  const taxes = 0; // Removido tax estático
+  const taxes = 0; 
   const total = subtotal + taxes;
 
   const handleHoldOrder = () => {
@@ -440,7 +440,7 @@ export default function PosPage() {
   return (
     <div className="h-screen w-full flex bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
       
-      {/* LEFT SIDEBAR - Categories */}
+      {}
       <div className="w-[110px] bg-[#0f172a] border-r border-slate-800 flex flex-col items-center py-6 shadow-sm z-10 flex-shrink-0 overflow-y-auto custom-scrollbar">
         {userRole === 'VENDEDOR' ? (
           <Link 
@@ -494,9 +494,9 @@ export default function PosPage() {
         </div>
       </div>
 
-      {/* CENTER GRID - Products */}
+      {}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-50 dark:bg-slate-950">
-        {/* Top Header / Branch Selector */}
+        {}
         <div className="h-[70px] bg-[#0f172a] border-b border-slate-800 flex items-center justify-between px-8 flex-shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-slate-200 font-semibold text-base tracking-normal">Terminal POS</span>
@@ -513,7 +513,7 @@ export default function PosPage() {
           )}
         </div>
 
-        {/* Grid Scroll Area */}
+        {}
         <div className="flex-1 overflow-y-auto px-8 pb-8 custom-scrollbar">
           {groupedProducts.length === 0 ? (
             <div className="text-center mt-20 text-slate-400">
@@ -566,10 +566,10 @@ export default function PosPage() {
         </div>
       </div>
 
-      {/* RIGHT SIDEBAR - Cart */}
+      {}
       <div className="w-[380px] bg-white border-l border-slate-200 flex flex-col h-full shadow-lg z-20 flex-shrink-0">
         
-        {/* Cart Header */}
+        {}
         <div className="bg-[#0f172a] text-white p-6 h-[70px] border-b border-slate-800 flex justify-between items-center flex-shrink-0">
           <div className="flex items-center gap-2 font-bold text-base">
             <Store size={18} className="text-white" />
@@ -578,7 +578,7 @@ export default function PosPage() {
           <span className="text-xs text-slate-400 font-medium">Orden: #{orderNumber}</span>
         </div>
 
-        {/* Tab Selector below Header */}
+        {}
         <div className="p-6 pb-0 flex-shrink-0">
           <div className="flex border-b border-slate-100 dark:border-slate-800 w-full mb-4">
             <div 
@@ -598,7 +598,7 @@ export default function PosPage() {
           </div>
         </div>
 
-        {/* Right Tab Content */}
+        {}
         <div className="flex-1 overflow-y-auto px-6 relative custom-scrollbar">
           {activeRightTab === 'new' ? (
             cart.length === 0 ? (
@@ -612,7 +612,7 @@ export default function PosPage() {
               <div className="flex flex-col gap-6 py-2">
                 {cart.map((item, index) => (
                   <div key={`${item.producto_id}-${index}`} className="flex gap-4 relative">
-                    {/* Remove Popover Overlay */}
+                    {}
                     {itemToRemove === item.producto_id && (
                       <div className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm animate-fadeIn">
                         <Trash2 size={24} className="text-slate-400 mb-2" />
@@ -684,7 +684,7 @@ export default function PosPage() {
           )}
         </div>
 
-        {/* Cart Summary & Actions */}
+        {}
         <div className="p-6 pt-4 border-t border-slate-200 bg-white flex-shrink-0">
           <div className="flex flex-col gap-2 mb-4">
             <div className="flex justify-between items-center text-sm">
@@ -719,7 +719,7 @@ export default function PosPage() {
 
       </div>
 
-      {/* CHECKOUT MODAL OVERLAY */}
+      {}
       {showCheckoutModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
@@ -793,7 +793,7 @@ export default function PosPage() {
                 </div>
               </div>
               
-              {/* Resumen Final */}
+              {}
               <div className="mt-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex flex-col gap-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600 dark:text-slate-400">Total a Pagar</span>
@@ -821,11 +821,11 @@ export default function PosPage() {
         </div>
       )}
 
-      {/* VARIANT SELECTOR MODAL OVERLAY */}
+      {}
       {selectedGroup && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex md:flex-row flex-col border border-slate-200 dark:border-slate-700 h-auto max-h-[90vh]">
-            {/* Left: Product Image */}
+            {}
             <div className="md:w-1/2 h-64 md:h-auto relative bg-slate-50 dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 flex items-center justify-center">
               {(selectedVariant?.image || selectedGroup.image) ? (
                 <img src={selectedVariant?.image || selectedGroup.image} alt={selectedGroup.name} className="w-full h-full object-cover absolute inset-0" />
@@ -845,9 +845,9 @@ export default function PosPage() {
               </div>
             </div>
             
-            {/* Right: Details & Selectors */}
+            {}
             <div className="md:w-1/2 p-6 flex flex-col overflow-y-auto relative h-full text-left">
-              {/* Close Button (Hidden on Mobile) */}
+              {}
               <div className="hidden md:flex justify-end absolute top-4 right-4 z-10">
                 <div 
                   role="button" 
@@ -868,7 +868,7 @@ export default function PosPage() {
                 SKU: {selectedVariant?.sku || selectedGroup.items[0]?.sku}
               </span>
 
-              {/* Separated Attribute selectors */}
+              {}
               <div className="mb-5 flex flex-col gap-3.5">
                 {Object.keys(allAttributesGrouped).length > 0 ? (
                   Object.entries(allAttributesGrouped).map(([key, values]) => (
@@ -880,15 +880,15 @@ export default function PosPage() {
                         {values.map(val => {
                           const isSelected = selectedAttributes[key] === val;
                           
-                          // Check if there is any variant in selectedGroup that has this attribute value
-                          // AND matches the other selected attributes, AND has stock > 0.
+                          
+                          
                           const hasStock = selectedGroup.items.some(item => {
                             const attrs = item.producto?.attributes || {};
                             if (attrs[key] !== val) return false;
                             
-                            // Check other selected attributes
+                            
                             for (const [k, v] of Object.entries(selectedAttributes)) {
-                              if (k === key) continue; // ignore current attribute key
+                              if (k === key) continue; 
                               if (attrs[k] !== v) return false;
                             }
                             return item.cantidadTotal > 0;
@@ -945,7 +945,7 @@ export default function PosPage() {
                 )}
               </div>
 
-              {/* Stock status info */}
+              {}
               {selectedVariant && (
                 <div className="mb-5 flex items-center justify-between text-xs font-bold uppercase">
                   <span className="text-slate-400">Estado del Stock</span>
@@ -955,7 +955,7 @@ export default function PosPage() {
                 </div>
               )}
 
-              {/* Price Box */}
+              {}
               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-800 mb-5 flex justify-between items-center">
                  <span className="text-xs font-semibold text-slate-400">Precio unitario</span>
                  <span className="text-xl font-bold text-slate-800 dark:text-white">
@@ -963,7 +963,7 @@ export default function PosPage() {
                  </span>
               </div>
 
-              {/* Add to Cart Button */}
+              {}
               <button 
                 onClick={() => { 
                   if (selectedVariant && selectedVariant.cantidadTotal > 0) {

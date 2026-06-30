@@ -8,21 +8,21 @@ import * as fs from 'fs';
 import { runPreMigrations } from './pre-migrations';
 
 async function bootstrap() {
-  // Ejecutar migraciones previas a la sincronización de base de datos
+  
   await runPreMigrations();
 
   const app = await NestFactory.create(AppModule);
 
-  // Asegurar la existencia del directorio uploads
+  
   const uploadDir = join(process.cwd(), 'uploads');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
-  // Servir archivos estáticos de uploads
+  
   app.use('/uploads', express.static(uploadDir));
 
-  app.enableCors(); // Fundamental para React
+  app.enableCors(); 
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
@@ -55,6 +55,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(3000);
+  await app.listen(3000, '0.0.0.0');
 }
 bootstrap();

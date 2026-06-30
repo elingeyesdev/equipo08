@@ -51,6 +51,18 @@ public interface ApiService {
     @retrofit2.http.DELETE("productos/{id}")
     Call<Void> deleteProducto(@retrofit2.http.Path("id") String id);
 
+    @retrofit2.http.GET("productos/categorias")
+    Call<java.util.List<com.example.template.network.models.Categoria>> getCategorias();
+
+    @POST("productos/categorias")
+    Call<com.example.template.network.models.Categoria> createCategoria(@Body com.example.template.network.models.Categoria categoria);
+
+    @retrofit2.http.PUT("productos/categorias/{id}")
+    Call<com.example.template.network.models.Categoria> updateCategoria(@retrofit2.http.Path("id") String id, @Body com.example.template.network.models.Categoria categoria);
+
+    @retrofit2.http.DELETE("productos/categorias/{id}")
+    Call<Void> deleteCategoria(@retrofit2.http.Path("id") String id);
+
     @retrofit2.http.GET("sourcing")
     Call<java.util.List<com.example.template.network.models.LoteIngreso>> getLotes();
 
@@ -67,6 +79,9 @@ public interface ApiService {
     @retrofit2.http.GET("stock")
     Call<java.util.List<com.example.template.network.models.Stock>> getStock();
 
+    @retrofit2.http.GET("stock/kardex/{productoId}")
+    Call<java.util.List<com.example.template.network.models.KardexResponse>> getKardex(@retrofit2.http.Path("productoId") String productoId);
+
     @POST("stock/transfer")
     Call<Void> transferStock(@Body com.example.template.network.models.TrasladoRequest request);
 
@@ -76,7 +91,7 @@ public interface ApiService {
     @retrofit2.http.GET("ajustes")
     Call<java.util.List<com.example.template.network.models.Ajuste>> getAjustes();
 
-    // EMPLEADOS (Users)
+    
     @retrofit2.http.GET("users")
     Call<java.util.List<com.example.template.network.models.Empleado>> getEmpleados();
 
@@ -89,19 +104,19 @@ public interface ApiService {
     @retrofit2.http.DELETE("users/{id}")
     Call<Void> deleteEmpleado(@retrofit2.http.Path("id") String id);
 
-    // PERMISOS
+    
     @retrofit2.http.GET("users/permissions")
     Call<java.util.List<com.example.template.network.models.PermisosRoles>> getPermisos();
 
     @retrofit2.http.PUT("users/permissions")
     Call<com.example.template.network.models.PermisosRoles> updatePermisos(@Body com.example.template.network.models.PermisosRoles permisos);
 
-    // VENTAS (Sales)
+    
     @retrofit2.http.GET("ventas")
     Call<java.util.List<com.example.template.network.models.Venta>> getVentas();
 
     @retrofit2.http.GET("ventas/kpis/dashboard")
-    Call<com.example.template.network.models.DashboardKpis> getDashboardKpis();
+    Call<com.example.template.network.models.DashboardKpis> getDashboardKpis(@retrofit2.http.Query("sucursal_id") String sucursalId);
 
     @POST("ventas")
     Call<com.example.template.network.models.Venta> createVenta(@Body com.example.template.network.models.VentaRequest request);

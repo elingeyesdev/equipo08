@@ -63,7 +63,7 @@ public class AuditReportsFragment extends Fragment {
     private Calendar calTo = null;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
 
-    // Audit Form Variables
+    
     private FloatingActionButton btnToggleAuditForm;
     private Button btnSubmitAudit;
     private androidx.cardview.widget.CardView cardAuditForm;
@@ -112,7 +112,7 @@ public class AuditReportsFragment extends Fragment {
             }
         });
 
-        // Bind Audit Form
+        
         btnToggleAuditForm = view.findViewById(R.id.btnToggleAuditForm);
         cardAuditForm = view.findViewById(R.id.cardAuditForm);
         spinnerSucursalAudit = view.findViewById(R.id.spinnerSucursalAudit);
@@ -262,25 +262,51 @@ public class AuditReportsFragment extends Fragment {
         });
 
         btnSubmitAudit.setOnClickListener(v -> {
-            if (filteredStockList.isEmpty() || spinnerProductoAudit.getSelectedItemPosition() < 0) return;
-            Stock selectedStock = filteredStockList.get(spinnerProductoAudit.getSelectedItemPosition());
+            if (filteredStockList.isEmpty() || spinnerProductoAudit.getSelectedItemPosition() < 0) {
+                Toast.makeText(getContext(), "El campo Producto es obligatorio", Toast.LENGTH_SHORT).show();
+                return;
+            }
             
             String cantStr = etUnidadesPerdidas.getText().toString().trim();
-            int perdidas = cantStr.isEmpty() ? 0 : Integer.parseInt(cantStr);
-            int fisica = selectedStock.getCantidadTotal() - perdidas;
+            if (cantStr.isEmpty()) {
+                Toast.makeText(getContext(), "El campo Cantidad de unidades perdidas es obligatorio", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            int perdidas;
+            try {
+                perdidas = Integer.parseInt(cantStr);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getContext(), "La cantidad ingresada no es válida", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            Stock selectedStock = filteredStockList.get(spinnerProductoAudit.getSelectedItemPosition());
+            int sistema = selectedStock.getCantidadTotal();
+            
+            if (perdidas > sistema) {
+                Toast.makeText(getContext(), "No puedes perder más de las unidades disponibles en sistema (" + sistema + ")", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (perdidas < 0) {
+                Toast.makeText(getContext(), "La cantidad no puede ser negativa", Toast.LENGTH_SHORT).show();
+                return;
+            }
             
             String motivo = motivos[spinnerMotivoAudit.getSelectedItemPosition()];
             String obs = etObservacionesAudit.getText().toString().trim();
             
             if (("DANO_MERMA".equals(motivo) || "ROBO_O_PERDIDA".equals(motivo) || "CADUCIDAD".equals(motivo)) && obs.isEmpty()) {
-                Toast.makeText(getContext(), "Observaciones requeridas para este motivo", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "El campo Observaciones es obligatorio para este motivo", Toast.LENGTH_SHORT).show();
                 return;
             }
+            
+            int fisica = sistema - perdidas;
             
             AjusteRequest req = new AjusteRequest(
                 selectedStock.getSucursalId(),
                 selectedStock.getProductoId(),
-                selectedStock.getCantidadTotal(),
+                sistema,
                 fisica,
                 motivo,
                 obs.isEmpty() ? null : obs
@@ -316,8 +342,6 @@ public class AuditReportsFragment extends Fragment {
     private void validateAuditForm() {
         String cantStr = etUnidadesPerdidas.getText().toString().trim();
         if (cantStr.isEmpty() || filteredStockList.isEmpty() || spinnerProductoAudit.getSelectedItemPosition() < 0) {
-            btnSubmitAudit.setEnabled(false);
-            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
             llWarningAudit.setVisibility(View.GONE);
             return;
         }
@@ -329,12 +353,8 @@ public class AuditReportsFragment extends Fragment {
         if (perdidas > sistema) {
             llWarningAudit.setVisibility(View.VISIBLE);
             tvWarningAudit.setText("No puedes perder más de las unidades disponibles en sistema (" + sistema + ")");
-            btnSubmitAudit.setEnabled(false);
-            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0d9488")));
         } else {
             llWarningAudit.setVisibility(View.GONE);
-            btnSubmitAudit.setEnabled(true);
-            btnSubmitAudit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#0f172a")));
         }
     }
 
@@ -345,7 +365,7 @@ public class AuditReportsFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Ajuste> list = response.body();
                     
-                    // reverse to show newest first
+                    
                     Collections.reverse(list);
                     
                     allAjustes = new ArrayList<>(list);

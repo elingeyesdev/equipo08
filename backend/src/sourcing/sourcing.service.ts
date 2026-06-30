@@ -43,18 +43,18 @@ export class SourcingService {
         );
       }
 
-      // Prioridad: costo del DTO > precioCosto del catálogo
+      
       const costoUnitario = dto.costoUnitario != null && dto.costoUnitario > 0
         ? Number(dto.costoUnitario)
         : Number(producto.precioCosto || 0);
 
-      // Buscar o crear la variante por defecto en la base de datos para este producto
+      
       let variant = await queryRunner.manager.findOne(ProductoVariacion, {
         where: { producto: { id: dto.producto_id, tenant_id } },
         order: { createdAt: 'ASC' },
       });
       if (!variant) {
-        // En caso extremo que no exista, la creamos al vuelo para mantener consistencia
+        
         variant = queryRunner.manager.create(ProductoVariacion, {
           producto_id: dto.producto_id,
           sku: `SKU-${dto.producto_id.split('-')[0]}`,
@@ -65,7 +65,7 @@ export class SourcingService {
         variant = await queryRunner.manager.save(variant);
       }
 
-      // Buscar o crear stock_id utilizando producto_variacion_id
+      
       let stock = await queryRunner.manager.findOne(Stock, {
         where: { tenant_id, sucursal_id: dto.sucursal_id, producto_variacion_id: variant.id },
       });
@@ -110,7 +110,7 @@ export class SourcingService {
 
       await queryRunner.commitTransaction();
       
-      // Mapear para compatibilidad con el frontend
+      
       return {
         ...loteGuardado,
         producto_id: dto.producto_id,
@@ -133,7 +133,7 @@ export class SourcingService {
       order: { fechaIngreso: 'DESC' },
     });
 
-    // Mapear para compatibilidad 100% con el frontend actual
+    
     return lotes.map(l => ({
       ...l,
       producto_id: l.stock?.producto_id,
@@ -184,7 +184,7 @@ export class SourcingService {
         );
       }
 
-      // Buscar o crear la variante por defecto
+      
       let variant = await queryRunner.manager.findOne(ProductoVariacion, {
         where: { producto: { id: currentProductoId, tenant_id } },
         order: { createdAt: 'ASC' },
@@ -200,7 +200,7 @@ export class SourcingService {
         variant = await queryRunner.manager.save(variant);
       }
 
-      // Buscar o crear stock
+      
       let stock = await queryRunner.manager.findOne(Stock, {
         where: { tenant_id, sucursal_id: currentSucursalId, producto_variacion_id: variant.id },
       });
@@ -257,10 +257,10 @@ export class SourcingService {
           variant.id,
         );
       } else {
-        // Obtener el anterior variant_id del stock asociado al lote
+        
         const previousVariantId = lote.stock?.producto_variacion_id;
 
-        // Desasociar del anterior
+        
         await this.stockService.applyStockDelta(
           queryRunner.manager,
           tenant_id,
@@ -277,7 +277,7 @@ export class SourcingService {
           previousVariantId,
         );
 
-        // Asociar al nuevo
+        
         await this.stockService.applyStockDelta(
           queryRunner.manager,
           tenant_id,

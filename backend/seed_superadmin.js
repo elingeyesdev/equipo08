@@ -14,7 +14,7 @@ async function seedSuperAdmin() {
   try {
     await client.connect();
 
-    // Revisa si ya existe el superadmin
+    
     const res = await client.query("SELECT * FROM users WHERE email = $1", ['admin@bolclick.app']);
     if (res.rows.length > 0) {
       console.log('El super admin ya existe: admin@bolclick.app');
@@ -25,7 +25,7 @@ async function seedSuperAdmin() {
     const hashedPassword = await bcrypt.hash('SuperAdmin123!', salt);
     const userId = crypto.randomUUID();
 
-    // IMPORTANTE: insertamos con role = 'SUPER_ADMIN' y tenant_id = null
+    
     await client.query(
       `INSERT INTO users (id, name, email, password, role, "isActive", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,

@@ -135,7 +135,7 @@ public class PermisosRoles {
     public boolean isVentasEliminar() { return ventasEliminar; }
     public void setVentasEliminar(boolean ventasEliminar) { this.ventasEliminar = ventasEliminar; }
 
-    // Helper methods for backwards compatibility with other fragments
+    
     public boolean isSucursalesGestionar() { return sucursalesCrear || sucursalesEditar || sucursalesEliminar; }
     public boolean isCatalogoGestionar() { return catalogoCrear || catalogoEditar || catalogoEliminar; }
     public boolean isProveedoresGestionar() { return proveedoresCrear || proveedoresEditar || proveedoresEliminar; }

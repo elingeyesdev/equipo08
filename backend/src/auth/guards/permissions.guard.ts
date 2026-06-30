@@ -23,10 +23,10 @@ export class PermissionsGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
 
-    // El dueño siempre tiene permiso para todo
+    
     if (user.role === UserRole.OWNER) return true;
 
-    // Obtener los permisos configurados para este tenant y este rol
+    
     const allPermissions = await this.usersService.getPermissions(
       user.tenantId,
     );
@@ -34,10 +34,10 @@ export class PermissionsGuard implements CanActivate {
 
     if (!rolePerm) return false;
 
-    // Transformar la clave del permiso (ej: 'sucursales.ver' -> 'sucursales_ver')
+    
     const entityField = requiredPermission.replace('.', '_');
 
-    // Permitir lectura de sucursales e inventario básica si el rol tiene asignado operar el POS
+    
     if (
       (requiredPermission === 'sucursales.ver' ||
         requiredPermission === 'inventario.ver') &&

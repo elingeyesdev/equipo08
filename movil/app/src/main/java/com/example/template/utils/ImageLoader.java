@@ -53,7 +53,7 @@ public class ImageLoader {
                 URL urlObj = new URL(processedUrl);
                 HttpURLConnection conn = (HttpURLConnection) urlObj.openConnection();
                 
-                // Cabecera necesaria para omitir la página de advertencia de ngrok
+                
                 conn.setRequestProperty("ngrok-skip-browser-warning", "true");
                 conn.setConnectTimeout(10000);
                 conn.setReadTimeout(10000);
@@ -160,7 +160,7 @@ public class ImageLoader {
     private static String preprocessUrl(String url) {
         if (url == null) return null;
         
-        // Si la URL es relativa y empieza con "/", le añadimos el host base del backend
+        
         if (url.startsWith("/")) {
             String apiBase = ApiClient.getBaseUrl();
             if (apiBase.endsWith("/api/")) {
@@ -171,12 +171,12 @@ public class ImageLoader {
             return apiBase + url;
         }
         
-        // Si la URL apunta a localhost o entornos locales en la DB, la redirigimos al tunnel de ngrok actual
+        
         if (url.contains("localhost:3000") || url.contains("127.0.0.1:3000") || url.contains("10.0.2.2:3000")) {
             String path = "";
             int portIndex = url.indexOf(":3000");
             if (portIndex != -1) {
-                path = url.substring(portIndex + 5); // Obtiene la ruta después del puerto 3000 (ej: /uploads/...)
+                path = url.substring(portIndex + 5); 
             }
             
             String apiBase = ApiClient.getBaseUrl();

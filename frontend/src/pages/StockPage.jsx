@@ -14,7 +14,7 @@ export default function StockPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [alertsCount, setAlertsCount] = useState(0);
   
-  // Transfer Form State
+  
   const [transferItem, setTransferItem] = useState(null);
   const [transferForm, setTransferForm] = useState({
     to_sucursal_id: '',
@@ -50,7 +50,7 @@ export default function StockPage() {
     Promise.all([
       api.get('/stock'),
       api.get('/sucursales'),
-      api.get('/ajustes').catch(() => ({ data: [] })) // Fallback if user doesn't have permission
+      api.get('/ajustes').catch(() => ({ data: [] })) 
     ]).then(([resStock, resSuc, resAj]) => {
       setStock(resStock.data);
       setSucursales(resSuc.data);
@@ -122,7 +122,7 @@ export default function StockPage() {
 
   const historicalLossValue = filteredAjustes.reduce((acc, a) => {
     let exactLoss = Number(a.valor_perdido || 0);
-    // Backwards Compatibility: Si el registro es antiguo y no se congeló el valor_perdido en BD, estimarlo dinámicamente.
+    
     if (exactLoss === 0 && a.cantidad_fisica < a.cantidad_sistema) {
         const unitsLost = a.cantidad_sistema - a.cantidad_fisica;
         const refStock = stock.find(s => s.producto_id === a.producto_id);
@@ -163,7 +163,7 @@ export default function StockPage() {
   };  return (
     <div className="full-width-container animate-fadein space-y-8">
       
-      {/* Header Panel */}
+      {}
       <div className="page-header-bar">
         <div>
           <h1>Inventario y Valuación Física</h1>
@@ -182,7 +182,7 @@ export default function StockPage() {
           </div>
       </div>
 
-      {/* Filter Panel */}
+      {}
       {showFilters && !transferItem && (
         <div className="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-end md:items-center gap-4 animate-fadeIn">
           <div className="flex-1 w-full">
@@ -220,7 +220,7 @@ export default function StockPage() {
       )}
 
 
-      {/* Transfer Inline Form */}
+      {}
       {transferItem && (
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fadeIn relative">
           <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
@@ -290,7 +290,7 @@ export default function StockPage() {
         </div>
       )}
       
-      {/* Resumen Financiero Dash Cards */}
+      {}
       {!transferItem && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex items-center justify-between transition-transform hover:-translate-y-1">
@@ -319,7 +319,7 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* Main Stock Table */}
+      {}
       {!transferItem && (
         <div className="table-premium-wrapper">
           <div className="overflow-x-auto">
@@ -360,7 +360,7 @@ export default function StockPage() {
                     const isExpanded = !!expandedStock[key];
                     
                     if (variants.length === 1) {
-                      // Single stock item row (no variants)
+                      
                       const s = variants[0];
                       const isAlerta = s.cantidadTotal < (s.producto?.stockMinimo || 10);
                       const valuation = Number(s.valorAdquisicion || 0);
@@ -395,7 +395,7 @@ export default function StockPage() {
                         </tr>
                       );
                     } else {
-                      // Multi-variant stock parent row
+                      
                       const main = variants[0];
                       const totalQty = variants.reduce((sum, v) => sum + (v.cantidadTotal || 0), 0);
                       const totalValuation = variants.reduce((sum, v) => sum + (Number(v.valorAdquisicion) || 0), 0);

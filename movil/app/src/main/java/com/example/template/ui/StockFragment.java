@@ -57,6 +57,7 @@ public class StockFragment extends Fragment {
     private Button btnToggleFilter;
     private CardView cardFilter;
     private boolean isFilterVisible = false;
+    private com.example.template.utils.SessionManager sessionManager;
 
     private List<Stock> allStockList = new ArrayList<>();
     private List<com.example.template.network.models.Ajuste> allAjustesList = new ArrayList<>();
@@ -91,10 +92,18 @@ public class StockFragment extends Fragment {
             public void onTrasladoClick(Stock stock) {
                 showTrasladoDialog(stock);
             }
+
+            @Override
+            public void onStockLongClick(Stock stock) {
+                if (stock.getProducto() != null) {
+                    showKardexDialog(stock.getProducto().getId(), stock.getProducto().getName(), stock.getProducto().getSku());
+                }
+            }
         });
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
+        sessionManager = new com.example.template.utils.SessionManager(getContext());
 
 
 
@@ -124,7 +133,22 @@ public class StockFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Sucursal>> call, Response<List<Sucursal>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    sucursalesList = response.body();
+                    List<Sucursal> allBranches = response.body();
+                    sucursalesList = new ArrayList<>();
+                    
+                    String userRole = sessionManager.getRole();
+                    String userSucursalId = sessionManager.getSucursalId();
+                    
+                    if (!"OWNER".equalsIgnoreCase(userRole) && !"SUPER_ADMIN".equalsIgnoreCase(userRole) && userSucursalId != null && !userSucursalId.isEmpty()) {
+                        for (Sucursal s : allBranches) {
+                            if (userSucursalId.equals(s.getId())) {
+                                sucursalesList.add(s);
+                            }
+                        }
+                    } else {
+                        sucursalesList.addAll(allBranches);
+                    }
+                    
                     setupSpinner();
                 }
             }
@@ -140,7 +164,14 @@ public class StockFragment extends Fragment {
         if (getContext() == null) return;
 
         List<String> spinnerOptions = new ArrayList<>();
-        spinnerOptions.add("Consolidado total (todas las sucursales)");
+        
+        String userRole = sessionManager.getRole();
+        String userSucursalId = sessionManager.getSucursalId();
+        boolean isRestricted = !"OWNER".equalsIgnoreCase(userRole) && !"SUPER_ADMIN".equalsIgnoreCase(userRole) && userSucursalId != null && !userSucursalId.isEmpty();
+        
+        if (!isRestricted) {
+            spinnerOptions.add("Consolidado total (todas las sucursales)");
+        }
         for (Sucursal s : sucursalesList) {
             spinnerOptions.add("Sucursal: " + s.getName());
         }
@@ -150,6 +181,12 @@ public class StockFragment extends Fragment {
         );
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSucursal.setAdapter(spinnerAdapter);
+
+        if (isRestricted) {
+            spinnerSucursal.setEnabled(false);
+        } else {
+            spinnerSucursal.setEnabled(true);
+        }
 
         spinnerSucursal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -168,7 +205,7 @@ public class StockFragment extends Fragment {
             public void onResponse(Call<List<Stock>> call, Response<List<Stock>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     allStockList = response.body();
-                    filterStock(); // Apply current filter
+                    filterStock(); 
                 }
             }
 
@@ -200,13 +237,23 @@ public class StockFragment extends Fragment {
         List<Stock> baseList;
         Sucursal selectedBranch = null;
 
-        if (spinnerSucursal.getSelectedItemPosition() > 0) {
-            selectedBranch = sucursalesList.get(spinnerSucursal.getSelectedItemPosition() - 1);
-            baseList = new ArrayList<>();
-            for (Stock s : allStockList) {
-                if (s.getSucursalId() != null && s.getSucursalId().equals(selectedBranch.getId())) {
-                    baseList.add(s);
+        String selectedOption = spinnerSucursal.getSelectedItem() != null ? spinnerSucursal.getSelectedItem().toString() : "";
+        if (!selectedOption.equals("Consolidado total (todas las sucursales)")) {
+            for (Sucursal s : sucursalesList) {
+                if (selectedOption.equals("Sucursal: " + s.getName())) {
+                    selectedBranch = s;
+                    break;
                 }
+            }
+            if (selectedBranch != null) {
+                baseList = new ArrayList<>();
+                for (Stock s : allStockList) {
+                    if (s.getSucursalId() != null && s.getSucursalId().equals(selectedBranch.getId())) {
+                        baseList.add(s);
+                    }
+                }
+            } else {
+                baseList = allStockList;
             }
         } else {
             baseList = allStockList;
@@ -225,6 +272,32 @@ public class StockFragment extends Fragment {
             if (matches) {
                 filteredList.add(s);
             }
+        }
+
+        if (selectedBranch == null) {
+            java.util.Map<String, Stock> consolidatedMap = new java.util.LinkedHashMap<>();
+            for (Stock s : filteredList) {
+                if (s.getProducto() == null) continue;
+                String prodId = s.getProducto().getId();
+                if (consolidatedMap.containsKey(prodId)) {
+                    Stock existing = consolidatedMap.get(prodId);
+                    existing.setCantidadTotal(existing.getCantidadTotal() + s.getCantidadTotal());
+                } else {
+                    Stock copy = new Stock();
+                    copy.setId(s.getId());
+                    copy.setProductoId(s.getProductoId());
+                    copy.setSucursalId(null);
+                    copy.setCantidadTotal(s.getCantidadTotal());
+                    copy.setCostoPromedio(s.getCostoPromedio());
+                    copy.setProducto(s.getProducto());
+                    
+                    Sucursal dummy = new Sucursal("Todas las sucursales", "", "", true);
+                    copy.setSucursal(dummy);
+                    
+                    consolidatedMap.put(prodId, copy);
+                }
+            }
+            filteredList = new ArrayList<>(consolidatedMap.values());
         }
 
         List<com.example.template.network.models.Ajuste> filteredAjustes = new ArrayList<>();
@@ -248,7 +321,7 @@ public class StockFragment extends Fragment {
         adapter.updateData(filteredList);
         calculateTotal(filteredList, filteredAjustes);
 
-        // Calculate alerts reactively based on the filtered list
+        
         int alertCount = 0;
         for (Stock s : filteredList) {
             int minStock = s.getProducto() != null ? s.getProducto().getStockMinimo() : 10;
@@ -305,7 +378,7 @@ public class StockFragment extends Fragment {
         Button btnProcesar = dialogView.findViewById(R.id.btnProcesar);
         ImageButton btnClose = dialogView.findViewById(R.id.btnClose);
 
-        // Filter out current branch
+        
         List<Sucursal> validDestinations = new ArrayList<>();
         List<String> validDestinationsNames = new ArrayList<>();
         for (Sucursal s : sucursalesList) {
@@ -396,7 +469,7 @@ public class StockFragment extends Fragment {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(getContext(), "Traslado exitoso", Toast.LENGTH_SHORT).show();
-                    loadStock(); // refresh inventory
+                    loadStock(); 
                 } else {
                     Toast.makeText(getContext(), "Error al trasladar inventario", Toast.LENGTH_SHORT).show();
                 }
@@ -410,6 +483,74 @@ public class StockFragment extends Fragment {
     }
 
 
+
+    private void showKardexDialog(String productoId, String productName, String sku) {
+        if (getContext() == null) return;
+
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_kardex, null);
+        TextView tvKardexProductInfo = dialogView.findViewById(R.id.tvKardexProductInfo);
+        android.widget.ProgressBar pbKardexLoading = dialogView.findViewById(R.id.pbKardexLoading);
+        TextView tvKardexEmpty = dialogView.findViewById(R.id.tvKardexEmpty);
+        RecyclerView rvKardexMovements = dialogView.findViewById(R.id.rvKardexMovements);
+        android.widget.ImageButton btnCloseKardex = dialogView.findViewById(R.id.btnCloseKardex);
+        Button btnBackKardex = dialogView.findViewById(R.id.btnBackKardex);
+
+        String sub = productName + (sku != null && !sku.isEmpty() ? " (SKU: " + sku + ")" : "");
+        tvKardexProductInfo.setText(sub);
+
+        rvKardexMovements.setLayoutManager(new LinearLayoutManager(getContext()));
+        java.util.List<com.example.template.network.models.KardexResponse> movements = new java.util.ArrayList<>();
+        com.example.template.ui.adapters.KardexAdapter adapter = new com.example.template.ui.adapters.KardexAdapter(movements);
+        rvKardexMovements.setAdapter(adapter);
+
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setView(dialogView)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        btnCloseKardex.setOnClickListener(v -> dialog.dismiss());
+        btnBackKardex.setOnClickListener(v -> dialog.dismiss());
+
+        pbKardexLoading.setVisibility(View.VISIBLE);
+        tvKardexEmpty.setVisibility(View.GONE);
+        rvKardexMovements.setVisibility(View.GONE);
+
+        apiService.getKardex(productoId).enqueue(new Callback<java.util.List<com.example.template.network.models.KardexResponse>>() {
+            @Override
+            public void onResponse(Call<java.util.List<com.example.template.network.models.KardexResponse>> call, Response<java.util.List<com.example.template.network.models.KardexResponse>> response) {
+                if (!isAdded()) return;
+                pbKardexLoading.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    java.util.List<com.example.template.network.models.KardexResponse> list = response.body();
+                    if (list.isEmpty()) {
+                        tvKardexEmpty.setVisibility(View.VISIBLE);
+                    } else {
+                        movements.addAll(list);
+                        adapter.notifyDataSetChanged();
+                        rvKardexMovements.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Error al obtener Kardex", Toast.LENGTH_SHORT).show();
+                    tvKardexEmpty.setText("Error al cargar movimientos");
+                    tvKardexEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<java.util.List<com.example.template.network.models.KardexResponse>> call, Throwable t) {
+                if (!isAdded()) return;
+                pbKardexLoading.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                tvKardexEmpty.setText("Error de conexión");
+                tvKardexEmpty.setVisibility(View.VISIBLE);
+            }
+        });
+
+        dialog.show();
+    }
 
     @Override
     public void onResume() {

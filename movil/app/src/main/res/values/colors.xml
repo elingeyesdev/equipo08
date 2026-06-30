@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- OmniMall Colors -->
+    
     <color name="bg_dark">#eef2f6</color>
     <color name="bg_card">#FFFFFF</color>
     <color name="text_primary">#0f172a</color>
     <color name="text_secondary">#475569</color>
     <color name="primary_color">#0f172a</color>
     <color name="primary_hover">#1e293b</color>
-    <color name="accent_color">#0d9488</color> <!-- Teal único para acentos y ganancias -->
+    <color name="accent_color">#0d9488</color> 
     <color name="profit_color">#0d9488</color>
-    <color name="loss_color">#4f46e5</color> <!-- Pizarra neutro para pérdidas -->
+    <color name="loss_color">#4f46e5</color> 
     <color name="danger_color">#4f46e5</color>
     <color name="border_color">#cbd5e1</color>
     <color name="accent_blue">#0d9488</color>

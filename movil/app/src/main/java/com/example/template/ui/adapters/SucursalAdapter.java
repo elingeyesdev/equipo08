@@ -58,11 +58,13 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
         holder.tvDireccion.setText(s.getAddress() != null && !s.getAddress().isEmpty() ? s.getAddress() : "Sin Dirección");
         holder.tvTelefono.setText("Teléfono: " + (s.getPhone() != null && !s.getPhone().isEmpty() ? s.getPhone() : "N/A"));
         
+        holder.tvHorarios.setVisibility(View.GONE);
+
+        String tempText = "Sin horarios configurados";
         if (s.getHorarios() != null && !s.getHorarios().isEmpty()) {
-            holder.tvHorarios.setVisibility(View.VISIBLE);
+            StringBuilder sb = new StringBuilder();
             try {
                 com.google.gson.JsonArray array = new com.google.gson.JsonParser().parse(s.getHorarios()).getAsJsonArray();
-                StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < array.size(); i++) {
                     com.google.gson.JsonObject obj = array.get(i).getAsJsonObject();
                     com.google.gson.JsonArray days = obj.getAsJsonArray("days");
@@ -74,28 +76,40 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
                     } else {
                         for (int d = 0; d < days.size(); d++) {
                             String day = days.get(d).getAsString();
-                            sb.append(day.substring(0, Math.min(day.length(), 3)));
+                            sb.append(day);
                             if (d < days.size() - 1) sb.append(", ");
                         }
                         sb.append(": ");
                     }
                     sb.append(start).append(" - ").append(end);
-                    if (i < array.size() - 1) sb.append("\n");
+                    if (i < array.size() - 1) sb.append("\n\n");
                 }
-                holder.tvHorarios.setText("Horario: " + sb.toString());
+                tempText = sb.toString();
             } catch (Exception e) {
-                holder.tvHorarios.setText("Horario: " + s.getHorarios());
+                tempText = s.getHorarios();
             }
+            holder.btnShowSchedule.setVisibility(View.VISIBLE);
         } else {
-            holder.tvHorarios.setVisibility(View.GONE);
+            holder.btnShowSchedule.setVisibility(View.GONE);
         }
+        final String scheduleText = tempText;
+
+        holder.btnShowSchedule.setOnClickListener(v -> {
+            com.example.template.utils.DialogHelper.showInfoDialog(
+                holder.itemView.getContext(),
+                "Horarios de " + s.getName(),
+                scheduleText,
+                R.drawable.ic_clock,
+                Color.parseColor("#64748b")
+            );
+        });
         
         if (s.isActive()) {
             holder.tvEstado.setText("Operativa");
-            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); // Green
+            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); 
         } else {
             holder.tvEstado.setText("Cerrada");
-            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); // Red
+            holder.tvEstado.setTextColor(Color.parseColor("#0d9488")); 
         }
 
         if (canManage) {
@@ -126,7 +140,7 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTienda, tvNombre, tvDireccion, tvTelefono, tvEstado, tvHorarios;
-        ImageButton btnDelete, btnEdit;
+        ImageButton btnDelete, btnEdit, btnShowSchedule;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTienda = itemView.findViewById(R.id.tvTienda);
@@ -135,6 +149,7 @@ public class SucursalAdapter extends RecyclerView.Adapter<SucursalAdapter.ViewHo
             tvTelefono = itemView.findViewById(R.id.tvTelefono);
             tvEstado = itemView.findViewById(R.id.tvEstado);
             tvHorarios = itemView.findViewById(R.id.tvHorarios);
+            btnShowSchedule = itemView.findViewById(R.id.btnShowSchedule);
             btnDelete = itemView.findViewById(R.id.btnDelete);
             btnEdit = itemView.findViewById(R.id.btnEdit);
         }

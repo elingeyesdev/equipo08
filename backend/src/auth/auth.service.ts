@@ -43,7 +43,7 @@ export class AuthService {
         );
       }
 
-      // 1. Create Tenant
+      
       const salt = await bcrypt.genSalt();
       const hashedPassword = await bcrypt.hash(dto.password, salt);
 
@@ -59,7 +59,7 @@ export class AuthService {
 
       const savedTenant = await queryRunner.manager.save(newTenant);
 
-      // 2. Create Root User (OWNER)
+      
       const user = queryRunner.manager.create(User, {
         name: 'Administrador',
         email: dto.email,
@@ -69,7 +69,7 @@ export class AuthService {
       });
       await queryRunner.manager.save(user);
 
-      // 3. Seed Default Permissions
+      
       await this.usersService.seedDefaultPermissions(
         savedTenant.id,
         queryRunner.manager,
@@ -77,7 +77,7 @@ export class AuthService {
 
       await queryRunner.commitTransaction();
 
-      // Enviar correo de confirmación de registro de forma asíncrona
+      
       this.mailService
         .sendRegistrationEmail(dto.email, dto.name)
         .catch((e) => console.error(e));
@@ -95,7 +95,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<{ access_token: string; user: any }> {
-    // 1. Intentar buscar en la nueva tabla de usuarios
+    
     let user = await this.dataSource.getRepository(User).findOne({
       where: { email: dto.email },
       relations: ['sucursal'],
@@ -105,7 +105,7 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // Flujo Normal: Verificar password del User
+    
     const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
     if (!isMatch) {
       throw new UnauthorizedException('Credenciales inválidas');
@@ -115,13 +115,13 @@ export class AuthService {
       throw new UnauthorizedException('La cuenta de usuario está inactiva');
     }
 
-    // Cargar tenant manualmente (ya no es una relación FK)
+    
     let tenant: Tenant | null = null;
     if (user.tenant_id) {
       tenant = await this.dataSource.getRepository(Tenant).findOne({ where: { id: user.tenant_id } });
     }
 
-    // Permitir login a SUPER_ADMIN independientemente del tenant
+    
     if (user.role !== UserRole.SUPER_ADMIN) {
       if (!tenant) {
         throw new UnauthorizedException('Usuario sin tienda asignada');

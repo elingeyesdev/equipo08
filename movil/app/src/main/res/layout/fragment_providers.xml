@@ -20,7 +20,7 @@
 
     
 
-    <!-- CARD Form -->
+    
     <androidx.cardview.widget.CardView
         android:id="@+id/cardForm"
         android:layout_width="match_parent"
@@ -111,6 +111,23 @@
                     android:textColor="#0f172a" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:boxBackgroundColor="#f1f5f9"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxStrokeWidth="0dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Teléfono de contacto"
+                    android:inputType="phone"
+                    android:textColor="#0f172a" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGuardar"
                 android:layout_width="match_parent"
@@ -123,7 +140,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- LIST AREA -->
+    
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

@@ -181,7 +181,7 @@ export class UsersService {
   ): Promise<User> {
     const user = await this.findOne(tenant_id, id);
 
-    // Proteccion: No se puede cambiar el rol del Owner original
+    
     if (
       user.role === UserRole.OWNER &&
       dto.role &&
@@ -192,14 +192,14 @@ export class UsersService {
       );
     }
 
-    // Proteccion: No se puede desactivar al Owner original
+    
     if (user.role === UserRole.OWNER && dto.isActive === false) {
       throw new BadRequestException(
         'No se puede desactivar la cuenta del Administrador principal (Dueno).',
       );
     }
 
-    // Proteccion: Un usuario no puede desactivar su propia cuenta
+    
     if (id === requesterId && dto.isActive === false) {
       throw new BadRequestException(
         'No puedes desactivar tu propia cuenta de acceso.',
@@ -217,7 +217,7 @@ export class UsersService {
     return this.userRep.save(user);
   }
 
-  // --- Static Permissions Logic ---
+  
 
   async getPermissions(tenant_id: string): Promise<LegacyRolePermissions[]> {
     return [
@@ -240,7 +240,7 @@ export class UsersService {
     tenant_id: string,
     dto: UpdatePermissionsDto,
   ): Promise<LegacyRolePermissions> {
-    // Los permisos son estaticos y no editables en BD, retornamos el default correspondiente
+    
     const defaults =
       dto.role === UserRole.SUPERVISOR ? SUPERVISOR_DEFAULTS : VENDEDOR_DEFAULTS;
     return {
@@ -252,6 +252,6 @@ export class UsersService {
   }
 
   async seedDefaultPermissions(tenant_id: string, manager?: any): Promise<void> {
-    // No-op ya que no usamos BDD para permisos
+    
   }
 }

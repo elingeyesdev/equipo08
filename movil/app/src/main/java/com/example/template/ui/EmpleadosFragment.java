@@ -70,7 +70,7 @@ public class EmpleadosFragment extends Fragment {
         
         recyclerView = view.findViewById(R.id.recyclerView);
 
-        // Setup Role Spinner
+        
         String[] roleOptions = new String[]{"VENDEDOR", "SUPERVISOR"};
         if (getContext() != null) {
             ArrayAdapter<String> roleAdapter = new ArrayAdapter<>(
@@ -79,7 +79,7 @@ public class EmpleadosFragment extends Fragment {
             roleAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinnerRol.setAdapter(roleAdapter);
             
-            // Filters
+            
             String[] filterRoleOptions = new String[]{"Todos los roles", "VENDEDOR", "SUPERVISOR", "OWNER"};
             ArrayAdapter<String> filterRoleAdapter = new ArrayAdapter<>(
                 getContext(), android.R.layout.simple_spinner_item, filterRoleOptions
@@ -115,12 +115,12 @@ public class EmpleadosFragment extends Fragment {
 
     private void toggleForm(boolean fromEdit) {
         if (!fromEdit) {
-            editingEmpleado = null; // Clear if manual toggle
+            editingEmpleado = null; 
             etNombre.setText("");
             etEmail.setText("");
             etPassword.setText("");
             spinnerSucursal.setSelection(0);
-            btnGuardar.setText("Confirmar alta de personal");
+            btnGuardar.setText("Alta de empleado");
         }
         
         isFormVisible = !isFormVisible || fromEdit;
@@ -139,16 +139,16 @@ public class EmpleadosFragment extends Fragment {
         editingEmpleado = empleado;
         etNombre.setText(empleado.getNombreCompleto());
         etEmail.setText(empleado.getCorreo());
-        etPassword.setText(""); // Keep empty for security
+        etPassword.setText(""); 
         btnGuardar.setText("Actualizar empleado");
         
-        // Select Role
+        
         if (empleado.getRol() != null) {
             if (empleado.getRol().equalsIgnoreCase("VENDEDOR")) spinnerRol.setSelection(0);
             else if (empleado.getRol().equalsIgnoreCase("SUPERVISOR")) spinnerRol.setSelection(1);
         }
         
-        // Select Sucursal
+        
         if (empleado.getSucursalId() != null) {
             for (int i = 0; i < sucursalesList.size(); i++) {
                 if (sucursalesList.get(i).getId().equals(empleado.getSucursalId())) {
@@ -233,7 +233,7 @@ public class EmpleadosFragment extends Fragment {
                 }
                 
                 if (!hasOwner) {
-                    // Add the Owner manually
+                    
                     Empleado owner = new Empleado();
                     owner.setId("owner_id");
                     owner.setNombreCompleto(tenantName);
@@ -298,9 +298,18 @@ public class EmpleadosFragment extends Fragment {
             sucursalId = sucursalesList.get(sucIndex - 1).getId();
         }
 
-        if (nombre.isEmpty()) { etNombre.setError("Requerido"); return; }
-        if (email.isEmpty()) { etEmail.setError("Requerido"); return; }
-        if (editingEmpleado == null && password.isEmpty()) { etPassword.setError("Requerido"); return; }
+        if (nombre.isEmpty()) {
+            Toast.makeText(getContext(), "El campo Nombre Completo es obligatorio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (email.isEmpty()) {
+            Toast.makeText(getContext(), "El campo Correo Electrónico es obligatorio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (editingEmpleado == null && password.isEmpty()) {
+            Toast.makeText(getContext(), "El campo Contraseña es obligatorio", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if (password.isEmpty()) {
             password = null;
@@ -349,13 +358,13 @@ public class EmpleadosFragment extends Fragment {
     }
 
     private void confirmDelete(Empleado empleado) {
-        if (getContext() == null) return;
-        new androidx.appcompat.app.AlertDialog.Builder(getContext())
-            .setTitle("Eliminar Empleado")
-            .setMessage("¿Estás seguro de que quieres eliminar a " + empleado.getNombreCompleto() + "?")
-            .setPositiveButton("Eliminar", (dialog, which) -> deleteEmpleado(empleado))
-            .setNegativeButton("Cancelar", null)
-            .show();
+        com.example.template.utils.DialogHelper.showConfirmDialog(
+            getContext(),
+            "Eliminar Empleado",
+            "¿Estás seguro de que deseas eliminar al empleado \"" + empleado.getNombreCompleto() + "\"?\n\nEsta acción no se puede deshacer.",
+            "Eliminar",
+            () -> deleteEmpleado(empleado)
+        );
     }
 
     private void deleteEmpleado(Empleado empleado) {

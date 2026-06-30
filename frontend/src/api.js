@@ -13,7 +13,7 @@ export const getBackendUrl = (path = '') => {
   return `${base}${path}`;
 };
 
-// Interceptor para inyectar el Token
+
 api.interceptors.request.use((config) => {
   const token = sessionStorage.getItem('access_token');
   if (token) {
@@ -22,7 +22,7 @@ api.interceptors.request.use((config) => {
   return config;
 }, (error) => Promise.reject(error));
 
-// Interceptor para manejar errores globales (ej: token expirado)
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {

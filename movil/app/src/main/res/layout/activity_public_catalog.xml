@@ -7,7 +7,7 @@
     android:background="@color/bg_dark"
     tools:context=".PublicCatalogActivity">
 
-    <!-- Main Content Area -->
+    
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,7 +19,7 @@
             android:orientation="vertical"
             android:paddingBottom="80dp">
 
-            <!-- Hero Header Section -->
+            
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/clHero"
                 android:layout_width="match_parent"
@@ -28,7 +28,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="32dp">
 
-                <!-- Logo Image Card -->
+                
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cvStoreLogo"
                     android:layout_width="80dp"
@@ -60,7 +60,7 @@
 
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Store Info -->
+                
                 <TextView
                     android:id="@+id/tvStoreName"
                     android:layout_width="0dp"
@@ -89,14 +89,14 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- Search and Filter Container -->
+            
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingVertical="16dp">
 
-                <!-- Search Input Card -->
+                
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -140,7 +140,7 @@
 
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Category Tabs Scroll -->
+                
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -160,7 +160,7 @@
 
             </LinearLayout>
 
-            <!-- Loading View -->
+            
             <FrameLayout
                 android:id="@+id/flLoading"
                 android:layout_width="match_parent"
@@ -174,7 +174,7 @@
                     android:indeterminateTint="@color/accent_color" />
             </FrameLayout>
 
-            <!-- Empty View -->
+            
             <LinearLayout
                 android:id="@+id/llEmptyState"
                 android:layout_width="match_parent"
@@ -209,7 +209,7 @@
                     android:gravity="center" />
             </LinearLayout>
 
-            <!-- Products RecyclerView -->
+            
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCatalogProducts"
                 android:layout_width="match_parent"
@@ -221,7 +221,7 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Top Toolbar (Always on Top) -->
+    
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -251,7 +251,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Floating Action Button for Cart -->
+    
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fabCart"
         android:layout_width="wrap_content"

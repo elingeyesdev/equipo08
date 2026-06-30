@@ -50,7 +50,7 @@ export class CreateProductoDto {
 
   @ApiProperty()
   @IsString()
-  @IsOptional() // In case it's orphan initially
+  @IsOptional() 
   proveedor_id?: string;
 
   @ApiProperty({ required: false })

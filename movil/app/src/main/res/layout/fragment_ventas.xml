@@ -7,7 +7,7 @@
     android:background="@color/bg_dark"
     android:padding="16dp">
 
-    <!-- History RecyclerView with SwipeRefresh -->
+    
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshHistory"
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Toggle Filters Button -->
+                
                 <Button
                     android:id="@+id/btnToggleHistoryFilters"
                     android:layout_width="match_parent"
@@ -34,7 +34,7 @@
                     android:backgroundTint="@color/accent_color"
                     android:textColor="#ffffff" />
 
-                <!-- History Filters Panel -->
+                
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardHistoryFilters"
                     android:layout_width="match_parent"
@@ -164,7 +164,7 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- History RecyclerView -->
+                
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvSalesHistory"
                     android:layout_width="match_parent"

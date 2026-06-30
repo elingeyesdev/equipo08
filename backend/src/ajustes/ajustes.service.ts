@@ -45,7 +45,7 @@ export class AjustesService {
     const unitsLost = dto.cantidad_sistema - dto.cantidad_fisica;
     const valor_perdido = unitsLost > 0 ? unitsLost * avgCost : 0;
 
-    // 1. Guardar el Acta de Ajuste (vinculado a stock_id)
+    
     const nuevoAjuste = this.ajusteRep.create({
       tenant_id,
       usuario_id,
@@ -58,7 +58,7 @@ export class AjustesService {
     });
     const guardado = await this.ajusteRep.save(nuevoAjuste);
 
-    // 2. Sincronizador Transversal: Forzar la actualización del Stock Físico a la cantidad reportada.
+    
     const diferencia = dto.cantidad_fisica - dto.cantidad_sistema;
 
     await this.stockService.sumStock(

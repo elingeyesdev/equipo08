@@ -15,7 +15,7 @@
         android:padding="16dp"
         android:background="?android:attr/selectableItemBackground">
 
-        <!-- Top Section: Expand indicator and name -->
+        
         <ImageView
             android:id="@+id/ivChevron"
             android:layout_width="24dp"
@@ -78,7 +78,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Prices section -->
+        
         <LinearLayout
             android:id="@+id/layoutPrices"
             android:layout_width="0dp"
@@ -153,7 +153,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Actions section -->
+        
         <LinearLayout
             android:id="@+id/layoutActions"
             android:layout_width="wrap_content"

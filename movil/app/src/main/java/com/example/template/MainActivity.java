@@ -16,6 +16,7 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 
 
+import com.example.template.ui.CategoriasFragment;
 import com.example.template.ui.HomeFragment;
 import com.example.template.ui.ProductsFragment;
 import com.example.template.ui.ProvidersFragment;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
 
         sessionManager = new SessionManager(this);
-        // Bypass login and use dummy session as requested
+        
         if (!sessionManager.isLoggedIn()) {
             startActivity(new Intent(this, LandingActivity.class));
             finish();
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("Inicio");
         
-        // Force the system status bar color to match the header color (slate #0f172a)
+        
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_color));
             getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.primary_color));
@@ -94,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Update nav header
+        
         android.view.View headerView = navigationView.getHeaderView(0);
         if (headerView == null) {
             headerView = navigationView.inflateHeaderView(R.layout.nav_header);
@@ -123,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
-        // Fetch latest tenant profile to sync logo & tenant name
+        
         ApiClient.getClient(this).create(ApiService.class).getTenantProfile().enqueue(new Callback<TenantProfile>() {
             @Override
             public void onResponse(Call<TenantProfile> call, Response<TenantProfile> response) {
@@ -138,11 +139,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public void onFailure(Call<TenantProfile> call, Throwable t) {
-                // Network error, fallback to cached settings
+                
             }
         });
 
-        // initial load
+        
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(R.id.nav_home);
             getSupportFragmentManager().beginTransaction()
@@ -155,9 +156,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             MenuItem groupItem = navigationView.getMenu().findItem(id);
             if (groupItem != null && groupItem.getTitle() != null) {
                 SpannableString s = new SpannableString(groupItem.getTitle());
-                // Color gris claro para que resalte sutilmente en el fondo oscuro
+                
                 s.setSpan(new ForegroundColorSpan(android.graphics.Color.parseColor("#94A3B8")), 0, s.length(), 0);
-                // Texto un poco más pequeño
+                
                 s.setSpan(new android.text.style.RelativeSizeSpan(0.8f), 0, s.length(), 0);
                 groupItem.setTitle(s);
             }
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         applyPermissions();
 
-        // Registrar callback para manejar el botón de atrás (Drawer y navegación) en Android 13+ (API 33+)
+        
         getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -193,11 +194,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Menu menu = navigationView.getMenu();
 
         if ("OWNER".equalsIgnoreCase(role)) {
-            // Owner sees everything, nothing to hide
+            
             return;
         }
 
-        // Default hide administration stuff for non-owners
+        
         menu.findItem(R.id.nav_permisos).setVisible(false);
         menu.findItem(R.id.nav_settings).setVisible(false);
 
@@ -209,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (pr.getRole().equalsIgnoreCase(role)) {
                             menu.findItem(R.id.nav_providers).setVisible(pr.isCatalogoVer());
                             menu.findItem(R.id.nav_products).setVisible(pr.isCatalogoVer());
+                            menu.findItem(R.id.nav_categorias).setVisible(pr.isCatalogoVer());
                             menu.findItem(R.id.nav_sucursales).setVisible(pr.isSucursalesVer());
                             menu.findItem(R.id.nav_sourcing).setVisible(pr.isSourcingVer());
                             menu.findItem(R.id.nav_stock).setVisible(pr.isInventarioVer());
@@ -239,6 +241,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new ProvidersFragment();
         } else if (itemId == R.id.nav_products) {
             selectedFragment = new ProductsFragment();
+        } else if (itemId == R.id.nav_categorias) {
+            selectedFragment = new CategoriasFragment();
         } else if (itemId == R.id.nav_sourcing) {
             selectedFragment = new SourcingFragment();
         } else if (itemId == R.id.nav_stock) {
@@ -271,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             uncheckAllMenuItems(navigationView.getMenu());
             item.setChecked(true);
             
-            // Set toolbar title dynamically to match screen name
+            
             String title = item.getTitle().toString();
             if (itemId == R.id.nav_home) {
                 title = "Inicio";

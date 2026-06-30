@@ -51,7 +51,7 @@ public class SettingsFragment extends Fragment {
 
         apiService = ApiClient.getClient(getContext()).create(ApiService.class);
 
-        // Cargar los ajustes actuales
+        
         loadTenantProfile();
 
         btnSave.setOnClickListener(v -> saveTenantProfile());
@@ -97,7 +97,7 @@ public class SettingsFragment extends Fragment {
                         int color = Color.parseColor(colorHex);
                         viewColorPreview.setBackgroundTintList(ColorStateList.valueOf(color));
                     } catch (IllegalArgumentException e) {
-                        // Color inválido
+                        
                     }
                 }
             }
@@ -137,7 +137,7 @@ public class SettingsFragment extends Fragment {
 
                         String brandColor = profile.getBrandColor();
                         if (brandColor == null || brandColor.trim().isEmpty()) {
-                            brandColor = "#0d9488"; // Default color
+                            brandColor = "#0d9488"; 
                         }
                         etBrandColor.setText(brandColor);
 
@@ -193,7 +193,7 @@ public class SettingsFragment extends Fragment {
                     if (response.isSuccessful() && response.body() != null) {
                         Toast.makeText(getContext(), "Ajustes guardados correctamente", Toast.LENGTH_SHORT).show();
                         
-                        // Actualizar caché de sesión y título del toolbar en tiempo real
+                        
                         com.example.template.utils.SessionManager session = new com.example.template.utils.SessionManager(getContext());
                         session.updateTenantName(name);
                         session.updateLogoUrl(uploadedLogoUrl);
@@ -201,7 +201,7 @@ public class SettingsFragment extends Fragment {
                             ((MainActivity) getActivity()).updateNavHeaderLogo(uploadedLogoUrl);
                         }
 
-                        // Recargar para confirmar persistencia
+                        
                         loadTenantProfile();
                     } else {
                         Toast.makeText(getContext(), "Error al guardar los ajustes", Toast.LENGTH_SHORT).show();
@@ -253,7 +253,7 @@ public class SettingsFragment extends Fragment {
                         ivLogoPreview.setVisibility(View.VISIBLE);
                         com.example.template.utils.ImageLoader.loadImage(uploadedLogoUrl, ivLogoPreview);
                         
-                        // Opcionalmente actualizar la UI
+                        
                         com.example.template.utils.SessionManager session = new com.example.template.utils.SessionManager(getContext());
                         session.updateLogoUrl(uploadedLogoUrl);
                         if (getActivity() instanceof MainActivity) {

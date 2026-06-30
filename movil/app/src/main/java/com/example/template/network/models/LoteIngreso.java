@@ -17,6 +17,8 @@ public class LoteIngreso {
     private Producto producto;
     private Proveedor proveedor;
 
+    private Double costoUnitario;
+
     public LoteIngreso(String sucursal_id, String producto_id, String proveedor_id, int cantidad, String fechaVencimiento, String fechaProduccion) {
         this.sucursal_id = sucursal_id;
         this.producto_id = producto_id;
@@ -25,6 +27,9 @@ public class LoteIngreso {
         this.fechaVencimiento = fechaVencimiento;
         this.fechaProduccion = fechaProduccion;
     }
+
+    public Double getCostoUnitario() { return costoUnitario; }
+    public void setCostoUnitario(Double costoUnitario) { this.costoUnitario = costoUnitario; }
 
     public String getId() { return id; }
     public String getSucursalId() { return sucursal_id; }

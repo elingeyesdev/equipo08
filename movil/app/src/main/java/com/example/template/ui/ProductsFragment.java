@@ -26,6 +26,7 @@ import com.example.template.network.ApiClient;
 import com.example.template.network.ApiService;
 import com.example.template.network.models.Producto;
 import com.example.template.network.models.Proveedor;
+import com.example.template.network.models.Categoria;
 import com.example.template.ui.adapters.ProductoAdapter;
 
 import java.util.ArrayList;
@@ -118,7 +119,7 @@ public class ProductsFragment extends Fragment {
             public void onNothingSelected(android.widget.AdapterView<?> parent) {}
         });
 
-        // Setup Categories
+        
         String[] categorias = {
             "Abarrotes y Alimentos", "Bebidas", "Ropa y Moda", "Zapatos y Calzado",
             "Belleza y Cuidado Personal", "Joyería y Relojes", "Juguetes y Niños",
@@ -129,7 +130,7 @@ public class ProductsFragment extends Fragment {
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategoria.setAdapter(catAdapter);
 
-        // Setup Margen Calculation
+        
         android.text.TextWatcher textWatcher = new android.text.TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) { calculateMargin(); }
@@ -154,6 +155,11 @@ public class ProductsFragment extends Fragment {
             public void onCopyClick(Producto producto) {
                 copyProducto(producto);
             }
+
+            @Override
+            public void onProductLongClick(Producto producto) {
+                showKardexDialog(producto.getId(), producto.getName(), producto.getSku());
+            }
         });
         recyclerView.setAdapter(adapter);
 
@@ -162,13 +168,14 @@ public class ProductsFragment extends Fragment {
         btnToggleForm.setOnClickListener(v -> toggleForm(false));
         btnGuardar.setOnClickListener(v -> saveProducto());
 
-        // Default hide
+        
         btnToggleForm.setVisibility(View.GONE);
         adapter.setCanManage(false);
 
         loadPermissions();
         loadProductos();
         loadProveedoresToSpinner();
+        loadCategoriasToSpinner();
         
         return view;
     }
@@ -242,7 +249,7 @@ public class ProductsFragment extends Fragment {
         
         btnGuardar.setText("Actualizar artículo");
         
-        // Categoria
+        
         if (producto.getCategory() != null) {
             ArrayAdapter<String> catAdapter = (ArrayAdapter<String>) spinnerCategoria.getAdapter();
             for (int i = 0; i < catAdapter.getCount(); i++) {
@@ -253,10 +260,10 @@ public class ProductsFragment extends Fragment {
             }
         }
         
-        // Force attributes generation even if category selection listener doesn't fire
+        
         updateAttributeFields(producto.getAttributes());
 
-        // Proveedor
+        
         if (producto.getProveedorId() != null) {
             for (int i = 0; i < proveedoresList.size(); i++) {
                 if (proveedoresList.get(i).getId().equals(producto.getProveedorId())) {
@@ -294,7 +301,7 @@ public class ProductsFragment extends Fragment {
         
         btnGuardar.setText("Nuevo artículo");
         
-        // Categoria
+        
         if (producto.getCategory() != null) {
             ArrayAdapter<String> catAdapter = (ArrayAdapter<String>) spinnerCategoria.getAdapter();
             for (int i = 0; i < catAdapter.getCount(); i++) {
@@ -305,10 +312,10 @@ public class ProductsFragment extends Fragment {
             }
         }
         
-        // Force attributes generation and copy attributes
+        
         updateAttributeFields(producto.getAttributes());
 
-        // Proveedor
+        
         if (producto.getProveedorId() != null) {
             for (int i = 0; i < proveedoresList.size(); i++) {
                 if (proveedoresList.get(i).getId().equals(producto.getProveedorId())) {
@@ -358,7 +365,7 @@ public class ProductsFragment extends Fragment {
                     List<Producto> list = response.body();
                     adapter.updateData(list);
 
-                    // Setup AutoComplete for product names
+                    
                     List<String> productNames = new ArrayList<>();
                     for (Producto p : list) {
                         if (p.getName() != null && !p.getName().isEmpty() && !productNames.contains(p.getName())) {
@@ -398,6 +405,41 @@ public class ProductsFragment extends Fragment {
         });
     }
 
+    private void loadCategoriasToSpinner() {
+        apiService.getCategorias().enqueue(new Callback<List<Categoria>>() {
+            @Override
+            public void onResponse(Call<List<Categoria>> call, Response<List<Categoria>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<String> catNames = new ArrayList<>();
+                    for (Categoria c : response.body()) {
+                        catNames.add(c.getNombre());
+                    }
+                    if (catNames.isEmpty()) {
+                        catNames.add("Otros");
+                    }
+                    if (getContext() != null) {
+                        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                            getContext(), android.R.layout.simple_spinner_item, catNames
+                        );
+                        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        spinnerCategoria.setAdapter(spinnerAdapter);
+
+                        if (editingProducto != null && editingProducto.getCategory() != null) {
+                            for (int i = 0; i < catNames.size(); i++) {
+                                if (catNames.get(i).equalsIgnoreCase(editingProducto.getCategory())) {
+                                    spinnerCategoria.setSelection(i);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Categoria>> call, Throwable t) { }
+        });
+    }
+
     private void saveProducto() {
         String name = etName.getText().toString().trim();
         String desc = etDescription.getText().toString().trim();
@@ -408,8 +450,24 @@ public class ProductsFragment extends Fragment {
         
         Proveedor selectedProv = (Proveedor) spinnerProveedor.getSelectedItem();
 
-        if (name.isEmpty() || sku.isEmpty() || costeStr.isEmpty() || ventaStr.isEmpty() || selectedProv == null) {
-            Toast.makeText(getContext(), "Por favor, completa todos los campos requeridos", Toast.LENGTH_SHORT).show();
+        if (name.isEmpty()) {
+            Toast.makeText(getContext(), "El campo Nombre es obligatorio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (sku.isEmpty()) {
+            Toast.makeText(getContext(), "El campo SKU es obligatorio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (costeStr.isEmpty()) {
+            Toast.makeText(getContext(), "El campo Precio de Costo es obligatorio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (ventaStr.isEmpty()) {
+            Toast.makeText(getContext(), "El campo Precio de Venta es obligatorio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (selectedProv == null) {
+            Toast.makeText(getContext(), "El campo Proveedor es obligatorio", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -480,13 +538,13 @@ public class ProductsFragment extends Fragment {
         }
     }
     private void confirmDelete(Producto producto) {
-        if (getContext() == null) return;
-        new androidx.appcompat.app.AlertDialog.Builder(getContext())
-            .setTitle("Eliminar Producto")
-            .setMessage("¿Estás seguro de que quieres eliminar " + producto.getName() + "?")
-            .setPositiveButton("Eliminar", (dialog, which) -> deleteProducto(producto))
-            .setNegativeButton("Cancelar", null)
-            .show();
+        com.example.template.utils.DialogHelper.showConfirmDialog(
+            getContext(),
+            "Eliminar Producto",
+            "¿Estás seguro de que deseas eliminar \"" + producto.getName() + "\"?",
+            "Eliminar",
+            () -> deleteProducto(producto)
+        );
     }
 
     private void deleteProducto(Producto producto) {
@@ -588,6 +646,74 @@ public class ProductsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void showKardexDialog(String productoId, String productName, String sku) {
+        if (getContext() == null) return;
+
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_kardex, null);
+        TextView tvKardexProductInfo = dialogView.findViewById(R.id.tvKardexProductInfo);
+        android.widget.ProgressBar pbKardexLoading = dialogView.findViewById(R.id.pbKardexLoading);
+        TextView tvKardexEmpty = dialogView.findViewById(R.id.tvKardexEmpty);
+        RecyclerView rvKardexMovements = dialogView.findViewById(R.id.rvKardexMovements);
+        android.widget.ImageButton btnCloseKardex = dialogView.findViewById(R.id.btnCloseKardex);
+        Button btnBackKardex = dialogView.findViewById(R.id.btnBackKardex);
+
+        String sub = productName + (sku != null && !sku.isEmpty() ? " (SKU: " + sku + ")" : "");
+        tvKardexProductInfo.setText(sub);
+
+        rvKardexMovements.setLayoutManager(new LinearLayoutManager(getContext()));
+        java.util.List<com.example.template.network.models.KardexResponse> movements = new java.util.ArrayList<>();
+        com.example.template.ui.adapters.KardexAdapter adapter = new com.example.template.ui.adapters.KardexAdapter(movements);
+        rvKardexMovements.setAdapter(adapter);
+
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(getContext())
+                .setView(dialogView)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        btnCloseKardex.setOnClickListener(v -> dialog.dismiss());
+        btnBackKardex.setOnClickListener(v -> dialog.dismiss());
+
+        pbKardexLoading.setVisibility(View.VISIBLE);
+        tvKardexEmpty.setVisibility(View.GONE);
+        rvKardexMovements.setVisibility(View.GONE);
+
+        apiService.getKardex(productoId).enqueue(new Callback<java.util.List<com.example.template.network.models.KardexResponse>>() {
+            @Override
+            public void onResponse(Call<java.util.List<com.example.template.network.models.KardexResponse>> call, Response<java.util.List<com.example.template.network.models.KardexResponse>> response) {
+                if (!isAdded()) return;
+                pbKardexLoading.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null) {
+                    java.util.List<com.example.template.network.models.KardexResponse> list = response.body();
+                    if (list.isEmpty()) {
+                        tvKardexEmpty.setVisibility(View.VISIBLE);
+                    } else {
+                        movements.addAll(list);
+                        adapter.notifyDataSetChanged();
+                        rvKardexMovements.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Error al obtener Kardex", Toast.LENGTH_SHORT).show();
+                    tvKardexEmpty.setText("Error al cargar movimientos");
+                    tvKardexEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<java.util.List<com.example.template.network.models.KardexResponse>> call, Throwable t) {
+                if (!isAdded()) return;
+                pbKardexLoading.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                tvKardexEmpty.setText("Error de conexión");
+                tvKardexEmpty.setVisibility(View.VISIBLE);
+            }
+        });
+
+        dialog.show();
     }
 
     @Override

@@ -20,7 +20,7 @@
 
     
 
-    <!-- CARD Form -->
+    
     <androidx.cardview.widget.CardView
         android:id="@+id/cardForm"
         android:layout_width="match_parent"
@@ -110,75 +110,23 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"/>
 
+            
             <LinearLayout
+                android:id="@+id/llHorariosContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="12dp"
-                android:background="@drawable/edit_text_bg"
-                android:layout_marginBottom="16dp">
+                android:orientation="vertical" />
 
-                <TextView
-                    android:id="@+id/tvSelectedDaysLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Días: lunes, martes, miércoles, jueves, viernes"
-                    android:textColor="#0f172a"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/btnSelectDays"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:backgroundTint="@color/accent_color"
-                    android:text="Cambiar días"
-                    android:textColor="#ffffff"
-                    android:textSize="12sp"
-                    style="@style/Widget.MaterialComponents.Button.TextButton" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="De: "
-                        android:textColor="@color/accent_color"
-                        android:textSize="14sp" />
-
-                    <Button
-                        android:id="@+id/btnStartTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="08:00"
-                        android:backgroundTint="#f1f5f9"
-                        android:textColor="#0f172a"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="A: "
-                        android:textColor="@color/accent_color"
-                        android:textSize="14sp" />
-
-                    <Button
-                        android:id="@+id/btnEndTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="18:00"
-                        android:backgroundTint="#f1f5f9"
-                        android:textColor="#0f172a"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
-                </LinearLayout>
-            </LinearLayout>
+            
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddHorario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="@color/accent_color"
+                android:textColor="#ffffff"
+                app:cornerRadius="8dp"
+                android:text="+ Agregar Bloque de Horario" />
 
             <TextView 
                 android:layout_width="wrap_content" 
@@ -206,7 +154,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- LIST AREA -->
+    
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

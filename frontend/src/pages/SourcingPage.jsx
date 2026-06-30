@@ -33,7 +33,7 @@ export default function SourcingPage() {
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown on click outside
+  
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -46,7 +46,7 @@ export default function SourcingPage() {
     };
   }, []);
 
-  // Reset page to 1 when any filter changes
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [filterProducto, filterProveedor, filterSucursal, filterDateStart, filterDateEnd, filterExpiryStart, filterExpiryEnd]);
@@ -162,7 +162,7 @@ export default function SourcingPage() {
   const selectedProductObj = products.find(p => p.id === loteForm.producto_id);
   const showExpirationDate = selectedProductObj && ['Abarrotes y Alimentos', 'Bebidas'].includes(selectedProductObj.category);
 
-  // Compute filtered items for pagination calculation
+  
   const filteredHistorial = historial.filter(h => {
     if (filterProducto !== 'ALL' && h.producto_id !== filterProducto) return false;
     if (filterProveedor !== 'ALL' && h.producto?.proveedor_id !== filterProveedor) return false;

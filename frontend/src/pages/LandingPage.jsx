@@ -747,7 +747,7 @@ export default function LandingPage() {
       <div className="lp">
 
 
-        {/* NAV */}
+        {}
         <nav className="lp-nav">
           <div className="lp-nav-inner">
             <Link to="/" style={{ textDecoration: 'none' }}>
@@ -772,7 +772,7 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        {/* HERO */}
+        {}
         <section className="lp-hero">
           <div className="lp-hero-inner">
             <div className="lp-hero-text">
@@ -793,7 +793,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* EMPOWERING */}
+        {}
         <section className="lp-empowering">
           <div className="lp-empowering-inner">
             <h2>Potenciando negocios en Bolivia con nuestro sistema POS</h2>
@@ -802,10 +802,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FEATURES EXPANDIDAS */}
+        {}
         <section style={{ background: '#fff', borderBottom: '1px solid #e0e0e0' }} id="herramientas">
 
-          {/* 1 POS imagen izq texto der */}
+          {}
           <div className="lp-feat-row">
             <img src="/feat-pos.png" alt="Punto de Venta BolClick" className="lp-feat-img-el" />
             <div className="lp-tool-text">
@@ -820,7 +820,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 2 INVENTARIO texto izq imagen der */}
+          {}
           <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
             <div className="lp-feat-row reverse">
               <div className="lp-tool-text">
@@ -837,7 +837,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 3 ANÁLISIS imagen izq texto der */}
+          {}
           <div className="lp-feat-row">
             <img src="/feat-analytics.png" alt="Análisis de Ventas BolClick" className="lp-feat-img-el" />
             <div className="lp-tool-text">
@@ -852,7 +852,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 4 PERSONAL texto izq imagen der */}
+          {}
           <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0' }}>
             <div className="lp-feat-row reverse">
               <div className="lp-tool-text">
@@ -869,7 +869,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* 5 MULTISUCURSAL imagen izq texto der */}
+          {}
           <div className="lp-feat-row">
             <img src="/feat-multistore.png" alt="Sucursales BolClick" className="lp-feat-img-el" />
             <div className="lp-tool-text">
@@ -886,7 +886,7 @@ export default function LandingPage() {
 
         </section>
 
-        {/* STATS */}
+        {}
         <section className="lp-stats">
           <div className="lp-stats-inner">
             <div className="lp-stat">
@@ -911,7 +911,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FREE CTA */}
+        {}
         <section className="lp-free" id="precios">
           <div className="lp-free-inner">
             <h2>Empieza a usar BolClick hoy, es gratis</h2>
@@ -925,7 +925,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FOOTER */}
+        {}
         <footer className="lp-footer" id="ayuda">
           <div className="lp-footer-inner">
             <Link to="/" style={{ textDecoration: 'none' }}>

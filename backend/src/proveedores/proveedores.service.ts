@@ -151,11 +151,11 @@ export class ProveedoresService implements OnModuleInit {
   async create(tenant_id: string, dto: CreateProveedorDto): Promise<Proveedor> {
     if (!dto.taxId) throw new BadRequestException('NIT es obligatorio para agregar un proveedor.');
 
-    // 1. Buscar si ya existe en el directorio global
+    
     let globalProv = await this.proveRep.findOne({ where: { tenant_id: 'GLOBAL', taxId: dto.taxId } });
 
     if (!globalProv) {
-      // Si no existe globalmente, lo creamos para que otras tiendas puedan reutilizarlo
+      
       if (!dto.name)
         throw new BadRequestException(
           'El nombre del proveedor es obligatorio para registrar un NIT nuevo.',
@@ -169,7 +169,7 @@ export class ProveedoresService implements OnModuleInit {
       });
       await this.proveRep.save(globalProv);
     } else {
-      // Si ya existe globalmente, heredamos su nombre oficial y correo
+      
       dto.name = globalProv.name;
       dto.contactEmail = globalProv.contactEmail || dto.contactEmail;
       dto.phone = globalProv.phone || dto.phone;
@@ -201,7 +201,7 @@ export class ProveedoresService implements OnModuleInit {
 
     await this.validateProveedor(tenant_id, dto, id);
 
-    // Copy the updated properties
+    
     Object.assign(proveedor, dto);
     return this.proveRep.save(proveedor);
   }
@@ -214,7 +214,7 @@ export class ProveedoresService implements OnModuleInit {
       await this.proveRep.remove(proveedor);
     } catch (e) {
       if (e.code === '23503') {
-        // Foreign key constraint
+        
         throw new NotFoundException(
           'No se puede eliminar el proveedor. Está asociado a productos o lotes de compra en tu catálogo.',
         );
