@@ -973,8 +973,10 @@ public class TerminalPOSFragment extends Fragment {
             
             if (s.getProducto() != null && s.getProducto().getImagenUrl() != null && !s.getProducto().getImagenUrl().trim().isEmpty()) {
                 holder.ivProductImage.setPadding(0, 0, 0, 0);
+                holder.ivProductImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 ImageLoader.loadImage(s.getProducto().getImagenUrl(), holder.ivProductImage);
             } else {
+                holder.ivProductImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 holder.ivProductImage.setImageResource(R.drawable.ic_product_placeholder);
                 int pad = (int) (8 * holder.itemView.getResources().getDisplayMetrics().density);
                 holder.ivProductImage.setPadding(pad, pad, pad, pad);

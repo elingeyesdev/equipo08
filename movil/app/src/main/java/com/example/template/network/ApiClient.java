@@ -17,8 +17,8 @@ public class ApiClient {
     // Configura aquí la URL de tu API:
     // - Para usar el EMULADOR de Android: usa "http://10.0.2.2:3000/api/"
     // - Para usar un CELULAR FÍSICO en la misma red Wi-Fi: usa la IP local de tu PC, ej: "http://192.168.1.X:3000/api/"
-    //private static final String BASE_URL = "https://runner-affair-gratitude.ngrok-free.dev/api/"; // Desarrollo local (ngrok)
-     private static final String BASE_URL = "http://10.0.2.2:3000/api/"; // Desarrollo local (Emulador)
+    private static final String BASE_URL = "https://runner-affair-gratitude.ngrok-free.dev/api/"; // Desarrollo local (ngrok)
+     //private static final String BASE_URL = "http://10.0.2.2:3000/api/"; // Desarrollo local (Emulador)
     // private static final String BASE_URL = "https://bolclick-backend.onrender.com/api/"; // Producción Render
 
 

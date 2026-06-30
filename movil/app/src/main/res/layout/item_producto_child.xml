@@ -33,9 +33,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SKU: N/A"
-            android:background="#e2e8f0"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="2dp"
             android:textColor="#475569"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -175,7 +172,7 @@
                 android:scaleType="fitCenter"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_edit"
-                app:tint="#64748b"
+                app:tint="@color/accent_color"
                 android:contentDescription="Edit"
                 android:layout_marginEnd="4dp" />
 
@@ -187,7 +184,7 @@
                 android:scaleType="fitCenter"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_delete"
-                app:tint="#ef4444"
+                app:tint="@color/loss_color"
                 android:contentDescription="Delete" />
         </LinearLayout>
 

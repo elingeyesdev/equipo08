@@ -274,7 +274,7 @@ public class ProductsFragment extends Fragment {
     private void copyProducto(Producto producto) {
         editingProducto = null;
         etName.setText(producto.getName(), false);
-        etDescription.setText("");
+        etDescription.setText(producto.getDescription() != null ? producto.getDescription() : "");
         etSku.setText("");
         etPrecioCoste.setText(String.valueOf(producto.getPrecioCosto()));
         etPrecioVenta.setText(String.valueOf(producto.getPrecioVenta()));

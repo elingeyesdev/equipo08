@@ -132,18 +132,7 @@
                         android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Simulate Button -->
-                <Button
-                    android:id="@+id/btnSimulateAlerts"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Simular escenario de bajo stock"
-                    android:backgroundTint="@color/primary_color"
-                    android:textColor="#ffffff"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp" />
+
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

@@ -32,7 +32,7 @@
             <item
                 android:id="@+id/nav_sourcing"
                 android:icon="@drawable/ic_sourcing"
-                android:title="Abastecimiento" />
+                android:title="Lotes" />
             <item
                 android:id="@+id/nav_stock"
                 android:icon="@drawable/ic_stock"

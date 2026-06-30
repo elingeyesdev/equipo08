@@ -164,6 +164,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         applyPermissions();
+
+        // Registrar callback para manejar el botón de atrás (Drawer y navegación) en Android 13+ (API 33+)
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
+                    drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START);
+                } else {
+                    androidx.fragment.app.Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+                    if (currentFragment != null && !(currentFragment instanceof HomeFragment)) {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, new HomeFragment())
+                                .commit();
+                        uncheckAllMenuItems(navigationView.getMenu());
+                        navigationView.setCheckedItem(R.id.nav_home);
+                        updateToolbarTitle("Inicio");
+                    } else {
+                        finish();
+                    }
+                }
+            }
+        });
     }
 
     private void applyPermissions() {
@@ -261,24 +283,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.START)) {
-            drawerLayout.closeDrawer(androidx.core.view.GravityCompat.START);
-        } else {
-            androidx.fragment.app.Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
-            if (currentFragment != null && !(currentFragment instanceof HomeFragment)) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new HomeFragment())
-                        .commit();
-                uncheckAllMenuItems(navigationView.getMenu());
-                navigationView.setCheckedItem(R.id.nav_home);
-                updateToolbarTitle("Inicio");
-            } else {
-                super.onBackPressed();
-            }
-        }
-    }
+
 
     public void updateToolbarTitle(String title) {
         if (toolbar != null) {
