@@ -562,13 +562,17 @@ export default function PublicCatalogPage() {
                           </div>
                         ) : null)}
                         {(selectedVariant?.description || selectedProduct.description) && (
-                          <div className="mt-4 pt-4 border-t border-[var(--border)] text-sm">
-                            {selectedVariant?.description || selectedProduct.description}
+                          <div className="mt-4 pt-4 border-t border-[var(--border)] text-xs text-[var(--txt-muted)]">
+                            <span className="font-semibold block uppercase tracking-wider mb-1">Descripción:</span>
+                            <span className="text-sm text-[var(--txt-secondary)]">{selectedVariant?.description || selectedProduct.description}</span>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <p>{selectedVariant?.description || selectedProduct.description || 'Este producto no cuenta con especificaciones adicionales.'}</p>
+                      <div>
+                        <span className="text-xs font-semibold block uppercase tracking-wider text-[var(--txt-muted)] mb-1">Descripción:</span>
+                        <p className="text-sm text-[var(--txt-secondary)]">{selectedVariant?.description || selectedProduct.description || 'Este producto no cuenta con especificaciones adicionales.'}</p>
+                      </div>
                     )}
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
-import { ShoppingCart, Plus, X, Loader2, Edit2, Trash2, Package, Search } from 'lucide-react';
+import { ShoppingCart, Plus, X, Loader2, Edit2, Trash2, Package, Search, Filter } from 'lucide-react';
 import { useToast } from '../components/ToastContext';
 import ConfirmModal from '../components/ConfirmModal';
 
@@ -197,11 +197,11 @@ export default function SourcingPage() {
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowFilters(!showFilters)} 
-            className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-              showFilters ? 'bg-white text-slate-800 border border-slate-300' : 'bg-white/20 hover:bg-white/30 text-white'
+            className={`py-2 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm border ${
+              showFilters ? 'bg-white text-slate-900 border-slate-300' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
           >
-            <Search size={18} /> {showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}
+            <Filter size={16} /> {showFilters ? 'Ocultar Filtros' : 'Filtrar'}
           </button>
           {hasPermission('sourcing_crear') && (
             <button
@@ -557,15 +557,15 @@ export default function SourcingPage() {
               </tbody>
             </table>
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 border-t border-slate-100">
-                <span className="text-xs text-slate-500">
+              <div className="flex items-center justify-between px-6 py-4 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   Mostrando página {currentPage} de {totalPages} ({filteredHistorial.length} lotes en total)
                 </span>
                 <div className="flex gap-1">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-350 dark:hover:bg-slate-700/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     Anterior
                   </button>
@@ -575,8 +575,8 @@ export default function SourcingPage() {
                       onClick={() => setCurrentPage(i + 1)}
                       className={`w-8 h-8 text-xs font-bold rounded-lg transition-all ${
                         currentPage === i + 1
-                          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-650/15'
-                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                          ? 'bg-[#184e77] dark:bg-white text-white dark:text-slate-900 shadow-sm'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-350 dark:hover:bg-slate-700/60'
                       }`}
                     >
                       {i + 1}
@@ -585,7 +585,7 @@ export default function SourcingPage() {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-350 dark:hover:bg-slate-700/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     Siguiente
                   </button>

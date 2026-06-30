@@ -285,22 +285,50 @@ export class StockService {
       .orderBy('movimiento.createdAt', 'DESC');
 
     const result = await query.getMany();
+    const mapped = [];
 
-    return result.map(m => ({
-      id: m.id,
-      fecha: m.createdAt,
-      tipo: m.tipo,
-      cantidadDelta: m.cantidadDelta,
-      stockAnterior: Number(m.stockAnterior || 0),
-      stockResultante: Number(m.stockResultante || 0),
-      costoUnitario: Number(m.costoUnitario || 0),
-      motivo: m.motivo,
-      usuarioNombre: m.usuario?.name || 'Sistema',
-      referenciaTipo: m.referenciaTipo,
-      referenciaId: m.referenciaId,
-      sucursalNombre: m.stock?.sucursal?.name || 'General',
-      variacionDetalle: m.stock?.variacion?.opciones || null,
-      sku: m.stock?.variacion?.sku || null,
-    }));
+    for (const m of result) {
+      let valorUnitario = Number(m.costoUnitario || 0);
+
+      try {
+        if (m.referenciaTipo === 'VENTA' && m.referenciaId) {
+          const detail = await this.stockRep.manager.getRepository('VentaDetalle').findOne({
+            where: { venta_id: m.referenciaId, producto_id: m.stock?.producto_id },
+          }) as any;
+          if (detail) {
+            valorUnitario = Number(detail.precioUnitarioSnapshot || 0);
+          }
+        } else if (m.referenciaTipo === 'COMPRA' && m.referenciaId) {
+          const lote = await this.stockRep.manager.getRepository('LoteIngreso').findOne({
+            where: { id: m.referenciaId },
+          }) as any;
+          if (lote) {
+            valorUnitario = Number(lote.costoUnitario || 0);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching Kardex details:', err);
+      }
+
+      mapped.push({
+        id: m.id,
+        fecha: m.createdAt,
+        tipo: m.tipo,
+        cantidadDelta: m.cantidadDelta,
+        stockAnterior: Number(m.stockAnterior || 0),
+        stockResultante: Number(m.stockResultante || 0),
+        costoUnitario: valorUnitario,
+        motivo: m.motivo,
+        usuarioNombre: m.usuario?.name || 'Sistema',
+        referenciaTipo: m.referenciaTipo,
+        referenciaId: m.referenciaId,
+        sucursalId: m.stock?.sucursal_id,
+        sucursalNombre: m.stock?.sucursal?.name || 'General',
+        variacionDetalle: m.stock?.variacion?.opciones || null,
+        sku: m.stock?.variacion?.sku || null,
+      });
+    }
+
+    return mapped;
   }
 }

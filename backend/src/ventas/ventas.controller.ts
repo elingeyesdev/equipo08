@@ -7,6 +7,7 @@ import {
   UseGuards,
   Res,
   Req,
+  Query,
 } from '@nestjs/common';
 import { VentasService } from './ventas.service';
 import { CreateVentaDto } from './dto/create-venta.dto';
@@ -41,8 +42,13 @@ export class VentasController {
 
   @Get('kpis/dashboard')
   @RequirePermission('ventas.ver')
-  async getKpis(@TenantId() tenant_id: string) {
-    return this.ventasService.getDashboardKpis(tenant_id);
+  async getKpis(
+    @TenantId() tenant_id: string,
+    @Query('sucursal_id') sucursal_id?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.ventasService.getDashboardKpis(tenant_id, sucursal_id, startDate, endDate);
   }
 
   @Get('siguiente-numero/:sucursalId')

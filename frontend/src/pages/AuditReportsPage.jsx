@@ -164,13 +164,13 @@ export default function AuditReportsPage() {
         </div>
         <div className="flex gap-3 relative z-10">
           <button
-            className={`py-2 px-5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-              showFilters ? 'bg-indigo-500 text-white shadow-indigo-500/20' : 'bg-white/20 hover:bg-white/30 text-white'
+            className={`py-2 px-4 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm border ${
+              showFilters ? 'bg-white text-slate-900 border-slate-300' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
             }`}
             onClick={() => setShowFilters(!showFilters)}
           >
-            <Filter size={18} />
-            <span>{showFilters ? 'Ocultar Filtros' : 'Buscar / Filtrar'}</span>
+            <Filter size={16} />
+            <span>{showFilters ? 'Ocultar Filtros' : 'Filtrar'}</span>
           </button>
 
           <button
@@ -186,8 +186,7 @@ export default function AuditReportsPage() {
       {showAuditForm && (
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-fadeIn">
           <div className="flex justify-between items-center pb-4 border-b border-slate-100 mb-4">
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 m-0">
-               <ClipboardList size={18} className="text-indigo-600" />
+            <h3 className="text-base font-bold text-slate-900 m-0">
                <span>Nueva Auditoría de Stock</span>
             </h3>
           </div>
@@ -216,7 +215,26 @@ export default function AuditReportsPage() {
                   className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/10"
                 >
                   <option value="">Selecciona un producto...</option>
-                  {productos.map(p => <option key={p.id} value={p.id}>{p.name || p.nombre} ({p.sku})</option>)}
+                  {productos.map(p => {
+                    const formattedAttrs = p.attributes
+                      ? Object.entries(p.attributes)
+                          .map(([k, v]) => {
+                            if (k === 'volumen_ml') {
+                              const num = Number(v);
+                              if (!isNaN(num)) {
+                                return num >= 1000 ? `${num / 1000}L` : `${num}ml`;
+                              }
+                            }
+                            return v;
+                          })
+                          .join(' | ')
+                      : '';
+                    return (
+                      <option key={p.id} value={p.id}>
+                        {p.name || p.nombre} {formattedAttrs ? `[${formattedAttrs}]` : ''}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -265,7 +283,7 @@ export default function AuditReportsPage() {
               <button 
                 type="button" 
                 onClick={() => setShowAuditForm(false)} 
-                className="btn-premium"
+                className="py-2.5 px-5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all text-sm cursor-pointer"
               >
                 Cancelar
               </button>

@@ -242,22 +242,52 @@ export class VentasService {
     return this.hydrateLegacyDetalle(venta);
   }
 
-  async getDashboardKpis(tenant_id: string): Promise<any> {
-    const kpis = await this.ventaRep
+  async getDashboardKpis(
+    tenant_id: string,
+    sucursal_id?: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<any> {
+    const kpisQuery = this.ventaRep
       .createQueryBuilder('venta')
-      .where('venta.tenant_id = :tenant_id', { tenant_id })
+      .where('venta.tenant_id = :tenant_id', { tenant_id });
+
+    if (sucursal_id && sucursal_id !== 'ALL') {
+      kpisQuery.andWhere('venta.sucursal_id = :sucursal_id', { sucursal_id });
+    }
+    if (startDate) {
+      kpisQuery.andWhere('venta.fecha >= :startDate', { startDate: new Date(`${startDate}T00:00:00`) });
+    }
+    if (endDate) {
+      kpisQuery.andWhere('venta.fecha <= :endDate', { endDate: new Date(`${endDate}T23:59:59`) });
+    }
+
+    const kpis = await kpisQuery
       .select('SUM(venta.total)', 'sumTotal')
       .addSelect('SUM(venta.costoTotal)', 'sumCosto')
       .addSelect('SUM(venta.utilidadTotal)', 'sumUtilidad')
       .addSelect('COUNT(venta.id)', 'countVentas')
       .getRawOne();
 
-    const recentSales = await this.ventaRep.find({
-      where: { tenant_id },
-      order: { fecha: 'DESC' },
-      take: 5,
-      relations: ['cliente', 'detalles'],
-    });
+    const recentSalesQuery = this.ventaRep
+      .createQueryBuilder('venta')
+      .leftJoinAndSelect('venta.cliente', 'cliente')
+      .leftJoinAndSelect('venta.detalles', 'detalles')
+      .where('venta.tenant_id = :tenant_id', { tenant_id })
+      .orderBy('venta.fecha', 'DESC')
+      .take(5);
+
+    if (sucursal_id && sucursal_id !== 'ALL') {
+      recentSalesQuery.andWhere('venta.sucursal_id = :sucursal_id', { sucursal_id });
+    }
+    if (startDate) {
+      recentSalesQuery.andWhere('venta.fecha >= :startDate', { startDate: new Date(`${startDate}T00:00:00`) });
+    }
+    if (endDate) {
+      recentSalesQuery.andWhere('venta.fecha <= :endDate', { endDate: new Date(`${endDate}T23:59:59`) });
+    }
+
+    const recentSales = await recentSalesQuery.getMany();
 
     return {
       totalVentas: Number(kpis.countVentas || 0),

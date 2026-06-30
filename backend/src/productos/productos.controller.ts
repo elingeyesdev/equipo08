@@ -22,6 +22,40 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class ProductosController {
   constructor(private readonly productosService: ProductosService) {}
 
+  @Get('categorias')
+  @RequirePermission('catalogo.ver')
+  findCategorias(@TenantId() tenantId: string) {
+    return this.productosService.findCategorias(tenantId);
+  }
+
+  @Post('categorias')
+  @RequirePermission('catalogo.crear')
+  createCategoria(
+    @TenantId() tenantId: string,
+    @Body('nombre') nombre: string,
+  ) {
+    return this.productosService.createCategoria(tenantId, nombre);
+  }
+
+  @Put('categorias/:id')
+  @RequirePermission('catalogo.editar')
+  updateCategoria(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @Body('nombre') nombre: string,
+  ) {
+    return this.productosService.updateCategoria(tenantId, id, nombre);
+  }
+
+  @Delete('categorias/:id')
+  @RequirePermission('catalogo.eliminar')
+  removeCategoria(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+  ) {
+    return this.productosService.removeCategoria(tenantId, id);
+  }
+
   @Post('upload')
   @RequirePermission('catalogo.crear')
   @UseInterceptors(FileInterceptor('file'))
@@ -60,40 +94,6 @@ export class ProductosController {
   @RequirePermission('catalogo.eliminar')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.productosService.remove(tenantId, id);
-  }
-
-  @Get('categorias')
-  @RequirePermission('catalogo.ver')
-  findCategorias(@TenantId() tenantId: string) {
-    return this.productosService.findCategorias(tenantId);
-  }
-
-  @Post('categorias')
-  @RequirePermission('catalogo.crear')
-  createCategoria(
-    @TenantId() tenantId: string,
-    @Body('nombre') nombre: string,
-  ) {
-    return this.productosService.createCategoria(tenantId, nombre);
-  }
-
-  @Put('categorias/:id')
-  @RequirePermission('catalogo.editar')
-  updateCategoria(
-    @TenantId() tenantId: string,
-    @Param('id') id: string,
-    @Body('nombre') nombre: string,
-  ) {
-    return this.productosService.updateCategoria(tenantId, id, nombre);
-  }
-
-  @Delete('categorias/:id')
-  @RequirePermission('catalogo.eliminar')
-  removeCategoria(
-    @TenantId() tenantId: string,
-    @Param('id') id: string,
-  ) {
-    return this.productosService.removeCategoria(tenantId, id);
   }
 }
 
